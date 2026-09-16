@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard — AU Employee Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="dashboard.css">
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i>Dashboard</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-calendar-check"></i>My Attendance</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-qrcode"></i>Show Attendance QR</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>Attendance History</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-money-check-dollar"></i>My Payslips</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-user"></i>My Profile</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-circle-question"></i>Help and Support</a>
+        </nav>
+
+        <a href="#" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a>
+      </aside>
+
+      <!-- Main content -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <i class="fa-solid fa-bars menu-icon"></i>
+            <h1>Employee Dashboard</h1>
+          </div>
+          <div class="topbar-right">
+            <span class="date"><i class="fa-regular fa-calendar"></i> July 23, 2026 &middot; Wednesday</span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="icon-btn"><i class="fa-regular fa-sun"></i></span>
+            <span class="user-chip"><i class="fa-regular fa-user"></i> John Benedict <i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+        </header>
+
+        <!-- Welcome banner -->
+        <section class="welcome-banner">
+          <div class="welcome-text">
+            <h2>Good morning, John Benedict <i class="fa-regular fa-hand"></i></h2>
+            <p><strong>Employee ID:</strong> AU-EMP-2026-001</p>
+            <p><strong>Department:</strong> <span class="link-text">Information Technology Department</span></p>
+            <p class="muted">Here is your attendance and employee information for today.</p>
+          </div>
+        </section>
+
+        <!-- Stats grid (2x2) -->
+        <section class="stats-grid">
+          <div class="stat-card">
+            <i class="fa-regular fa-calendar-check stat-icon green"></i>
+            <div>
+              <div class="stat-label">Days Present</div>
+              <div class="stat-value">18 <span>days</span></div>
+              <div class="stat-sub">This Month</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-regular fa-clock stat-icon gold"></i>
+            <div>
+              <div class="stat-label">Days Late</div>
+              <div class="stat-value">2 <span>days</span></div>
+              <div class="stat-sub">This Month</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-regular fa-calendar-xmark stat-icon red"></i>
+            <div>
+              <div class="stat-label">Days Absent</div>
+              <div class="stat-value">0 <span>days</span></div>
+              <div class="stat-sub">This Month</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <i class="fa-solid fa-hourglass-half stat-icon navy"></i>
+            <div>
+              <div class="stat-label">Overtime Hours</div>
+              <div class="stat-value">6.5 <span>hours</span></div>
+              <div class="stat-sub">This Month</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Today's Attendance -->
+        <section class="attendance-card">
+          <div class="attendance-header">
+            <h3><i class="fa-regular fa-calendar"></i> Today's Attendance</h3>
+            <span class="attendance-date">July 23, 2026 (Wed)</span>
+          </div>
+
+          <div class="attendance-status-row">
+            <span class="status-pill"><i class="fa-solid fa-circle"></i> On Time</span>
+            <div class="schedule-info">
+              <span class="label">Schedule</span>
+              <span class="value">7:30 AM &ndash; 5:00 PM</span>
+            </div>
+          </div>
+
+          <div class="attendance-details">
+            <div>
+              <div class="label">Time-In</div>
+              <div class="value success">7:24 AM <i class="fa-solid fa-check"></i></div>
+            </div>
+            <div>
+              <div class="label">Time-Out</div>
+              <div class="value">&mdash;</div>
+              <div class="sub">Not yet recorded</div>
+            </div>
+            <div>
+              <div class="label">Total Hours</div>
+              <div class="value">0h 00m</div>
+            </div>
+          </div>
+
+          <button class="btn-navy"><i class="fa-solid fa-qrcode"></i> Show My QR Code</button>
+          <button class="btn-outline">View Attendance History <i class="fa-solid fa-chevron-right"></i></button>
+        </section>
+
+        <!-- Bottom grid -->
+        <section class="bottom-grid">
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Attendance</h3>
+              <a href="#" class="panel-link">View All Attendance Records</a>
+            </div>
+            <table class="attendance-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time-In</th>
+                  <th>Time-Out</th>
+                  <th>Total Hours</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>July 23, 2026 (Wed)</td>
+                  <td>7:24 AM</td>
+                  <td>&mdash;</td>
+                  <td>&mdash;</td>
+                  <td><span class="tag ontime">On Time</span></td>
+                </tr>
+                <tr>
+                  <td>July 22, 2026 (Tue)</td>
+                  <td>7:28 AM</td>
+                  <td>5:06 PM</td>
+                  <td>9h 38m</td>
+                  <td><span class="tag ontime">On Time</span></td>
+                </tr>
+                <tr>
+                  <td>July 21, 2026 (Mon)</td>
+                  <td>7:42 AM</td>
+                  <td>5:10 PM</td>
+                  <td>9h 28m</td>
+                  <td><span class="tag late">Late</span></td>
+                </tr>
+                <tr>
+                  <td>July 20, 2026 (Sun)</td>
+                  <td>7:30 AM</td>
+                  <td>5:02 PM</td>
+                  <td>9h 32m</td>
+                  <td><span class="tag ontime">On Time</span></td>
+                </tr>
+                <tr>
+                  <td>July 19, 2026 (Sat)</td>
+                  <td>&mdash;</td>
+                  <td>&mdash;</td>
+                  <td>&mdash;</td>
+                  <td><span class="tag absent">Absent</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i class="fa-regular fa-file-lines"></i> Latest Payroll</h3>
+              <a href="#" class="panel-link">View All Payslips</a>
+            </div>
+            <div class="payroll-row">
+              <span class="label">Payroll Period</span>
+              <span class="value">July 1 &ndash; 15, 2026</span>
+            </div>
+            <div class="payroll-row">
+              <span class="label">Gross Salary</span>
+              <span class="value">&#8369;18,500.00</span>
+            </div>
+            <div class="payroll-row">
+              <span class="label">Total Deductions</span>
+              <span class="value">&#8369;2,750.00</span>
+            </div>
+            <div class="payroll-row net">
+              <span class="label">Net Pay</span>
+              <span class="value">&#8369;15,750.00</span>
+            </div>
+            <div class="payroll-row">
+              <span class="label">Status</span>
+              <span class="tag released"><i class="fa-solid fa-circle"></i> Released</span>
+            </div>
+            <button class="btn-navy full"><i class="fa-regular fa-file-lines"></i> View Payslip</button>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3><i class="fa-solid fa-bullhorn"></i> Announcements</h3>
+              <a href="#" class="panel-link">View All Announcements</a>
+            </div>
+            <div class="announcement">
+              <i class="fa-regular fa-calendar-check announce-icon red"></i>
+              <div>
+                <div class="announce-top">
+                  <strong>Payroll Release Schedule</strong>
+                  <span class="tag payroll">Payroll</span>
+                </div>
+                <p>The payroll for the 1st semester will be released on July 31, 2026.</p>
+                <span class="announce-date">Jul 20, 2026</span>
+              </div>
+            </div>
+            <div class="announcement">
+              <i class="fa-solid fa-flag announce-icon blue"></i>
+              <div>
+                <div class="announce-top">
+                  <strong>Campus Holiday: Ninoy Aquino Day</strong>
+                  <span class="tag notice">Notice</span>
+                </div>
+                <p>Please be informed that classes and work are suspended on August 21, 2026.</p>
+                <span class="announce-date">Jul 19, 2026</span>
+              </div>
+            </div>
+            <div class="announcement">
+              <i class="fa-regular fa-id-card announce-icon orange"></i>
+              <div>
+                <div class="announce-top">
+                  <strong>HR Document Submission</strong>
+                  <span class="tag reminder">Reminder</span>
+                </div>
+                <p>Submit your updated government IDs on or before August 5, 2026.</p>
+                <span class="announce-date">Jul 18, 2026</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+  </body>
+</html>
