@@ -59,12 +59,17 @@ The dashboard uses mock data and makes no network calls to the external systems.
 ## Project Structure
 
 ```text
-admin/dashboard.html       # IT Administrator dashboard
-admin/layout/sidebar.js    # Reusable sidebar component
-admin/layout/navbar.js     # Reusable navbar component
-css/admin.css              # Custom dashboard styles
-js/admin-dashboard.js      # Dashboard mounting and interactions
-img/aulogo.png             # Arellano University logo
+index.html                         # Root login page
+employee/dashboard.html            # Employee dashboard
+admin/dashboard.html               # IT Administrator dashboard
+admin/layout/sidebar.js            # Reusable sidebar component
+admin/layout/navbar.js             # Reusable navbar component
+css/admin.css                      # Custom admin dashboard styles
+css/employee.css                   # Employee dashboard styles
+css/login.css                      # Login page styles
+js/admin/admin-layout.js           # Shared admin layout behavior
+js/admin/dashboard.js              # Admin dashboard mounting and interactions
+img/                               # Application image assets
 ```
 
 ## Run Locally
@@ -75,7 +80,7 @@ Serve the repository root with any static HTTP server. For example:
 python3 -m http.server 8000
 ```
 
-Open http://localhost:8000/admin/dashboard.html in a browser.
+Open http://localhost:8000/ in a browser for the login page. The administrator dashboard is available at http://localhost:8000/admin/dashboard.html and the employee dashboard at http://localhost:8000/employee/dashboard.html.
 
 ## Current Limitations
 

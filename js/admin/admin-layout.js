@@ -1,5 +1,5 @@
-import { Sidebar } from '../admin/layout/sidebar.js';
-import { Navbar } from '../admin/layout/navbar.js';
+import { Sidebar } from '../../admin/layout/sidebar.js';
+import { Navbar } from '../../admin/layout/navbar.js';
 
 export function initializeAdminLayout(options = {}) {
     const {
