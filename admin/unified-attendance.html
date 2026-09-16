@@ -1,0 +1,682 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Unified attendance standardization, validation, and processing monitoring for Arellano University." />
+    <link rel="icon" type="image/png" href="../img/aulogo.png" />
+    <link rel="apple-touch-icon" href="../img/aulogo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <title>Unified Attendance | Arellano University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="bg-au-background text-slate-800 antialiased">
+    <div id="sidebar-root"></div>
+
+    <div class="min-h-screen lg:pl-72">
+        <div id="navbar-root"></div>
+
+        <main id="unified-attendance-main" class="mx-auto min-w-0 max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <section aria-labelledby="unified-page-title">
+                <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                    <div class="max-w-3xl">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-au-navy-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-navy">IT Administrator</span>
+                            <span class="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-blue">Unified Attendance</span>
+                        </div>
+                        <h1 id="unified-page-title" class="text-2xl font-extrabold tracking-tight text-au-navy sm:text-3xl">Unified Attendance</h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor standardized attendance records, source matching, validation results, processing status, and records requiring review.</p>
+                        <p class="mt-3 flex items-center gap-2 text-[11px] font-medium text-slate-400" aria-live="polite">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span data-layout-feedback>Prototype unified attendance data is ready for review.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button id="refresh-data" type="button" class="button-primary">
+                            <i class="fa-solid fa-rotate h-4 w-4" aria-hidden="true"></i>
+                            <span data-refresh-label>Refresh Data</span>
+                        </button>
+                        <a href="#validation-issues" class="button-secondary">
+                            <i class="fa-solid fa-triangle-exclamation h-4 w-4" aria-hidden="true"></i>
+                            <span>View Validation Issues</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3.5 text-sm leading-6 text-blue-900" aria-label="Unified Attendance integration notice">
+                <i class="fa-solid fa-layer-group mt-0.5 h-4 w-4 shrink-0 text-au-blue" aria-hidden="true"></i>
+                <p><strong>Unified Attendance combines standardized attendance events from Bundy/Biometric and QR Attendance</strong> using the HRPS Employee ID as the master employee identifier. Records must pass validation and attendance processing before they can become verified attendance for Payroll.</p>
+            </section>
+
+            <section aria-label="Unified Attendance summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-layer-group h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Today</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Total Records Today</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">368</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Unified Source Events</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-clock h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-600">Existing</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Bundy Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">326</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Existing Attendance Source</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-qrcode h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-700">Additional</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">QR Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">42</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Additional Attendance Source</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Passed</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Valid Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">354</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Passed Validation</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-user-clock h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Review</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Needs Review</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">8</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Exceptions</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-code-merge h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Flagged</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Duplicate / Conflict</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">6</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Detected Issues</p>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden p-5 sm:p-6" aria-labelledby="unified-flow-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Source merge and processing path</p>
+                        <h2 id="unified-flow-title" class="mt-1 text-base font-extrabold text-au-navy">Unified Attendance Data Flow</h2>
+                        <p class="mt-1 max-w-3xl text-xs font-medium leading-5 text-slate-400">HRPS supplies employee and schedule reference data while Bundy and QR events are converted into one common attendance format before validation and processing.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Prototype flow</span>
+                </div>
+
+                <div class="mt-6 overflow-x-auto pb-2">
+                    <div class="flow-layout flex min-w-0 flex-col gap-3 2xl:min-w-max 2xl:flex-row 2xl:items-stretch">
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-emerald-50 text-emerald-600"><i class="fa-solid fa-building h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>HRPS Reference</strong>
+                            <small>Employee ID · status · schedule</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Available</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="grid w-full gap-3 sm:grid-cols-2 2xl:w-[20rem] 2xl:grid-cols-1">
+                            <div class="flow-step w-full 2xl:w-full">
+                                <span class="flow-step-icon bg-violet-50 text-violet-600"><i class="fa-solid fa-clock h-4 w-4" aria-hidden="true"></i></span>
+                                <strong>Bundy Input</strong>
+                                <small>326 source events</small>
+                                <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Received</span>
+                            </div>
+                            <div class="flow-step w-full 2xl:w-full">
+                                <span class="flow-step-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-qrcode h-4 w-4" aria-hidden="true"></i></span>
+                                <strong>QR Input</strong>
+                                <small>42 source events</small>
+                                <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Received</span>
+                            </div>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-code-branch h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Standardization</strong>
+                            <small>368 records converted</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Processed</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-sky-50 text-sky-700"><i class="fa-solid fa-layer-group h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Unified Attendance</strong>
+                            <small>368 unified records</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Current</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-amber-50 text-amber-600"><i class="fa-solid fa-shield-halved h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Validation</strong>
+                            <small>354 valid · 14 flagged</small>
+                            <span class="status-badge status-warning mt-2"><span class="status-dot status-dot-warning"></span>Review</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-orange-50 text-orange-600"><i class="fa-solid fa-gears h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Attendance Processing</strong>
+                            <small>Pending schedule calculations</small>
+                            <span class="status-badge status-pending mt-2"><span class="status-dot status-dot-warning"></span>Prototype</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Verified Attendance</strong>
+                            <small>Eligible for downstream transfer</small>
+                            <span class="status-badge status-pending mt-2"><span class="status-dot status-dot-warning"></span>Not All Ready</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="source-distribution-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Source contribution</p>
+                            <h2 id="source-distribution-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Source Distribution</h2>
+                        </div>
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-chart-column h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">Source identifies where the attendance event originated before standardization. Counts are prototype data.</p>
+                    <div class="mt-5 space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Bundy / Biometric</span><span>326 records <span class="ml-1 text-slate-400">88.6%</span></span></div>
+                            <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[88.6%] rounded-full bg-au-blue"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>QR Attendance</span><span>42 records <span class="ml-1 text-slate-400">11.4%</span></span></div>
+                            <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[11.4%] rounded-full bg-violet-500"></div></div>
+                        </div>
+                    </div>
+                    <div class="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500"><span class="rounded-full bg-slate-100 px-2.5 py-1">326 + 42 = 368 events</span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-blue-50 px-2.5 py-1 text-au-blue">Same standardized format</span></div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="validation-overview-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Quality breakdown</p>
+                            <h2 id="validation-overview-title" class="mt-1 text-base font-extrabold text-au-navy">Validation Overview</h2>
+                        </div>
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-list-check h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-emerald-50/70 px-3.5 py-3 text-xs font-bold text-emerald-800"><span>Valid</span><span>354</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/70 px-3.5 py-3 text-xs font-bold text-amber-800"><span>Missing Time-In</span><span>2</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/70 px-3.5 py-3 text-xs font-bold text-amber-800"><span>Missing Time-Out</span><span>4</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-orange-50/70 px-3.5 py-3 text-xs font-bold text-orange-800"><span>Duplicates</span><span>4</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-slate-100 px-3.5 py-3 text-xs font-bold text-slate-700"><span>Schedule Mismatch</span><span>1</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-red-50/70 px-3.5 py-3 text-xs font-bold text-red-800"><span>Inactive Employee</span><span>1</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-slate-100 px-3.5 py-3 text-xs font-bold text-slate-700 sm:col-span-2"><span>Employee Not Found</span><span>2</span></div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="unified-records" class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="unified-records-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Central standardized layer</p>
+                        <h2 id="unified-records-title" class="mt-1 text-base font-extrabold text-au-navy">Unified Attendance Records</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Bundy and QR events are represented in the same attendance record shape; validation and processing status determine readiness.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock records</span>
+                </div>
+
+                <form id="unified-record-filters" class="grid gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 sm:px-6" novalidate>
+                    <label class="block min-w-0 xl:col-span-1">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Search Employee ID / Name</span>
+                        <input id="unified-record-search" type="search" placeholder="Search ID or name" aria-label="Search Employee ID or Name" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Date</span>
+                        <input id="unified-record-date" type="date" value="2026-09-16" aria-label="Filter by date" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Source</span>
+                        <select id="unified-source-filter" aria-label="Filter by source" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All Sources</option>
+                            <option value="bundy">Bundy</option>
+                            <option value="qr">QR</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Validation Status</span>
+                        <select id="unified-validation-filter" aria-label="Filter by validation status" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All validation</option>
+                            <option value="valid">Valid</option>
+                            <option value="missing-time-in">Missing Time-In</option>
+                            <option value="missing-time-out">Missing Time-Out</option>
+                            <option value="duplicate">Duplicate</option>
+                            <option value="employee-not-found">Employee Not Found</option>
+                            <option value="inactive-employee">Inactive Employee</option>
+                            <option value="schedule-mismatch">Schedule Mismatch</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Processing Status</span>
+                        <select id="unified-processing-filter" aria-label="Filter by processing status" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All processing</option>
+                            <option value="processed">Processed</option>
+                            <option value="needs-review">Needs Review</option>
+                            <option value="not-ready">Not Ready</option>
+                        </select>
+                    </label>
+                </form>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3 text-[11px] font-semibold text-slate-400 sm:px-6">
+                    <span data-unified-count aria-live="polite">Showing 5 mock unified attendance records.</span>
+                    <span>UI-only filters · No attendance backend queried</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[1120px] w-full text-left">
+                        <caption class="sr-only">Unified Attendance Records</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Employee</th>
+                                <th class="px-5 py-3 font-bold">Date</th>
+                                <th class="px-5 py-3 font-bold">Time-In</th>
+                                <th class="px-5 py-3 font-bold">Time-Out</th>
+                                <th class="px-5 py-3 font-bold">Source</th>
+                                <th class="px-5 py-3 font-bold">Validation</th>
+                                <th class="px-5 py-3 font-bold">Processing Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover" data-unified-row data-date="2026-09-16" data-source="bundy" data-validation="valid" data-processing="processed">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0418</td>
+                                <td class="px-5 py-4 text-slate-600">John Benedict M. Villegas</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:24 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">5:03 PM</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-extrabold text-violet-700">Bundy</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-unified-row data-date="2026-09-16" data-source="qr" data-validation="valid" data-processing="processed">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0194</td>
+                                <td class="px-5 py-4 text-slate-600">Maria Santos</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:31 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">5:08 PM</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold text-cyan-700">QR</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-unified-row data-date="2026-09-16" data-source="qr" data-validation="missing-time-out" data-processing="needs-review">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0332</td>
+                                <td class="px-5 py-4 text-slate-600">Robert Cruz</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:42 AM</td>
+                                <td class="px-5 py-4 text-slate-400">—</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-extrabold text-cyan-700">QR</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Missing Time-Out</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-unified-row data-date="2026-09-16" data-source="bundy" data-validation="missing-time-in" data-processing="needs-review">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0177</td>
+                                <td class="px-5 py-4 text-slate-600">Ana Reyes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 2026</td>
+                                <td class="px-5 py-4 text-slate-400">—</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">5:04 PM</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-extrabold text-violet-700">Bundy</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Missing Time-In</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-unified-row data-date="2026-09-16" data-source="bundy" data-validation="inactive-employee" data-processing="not-ready">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0087</td>
+                                <td class="px-5 py-4 text-slate-600">Inactive Employee</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:49 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-400">—</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-extrabold text-violet-700">Bundy</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Inactive Employee</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Not Ready</span></td>
+                            </tr>
+                            <tr data-unified-empty hidden>
+                                <td colspan="8" class="px-5 py-10 text-center text-xs font-semibold text-slate-400 sm:px-6">No mock unified attendance records match these filters.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="duplicate-records" class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="duplicate-records-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Repeated or conflicting events</p>
+                        <h2 id="duplicate-records-title" class="mt-1 text-base font-extrabold text-au-navy">Duplicate Records</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Potential duplicates are held for review before a standardized record is treated as verified attendance.</p>
+                    </div>
+                    <div class="flex items-center gap-2 rounded-full bg-orange-50 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[0.1em] text-orange-800"><i class="fa-solid fa-copy" aria-hidden="true"></i>Potential Duplicates Today: 4</div>
+                </div>
+
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <article class="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Repeated Bundy event</h3><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Potential Duplicate</span></div>
+                        <dl class="mt-4 grid gap-3 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-014</dd></div><div><dt class="section-kicker">Source</dt><dd class="mt-1 font-semibold text-slate-600">Bundy</dd></div><div class="sm:col-span-1"><dt class="section-kicker">Events</dt><dd class="mt-1 font-semibold leading-5 text-slate-600">7:32:04 AM<br />7:32:07 AM</dd></div></dl>
+                        <div class="mt-3 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500"><span>Validation: Potential Duplicate</span><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button></div>
+                    </article>
+                    <article class="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Cross-source attendance event</h3><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                        <dl class="mt-4 grid gap-3 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-194</dd></div><div><dt class="section-kicker">Sources</dt><dd class="mt-1 font-semibold text-slate-600">Bundy + QR</dd></div><div class="sm:col-span-1"><dt class="section-kicker">Issue</dt><dd class="mt-1 font-semibold leading-5 text-slate-600">Possible duplicate cross-source attendance event.</dd></div></dl>
+                        <div class="mt-3 flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-500"><span>Resolution: To Be Confirmed</span><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="review">Review</button></div>
+                    </article>
+                </div>
+                <p class="mt-4 text-[11px] font-semibold text-slate-400"><strong class="text-slate-500">Prototype Rule:</strong> the final duplicate threshold and cross-source resolution policy are To Be Confirmed.</p>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,.9fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="source-conflicts-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Cross-source quality gate</p>
+                            <h2 id="source-conflicts-title" class="mt-1 text-base font-extrabold text-au-navy">Source Conflicts</h2>
+                        </div>
+                        <span class="icon-tile bg-orange-50 text-orange-600"><i class="fa-solid fa-code-merge h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 space-y-3">
+                        <div class="rounded-xl border border-orange-100 bg-orange-50/50 p-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Multiple source events</h3><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                            <dl class="mt-3 grid gap-2 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee ID</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-221</dd></div><div><dt class="section-kicker">Bundy Event</dt><dd class="mt-1 font-semibold text-slate-600">7:28 AM</dd></div><div><dt class="section-kicker">QR Event</dt><dd class="mt-1 font-semibold text-slate-600">7:29 AM</dd></div></dl>
+                            <p class="mt-3 text-[11px] leading-5 text-slate-500">Multiple attendance sources recorded the same attendance event.</p>
+                        </div>
+                        <div class="rounded-xl border border-orange-100 bg-orange-50/50 p-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Conflicting time-out values</h3><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                            <dl class="mt-3 grid gap-2 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee ID</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-145</dd></div><div><dt class="section-kicker">Bundy Time-Out</dt><dd class="mt-1 font-semibold text-slate-600">5:04 PM</dd></div><div><dt class="section-kicker">QR Time-Out</dt><dd class="mt-1 font-semibold text-slate-600">5:32 PM</dd></div></dl>
+                            <p class="mt-3 text-[11px] leading-5 text-slate-500">Source conflict resolution rule: <strong class="text-slate-700">To Be Confirmed</strong>.</p>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-[11px] font-semibold text-slate-400">The prototype does not automatically decide which source is authoritative for a conflict.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="incomplete-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Completeness review</p>
+                            <h2 id="incomplete-title" class="mt-1 text-base font-extrabold text-au-navy">Incomplete Attendance Records</h2>
+                        </div>
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-3"><div class="rounded-xl bg-amber-50 px-3.5 py-3"><p class="section-kicker text-amber-700">Missing Time-In</p><p class="mt-1 text-2xl font-extrabold text-au-navy">2</p></div><div class="rounded-xl bg-orange-50 px-3.5 py-3"><p class="section-kicker text-orange-700">Missing Time-Out</p><p class="mt-1 text-2xl font-extrabold text-au-navy">4</p></div></div>
+                    <div class="mt-4 space-y-3">
+                        <div class="rounded-xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-2"><span class="text-xs font-extrabold text-slate-700">AU-EMP-2026-177</span><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Incomplete</span></div><p class="mt-2 text-[11px] text-slate-500">Time-In: 7:31 AM · Time-Out: — · Missing Time-Out</p><button type="button" class="button-secondary mt-3 min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><div class="flex items-center justify-between gap-2"><span class="text-xs font-extrabold text-slate-700">AU-EMP-2026-283</span><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Incomplete</span></div><p class="mt-2 text-[11px] text-slate-500">Time-In: — · Time-Out: 5:02 PM · Missing Time-In</p><button type="button" class="button-secondary mt-3 min-h-0 px-3 py-2 text-[11px]" data-ui-action="review">Review</button></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="processing-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Lifecycle status</p>
+                            <h2 id="processing-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Processing</h2>
+                        </div>
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-gears h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-600">
+                        <span class="rounded-full bg-slate-100 px-3 py-2">Received <strong class="ml-1 text-au-navy">368</strong></span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-blue-50 px-3 py-2 text-au-blue">Standardized <strong class="ml-1">368</strong></span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-amber-50 px-3 py-2 text-amber-800">Validated <strong class="ml-1">354</strong></span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-violet-50 px-3 py-2 text-violet-800">Processed <strong class="ml-1">342</strong></span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-emerald-50 px-3 py-2 text-emerald-800">Awaiting Review / Verified</span>
+                    </div>
+                    <dl class="mt-5 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5 sm:grid-cols-4"><div><dt class="section-kicker">Received</dt><dd class="mt-1 text-lg font-extrabold text-au-navy">368</dd></div><div><dt class="section-kicker">Standardized</dt><dd class="mt-1 text-lg font-extrabold text-au-navy">368</dd></div><div><dt class="section-kicker">Validated</dt><dd class="mt-1 text-lg font-extrabold text-emerald-700">354</dd></div><div><dt class="section-kicker">Needs Review</dt><dd class="mt-1 text-lg font-extrabold text-amber-700">14</dd></div></dl>
+                    <p class="mt-4 text-[11px] font-semibold leading-5 text-slate-400">Processed is not the same as Payroll Ready. Schedule calculations and review remain separate workflow steps.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="readiness-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Downstream handoff</p>
+                            <h2 id="readiness-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Readiness</h2>
+                        </div>
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-route h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 space-y-3">
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-emerald-50/70 px-3.5 py-3 text-xs font-bold text-emerald-800"><span>Verified Attendance</span><span>340</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-amber-50/70 px-3.5 py-3 text-xs font-bold text-amber-800"><span>Pending Review</span><span>14</span></div>
+                        <div class="flex items-center justify-between gap-3 rounded-xl bg-red-50/70 px-3.5 py-3 text-xs font-bold text-red-800"><span>Not Ready</span><span>14</span></div>
+                    </div>
+                    <div class="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 px-3.5 py-3 text-[11px] font-semibold leading-5 text-blue-900"><i class="fa-solid fa-circle-info mr-1.5 text-au-blue" aria-hidden="true"></i>Only verified attendance should be forwarded to the Existing Payroll System. This page does not calculate salary or generate payroll.</div>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="processed-preview-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Sample calculation output</p>
+                        <h2 id="processed-preview-title" class="mt-1 text-base font-extrabold text-au-navy">Processed Attendance Preview</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Attendance calculations are sample results and must follow confirmed beneficiary policies in production.</p>
+                    </div>
+                    <span class="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-bold text-amber-800">Prototype calculations</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[930px] w-full text-left">
+                        <caption class="sr-only">Processed attendance preview</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Schedule</th>
+                                <th class="px-5 py-3 font-bold">Time-In</th>
+                                <th class="px-5 py-3 font-bold">Time-Out</th>
+                                <th class="px-5 py-3 font-bold">Attendance Result</th>
+                                <th class="px-5 py-3 font-bold">Late</th>
+                                <th class="px-5 py-3 font-bold">Undertime</th>
+                                <th class="px-5 py-3 font-bold">Overtime</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0418</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">7:30 AM – 5:00 PM</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">7:24 AM</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">5:03 PM</td><td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Present</span></td><td class="px-5 py-4 text-slate-500">0 min</td><td class="px-5 py-4 text-slate-500">0 min</td><td class="px-5 py-4 text-slate-500">3 min</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0194</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">7:30 AM – 5:00 PM</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">7:42 AM</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">5:05 PM</td><td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Late</span></td><td class="px-5 py-4 text-slate-500">12 min</td><td class="px-5 py-4 text-slate-500">0 min</td><td class="px-5 py-4 text-slate-500">5 min</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="validation-issues" class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="review-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Exception queue</p>
+                        <h2 id="review-title" class="mt-1 text-base font-extrabold text-au-navy">Records Requiring Review</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Unified Attendance identifies exceptions; authorized correction and approval actions belong to the separate attendance workflow.</p>
+                    </div>
+                    <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>14 pending</span>
+                </div>
+
+                <div class="mt-5 grid gap-4 md:grid-cols-3">
+                    <article class="rounded-2xl border border-orange-100 bg-orange-50/50 p-4">
+                        <div class="flex items-center justify-between gap-2"><span class="icon-tile bg-orange-100 text-orange-700"><i class="fa-solid fa-code-merge h-4 w-4" aria-hidden="true"></i></span><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                        <h3 class="mt-4 text-xs font-extrabold text-slate-700">Cross-Source Conflict</h3>
+                        <p class="mt-2 text-[11px] leading-5 text-slate-500"><strong>AU-EMP-2026-221</strong><br />Bundy and QR attendance events conflict.</p>
+                        <div class="mt-4 flex flex-wrap gap-2"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view source events">View Source Events</button></div>
+                    </article>
+                    <article class="rounded-2xl border border-amber-100 bg-amber-50/50 p-4">
+                        <div class="flex items-center justify-between gap-2"><span class="icon-tile bg-amber-100 text-amber-700"><i class="fa-solid fa-clock h-4 w-4" aria-hidden="true"></i></span><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Incomplete</span></div>
+                        <h3 class="mt-4 text-xs font-extrabold text-slate-700">Missing Time-Out</h3>
+                        <p class="mt-2 text-[11px] leading-5 text-slate-500"><strong>AU-EMP-2026-177</strong><br />No valid time-out event found.</p>
+                        <div class="mt-4 flex flex-wrap gap-2"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view source events">View Source Events</button></div>
+                    </article>
+                    <article class="rounded-2xl border border-red-100 bg-red-50/50 p-4">
+                        <div class="flex items-center justify-between gap-2"><span class="icon-tile bg-red-100 text-red-700"><i class="fa-solid fa-user-slash h-4 w-4" aria-hidden="true"></i></span><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Rejected / Review</span></div>
+                        <h3 class="mt-4 text-xs font-extrabold text-slate-700">Inactive Employee</h3>
+                        <p class="mt-2 text-[11px] leading-5 text-slate-500"><strong>AU-EMP-2026-087</strong><br />Attendance event belongs to an employee marked inactive in HRPS.</p>
+                        <div class="mt-4"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button></div>
+                    </article>
+                </div>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="standard-format-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Normalization contract</p>
+                        <h2 id="standard-format-title" class="mt-1 text-base font-extrabold text-au-navy">Standard Attendance Format</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">The standardized structure keeps source provenance visible while preparing records for validation, approval, and downstream attendance workflows.</p>
+                    </div>
+                    <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-au-blue">Prototype schema</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[760px] w-full text-left">
+                        <caption class="sr-only">Standard attendance format</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Field</th>
+                                <th class="px-5 py-3 font-bold">Purpose</th>
+                                <th class="px-5 py-3 font-bold">Example</th>
+                                <th class="px-5 py-3 font-bold">Source</th>
+                                <th class="px-5 py-3 font-bold">Required</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Employee ID</td><td class="px-5 py-3.5 text-slate-500">Master employee identifier</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">AU-EMP-2026-0418</td><td class="px-5 py-3.5 text-slate-500">HRPS</td><td class="px-5 py-3.5 font-semibold text-emerald-700">Yes</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Date</td><td class="px-5 py-3.5 text-slate-500">Attendance work date</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">Sep 16, 2026</td><td class="px-5 py-3.5 text-slate-500">Derived</td><td class="px-5 py-3.5 font-semibold text-emerald-700">Yes</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Time-In</td><td class="px-5 py-3.5 text-slate-500">First valid attendance entry</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">7:24 AM</td><td class="px-5 py-3.5 text-slate-500">Bundy / QR</td><td class="px-5 py-3.5 font-semibold text-amber-700">Conditional</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Time-Out</td><td class="px-5 py-3.5 text-slate-500">Last valid attendance exit</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">5:03 PM</td><td class="px-5 py-3.5 text-slate-500">Bundy / QR</td><td class="px-5 py-3.5 font-semibold text-amber-700">Conditional</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Source</td><td class="px-5 py-3.5 text-slate-500">Original attendance source</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">Bundy</td><td class="px-5 py-3.5 text-slate-500">System</td><td class="px-5 py-3.5 font-semibold text-emerald-700">Yes</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Status</td><td class="px-5 py-3.5 text-slate-500">Processed attendance result</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">Present</td><td class="px-5 py-3.5 text-slate-500">Processing</td><td class="px-5 py-3.5 font-semibold text-slate-500">Later</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Validation Status</td><td class="px-5 py-3.5 text-slate-500">Validation result</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">Valid</td><td class="px-5 py-3.5 text-slate-500">Validation Service</td><td class="px-5 py-3.5 font-semibold text-emerald-700">Yes</td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-3.5 font-bold text-slate-700 sm:px-6">Approval Status</td><td class="px-5 py-3.5 text-slate-500">Correction / approval state</td><td class="whitespace-nowrap px-5 py-3.5 text-slate-500">Not Required</td><td class="px-5 py-3.5 text-slate-500">Approval Workflow</td><td class="px-5 py-3.5 font-semibold text-slate-500">Later</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="border-t border-slate-100 px-5 py-4 text-[11px] font-semibold leading-5 text-slate-400 sm:px-6">Additional implementation fields may include Record ID, Schedule ID, Late Minutes, Undertime Minutes, Overtime Minutes, Created At, and Updated At.</p>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="validation-rules-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Technical quality gates</p>
+                            <h2 id="validation-rules-title" class="mt-1 text-base font-extrabold text-au-navy">Validation Rules</h2>
+                        </div>
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-shield-halved h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Employee Exists</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Check HRPS Employee ID.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Employee Active</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Verify HRPS employment status.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Source Valid</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Confirm Bundy or QR source.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Timestamp Valid</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Check attendance event timestamp.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Duplicate Check</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Identify repeated or conflicting events.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3"><h3 class="text-xs font-extrabold text-slate-700">Schedule Match</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Compare the record with assigned schedule.</p></div>
+                        <div class="rounded-xl border border-slate-200 p-3 sm:col-span-2"><h3 class="text-xs font-extrabold text-slate-700">Completeness</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Check Time-In and Time-Out requirements according to confirmed beneficiary policies.</p></div>
+                    </div>
+                    <p class="mt-4 text-[11px] font-semibold text-slate-400">Exact attendance rules and thresholds remain subject to confirmation.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="correction-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Separate workflow boundary</p>
+                            <h2 id="correction-title" class="mt-1 text-base font-extrabold text-au-navy">Records Requiring Correction or Approval</h2>
+                        </div>
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-user-pen h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <dl class="mt-5 grid grid-cols-3 gap-2 text-center"><div class="rounded-xl bg-violet-50 px-2 py-3"><dt class="text-[10px] font-bold uppercase tracking-[0.08em] text-violet-700">Attendance Correction Requests</dt><dd class="mt-1 text-xl font-extrabold text-au-navy">3</dd></div><div class="rounded-xl bg-amber-50 px-2 py-3"><dt class="text-[10px] font-bold uppercase tracking-[0.08em] text-amber-700">Pending Supervisor Review</dt><dd class="mt-1 text-xl font-extrabold text-au-navy">2</dd></div><div class="rounded-xl bg-slate-100 px-2 py-3"><dt class="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-600">Needs Additional Information</dt><dd class="mt-1 text-xl font-extrabold text-au-navy">1</dd></div></dl>
+                    <p class="mt-5 text-xs leading-6 text-slate-500">Unified Attendance identifies exceptions. Employee corrections and authorized approvals are handled through the attendance correction / approval workflow.</p>
+                    <div class="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[11px] font-semibold leading-5 text-slate-600"><i class="fa-solid fa-circle-info mr-1.5 text-au-blue" aria-hidden="true"></i>This monitoring page does not edit attendance values or HRPS employee status.</div>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="data-quality-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Prototype quality indicators</p>
+                            <h2 id="data-quality-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Data Quality</h2>
+                        </div>
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-chart-line h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 space-y-3">
+                        <div><div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Employee Match Rate</span><span>99.2%</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[99.2%] rounded-full bg-emerald-500"></div></div></div>
+                        <div><div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Valid Record Rate</span><span>96.2%</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[96.2%] rounded-full bg-au-blue"></div></div></div>
+                        <div><div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Duplicate Rate</span><span>1.1%</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[1.1%] min-w-[0.35rem] rounded-full bg-orange-400"></div></div></div>
+                        <div><div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Incomplete Record Rate</span><span>1.6%</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[1.6%] min-w-[0.35rem] rounded-full bg-amber-400"></div></div></div>
+                        <div><div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Source Conflict Rate</span><span>0.8%</span></div><div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[0.8%] min-w-[0.35rem] rounded-full bg-red-400"></div></div></div>
+                    </div>
+                    <p class="mt-4 text-[11px] font-semibold text-slate-400">Prototype metrics only; production definitions and calculation windows are To Be Confirmed.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 overflow-hidden p-5 sm:p-6" aria-labelledby="source-quality-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Compare source quality</p>
+                            <h2 id="source-quality-title" class="mt-1 text-base font-extrabold text-au-navy">Source Quality Breakdown</h2>
+                        </div>
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-table-list h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 overflow-x-auto">
+                        <table class="min-w-[440px] w-full text-left text-xs">
+                            <caption class="sr-only">Source quality breakdown</caption>
+                            <thead class="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400"><tr><th class="pb-3 font-bold">Source</th><th class="pb-3 font-bold">Records</th><th class="pb-3 font-bold">Valid</th><th class="pb-3 font-bold">Needs Review</th><th class="pb-3 font-bold">Rejected</th></tr></thead>
+                            <tbody class="divide-y divide-slate-100"><tr><td class="py-3 font-bold text-slate-700">Bundy</td><td class="py-3 text-slate-500">326</td><td class="py-3 text-emerald-700">316</td><td class="py-3 text-amber-700">8</td><td class="py-3 text-red-700">2</td></tr><tr><td class="py-3 font-bold text-slate-700">QR</td><td class="py-3 text-slate-500">42</td><td class="py-3 text-emerald-700">38</td><td class="py-3 text-amber-700">4</td><td class="py-3 text-red-700">0</td></tr></tbody>
+                        </table>
+                    </div>
+                    <p class="mt-4 text-[11px] font-semibold leading-5 text-slate-400">Source quality values are prototype summaries for IT monitoring and do not replace validation records.</p>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="processing-history-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Audit-ready processing runs</p>
+                        <h2 id="processing-history-title" class="mt-1 text-base font-extrabold text-au-navy">Unified Attendance Processing History</h2>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock history</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[980px] w-full text-left">
+                        <caption class="sr-only">Unified Attendance processing history</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400"><tr><th class="px-5 py-3 font-bold sm:px-6">Batch ID</th><th class="px-5 py-3 font-bold">Date &amp; Time</th><th class="px-5 py-3 font-bold">Bundy Input</th><th class="px-5 py-3 font-bold">QR Input</th><th class="px-5 py-3 font-bold">Unified Records</th><th class="px-5 py-3 font-bold">Warnings</th><th class="px-5 py-3 font-bold">Errors</th><th class="px-5 py-3 font-bold">Duration</th><th class="px-5 py-3 font-bold">Result</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">UA-20260916-1300</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 1:00 PM</td><td class="px-5 py-4 text-slate-500">42</td><td class="px-5 py-4 text-slate-500">8</td><td class="px-5 py-4 text-slate-500">49</td><td class="px-5 py-4 text-amber-700">1</td><td class="px-5 py-4 text-slate-500">0</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">1.2s</td><td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td></tr>
+                            <tr class="table-row-hover"><td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">UA-20260916-1245</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 16, 12:45 PM</td><td class="px-5 py-4 text-slate-500">38</td><td class="px-5 py-4 text-slate-500">5</td><td class="px-5 py-4 text-slate-500">43</td><td class="px-5 py-4 text-slate-500">0</td><td class="px-5 py-4 text-slate-500">0</td><td class="whitespace-nowrap px-5 py-4 text-slate-500">0.9s</td><td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="border-t border-slate-100 px-5 py-4 text-[11px] font-semibold leading-5 text-slate-400 sm:px-6">Input event counts do not always equal unified record counts when duplicates or conflicts are consolidated for review.</p>
+            </section>
+
+            <section class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="recent-events-title">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <p class="section-kicker">Activity stream</p>
+                        <h2 id="recent-events-title" class="mt-1 text-base font-extrabold text-au-navy">Recent Processing Events</h2>
+                    </div>
+                    <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                </div>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <div class="flex gap-3"><span class="activity-dot bg-amber-100 text-amber-700"><i class="fa-solid fa-triangle-exclamation h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">50 source events were processed into 49 unified attendance records.</p><p class="mt-1 text-[10px] font-medium text-slate-400">1:00 PM · Warning</p></div></div>
+                    <div class="flex gap-3"><span class="activity-dot bg-orange-100 text-orange-700"><i class="fa-solid fa-code-merge h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">1 potential cross-source duplicate was flagged.</p><p class="mt-1 text-[10px] font-medium text-slate-400">12:59 PM · Needs Review</p></div></div>
+                    <div class="flex gap-3"><span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-building h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">HRPS employee validation completed successfully.</p><p class="mt-1 text-[10px] font-medium text-slate-400">12:58 PM · Success</p></div></div>
+                    <div class="flex gap-3"><span class="activity-dot bg-blue-100 text-au-blue"><i class="fa-solid fa-layer-group h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">Unified attendance batch completed successfully.</p><p class="mt-1 text-[10px] font-medium text-slate-400">12:45 PM · Success</p></div></div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm sm:px-6" aria-label="Unified Attendance privacy and scope note">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-shield-heart mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true"></i>
+                    <p class="text-xs leading-6 text-slate-600"><strong class="text-au-navy">Monitoring scope:</strong> This page shows attendance-event data only. No raw biometric information, QR credential contents, salary information, unnecessary HR data, employee-management CRUD, payroll calculation, accounting controls, QR generation, scanner interface, or WFH/Google Meet attendance is included.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/unified-attendance.js"></script>
+</body>
+</html>

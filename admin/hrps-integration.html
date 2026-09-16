@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="HRPS integration monitoring for Arellano University employee master-data synchronization." />
+    <link rel="icon" type="image/png" href="../img/aulogo.png" />
+    <link rel="apple-touch-icon" href="../img/aulogo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <title>HRPS Integration | Arellano University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="bg-au-background text-slate-800 antialiased">
+    <div id="sidebar-root"></div>
+
+    <div class="min-h-screen lg:pl-72">
+        <div id="navbar-root"></div>
+
+        <main id="hrps-integration-main" class="mx-auto min-w-0 max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <section aria-labelledby="hrps-integration-title">
+                <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                    <div class="max-w-3xl">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-au-navy-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-navy">IT Administrator</span>
+                            <span class="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-blue">External Source System</span>
+                        </div>
+                        <h1 id="hrps-integration-title" class="text-2xl font-extrabold tracking-tight text-au-navy sm:text-3xl">HRPS Integration</h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor employee master-data synchronization between the existing HRPS and the integration layer.</p>
+                        <p class="mt-3 flex items-center gap-2 text-[11px] font-medium text-slate-400" aria-live="polite">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span data-layout-feedback>Prototype HRPS connection status is healthy.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button id="sync-now" type="button" class="button-primary">
+                            <i class="fa-solid fa-rotate h-4 w-4" aria-hidden="true"></i>
+                            <span data-sync-label>Sync Now</span>
+                        </button>
+                        <a href="#synchronization-history" class="button-secondary">
+                            <i class="fa-solid fa-list-check h-4 w-4" aria-hidden="true"></i>
+                            <span>View Sync Logs</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-label="HRPS synchronization summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Connection Status</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">Online</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">HRPS Connection</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Today</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Last Successful Sync</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">10:38 AM</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Today</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-users h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-600">Received</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Employee Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">486</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Received from HRPS</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-sky-50 text-sky-700"><i class="fa-solid fa-user-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-sky-700">Current</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Active Employees</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">472</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Employment Status = Active</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-arrows-rotate h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600">Latest</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Records Updated</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">12</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Latest Sync</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-triangle-exclamation h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-red-600">Review</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Records Requiring Review</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">3</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Data Issues</p>
+                </article>
+            </section>
+
+            <section class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3.5 text-sm leading-6 text-blue-900" aria-label="HRPS authority notice">
+                <i class="fa-solid fa-circle-info mt-0.5 h-4 w-4 shrink-0 text-au-blue" aria-hidden="true"></i>
+                <p><strong>HRPS is the authoritative source of employee information.</strong> This integration page monitors and validates synchronized data; it does not replace HRPS employee management.</p>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="hrps-connection-title">
+                    <div class="flex flex-col justify-between gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start">
+                        <div class="flex items-center gap-3">
+                            <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-building h-5 w-5" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="section-kicker">Prototype integration status</p>
+                                <h2 id="hrps-connection-title" class="mt-1 text-base font-extrabold text-au-navy">HRPS Connection</h2>
+                            </div>
+                        </div>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+
+                    <dl class="mt-5 grid gap-5 text-xs sm:grid-cols-2">
+                        <div><dt class="section-kicker">System</dt><dd class="mt-1 font-semibold text-slate-700">Existing HRPS</dd></div>
+                        <div><dt class="section-kicker">System Type</dt><dd class="mt-1 font-semibold text-slate-700">External Source System</dd></div>
+                        <div><dt class="section-kicker">Connection Status</dt><dd class="mt-1"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></dd></div>
+                        <div><dt class="section-kicker">Integration Method</dt><dd class="mt-1 font-semibold leading-5 text-slate-700">Prototype Adapter <span class="font-medium text-slate-400">(API / Adapter to be confirmed)</span></dd></div>
+                        <div><dt class="section-kicker">Last Successful Sync</dt><dd class="mt-1 font-semibold text-slate-700">10:38 AM</dd></div>
+                        <div><dt class="section-kicker">Last Attempt</dt><dd class="mt-1 font-semibold text-slate-700">10:38 AM</dd></div>
+                        <div><dt class="section-kicker">Sync Frequency</dt><dd class="mt-1 font-semibold text-slate-700">Every 15 minutes</dd></div>
+                        <div><dt class="section-kicker">Response Time</dt><dd class="mt-1 font-semibold text-slate-700">842 ms</dd></div>
+                    </dl>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="latest-sync-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Latest run</p>
+                            <h2 id="latest-sync-title" class="mt-1 text-base font-extrabold text-au-navy">Latest Synchronization</h2>
+                        </div>
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+
+                    <dl class="mt-5 grid grid-cols-2 gap-4 text-xs">
+                        <div><dt class="section-kicker">Started</dt><dd class="mt-1 font-semibold text-slate-700">10:38:02 AM</dd></div>
+                        <div><dt class="section-kicker">Completed</dt><dd class="mt-1 font-semibold text-slate-700">10:38:05 AM</dd></div>
+                        <div><dt class="section-kicker">Duration</dt><dd class="mt-1 font-semibold text-slate-700">3.2 seconds</dd></div>
+                        <div><dt class="section-kicker">Records Received</dt><dd class="mt-1 font-semibold text-slate-700">486</dd></div>
+                    </dl>
+
+                    <div class="mt-5 grid grid-cols-2 gap-2 border-t border-slate-100 pt-4 text-[11px] font-semibold">
+                        <span class="rounded-lg bg-blue-50 px-2.5 py-2 text-au-blue">2 New Records</span>
+                        <span class="rounded-lg bg-emerald-50 px-2.5 py-2 text-emerald-700">12 Updated Records</span>
+                        <span class="rounded-lg bg-slate-100 px-2.5 py-2 text-slate-600">469 Unchanged</span>
+                        <span class="rounded-lg bg-red-50 px-2.5 py-2 text-au-red">3 Failed Records</span>
+                    </div>
+                </article>
+            </section>
+            <section class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="hrps-data-flow-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Monitored path</p>
+                        <h2 id="hrps-data-flow-title" class="mt-1 text-base font-extrabold text-au-navy">HRPS Data Flow</h2>
+                        <p class="mt-1 text-xs font-medium leading-5 text-slate-400">Official employee fields are matched and standardized for internal integration services and Unified Attendance.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Prototype flow</span>
+                </div>
+
+                <div class="flow-layout mt-6">
+                    <div class="flex min-w-0 flex-col items-stretch gap-3 sm:mx-auto sm:max-w-md">
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-building" aria-hidden="true"></i></span>
+                            <strong>Existing HRPS</strong>
+                            <small>Official employee source</small>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-violet-50 text-violet-600"><i class="fa-solid fa-plug" aria-hidden="true"></i></span>
+                            <strong>Integration Adapter</strong>
+                            <small>Prototype connection</small>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-amber-50 text-amber-600"><i class="fa-solid fa-link" aria-hidden="true"></i></span>
+                            <strong>Employee ID Matching</strong>
+                            <small>Master identifier</small>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></span>
+                            <strong>Field Standardization</strong>
+                            <small>Mapped employee data</small>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-sky-50 text-sky-700"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+                            <strong>Integration Services</strong>
+                            <small>Internal data services</small>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full">
+                            <span class="flow-step-icon bg-emerald-50 text-emerald-600"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+                            <strong>Unified Attendance</strong>
+                            <small>Consumes matched data</small>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="data-mapping-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+                    <div>
+                        <p class="section-kicker">Field contract</p>
+                        <h2 id="data-mapping-title" class="mt-1 text-base font-extrabold text-au-navy">Employee Data Mapping</h2>
+                    </div>
+                    <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>6 required fields mapped</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[760px] w-full text-left">
+                        <caption class="sr-only">HRPS employee data field mapping</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">HRPS Field</th>
+                                <th class="px-5 py-3 font-bold">Internal Field</th>
+                                <th class="px-5 py-3 font-bold">Required</th>
+                                <th class="px-5 py-3 font-bold">Example</th>
+                                <th class="px-5 py-3 font-bold">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Employee ID</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">employee_id</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">AU-EMP-2026-001</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Employee Name</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">employee_name</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">John Benedict M. Villegas</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Department</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">department</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Information Technology</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Position</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">position</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Office Staff</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Employment Status</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">employment_status</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Active</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Work Schedule</td>
+                                <td class="px-5 py-4 font-mono text-[11px] text-slate-600">schedule_id / schedule_data</td>
+                                <td class="px-5 py-4 font-semibold text-slate-600">Yes</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:30 AM – 5:00 PM</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Mapped</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="employee-sync-title">
+                <div class="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+                    <div>
+                        <p class="section-kicker">Employee master data</p>
+                        <h2 id="employee-sync-title" class="mt-1 text-base font-extrabold text-au-navy">Recently Synchronized Employee Records</h2>
+                    </div>
+
+                    <div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-[minmax(15rem,1fr)_repeat(3,minmax(9rem,.55fr))]">
+                        <label class="relative min-w-0">
+                            <span class="sr-only">Search synchronized employee records</span>
+                            <i class="fa-solid fa-magnifying-glass pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" aria-hidden="true"></i>
+                            <input id="employee-record-search" type="search" placeholder="Search employee records" class="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-300 focus:bg-white focus:ring-4 focus:ring-blue-100" />
+                        </label>
+                        <label>
+                            <span class="sr-only">Filter by department</span>
+                            <select id="department-filter" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                                <option value="all">All departments</option>
+                                <option value="Unassigned">Unassigned</option>
+                                <option value="Information Technology">Information Technology</option>
+                                <option value="Human Resources">Human Resources</option>
+                                <option value="Administration">Administration</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span class="sr-only">Filter by employment status</span>
+                            <select id="employment-filter" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                                <option value="all">All statuses</option>
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span class="sr-only">Filter by sync result</span>
+                            <select id="sync-result-filter" class="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                                <option value="all">All results</option>
+                                <option value="Updated">Updated</option>
+                                <option value="No Change">No Change</option>
+                                <option value="Needs Review">Needs Review</option>
+                            </select>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[980px] w-full text-left">
+                        <caption class="sr-only">Recently synchronized HRPS employee records</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Employee</th>
+                                <th class="px-5 py-3 font-bold">Department</th>
+                                <th class="px-5 py-3 font-bold">Position</th>
+                                <th class="px-5 py-3 font-bold">Status</th>
+                                <th class="px-5 py-3 font-bold">Sync Result</th>
+                                <th class="px-5 py-3 font-bold">Updated</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover" data-employee-record data-department="Information Technology" data-employment="Active" data-sync-result="Updated">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-001</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">John Benedict M. Villegas</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Information Technology</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Office Staff</td>
+                                <td class="px-5 py-4"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Active</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Updated</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">10:38 AM</td>
+                            </tr>
+                            <tr class="table-row-hover" data-employee-record data-department="Human Resources" data-employment="Active" data-sync-result="No Change">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-014</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Maria Santos</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Human Resources</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">HR Staff</td>
+                                <td class="px-5 py-4"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Active</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-offline"><span class="status-dot status-dot-offline"></span>No Change</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">10:38 AM</td>
+                            </tr>
+                            <tr class="table-row-hover" data-employee-record data-department="Administration" data-employment="Inactive" data-sync-result="Updated">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-087</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Robert Cruz</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Administration</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Office Support</td>
+                                <td class="px-5 py-4"><span class="status-badge status-offline"><span class="status-dot status-dot-offline"></span>Inactive</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Updated</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">10:38 AM</td>
+                            </tr>
+                            <tr class="table-row-hover" data-employee-record data-department="Unassigned" data-employment="Active" data-sync-result="Needs Review">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-233</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Example Employee</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">—</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Office Support</td>
+                                <td class="px-5 py-4"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Active</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">10:38 AM</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0" aria-labelledby="records-review-title">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+                        <div>
+                            <p class="section-kicker text-au-red">Data quality</p>
+                            <h2 id="records-review-title" class="mt-1 text-base font-extrabold text-au-navy">Records Requiring Review</h2>
+                        </div>
+                        <span class="grid h-8 min-w-8 place-items-center rounded-full bg-red-50 px-2 text-xs font-extrabold text-au-red">3</span>
+                    </div>
+
+                    <div class="space-y-3 p-5 sm:p-6">
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex min-w-0 items-start gap-3">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-sm"><i class="fa-solid fa-building-circle-exclamation h-4 w-4" aria-hidden="true"></i></span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs font-extrabold text-slate-700">Missing Department</h3>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500"><span class="font-semibold">Employee ID:</span> AU-EMP-2026-233 · <span class="font-semibold">Employee:</span> Example Employee</p>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500">Department value missing from HRPS response.</p>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span>
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view missing department details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review missing department record">Review <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex min-w-0 items-start gap-3">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-sm"><i class="fa-solid fa-calendar-xmark h-4 w-4" aria-hidden="true"></i></span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs font-extrabold text-slate-700">Unknown Schedule</h3>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500"><span class="font-semibold">Employee ID:</span> AU-EMP-2026-177</p>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500">Work schedule could not be mapped to an existing schedule definition.</p>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span>
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view unknown schedule details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review unknown schedule record">Review <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-red-100 bg-red-50/50 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex min-w-0 items-start gap-3">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-au-red shadow-sm"><i class="fa-solid fa-copy h-4 w-4" aria-hidden="true"></i></span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs font-extrabold text-slate-700">Duplicate Employee ID</h3>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500"><span class="font-semibold">Employee ID:</span> AU-EMP-2026-091</p>
+                                        <p class="mt-1 text-[11px] leading-5 text-slate-500">Duplicate employee identifier detected during synchronization.</p>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Error</span>
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-red-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view duplicate employee ID details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review duplicate employee ID record">Review <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
+                            </div>
+                        </article>
+                    </div>
+                </article>
+
+                <div class="grid min-w-0 gap-6">
+                    <article class="dashboard-card p-5 sm:p-6" aria-labelledby="hrps-events-title">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <p class="section-kicker">Activity stream</p>
+                                <h2 id="hrps-events-title" class="mt-1 text-base font-extrabold text-au-navy">Recent HRPS Events</h2>
+                            </div>
+                            <span class="icon-tile shrink-0 bg-blue-50 text-au-blue"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                        </div>
+
+                        <div class="mt-5 space-y-4">
+                            <div class="flex gap-3">
+                                <span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check h-3.5 w-3.5" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold leading-5 text-slate-600">Employee synchronization completed successfully.</p>
+                                    <p class="mt-1 text-[10px] font-medium text-slate-400">10:38 AM · Success</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="activity-dot bg-blue-100 text-au-blue"><i class="fa-solid fa-arrows-rotate h-3.5 w-3.5" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold leading-5 text-slate-600">12 employee records were updated.</p>
+                                    <p class="mt-1 text-[10px] font-medium text-slate-400">10:38 AM · Updated</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="activity-dot bg-amber-100 text-amber-700"><i class="fa-solid fa-triangle-exclamation h-3.5 w-3.5" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold leading-5 text-slate-600">3 records were flagged for review.</p>
+                                    <p class="mt-1 text-[10px] font-medium text-slate-400">10:38 AM · Warning</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-heart-pulse h-3.5 w-3.5" aria-hidden="true"></i></span>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-xs font-semibold leading-5 text-slate-600">HRPS connection health check succeeded.</p>
+                                    <p class="mt-1 text-[10px] font-medium text-slate-400">10:35 AM · Online</p>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="dashboard-card p-5 sm:p-6" aria-labelledby="error-handling-title">
+                        <div class="flex items-start gap-3">
+                            <span class="icon-tile shrink-0 bg-emerald-50 text-emerald-600"><i class="fa-solid fa-shield-heart h-5 w-5" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="section-kicker">Future monitoring states</p>
+                                <h2 id="error-handling-title" class="mt-1 text-base font-extrabold text-au-navy">Connection &amp; Error Handling</h2>
+                            </div>
+                        </div>
+                        <p class="mt-4 text-xs leading-5 text-slate-600">Current connection is healthy. No active HRPS connection errors.</p>
+                        <div class="mt-4 flex flex-wrap gap-2">
+                            <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                            <span class="status-badge status-pending"><span class="status-dot status-dot-warning"></span>Delayed</span>
+                            <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span>
+                            <span class="status-badge status-offline"><span class="status-dot status-dot-offline"></span>Offline</span>
+                            <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Authentication Error</span>
+                            <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Timeout</span>
+                            <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Invalid Response</span>
+                        </div>
+                    </article>
+                </div>
+            </section>
+
+            <section id="synchronization-history" class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="synchronization-history-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+                    <div>
+                        <p class="section-kicker">Audit-ready run list</p>
+                        <h2 id="synchronization-history-title" class="mt-1 text-base font-extrabold text-au-navy">Synchronization History</h2>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock history</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[780px] w-full text-left">
+                        <caption class="sr-only">HRPS synchronization history</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Date &amp; Time</th>
+                                <th class="px-5 py-3 font-bold">Operation</th>
+                                <th class="px-5 py-3 font-bold">Records</th>
+                                <th class="px-5 py-3 font-bold">Duration</th>
+                                <th class="px-5 py-3 font-bold">Result</th>
+                                <th class="px-5 py-3 font-bold">Triggered By</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 10:38 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Scheduled Employee Sync</td>
+                                <td class="px-5 py-4 text-slate-500">486</td>
+                                <td class="px-5 py-4 text-slate-500">3.2s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 10:23 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Scheduled Employee Sync</td>
+                                <td class="px-5 py-4 text-slate-500">486</td>
+                                <td class="px-5 py-4 text-slate-500">3.1s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 10:08 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Scheduled Employee Sync</td>
+                                <td class="px-5 py-4 text-slate-500">483</td>
+                                <td class="px-5 py-4 text-slate-500">—</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 9:55 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Manual Sync</td>
+                                <td class="px-5 py-4 text-slate-500">486</td>
+                                <td class="px-5 py-4 text-slate-500">3.8s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">IT Administrator</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/hrps-integration.js"></script>
+</body>
+</html>

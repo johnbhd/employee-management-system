@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Bundy and biometric attendance-log ETL monitoring for Arellano University." />
+    <link rel="icon" type="image/png" href="../img/aulogo.png" />
+    <link rel="apple-touch-icon" href="../img/aulogo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <title>Bundy / Biometric ETL | Arellano University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="bg-au-background text-slate-800 antialiased">
+    <div id="sidebar-root"></div>
+
+    <div class="min-h-screen lg:pl-72">
+        <div id="navbar-root"></div>
+
+        <main id="bundy-biometric-etl-main" class="mx-auto min-w-0 max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <section aria-labelledby="bundy-page-title">
+                <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                    <div class="max-w-3xl">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-au-navy-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-navy">IT Administrator</span>
+                            <span class="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-blue">Attendance Integration</span>
+                        </div>
+                        <h1 id="bundy-page-title" class="text-2xl font-extrabold tracking-tight text-au-navy sm:text-3xl">Bundy / Biometric ETL</h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor attendance-log extraction, transformation, employee matching, and loading from the existing Bundy/Biometric attendance source.</p>
+                        <p class="mt-3 flex items-center gap-2 text-[11px] font-medium text-slate-400" aria-live="polite">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span data-layout-feedback>Prototype ETL status is ready for review.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button id="run-import" type="button" class="button-primary">
+                            <i class="fa-solid fa-rotate h-4 w-4" aria-hidden="true"></i>
+                            <span data-import-label>Run Import</span>
+                        </button>
+                        <a href="#import-history" class="button-secondary">
+                            <i class="fa-solid fa-list-check h-4 w-4" aria-hidden="true"></i>
+                            <span>View Import Logs</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3.5 text-sm leading-6 text-blue-900" aria-label="Bundy source and privacy notice">
+                <i class="fa-solid fa-shield-halved mt-0.5 h-4 w-4 shrink-0 text-au-blue" aria-hidden="true"></i>
+                <p><strong>The existing Bundy/Biometric device remains the attendance source.</strong> This integration processes attendance logs only and does not store fingerprint images or biometric templates.</p>
+            </section>
+
+            <section aria-label="Bundy ETL summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Device / Source Status</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">Online</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Attendance Source</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-file-import h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Today</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Logs Imported Today</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">326</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Raw Attendance Events</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-user-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-600">Matched</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Matched Employees</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">319</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Matched to HRPS ID</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-user-clock h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600">Review</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Unmatched Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">3</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Needs Review</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-copy h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-red-600">Flagged</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Duplicate Logs</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">2</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Detected</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-bars-progress h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-700">Queue</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Pending Processing</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">2</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">ETL Queue</p>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="source-connection-title">
+                    <div class="flex flex-col justify-between gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start">
+                        <div class="flex items-center gap-3">
+                            <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-clock h-5 w-5" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="section-kicker">External attendance source</p>
+                                <h2 id="source-connection-title" class="mt-1 text-base font-extrabold text-au-navy">Bundy / Biometric Source</h2>
+                            </div>
+                        </div>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+
+                    <dl class="mt-5 grid gap-x-5 gap-y-4 text-xs sm:grid-cols-2">
+                        <div><dt class="section-kicker">Source Name</dt><dd class="mt-1 font-semibold text-slate-700">Campus Bundy / Biometric Device</dd></div>
+                        <div><dt class="section-kicker">System Type</dt><dd class="mt-1 font-semibold text-slate-700">Existing Attendance Source</dd></div>
+                        <div><dt class="section-kicker">Connection Status</dt><dd class="mt-1"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></dd></div>
+                        <div><dt class="section-kicker">Import Method</dt><dd class="mt-1 font-semibold leading-5 text-slate-700">Device Export / Adapter <span class="font-medium text-slate-400">— To Be Confirmed</span></dd></div>
+                        <div><dt class="section-kicker">Last Import</dt><dd class="mt-1 font-semibold text-slate-700">10:41 AM</dd></div>
+                        <div><dt class="section-kicker">Next Scheduled Import</dt><dd class="mt-1 font-semibold text-slate-700">10:46 AM</dd></div>
+                        <div><dt class="section-kicker">Records in Latest Batch</dt><dd class="mt-1 font-semibold text-slate-700">84</dd></div>
+                        <div><dt class="section-kicker">Import Frequency</dt><dd class="mt-1 font-semibold leading-5 text-slate-700">Every 5 minutes <span class="font-medium text-slate-400">— Prototype</span></dd></div>
+                    </dl>
+                </article>
+
+                <article id="latest-import-batch" class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="latest-import-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Latest mock batch</p>
+                            <h2 id="latest-import-title" class="mt-1 text-base font-extrabold text-au-navy">Latest Import Batch</h2>
+                        </div>
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-file-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+
+                    <dl class="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-xs">
+                        <div><dt class="section-kicker">Batch ID</dt><dd class="mt-1 font-semibold text-slate-700">BE-20260915-1041</dd></div>
+                        <div><dt class="section-kicker">Duration</dt><dd class="mt-1 font-semibold text-slate-700">2.1 seconds</dd></div>
+                        <div><dt class="section-kicker">Started</dt><dd class="mt-1 font-semibold text-slate-700">10:41:02 AM</dd></div>
+                        <div><dt class="section-kicker">Completed</dt><dd class="mt-1 font-semibold text-slate-700">10:41:04 AM</dd></div>
+                        <div><dt class="section-kicker">Logs Received</dt><dd class="mt-1 font-semibold text-slate-700">84</dd></div>
+                        <div><dt class="section-kicker">Matched</dt><dd class="mt-1 font-semibold text-slate-700">81</dd></div>
+                        <div><dt class="section-kicker">Unmatched</dt><dd class="mt-1 font-semibold text-slate-700">3</dd></div>
+                        <div><dt class="section-kicker">Duplicates</dt><dd class="mt-1 font-semibold text-slate-700">2</dd></div>
+                        <div><dt class="section-kicker">Loaded</dt><dd class="mt-1 font-semibold text-slate-700">79</dd></div>
+                    </dl>
+
+                    <div class="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                        <span class="text-[11px] font-semibold text-slate-500">Result</span>
+                        <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Completed with Warnings</span>
+                    </div>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden p-5 sm:p-6" aria-labelledby="etl-pipeline-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Monitored transformation path</p>
+                        <h2 id="etl-pipeline-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance ETL Pipeline</h2>
+                        <p class="mt-1 max-w-3xl text-xs font-medium leading-5 text-slate-400">Attendance events move from the existing device source into a common, validated structure before Unified Attendance consumes them.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Prototype flow</span>
+                </div>
+
+                <div class="mt-6 overflow-x-auto pb-2">
+                    <div class="flow-layout flex min-w-0 flex-col gap-3 2xl:min-w-max 2xl:flex-row 2xl:items-stretch">
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+                            <strong>Bundy / Biometric</strong>
+                            <small>Existing device source</small>
+                            <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Online</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-violet-50 text-violet-600"><i class="fa-solid fa-file-import" aria-hidden="true"></i></span>
+                            <strong>Extract Logs</strong>
+                            <small>84 logs received</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Success</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-code-branch" aria-hidden="true"></i></span>
+                            <strong>Transform Format</strong>
+                            <small>84 standardized</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Success</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-amber-50 text-amber-600"><i class="fa-solid fa-link" aria-hidden="true"></i></span>
+                            <strong>Match Employee ID</strong>
+                            <small>81 matched · 3 review</small>
+                            <span class="status-badge status-warning mt-2"><span class="status-dot status-dot-warning"></span>Review</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-orange-50 text-orange-600"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i></span>
+                            <strong>Validate Record</strong>
+                            <small>79 valid · 2 duplicates</small>
+                            <span class="status-badge status-warning mt-2"><span class="status-dot status-dot-warning"></span>Warnings</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-emerald-50 text-emerald-600"><i class="fa-solid fa-database" aria-hidden="true"></i></span>
+                            <strong>Load Standardized Attendance</strong>
+                            <small>79 loaded</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Success</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-sky-50 text-sky-700"><i class="fa-solid fa-layer-group" aria-hidden="true"></i></span>
+                            <strong>Unified Attendance</strong>
+                            <small>Common attendance data</small>
+                            <span class="status-badge status-pending mt-2"><span class="status-dot status-dot-warning"></span>Pending</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="imported-logs" class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="imported-logs-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Attendance event preview</p>
+                        <h2 id="imported-logs-title" class="mt-1 text-base font-extrabold text-au-navy">Imported Attendance Logs</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Preview of log fields produced by the existing attendance source. No biometric material is included.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock records</span>
+                </div>
+
+                <form id="attendance-log-filters" class="grid gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 sm:px-6" novalidate>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Search ID</span>
+                        <input id="attendance-log-search" type="search" placeholder="Employee or device ID" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Date</span>
+                        <input id="attendance-log-date" type="date" value="2026-09-15" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Device</span>
+                        <select id="device-filter" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All devices</option>
+                            <option value="main-office">Main Office Device</option>
+                            <option value="administration">Administration Device</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Match Status</span>
+                        <select id="match-status-filter" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All match statuses</option>
+                            <option value="matched">Matched</option>
+                            <option value="unmatched">Unmatched</option>
+                            <option value="duplicate">Duplicate</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Processing Status</span>
+                        <select id="processing-status-filter" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-semibold text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All processing statuses</option>
+                            <option value="processed">Processed</option>
+                            <option value="needs-review">Needs Review</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </label>
+                </form>
+                <div class="overflow-x-auto">
+                    <table class="min-w-[1040px] w-full text-left">
+                        <caption class="sr-only">Imported attendance log preview</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Timestamp</th>
+                                <th class="px-5 py-3 font-bold">Device Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Matched Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Device</th>
+                                <th class="px-5 py-3 font-bold">Event</th>
+                                <th class="px-5 py-3 font-bold">Match Status</th>
+                                <th class="px-5 py-3 font-bold">Processing Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover" data-log-row data-date="2026-09-15" data-device="main-office" data-match-status="matched" data-processing-status="processed">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 7:24 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">EMP-00418</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">AU-EMP-2026-0418</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Main Office Device</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Matched</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-log-row data-date="2026-09-15" data-device="main-office" data-match-status="matched" data-processing-status="processed">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 7:31 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">EMP-00194</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">AU-EMP-2026-0194</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Main Office Device</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Matched</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-log-row data-date="2026-09-15" data-device="main-office" data-match-status="unmatched" data-processing-status="needs-review">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 7:36 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">TEMP-091</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">—</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Main Office Device</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Unmatched</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-log-row data-date="2026-09-15" data-device="main-office" data-match-status="duplicate" data-processing-status="needs-review">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 7:32 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">EMP-00014</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">AU-EMP-2026-0014</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Main Office Device</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Duplicate</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-log-row data-date="2026-09-15" data-device="administration" data-match-status="matched" data-processing-status="failed">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">Sep 15, 2026 8:02 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">EMP-00271</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">AU-EMP-2026-0271</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Administration Device</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Time Out</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Matched</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Failed</span></td>
+                            </tr>
+                            <tr data-log-empty hidden>
+                                <td colspan="7" class="px-5 py-10 text-center text-xs font-semibold text-slate-500 sm:px-6">No mock attendance logs match the selected filters.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 px-5 py-3.5 text-[11px] font-medium text-slate-400 sm:px-6">
+                    <span data-log-count>Showing 5 mock attendance logs.</span>
+                    <span>Preview only · Attendance event fields</span>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="employee-matching-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Master identifier mapping</p>
+                            <h2 id="employee-matching-title" class="mt-1 text-base font-extrabold text-au-navy">Employee ID Matching</h2>
+                        </div>
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-link h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">The Bundy device ID is matched to the official HRPS Employee ID. HRPS Employee ID remains the project master identifier and is not edited from this page.</p>
+
+                    <div class="mt-5 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
+                        <div class="rounded-xl border border-blue-100 bg-blue-50/60 p-3 text-center">
+                            <span class="section-kicker">Source ID</span>
+                            <strong class="mt-1 block text-xs text-au-navy">Bundy Device Employee ID</strong>
+                        </div>
+                        <i class="fa-solid fa-arrow-right hidden text-slate-300 sm:block" aria-hidden="true"></i>
+                        <div class="rounded-xl border border-violet-100 bg-violet-50/60 p-3 text-center">
+                            <span class="section-kicker">Rule</span>
+                            <strong class="mt-1 block text-xs text-au-navy">Mapping / Matching Rule</strong>
+                        </div>
+                        <i class="fa-solid fa-arrow-right hidden text-slate-300 sm:block" aria-hidden="true"></i>
+                        <div class="rounded-xl border border-emerald-100 bg-emerald-50/60 p-3 text-center">
+                            <span class="section-kicker">Master ID</span>
+                            <strong class="mt-1 block text-xs text-au-navy">HRPS Employee ID</strong>
+                        </div>
+                    </div>
+
+                    <dl class="mt-6 grid gap-3 sm:grid-cols-3">
+                        <div class="rounded-xl bg-emerald-50/70 p-3.5">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-700">Matched Automatically</dt>
+                            <dd class="mt-1 text-xl font-extrabold text-au-navy">319</dd>
+                        </div>
+                        <div class="rounded-xl bg-blue-50/70 p-3.5">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.1em] text-au-blue">Mapped Manually</dt>
+                            <dd class="mt-1 text-xl font-extrabold text-au-navy">4</dd>
+                        </div>
+                        <div class="rounded-xl bg-amber-50/70 p-3.5">
+                            <dt class="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">Unmatched</dt>
+                            <dd class="mt-1 text-xl font-extrabold text-au-navy">3</dd>
+                        </div>
+                    </dl>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="etl-issues-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker text-au-red">Data quality queue</p>
+                            <h2 id="etl-issues-title" class="mt-1 text-base font-extrabold text-au-navy">ETL Issues Requiring Attention</h2>
+                        </div>
+                        <span class="grid h-8 min-w-8 place-items-center rounded-full bg-red-50 px-2 text-xs font-extrabold text-au-red">4</span>
+                    </div>
+
+                    <div class="mt-5 space-y-3">
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-3.5">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-user-clock mt-0.5 text-amber-700" aria-hidden="true"></i>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-xs font-extrabold text-slate-700">Unmatched Employee</h3>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">3 Bundy records could not be matched to HRPS Employee IDs.</p>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span>
+                            </div>
+                            <div class="mt-3 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view unmatched employee details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review unmatched attendance records">Review Records</button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-3.5">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-copy mt-0.5 text-amber-700" aria-hidden="true"></i>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-xs font-extrabold text-slate-700">Duplicate Attendance</h3>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">2 potential duplicate attendance events detected.</p>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span>
+                            </div>
+                            <div class="mt-3 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view duplicate attendance details">View Details</button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-red-100 bg-red-50/50 p-3.5">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-calendar-xmark mt-0.5 text-au-red" aria-hidden="true"></i>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-xs font-extrabold text-slate-700">Invalid Timestamp</h3>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">1 attendance record contains an invalid timestamp.</p>
+                                </div>
+                                <span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Error</span>
+                            </div>
+                            <div class="mt-3 flex flex-wrap justify-end gap-3 border-t border-red-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view invalid timestamp details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review invalid timestamp records">Review Records</button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-3.5">
+                            <div class="flex items-start gap-3">
+                                <i class="fa-solid fa-plug-circle-exclamation mt-0.5 text-amber-700" aria-hidden="true"></i>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-xs font-extrabold text-slate-700">Device Communication Warning</h3>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">Last device response exceeded expected processing time.</p>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span>
+                            </div>
+                            <div class="mt-3 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view device communication details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="retry simulated import">Retry Import</button>
+                            </div>
+                        </article>
+                    </div>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,.9fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="unmatched-records-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker text-amber-700">Matching exceptions</p>
+                            <h2 id="unmatched-records-title" class="mt-1 text-base font-extrabold text-au-navy">Unmatched Attendance Records</h2>
+                        </div>
+                        <span class="grid h-8 min-w-8 place-items-center rounded-full bg-amber-50 px-2 text-xs font-extrabold text-amber-700">3</span>
+                    </div>
+
+                    <div class="mt-5 space-y-3">
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex min-w-0 items-start gap-3">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-sm"><i class="fa-solid fa-user-question h-4 w-4" aria-hidden="true"></i></span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs font-extrabold text-slate-700">Record 1</h3>
+                                        <dl class="mt-2 space-y-1 text-[11px] leading-5 text-slate-500">
+                                            <div><dt class="inline font-semibold">Device Employee ID:</dt> <dd class="inline">TEMP-091</dd></div>
+                                            <div><dt class="inline font-semibold">Timestamp:</dt> <dd class="inline">7:36 AM</dd></div>
+                                            <div><dt class="inline font-semibold">Device:</dt> <dd class="inline">Main Office Device</dd></div>
+                                            <div><dt class="inline font-semibold">Issue:</dt> <dd class="inline">No matching HRPS Employee ID</dd></div>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span>
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view unmatched record details">View Details</button>
+                                <button type="button" class="text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review employee mapping">Review Mapping</button>
+                            </div>
+                        </article>
+
+                        <article class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="flex min-w-0 items-start gap-3">
+                                    <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-sm"><i class="fa-solid fa-user-clock h-4 w-4" aria-hidden="true"></i></span>
+                                    <div class="min-w-0">
+                                        <h3 class="text-xs font-extrabold text-slate-700">Record 2</h3>
+                                        <dl class="mt-2 space-y-1 text-[11px] leading-5 text-slate-500">
+                                            <div><dt class="inline font-semibold">Device Employee ID:</dt> <dd class="inline">EMP-00891</dd></div>
+                                            <div><dt class="inline font-semibold">Issue:</dt> <dd class="inline">Mapped employee is currently inactive in HRPS.</dd></div>
+                                        </dl>
+                                    </div>
+                                </div>
+                                <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span>
+                            </div>
+                            <div class="mt-4 flex flex-wrap justify-end gap-3 border-t border-amber-100 pt-3">
+                                <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view inactive employee details">View Details</button>
+                            </div>
+                        </article>
+
+                        <p class="rounded-xl border border-slate-100 bg-slate-50 px-3.5 py-3 text-[11px] leading-5 text-slate-500"><span class="font-bold text-slate-700">Mapping safeguard:</span> a review may associate a Bundy Device Employee ID with an HRPS Employee ID, but it cannot edit the authoritative HRPS employee record.</p>
+                    </div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="duplicate-detection-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker text-red-700">Validation guardrail</p>
+                            <h2 id="duplicate-detection-title" class="mt-1 text-base font-extrabold text-au-navy">Duplicate Detection</h2>
+                        </div>
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-copy h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 rounded-2xl border border-red-100 bg-red-50/60 p-4">
+                        <p class="text-xs font-semibold text-red-800">Duplicates Detected Today</p>
+                        <p class="mt-1 text-3xl font-extrabold tracking-tight text-au-navy">2</p>
+                    </div>
+                    <p class="mt-4 text-xs leading-5 text-slate-500">Possible duplicate attendance logs are flagged before loading into Unified Attendance.</p>
+                    <div class="mt-5 rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+                        <div class="flex items-start gap-3">
+                            <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-au-blue shadow-sm"><i class="fa-solid fa-user-clock h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <h3 class="text-xs font-extrabold text-slate-700">AU-EMP-2026-0014</h3>
+                                <p class="mt-1 text-[11px] leading-5 text-slate-500">7:32:04 AM / 7:32:07 AM</p>
+                                <p class="mt-1 text-[11px] leading-5 text-slate-500">Multiple device events within a possible duplicate-detection window.</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 pt-3">
+                            <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Prototype Rule</span>
+                            <span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Flagged</span>
+                        </div>
+                    </div>
+                    <button type="button" class="mt-4 text-[11px] font-bold text-au-blue transition hover:text-au-navy" data-ui-action="review duplicate logs">Review Duplicate Logs <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="standardized-output-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Common attendance structure</p>
+                        <h2 id="standardized-output-title" class="mt-1 text-base font-extrabold text-au-navy">Standardized Attendance Output</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Valid mapped records are shaped for Unified Attendance processing; this preview does not send data to Payroll.</p>
+                    </div>
+                    <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Mock output</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[720px] w-full text-left">
+                        <caption class="sr-only">Standardized attendance output preview</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Date</th>
+                                <th class="px-5 py-3 font-bold">Time-In</th>
+                                <th class="px-5 py-3 font-bold">Time-Out</th>
+                                <th class="px-5 py-3 font-bold">Source</th>
+                                <th class="px-5 py-3 font-bold">Validation Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0418</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">7:24 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">5:03 PM</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Bundy</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0194</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">7:31 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">—</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Bundy</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Missing Time-Out</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="processing-guide-title">
+                    <div class="flex items-start gap-3">
+                        <span class="icon-tile shrink-0 bg-blue-50 text-au-blue"><i class="fa-solid fa-diagram-project h-5 w-5" aria-hidden="true"></i></span>
+                        <div>
+                            <p class="section-kicker">Transformation guide</p>
+                            <h2 id="processing-guide-title" class="mt-1 text-base font-extrabold text-au-navy">How Bundy Logs Are Processed</h2>
+                        </div>
+                    </div>
+                    <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                        <div class="flex gap-3">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-blue-50 text-[11px] font-extrabold text-au-blue">1</span>
+                            <div><h3 class="text-xs font-extrabold text-slate-700">Extract</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Read attendance event logs from the existing device/source.</p></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-violet-50 text-[11px] font-extrabold text-violet-600">2</span>
+                            <div><h3 class="text-xs font-extrabold text-slate-700">Transform</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Convert device-specific log fields into the project's common format.</p></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-amber-50 text-[11px] font-extrabold text-amber-700">3</span>
+                            <div><h3 class="text-xs font-extrabold text-slate-700">Match</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Associate the device employee ID with the HRPS Employee ID.</p></div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-orange-50 text-[11px] font-extrabold text-orange-600">4</span>
+                            <div><h3 class="text-xs font-extrabold text-slate-700">Validate</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Detect missing, duplicate, invalid, or inconsistent events.</p></div>
+                        </div>
+                        <div class="flex gap-3 sm:col-span-2">
+                            <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-emerald-50 text-[11px] font-extrabold text-emerald-700">5</span>
+                            <div><h3 class="text-xs font-extrabold text-slate-700">Load</h3><p class="mt-1 text-[11px] leading-5 text-slate-500">Store valid standardized records for Unified Attendance processing.</p></div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="source-activity-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Prototype distribution</p>
+                            <h2 id="source-activity-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Source Activity</h2>
+                        </div>
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-chart-column h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">Sample source labels show how activity could be grouped if multiple devices are eventually supported. Device names and counts are prototype data.</p>
+                    <div class="mt-5 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-blue-50 text-au-blue"><i class="fa-solid fa-clock h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span class="truncate">Main Office Device</span><span>214 logs</span></div>
+                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[66%] rounded-full bg-au-blue"></div></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-violet-50 text-violet-600"><i class="fa-solid fa-clock h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span class="truncate">Administration Device</span><span>112 logs</span></div>
+                                <div class="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[34%] rounded-full bg-violet-500"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="import-history" class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="import-history-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Audit-ready run list</p>
+                        <h2 id="import-history-title" class="mt-1 text-base font-extrabold text-au-navy">Import History</h2>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock history</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[900px] w-full text-left">
+                        <caption class="sr-only">Bundy import history</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Batch ID</th>
+                                <th class="px-5 py-3 font-bold">Date &amp; Time</th>
+                                <th class="px-5 py-3 font-bold">Logs Received</th>
+                                <th class="px-5 py-3 font-bold">Matched</th>
+                                <th class="px-5 py-3 font-bold">Loaded</th>
+                                <th class="px-5 py-3 font-bold">Warnings</th>
+                                <th class="px-5 py-3 font-bold">Duration</th>
+                                <th class="px-5 py-3 font-bold">Result</th>
+                                <th class="px-5 py-3 font-bold">Triggered By</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">BE-20260915-1041</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:41 AM</td>
+                                <td class="px-5 py-4 text-slate-500">84</td>
+                                <td class="px-5 py-4 text-slate-500">81</td>
+                                <td class="px-5 py-4 text-slate-500">79</td>
+                                <td class="px-5 py-4 text-amber-700">5</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">2.1s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">BE-20260915-1036</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:36 AM</td>
+                                <td class="px-5 py-4 text-slate-500">67</td>
+                                <td class="px-5 py-4 text-slate-500">67</td>
+                                <td class="px-5 py-4 text-slate-500">67</td>
+                                <td class="px-5 py-4 text-emerald-700">0</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">1.7s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">BE-20260915-1031</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:31 AM</td>
+                                <td class="px-5 py-4 text-slate-500">72</td>
+                                <td class="px-5 py-4 text-slate-500">70</td>
+                                <td class="px-5 py-4 text-slate-500">70</td>
+                                <td class="px-5 py-4 text-amber-700">2</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">1.9s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">System</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,.9fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="etl-events-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Activity stream</p>
+                            <h2 id="etl-events-title" class="mt-1 text-base font-extrabold text-au-navy">Recent ETL Events</h2>
+                        </div>
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+
+                    <div class="mt-5 space-y-4">
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-amber-100 text-amber-700"><i class="fa-solid fa-triangle-exclamation h-3.5 w-3.5" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">Import batch BE-20260915-1041 completed with warnings.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">10:41 AM · Warning</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-link h-3.5 w-3.5" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">81 employee IDs matched successfully.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">10:41 AM · Success</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-amber-100 text-amber-700"><i class="fa-solid fa-user-clock h-3.5 w-3.5" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">3 records sent for manual review.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">10:41 AM · Needs Review</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check h-3.5 w-3.5" aria-hidden="true"></i></span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">Import batch BE-20260915-1036 completed successfully.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">10:36 AM · Success</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="privacy-title">
+                    <div class="flex items-start gap-3">
+                        <span class="icon-tile shrink-0 bg-emerald-50 text-emerald-600"><i class="fa-solid fa-shield-heart h-5 w-5" aria-hidden="true"></i></span>
+                        <div>
+                            <p class="section-kicker">Data minimization</p>
+                            <h2 id="privacy-title" class="mt-1 text-base font-extrabold text-au-navy">Biometric Data Privacy</h2>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-xs leading-6 text-slate-600">This integration processes attendance event logs only. Fingerprint images, biometric templates, facial biometric data, and other raw biometric information are not required or stored by this integration system.</p>
+                    <div class="mt-5 rounded-xl border border-emerald-100 bg-emerald-50/60 px-3.5 py-3 text-[11px] font-semibold leading-5 text-emerald-800">
+                        <i class="fa-solid fa-check mr-1.5" aria-hidden="true"></i>
+                        Attendance-log integration only; the physical device remains outside this system.
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/bundy-biometric-etl.js"></script>
+</body>
+</html>

@@ -1,0 +1,740 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="QR attendance service monitoring and Unified Attendance integration for Arellano University." />
+    <link rel="icon" type="image/png" href="../img/aulogo.png" />
+    <link rel="apple-touch-icon" href="../img/aulogo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <title>QR Attendance | Arellano University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="bg-au-background text-slate-800 antialiased">
+    <div id="sidebar-root"></div>
+
+    <div class="min-h-screen lg:pl-72">
+        <div id="navbar-root"></div>
+
+        <main id="qr-attendance-main" class="mx-auto min-w-0 max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <section aria-labelledby="qr-page-title">
+                <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                    <div class="max-w-3xl">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-au-navy-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-navy">IT Administrator</span>
+                            <span class="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-blue">Attendance Integration</span>
+                        </div>
+                        <h1 id="qr-page-title" class="text-2xl font-extrabold tracking-tight text-au-navy sm:text-3xl">QR Attendance</h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor QR attendance activity, employee validation, scan processing, authorized stations, and synchronization with Unified Attendance.</p>
+                        <p class="mt-3 flex items-center gap-2 text-[11px] font-medium text-slate-400" aria-live="polite">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span data-layout-feedback>Prototype QR status is ready for review.</span>
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button id="refresh-status" type="button" class="button-primary">
+                            <i class="fa-solid fa-rotate h-4 w-4" aria-hidden="true"></i>
+                            <span data-refresh-label>Refresh Status</span>
+                        </button>
+                        <a href="#qr-logs" class="button-secondary">
+                            <i class="fa-solid fa-list-check h-4 w-4" aria-hidden="true"></i>
+                            <span>View QR Logs</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 px-4 py-3.5 text-sm leading-6 text-blue-900" aria-label="QR attendance integration notice">
+                <i class="fa-solid fa-circle-info mt-0.5 h-4 w-4 shrink-0 text-au-blue" aria-hidden="true"></i>
+                <p><strong>QR Attendance is an additional attendance source.</strong> HRPS remains the authoritative source for employee identity, and Bundy/Biometric remains an existing attendance source. QR records are standardized before being loaded into Unified Attendance.</p>
+            </section>
+
+            <section aria-label="QR attendance summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Service Status</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">Online</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">QR Attendance Service</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-qrcode h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-600">Today</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">QR Scans Today</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">42</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Attendance Events</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-user-check h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-600">Accepted</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Valid Records</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">38</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Accepted</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-user-clock h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600">Review</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Needs Review</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">2</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Validation Issues</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-orange-50 text-orange-600"><i class="fa-solid fa-copy h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-600">Flagged</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Duplicate Attempts</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">1</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Detected</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-qrcode h-5 w-5" aria-hidden="true"></i></span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-red-600">Rejected</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Invalid QR Attempts</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">1</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Rejected</p>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="qr-service-title">
+                    <div class="flex flex-col justify-between gap-3 border-b border-slate-100 pb-5 sm:flex-row sm:items-start">
+                        <div class="flex items-center gap-3">
+                            <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-qrcode h-5 w-5" aria-hidden="true"></i></span>
+                            <div>
+                                <p class="section-kicker">Service health</p>
+                                <h2 id="qr-service-title" class="mt-1 text-base font-extrabold text-au-navy">QR Attendance Service</h2>
+                            </div>
+                        </div>
+                        <span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span>
+                    </div>
+
+                    <dl class="mt-5 grid gap-x-5 gap-y-4 text-xs sm:grid-cols-2">
+                        <div><dt class="section-kicker">Service</dt><dd class="mt-1 font-semibold text-slate-700">QR Attendance</dd></div>
+                        <div><dt class="section-kicker">Type</dt><dd class="mt-1 font-semibold text-slate-700">Project Attendance Source</dd></div>
+                        <div><dt class="section-kicker">Status</dt><dd class="mt-1"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></dd></div>
+                        <div><dt class="section-kicker">Validation Source</dt><dd class="mt-1 font-semibold text-slate-700">HRPS Employee Data</dd></div>
+                        <div><dt class="section-kicker">Output</dt><dd class="mt-1 font-semibold text-slate-700">Unified Attendance</dd></div>
+                        <div><dt class="section-kicker">Last Activity</dt><dd class="mt-1 font-semibold text-slate-700">Moments ago</dd></div>
+                        <div><dt class="section-kicker">Records Today</dt><dd class="mt-1 font-semibold text-slate-700">42</dd></div>
+                        <div><dt class="section-kicker">Average Processing Time</dt><dd class="mt-1 font-semibold leading-5 text-slate-700">420 ms <span class="font-medium text-slate-400">— Prototype</span></dd></div>
+                    </dl>
+
+                    <div class="mt-5 rounded-xl border border-blue-100 bg-blue-50/60 px-3.5 py-3 text-[11px] font-semibold leading-5 text-blue-900">
+                        <i class="fa-solid fa-link mr-1.5 text-au-blue" aria-hidden="true"></i>
+                        QR is monitored as an additional source alongside Bundy/Biometric; both feed the common attendance path.
+                    </div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="validation-summary-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Today's quality breakdown</p>
+                            <h2 id="validation-summary-title" class="mt-1 text-base font-extrabold text-au-navy">QR Validation Summary</h2>
+                        </div>
+                        <span class="icon-tile bg-violet-50 text-violet-600"><i class="fa-solid fa-chart-simple h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+
+                    <div class="mt-5 space-y-3">
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Valid</span><span class="text-emerald-700">38</span></div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[90%] rounded-full bg-emerald-500" role="progressbar" aria-label="Valid QR records" aria-valuenow="38" aria-valuemin="0" aria-valuemax="42"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Invalid QR</span><span class="text-red-700">1</span></div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[8%] rounded-full bg-red-400" role="progressbar" aria-label="Invalid QR attempts" aria-valuenow="1" aria-valuemin="0" aria-valuemax="42"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Duplicate</span><span class="text-orange-700">1</span></div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[8%] rounded-full bg-orange-400" role="progressbar" aria-label="Duplicate QR records" aria-valuenow="1" aria-valuemin="0" aria-valuemax="42"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Inactive Employee</span><span class="text-amber-700">1</span></div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[8%] rounded-full bg-amber-400" role="progressbar" aria-label="Inactive employee attempts" aria-valuenow="1" aria-valuemin="0" aria-valuemax="42"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Employee Not Found</span><span class="text-slate-600">1</span></div>
+                            <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[8%] rounded-full bg-slate-400" role="progressbar" aria-label="Employee not found attempts" aria-valuenow="1" aria-valuemin="0" aria-valuemax="42"></div></div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden p-5 sm:p-6" aria-labelledby="qr-flow-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                    <div>
+                        <p class="section-kicker">Monitored transformation path</p>
+                        <h2 id="qr-flow-title" class="mt-1 text-base font-extrabold text-au-navy">QR Attendance Processing Flow</h2>
+                        <p class="mt-1 max-w-3xl text-xs font-medium leading-5 text-slate-400">Scan events are identified, validated, checked for duplicate or invalid activity, and standardized before they reach Unified Attendance.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Prototype flow</span>
+                </div>
+
+                <div class="mt-6 overflow-x-auto pb-2">
+                    <div class="flow-layout flex min-w-0 flex-col gap-3 2xl:min-w-max 2xl:flex-row 2xl:items-stretch">
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-user h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Employee</strong>
+                            <small>Authorized user scope</small>
+                            <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Ready</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-violet-50 text-violet-600"><i class="fa-solid fa-shield-halved h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Secure QR Credential</strong>
+                            <small>Token direction</small>
+                            <span class="status-badge status-pending mt-2"><span class="status-dot status-dot-warning"></span>Prototype</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-location-dot h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Authorized QR Station</strong>
+                            <small>Station authorization</small>
+                            <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Operational</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-qrcode h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>QR Scan</strong>
+                            <small>42 scans received today</small>
+                            <span class="status-badge status-online mt-2"><span class="status-dot status-dot-online"></span>Operational</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-emerald-50 text-emerald-600"><i class="fa-solid fa-user-check h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Employee Validation</strong>
+                            <small>Validate against HRPS</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Operational</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-amber-50 text-amber-600"><i class="fa-solid fa-qrcode h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>QR Validation</strong>
+                            <small>Check token validity</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Operational</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-orange-50 text-orange-600"><i class="fa-solid fa-copy h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Duplicate / Validity Check</strong>
+                            <small>1 flagged today</small>
+                            <span class="status-badge status-warning mt-2"><span class="status-dot status-dot-warning"></span>1 Flagged</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-code-branch h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Standardize Record</strong>
+                            <small>38 processed</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Processed</span>
+                        </div>
+                        <div class="flow-arrow self-center" aria-hidden="true"><i class="fa-solid fa-arrow-right"></i></div>
+                        <div class="flow-step w-full 2xl:w-[9.5rem]">
+                            <span class="flow-step-icon bg-sky-50 text-sky-700"><i class="fa-solid fa-layer-group h-4 w-4" aria-hidden="true"></i></span>
+                            <strong>Unified Attendance</strong>
+                            <small>Load accepted records</small>
+                            <span class="status-badge status-success mt-2"><span class="status-dot status-dot-online"></span>Synced</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="stations-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Station monitoring</p>
+                        <h2 id="stations-title" class="mt-1 text-base font-extrabold text-au-navy">Authorized QR Stations</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Prototype station records show which approved endpoints may record campus QR attendance. Locations are sample data pending confirmation.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Prototype stations</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[760px] w-full text-left">
+                        <caption class="sr-only">Authorized QR stations</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Station</th>
+                                <th class="px-5 py-3 font-bold">Location</th>
+                                <th class="px-5 py-3 font-bold">Status</th>
+                                <th class="px-5 py-3 font-bold">Last Activity</th>
+                                <th class="px-5 py-3 font-bold">Scans Today</th>
+                                <th class="px-5 py-3 font-bold">Version</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-STATION-01</td>
+                                <td class="px-5 py-4 text-slate-500">Main Administration Entrance <span class="text-[10px] text-slate-400">(Prototype)</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">1 minute ago</td>
+                                <td class="px-5 py-4 font-semibold text-slate-700">25</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">v1.0 Prototype</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-STATION-02</td>
+                                <td class="px-5 py-4 text-slate-500">Office Support Area <span class="text-[10px] text-slate-400">(Prototype)</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">4 minutes ago</td>
+                                <td class="px-5 py-4 font-semibold text-slate-700">17</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">v1.0 Prototype</td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-STATION-03</td>
+                                <td class="px-5 py-4 text-slate-500">Administration Annex <span class="text-[10px] text-slate-400">(Prototype)</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">12 minutes ago</td>
+                                <td class="px-5 py-4 font-semibold text-slate-700">0</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">v1.0 Prototype</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="qr-logs" class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="qr-logs-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Attendance event preview</p>
+                        <h2 id="qr-logs-title" class="mt-1 text-base font-extrabold text-au-navy">Recent QR Attendance Activity</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Activity shows the minimum event fields needed for technical monitoring and HRPS-backed validation.</p>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock records</span>
+                </div>
+
+                <form id="qr-activity-filters" class="grid gap-3 border-b border-slate-100 px-5 py-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 sm:px-6" novalidate>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Search Employee ID</span>
+                        <input id="qr-employee-search" type="search" placeholder="Search ID or employee" aria-label="Search Employee ID" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Date</span>
+                        <input id="qr-date-filter" type="date" value="2026-09-15" aria-label="Filter by date" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100" />
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Station</span>
+                        <select id="qr-station-filter" aria-label="Filter by station" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All stations</option>
+                            <option value="qr-station-01">QR-STATION-01</option>
+                            <option value="qr-station-02">QR-STATION-02</option>
+                            <option value="qr-station-03">QR-STATION-03</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Event</span>
+                        <select id="qr-event-filter" aria-label="Filter by event" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All events</option>
+                            <option value="time-in">Time In</option>
+                            <option value="time-out">Time Out</option>
+                            <option value="scan">Scan</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Validation Status</span>
+                        <select id="qr-validation-filter" aria-label="Filter by validation status" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All validation</option>
+                            <option value="valid">Valid</option>
+                            <option value="invalid-qr">Invalid QR</option>
+                            <option value="duplicate">Duplicate</option>
+                            <option value="inactive-employee">Inactive Employee</option>
+                            <option value="employee-not-found">Employee Not Found</option>
+                        </select>
+                    </label>
+                    <label class="block min-w-0">
+                        <span class="mb-1.5 block text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Processing Status</span>
+                        <select id="qr-processing-filter" aria-label="Filter by processing status" class="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-slate-50 px-3 text-xs font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-4 focus:ring-blue-100">
+                            <option value="all">All processing</option>
+                            <option value="processed">Processed</option>
+                            <option value="needs-review">Needs Review</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </label>
+                </form>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-5 py-3 text-[11px] font-semibold text-slate-400 sm:px-6">
+                    <span data-qr-count aria-live="polite">Showing 5 mock QR attendance events.</span>
+                    <span>UI-only filters · No live QR service queried</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[980px] w-full text-left">
+                        <caption class="sr-only">Recent QR attendance activity</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Time</th>
+                                <th class="px-5 py-3 font-bold">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Employee</th>
+                                <th class="px-5 py-3 font-bold">Station</th>
+                                <th class="px-5 py-3 font-bold">Event</th>
+                                <th class="px-5 py-3 font-bold">Validation</th>
+                                <th class="px-5 py-3 font-bold">Processing</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover" data-qr-row data-date="2026-09-15" data-station="qr-station-01" data-event="time-in" data-validation="valid" data-processing="processed">
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 sm:px-6">7:24 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700">AU-EMP-2026-0418</td>
+                                <td class="px-5 py-4 text-slate-600">John Benedict M. Villegas</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">QR-STATION-01</td>
+                                <td class="px-5 py-4 text-slate-500">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-qr-row data-date="2026-09-15" data-station="qr-station-01" data-event="time-in" data-validation="valid" data-processing="processed">
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 sm:px-6">7:31 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700">AU-EMP-2026-0194</td>
+                                <td class="px-5 py-4 text-slate-600">Maria Santos</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">QR-STATION-01</td>
+                                <td class="px-5 py-4 text-slate-500">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Processed</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-qr-row data-date="2026-09-15" data-station="qr-station-02" data-event="time-in" data-validation="duplicate" data-processing="needs-review">
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 sm:px-6">7:42 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700">AU-EMP-2026-0332</td>
+                                <td class="px-5 py-4 text-slate-600">Robert Cruz</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">QR-STATION-02</td>
+                                <td class="px-5 py-4 text-slate-500">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Duplicate</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-qr-row data-date="2026-09-15" data-station="qr-station-02" data-event="scan" data-validation="invalid-qr" data-processing="rejected">
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 sm:px-6">7:46 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700">UNKNOWN</td>
+                                <td class="px-5 py-4 text-slate-400">—</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">QR-STATION-02</td>
+                                <td class="px-5 py-4 text-slate-500">Scan</td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Invalid QR</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Rejected</span></td>
+                            </tr>
+                            <tr class="table-row-hover" data-qr-row data-date="2026-09-15" data-station="qr-station-03" data-event="time-in" data-validation="inactive-employee" data-processing="rejected">
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500 sm:px-6">7:49 AM</td>
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700">AU-EMP-2026-0087</td>
+                                <td class="px-5 py-4 text-slate-600">Inactive Employee</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">QR-STATION-03</td>
+                                <td class="px-5 py-4 text-slate-500">Time In</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Inactive Employee</span></td>
+                                <td class="px-5 py-4"><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Rejected</span></td>
+                            </tr>
+                            <tr data-qr-empty hidden>
+                                <td colspan="7" class="px-5 py-10 text-center text-xs font-semibold text-slate-400 sm:px-6">No mock QR attendance events match these filters.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="employee-validation-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Authoritative identity check</p>
+                            <h2 id="employee-validation-title" class="mt-1 text-base font-extrabold text-au-navy">Employee Validation</h2>
+                        </div>
+                        <span class="icon-tile bg-emerald-50 text-emerald-600"><i class="fa-solid fa-id-card h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">QR Attendance resolves the secure credential to an Employee ID, then checks the HRPS record and employment status. HRPS remains authoritative and this flow does not create a competing employee identity database.</p>
+
+                    <div class="mt-5 grid gap-2 text-[11px] font-semibold text-slate-600 sm:grid-cols-5">
+                        <div class="rounded-xl border border-blue-100 bg-blue-50 px-3 py-3 text-center"><span class="block text-[10px] uppercase tracking-[0.1em] text-blue-600">Credential</span><span class="mt-1 block">QR Credential</span></div>
+                        <div class="hidden place-items-center text-slate-300 sm:grid"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+                        <div class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-center"><span class="block text-[10px] uppercase tracking-[0.1em] text-slate-400">Resolve</span><span class="mt-1 block">Employee ID</span></div>
+                        <div class="hidden place-items-center text-slate-300 sm:grid"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+                        <div class="rounded-xl border border-emerald-100 bg-emerald-50 px-3 py-3 text-center"><span class="block text-[10px] uppercase tracking-[0.1em] text-emerald-700">Authoritative</span><span class="mt-1 block">HRPS Record</span></div>
+                    </div>
+                    <div class="mt-2 flex flex-col items-center gap-1 text-[11px] font-semibold text-slate-500 sm:flex-row sm:justify-center">
+                        <span class="hidden sm:inline">Then check:</span>
+                        <span class="rounded-full bg-slate-100 px-2.5 py-1">Employee exists?</span>
+                        <i class="fa-solid fa-arrow-right hidden text-slate-300 sm:inline" aria-hidden="true"></i>
+                        <span class="rounded-full bg-slate-100 px-2.5 py-1">Employment active?</span>
+                        <i class="fa-solid fa-arrow-right hidden text-slate-300 sm:inline" aria-hidden="true"></i>
+                        <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">Allowed / rejected</span>
+                    </div>
+
+                    <dl class="mt-5 grid grid-cols-2 gap-3 border-t border-slate-100 pt-5 text-xs sm:grid-cols-4">
+                        <div><dt class="section-kicker">Validated Today</dt><dd class="mt-1 text-lg font-extrabold text-au-navy">40</dd></div>
+                        <div><dt class="section-kicker">Active Employees</dt><dd class="mt-1 text-lg font-extrabold text-emerald-700">38</dd></div>
+                        <div><dt class="section-kicker">Inactive Attempts</dt><dd class="mt-1 text-lg font-extrabold text-amber-700">1</dd></div>
+                        <div><dt class="section-kicker">Not Found</dt><dd class="mt-1 text-lg font-extrabold text-slate-600">1</dd></div>
+                    </dl>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="qr-security-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Credential safeguards</p>
+                            <h2 id="qr-security-title" class="mt-1 text-base font-extrabold text-au-navy">QR Security</h2>
+                        </div>
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-shield-halved h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">The prototype represents a secure token direction only. A QR credential does not represent salary, address, password, private HR information, or other unnecessary personal data.</p>
+                    <dl class="mt-5 grid gap-x-5 gap-y-4 text-xs sm:grid-cols-2">
+                        <div><dt class="section-kicker">Credential Type</dt><dd class="mt-1 font-semibold text-slate-700">Secure Token <span class="font-medium text-slate-400">— Prototype</span></dd></div>
+                        <div><dt class="section-kicker">Raw Salary Data</dt><dd class="mt-1 font-semibold text-emerald-700">Not Included</dd></div>
+                        <div><dt class="section-kicker">Sensitive HR Data</dt><dd class="mt-1 font-semibold text-emerald-700">Not Included</dd></div>
+                        <div><dt class="section-kicker">Employee Validation</dt><dd class="mt-1 font-semibold text-slate-700">HRPS-backed</dd></div>
+                        <div><dt class="section-kicker">Token Expiration</dt><dd class="mt-1 font-semibold text-slate-700">To Be Confirmed</dd></div>
+                        <div><dt class="section-kicker">Rotation Strategy</dt><dd class="mt-1 font-semibold text-slate-700">To Be Confirmed</dd></div>
+                        <div class="sm:col-span-2"><dt class="section-kicker">Station Authorization</dt><dd class="mt-1 font-semibold text-slate-700">Enabled in Prototype UI</dd></div>
+                    </dl>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.15fr)_minmax(22rem,.85fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="invalid-attempts-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Review queue</p>
+                            <h2 id="invalid-attempts-title" class="mt-1 text-base font-extrabold text-au-navy">Invalid / Rejected QR Attempts</h2>
+                        </div>
+                        <span class="icon-tile bg-red-50 text-au-red"><i class="fa-solid fa-triangle-exclamation h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+
+                    <div class="mt-5 space-y-3">
+                        <div class="rounded-xl border border-red-100 bg-red-50/50 p-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Invalid Token</h3><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Rejected</span></div>
+                            <dl class="mt-3 grid gap-2 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Time</dt><dd class="mt-1 font-semibold text-slate-600">7:46 AM</dd></div><div><dt class="section-kicker">Station</dt><dd class="mt-1 font-semibold text-slate-600">QR-STATION-02</dd></div><div class="sm:col-span-1"><dt class="section-kicker">Issue</dt><dd class="mt-1 font-semibold leading-5 text-slate-600">QR credential could not be validated.</dd></div></dl>
+                            <div class="mt-3 flex flex-wrap gap-2"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view logs">View Logs</button></div>
+                        </div>
+                        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Inactive Employee</h3><span class="status-badge status-error"><span class="status-dot status-dot-error"></span>Rejected</span></div>
+                            <dl class="mt-3 grid gap-2 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee ID</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-087</dd></div><div class="sm:col-span-2"><dt class="section-kicker">Issue</dt><dd class="mt-1 font-semibold leading-5 text-slate-600">Employee is currently inactive according to HRPS.</dd></div></dl>
+                            <div class="mt-3"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button></div>
+                        </div>
+                        <div class="rounded-xl border border-orange-100 bg-orange-50/50 p-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2"><h3 class="text-xs font-extrabold text-slate-700">Duplicate Attendance</h3><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                            <dl class="mt-3 grid gap-2 text-[11px] sm:grid-cols-3"><div><dt class="section-kicker">Employee ID</dt><dd class="mt-1 font-semibold text-slate-600">AU-EMP-2026-332</dd></div><div class="sm:col-span-2"><dt class="section-kicker">Issue</dt><dd class="mt-1 font-semibold leading-5 text-slate-600">Potential duplicate attendance event detected.</dd></div></dl>
+                            <div class="mt-3"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="review">Review</button></div>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="qr-issues-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Operational attention</p>
+                            <h2 id="qr-issues-title" class="mt-1 text-base font-extrabold text-au-navy">QR Issues Requiring Attention</h2>
+                        </div>
+                        <span class="icon-tile bg-amber-50 text-amber-600"><i class="fa-solid fa-list-check h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 space-y-3">
+                        <div class="flex gap-3 rounded-xl border border-red-100 bg-red-50/50 p-3"><span class="activity-dot bg-red-100 text-red-700"><i class="fa-solid fa-qrcode" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">1 invalid QR credential was rejected.</p><p class="mt-1 text-[10px] font-medium text-red-700">Validation failure</p></div></div>
+                        <div class="flex gap-3 rounded-xl border border-orange-100 bg-orange-50/50 p-3"><span class="activity-dot bg-orange-100 text-orange-700"><i class="fa-solid fa-copy" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">1 potential duplicate attendance event requires review.</p><p class="mt-1 text-[10px] font-medium text-orange-700">Duplicate detection</p></div></div>
+                        <div class="flex gap-3 rounded-xl border border-amber-100 bg-amber-50/50 p-3"><span class="activity-dot bg-amber-100 text-amber-700"><i class="fa-solid fa-user-slash" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">1 QR scan belongs to an inactive HRPS employee.</p><p class="mt-1 text-[10px] font-medium text-amber-700">Employee validation</p></div></div>
+                        <div class="flex gap-3 rounded-xl border border-blue-100 bg-blue-50/50 p-3"><span class="activity-dot bg-blue-100 text-au-blue"><i class="fa-solid fa-gauge-high" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">QR-STATION-02 reported increased response latency.</p><p class="mt-1 text-[10px] font-medium text-au-blue">Station warning · Prototype</p></div></div>
+                    </div>
+                    <div class="mt-5 flex flex-wrap gap-2"><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view details">View Details</button><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="review">Review</button><button type="button" class="button-secondary min-h-0 px-3 py-2 text-[11px]" data-ui-action="view logs">View Logs</button></div>
+                </article>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article id="duplicate-detection" class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="duplicate-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Quality gate</p>
+                            <h2 id="duplicate-title" class="mt-1 text-base font-extrabold text-au-navy">Duplicate Detection</h2>
+                        </div>
+                        <span class="icon-tile bg-orange-50 text-orange-600"><i class="fa-solid fa-copy h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 flex items-end justify-between gap-4 rounded-2xl border border-orange-100 bg-orange-50/60 p-4"><div><p class="section-kicker text-orange-700">Potential duplicates today</p><p class="mt-1 text-3xl font-extrabold tracking-tight text-au-navy">1</p></div><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Needs Review</span></div>
+                    <p class="mt-4 text-xs leading-6 text-slate-600">Repeated or conflicting QR attendance events are flagged before being accepted into Unified Attendance.</p>
+                    <p class="mt-3 text-[11px] font-semibold text-slate-400"><span class="font-extrabold text-slate-500">Prototype Rule:</span> final duplicate detection window and conflict policy are To Be Confirmed.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="audit-coverage-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Monitoring boundary</p>
+                            <h2 id="audit-coverage-title" class="mt-1 text-base font-extrabold text-au-navy">Audit Coverage</h2>
+                        </div>
+                        <span class="icon-tile bg-slate-100 text-slate-600"><i class="fa-solid fa-clipboard-check h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">Important QR integration events should be logged without collecting unnecessary confidential employee information.</p>
+                    <div class="mt-4 grid gap-2 sm:grid-cols-2">
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Successful scans</div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Rejected scans</div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Station ID and timestamp</div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Employee identifier</div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Validation result</div>
+                        <div class="flex items-center gap-2 text-[11px] font-semibold text-slate-600"><i class="fa-solid fa-check text-emerald-600" aria-hidden="true"></i>Retry / review actions</div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="standardized-output-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Common attendance structure</p>
+                        <h2 id="standardized-output-title" class="mt-1 text-base font-extrabold text-au-navy">Standardized QR Attendance Output</h2>
+                        <p class="mt-1 text-xs leading-5 text-slate-400">Valid QR events use the same standardized attendance fields as other sources before they are available to Unified Attendance.</p>
+                    </div>
+                    <span class="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">Source = QR</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[760px] w-full text-left">
+                        <caption class="sr-only">Standardized QR attendance output</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Employee ID</th>
+                                <th class="px-5 py-3 font-bold">Date</th>
+                                <th class="px-5 py-3 font-bold">Time-In</th>
+                                <th class="px-5 py-3 font-bold">Time-Out</th>
+                                <th class="px-5 py-3 font-bold">Source</th>
+                                <th class="px-5 py-3 font-bold">Status</th>
+                                <th class="px-5 py-3 font-bold">Validation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0418</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:24 AM</td>
+                                <td class="px-5 py-4 text-slate-400">—</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-extrabold text-au-blue">QR</span></td>
+                                <td class="px-5 py-4 text-slate-600">Present</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">AU-EMP-2026-0194</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 2026</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">7:31 AM</td>
+                                <td class="px-5 py-4 text-slate-400">—</td>
+                                <td class="px-5 py-4"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-extrabold text-au-blue">QR</span></td>
+                                <td class="px-5 py-4 text-slate-600">Present</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Valid</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="source-distribution-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Additional source visibility</p>
+                            <h2 id="source-distribution-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Source Distribution</h2>
+                        </div>
+                        <span class="icon-tile bg-cyan-50 text-cyan-700"><i class="fa-solid fa-chart-column h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <p class="mt-3 text-xs leading-5 text-slate-500">Prototype source counts demonstrate how Bundy and QR activity can be compared before both enter the common attendance structure.</p>
+                    <div class="mt-5 space-y-4">
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>Bundy Records</span><span>326</span></div>
+                            <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[89%] rounded-full bg-au-blue"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex items-center justify-between gap-3 text-xs font-bold text-slate-700"><span>QR Records</span><span>42</span></div>
+                            <div class="mt-2 h-2.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full w-[12%] rounded-full bg-violet-500"></div></div>
+                        </div>
+                    </div>
+                    <div class="mt-5 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-500"><span class="rounded-full bg-slate-100 px-2.5 py-1">Total Source Events: 368</span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-blue-50 px-2.5 py-1 text-au-blue">Standardized Attendance</span><i class="fa-solid fa-arrow-right text-slate-300" aria-hidden="true"></i><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-emerald-700">Unified Attendance</span></div>
+                    <p class="mt-3 text-[10px] font-semibold text-slate-400">Bundy/Biometric remains an existing attendance source; QR is additional.</p>
+                </article>
+
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="qr-events-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Activity stream</p>
+                            <h2 id="qr-events-title" class="mt-1 text-base font-extrabold text-au-navy">Recent QR Integration Events</h2>
+                        </div>
+                        <span class="icon-tile bg-blue-50 text-au-blue"><i class="fa-solid fa-clock-rotate-left h-5 w-5" aria-hidden="true"></i></span>
+                    </div>
+                    <div class="mt-5 space-y-4">
+                        <div class="flex gap-3"><span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-circle-check h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">8 QR attendance events synchronized successfully.</p><p class="mt-1 text-[10px] font-medium text-slate-400">10:45 AM · Success</p></div></div>
+                        <div class="flex gap-3"><span class="activity-dot bg-orange-100 text-orange-700"><i class="fa-solid fa-copy h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">Potential duplicate QR event flagged for review.</p><p class="mt-1 text-[10px] font-medium text-slate-400">10:31 AM · Needs Review</p></div></div>
+                        <div class="flex gap-3"><span class="activity-dot bg-blue-100 text-au-blue"><i class="fa-solid fa-heart-pulse h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">QR-STATION-01 health check completed.</p><p class="mt-1 text-[10px] font-medium text-slate-400">10:28 AM · Success</p></div></div>
+                        <div class="flex gap-3"><span class="activity-dot bg-emerald-100 text-emerald-700"><i class="fa-solid fa-layer-group h-3.5 w-3.5" aria-hidden="true"></i></span><div class="min-w-0 flex-1"><p class="text-xs font-semibold leading-5 text-slate-600">9 standardized QR attendance records loaded.</p><p class="mt-1 text-[10px] font-medium text-slate-400">10:15 AM · Success</p></div></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="sync-history-title">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-start sm:px-6">
+                    <div>
+                        <p class="section-kicker">Audit-ready event runs</p>
+                        <h2 id="sync-history-title" class="mt-1 text-base font-extrabold text-au-navy">QR Synchronization History</h2>
+                    </div>
+                    <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500">Mock history</span>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-[960px] w-full text-left">
+                        <caption class="sr-only">QR synchronization history</caption>
+                        <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <tr>
+                                <th class="px-5 py-3 font-bold sm:px-6">Batch / Event</th>
+                                <th class="px-5 py-3 font-bold">Date &amp; Time</th>
+                                <th class="px-5 py-3 font-bold">Scans</th>
+                                <th class="px-5 py-3 font-bold">Accepted</th>
+                                <th class="px-5 py-3 font-bold">Rejected</th>
+                                <th class="px-5 py-3 font-bold">Needs Review</th>
+                                <th class="px-5 py-3 font-bold">Duration</th>
+                                <th class="px-5 py-3 font-bold">Result</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs">
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-20260915-1045</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:45 AM</td>
+                                <td class="px-5 py-4 text-slate-500">8</td>
+                                <td class="px-5 py-4 text-slate-500">8</td>
+                                <td class="px-5 py-4 text-slate-500">0</td>
+                                <td class="px-5 py-4 text-slate-500">0</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">0.6s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-20260915-1030</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:30 AM</td>
+                                <td class="px-5 py-4 text-slate-500">12</td>
+                                <td class="px-5 py-4 text-slate-500">10</td>
+                                <td class="px-5 py-4 text-slate-500">1</td>
+                                <td class="px-5 py-4 text-amber-700">1</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">0.9s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></td>
+                            </tr>
+                            <tr class="table-row-hover">
+                                <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">QR-20260915-1015</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">Sep 15, 10:15 AM</td>
+                                <td class="px-5 py-4 text-slate-500">9</td>
+                                <td class="px-5 py-4 text-slate-500">9</td>
+                                <td class="px-5 py-4 text-slate-500">0</td>
+                                <td class="px-5 py-4 text-slate-500">0</td>
+                                <td class="whitespace-nowrap px-5 py-4 text-slate-500">0.5s</td>
+                                <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm sm:px-6" aria-label="QR attendance scope note">
+                <div class="flex items-start gap-3">
+                    <i class="fa-solid fa-shield-heart mt-0.5 h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true"></i>
+                    <p class="text-xs leading-6 text-slate-600"><strong class="text-au-navy">Monitoring scope:</strong> This IT Administrator page monitors QR service status, credential validation, authorized station activity, synchronization, and errors. QR issuance, employee-facing QR display, camera scanning, employee management, payroll, and WFH/Google Meet attendance are outside this page.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/qr-attendance.js"></script>
+</body>
+</html>

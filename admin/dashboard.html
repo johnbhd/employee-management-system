@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="IT Administrator integration monitoring dashboard for Arellano University - Juan Sumulong Campus." />
+    <link rel="icon" type="image/png" href="../img/aulogo.png" />
+    <link rel="apple-touch-icon" href="../img/aulogo.png" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+    <title>IT Administrator Dashboard | Arellano University</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body class="bg-au-background text-slate-800 antialiased">
+    <div id="sidebar-root"></div>
+
+    <div class="min-h-screen lg:pl-72">
+        <div id="navbar-root"></div>
+
+        <main id="dashboard-main" class="mx-auto max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+            <section id="dashboard" aria-labelledby="dashboard-title">
+                <div class="flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+                    <div class="max-w-3xl">
+                        <div class="mb-3 flex flex-wrap items-center gap-2">
+                            <span class="rounded-full bg-au-navy-soft px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-navy">IT Administrator</span>
+                            <span class="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.16em] text-au-blue">Integration Monitoring</span>
+                        </div>
+                        <h1 id="dashboard-title" class="text-2xl font-extrabold tracking-tight text-au-navy sm:text-3xl">System Integration Dashboard</h1>
+                        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Monitor existing systems, attendance integrations, synchronization, errors, users, and security.</p>
+                        <p id="dashboard-feedback" class="mt-3 flex items-center gap-2 text-[11px] font-medium text-slate-400" aria-live="polite">
+                            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                            <span id="status-last-checked" data-layout-feedback>Status last checked moments ago.</span>
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button id="refresh-status" type="button" class="button-primary">
+                            <i class="fa-solid fa-arrows-rotate h-4 w-4" data-refresh-icon aria-hidden="true"></i>
+                            <span data-refresh-label>Refresh Status</span>
+                        </button>
+                        <button type="button" class="button-secondary" data-ui-action="view integration logs">
+                            <i class="fa-solid fa-file-lines h-4 w-4" aria-hidden="true"></i>
+                            <span>View Integration Logs</span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section aria-label="Integration summary" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-blue-50 text-au-blue">
+                            <i class="fa-solid fa-network-wired h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600">Live</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Connected Systems</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">5 / 6</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Systems Online</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-emerald-50 text-emerald-600">
+                            <i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Today</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Successful Syncs</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">1,248</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Successful records</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-red-50 text-au-red">
+                            <i class="fa-solid fa-circle-exclamation h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-red-600">Action</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Failed Transfers</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">7</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Needs Attention</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-amber-50 text-amber-600">
+                            <i class="fa-solid fa-clock h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-amber-600">Queue</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Pending Syncs</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">14</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Waiting</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-orange-50 text-orange-600">
+                            <i class="fa-solid fa-triangle-exclamation h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-orange-600">Open</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Integration Errors</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">3</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Open Issues</p>
+                </article>
+
+                <article class="dashboard-card p-5">
+                    <div class="flex items-start justify-between gap-3">
+                        <span class="icon-tile bg-violet-50 text-violet-600">
+                            <i class="fa-solid fa-users h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-violet-600">Active</span>
+                    </div>
+                    <p class="mt-5 text-xs font-semibold text-slate-500">Active Users</p>
+                    <p class="mt-1 text-2xl font-extrabold tracking-tight text-au-navy">86</p>
+                    <p class="mt-1 text-[11px] font-medium text-slate-400">Currently Active</p>
+                </article>
+            </section>
+
+            <section id="integration-monitoring" class="dashboard-card overflow-hidden" aria-labelledby="integration-health-title">
+                <div class="flex flex-col justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:px-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="grid h-9 w-9 place-items-center rounded-xl bg-blue-50 text-au-blue">
+                                <i class="fa-solid fa-chart-line h-5 w-5" aria-hidden="true"></i>
+                            </span>
+                            <div>
+                                <h2 id="integration-health-title" class="text-base font-extrabold text-au-navy">Integration Health</h2>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">Existing connected systems and project services</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-[11px] font-medium text-slate-400">
+                        <span class="status-dot status-dot-online"></span>
+                        <span>Last checked moments ago</span>
+                    </div>
+                </div>
+
+                <div class="hidden grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] gap-4 bg-slate-50/70 px-6 py-3 text-[10px] font-bold uppercase tracking-[0.13em] text-slate-400 lg:grid">
+                    <span>Integration</span>
+                    <span>Purpose</span>
+                    <span>Status</span>
+                    <span>Last sync</span>
+                    <span class="text-right">Action</span>
+                </div>
+
+                <div class="divide-y divide-slate-100">
+                    <div id="hrps-integration" class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-au-blue"><i class="fa-solid fa-building h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">HRPS</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">Official employee information source</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Employee Master Data</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>2 minutes ago</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#hrps-integration">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+
+                    <div id="bundy-etl" class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-violet-50 text-violet-600"><i class="fa-solid fa-clock h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">Bundy / Biometric ETL</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">Attendance source ingestion</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Attendance Log Import</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>5 minutes ago</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#bundy-etl">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+
+                    <div id="qr-attendance" class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cyan-50 text-cyan-700"><i class="fa-solid fa-qrcode h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">QR Attendance</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">Additional attendance source</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Additional Attendance Source</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>Live</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#qr-attendance">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+
+                    <div class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row data-section="unified-attendance">
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-600"><i class="fa-solid fa-layer-group h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">Unified Attendance</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">Standardized internal attendance data</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Standardized Attendance Records</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>1 minute ago</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#unified-attendance">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+
+                    <div id="payroll-integration" class="grid gap-4 bg-amber-50/30 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-amber-50 text-amber-700"><i class="fa-solid fa-money-check-dollar h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">Existing Payroll System</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">External downstream system</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Verified Attendance Transfer</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-warning"><span class="status-dot status-dot-warning"></span>Warning</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>18 minutes ago</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#payroll-integration">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+
+                    <div id="accounting-integration" class="grid gap-4 px-5 py-4 lg:grid-cols-[minmax(14rem,1.5fr)_minmax(12rem,1fr)_auto_minmax(8rem,.8fr)_auto] lg:items-center lg:px-6" data-health-row>
+                        <div class="flex items-center gap-3">
+                            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-sky-50 text-sky-700"><i class="fa-solid fa-building-columns h-4 w-4" aria-hidden="true"></i></span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-extrabold text-slate-700">Existing Accounting System</p>
+                                <p class="mt-0.5 text-xs font-medium text-slate-400">External downstream system</p>
+                            </div>
+                        </div>
+                        <div class="text-xs font-medium text-slate-500"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Purpose</span>Approved Payroll Synchronization</div>
+                        <div><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Status</span><span class="status-badge status-online"><span class="status-dot status-dot-online"></span>Online</span></div>
+                        <div class="text-xs font-semibold text-slate-600"><span class="mb-1 block text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400 lg:hidden">Last sync</span>12 minutes ago</div>
+                        <a class="text-xs font-bold text-au-blue transition hover:text-au-navy lg:text-right" href="#accounting-integration">View details <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid min-w-0 gap-6 min-[1800px]:grid-cols-[minmax(0,1fr)_minmax(22rem,26rem)]">
+                <article class="dashboard-card min-w-0 p-5 sm:p-6" aria-labelledby="data-flow-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Connected data flow</p>
+                            <h2 id="data-flow-title" class="mt-1 text-base font-extrabold text-au-navy">Attendance Data Flow</h2>
+                            <p class="mt-1 text-xs font-medium leading-5 text-slate-400">How attendance records travel through the integration layer.</p>
+                        </div>
+                        <span class="hidden rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 sm:inline-flex">Live view</span>
+                    </div>
+
+                    <div class="flow-layout mt-6 overflow-x-auto pb-1">
+                        <div class="flex min-w-0 flex-col gap-3 2xl:min-w-max 2xl:flex-row 2xl:items-center">
+                            <div class="min-w-0 flex-1 2xl:min-w-[9rem]">
+                                <p class="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">Attendance inputs</p>
+                                <div class="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+                                    <div class="flow-source">
+                                        <span class="flow-icon bg-blue-50 text-au-blue"><i class="fa-solid fa-building" aria-hidden="true"></i></span>
+                                        <span><strong>HRPS</strong><small>Employee data</small></span>
+                                    </div>
+                                    <div class="flow-source">
+                                        <span class="flow-icon bg-violet-50 text-violet-600"><i class="fa-solid fa-clock" aria-hidden="true"></i></span>
+                                        <span><strong>Bundy</strong><small>Device logs</small></span>
+                                    </div>
+                                    <div class="flow-source">
+                                        <span class="flow-icon bg-cyan-50 text-cyan-700"><i class="fa-solid fa-qrcode" aria-hidden="true"></i></span>
+                                        <span><strong>QR Attendance</strong><small>Additional source</small></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flow-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+
+                            <div class="flow-step">
+                                <span class="flow-step-icon bg-emerald-50 text-emerald-600">
+                                    <i class="fa-solid fa-layer-group h-5 w-5" aria-hidden="true"></i>
+                                </span>
+                                <strong>Unified Attendance</strong>
+                                <small>Standardize</small>
+                            </div>
+
+                            <div class="flow-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+
+                            <div class="flow-step">
+                                <span class="flow-step-icon bg-amber-50 text-amber-600">
+                                    <i class="fa-solid fa-triangle-exclamation h-5 w-5" aria-hidden="true"></i>
+                                </span>
+                                <strong>Validation</strong>
+                                <small>Review</small>
+                            </div>
+
+                            <div class="flow-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+
+                            <div class="flow-step">
+                                <span class="flow-step-icon bg-blue-50 text-au-blue">
+                                    <i class="fa-solid fa-circle-check h-5 w-5" aria-hidden="true"></i>
+                                </span>
+                                <strong>Verified Attendance</strong>
+                                <small>Payroll-ready</small>
+                            </div>
+
+                            <div class="flow-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+
+                            <div class="flow-step">
+                                <span class="flow-step-icon bg-slate-100 text-slate-600">
+                                    <i class="fa-solid fa-money-check-dollar h-5 w-5" aria-hidden="true"></i>
+                                </span>
+                                <strong>Existing Payroll</strong>
+                                <small>Downstream</small>
+                            </div>
+
+                            <div class="flow-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+
+                            <div class="flow-step">
+                                <span class="flow-step-icon bg-sky-50 text-sky-700">
+                                    <i class="fa-solid fa-building-columns h-5 w-5" aria-hidden="true"></i>
+                                </span>
+                                <strong>Existing Accounting</strong>
+                                <small>Downstream</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 flex items-center gap-2 rounded-xl border border-blue-100 bg-blue-50/60 px-3 py-2.5 text-[11px] font-medium leading-5 text-blue-800">
+                        <i class="fa-solid fa-circle-info h-4 w-4 shrink-0" aria-hidden="true"></i>
+                        <span>Existing Payroll and Accounting remain external systems; this dashboard monitors their connection health.</span>
+                    </div>
+                </article>
+
+                <article class="dashboard-card p-5 sm:p-6" aria-labelledby="sync-overview-title">
+                    <div class="flex items-start justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Today</p>
+                            <h2 id="sync-overview-title" class="mt-1 text-base font-extrabold text-au-navy">Synchronization Overview</h2>
+                            <p class="mt-1 text-xs font-medium leading-5 text-slate-400">Transfer activity across monitored integrations.</p>
+                        </div>
+                        <span class="grid h-9 w-9 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
+                            <i class="fa-solid fa-arrows-rotate h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                    </div>
+
+                    <div class="mt-7 flex h-3 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-label="Synchronization completion" aria-valuemin="0" aria-valuemax="100" aria-valuenow="98">
+                        <span class="bg-au-blue" style="width: 98.3%"></span>
+                        <span class="bg-au-red" style="width: 0.6%"></span>
+                        <span class="bg-amber-400" style="width: 1.1%"></span>
+                    </div>
+
+                    <div class="mt-5 grid grid-cols-3 gap-3">
+                        <div>
+                            <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400"><span class="h-2 w-2 rounded-full bg-au-blue"></span>Successful</div>
+                            <p class="mt-2 text-xl font-extrabold text-au-navy">1,248</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400"><span class="h-2 w-2 rounded-full bg-au-red"></span>Failed</div>
+                            <p class="mt-2 text-xl font-extrabold text-au-navy">7</p>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400"><span class="h-2 w-2 rounded-full bg-amber-400"></span>Pending</div>
+                            <p class="mt-2 text-xl font-extrabold text-au-navy">14</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-t border-slate-100 pt-4">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-semibold text-slate-500">Completion rate</span>
+                            <span class="font-extrabold text-emerald-600">98.3%</span>
+                        </div>
+                        <div class="mt-2 flex items-center justify-between text-[11px] font-medium text-slate-400">
+                            <span>1,269 total records today</span>
+                            <span>Across 6 services</span>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="grid gap-6 2xl:grid-cols-[minmax(0,1.25fr)_minmax(22rem,.75fr)]">
+                <article class="dashboard-card min-w-0 overflow-hidden" aria-labelledby="events-title">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5 sm:px-6">
+                        <div>
+                            <p class="section-kicker">Activity stream</p>
+                            <h2 id="events-title" class="mt-1 text-base font-extrabold text-au-navy">Recent Integration Events</h2>
+                        </div>
+                        <button type="button" class="hidden text-xs font-bold text-au-blue transition hover:text-au-navy sm:inline-flex" data-ui-action="view all integration events">View all events <i class="fa-solid fa-arrow-right ml-1" aria-hidden="true"></i></button>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-[760px] w-full text-left">
+                            <caption class="sr-only">Recent integration events</caption>
+                            <thead class="bg-slate-50/70 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                                <tr>
+                                    <th class="px-5 py-3 font-bold sm:px-6">Time</th>
+                                    <th class="px-5 py-3 font-bold">Source</th>
+                                    <th class="px-5 py-3 font-bold">Destination</th>
+                                    <th class="px-5 py-3 font-bold">Event</th>
+                                    <th class="px-5 py-3 font-bold">Records</th>
+                                    <th class="px-5 py-3 font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-xs">
+                                <tr class="table-row-hover">
+                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">10:42 AM</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Bundy ETL</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-slate-500">Unified Attendance</td>
+                                    <td class="min-w-44 px-5 py-4 font-medium text-slate-500">Attendance logs imported</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">84 records</td>
+                                    <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                </tr>
+                                <tr class="table-row-hover">
+                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">10:38 AM</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">HRPS</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-slate-500">Integration Layer</td>
+                                    <td class="min-w-44 px-5 py-4 font-medium text-slate-500">Employee data synchronization</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">12 records</td>
+                                    <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                </tr>
+                                <tr class="table-row-hover">
+                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">10:31 AM</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">Unified Attendance</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-slate-500">Payroll</td>
+                                    <td class="min-w-44 px-5 py-4 font-medium text-slate-500">Verified attendance transfer</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">42 records</td>
+                                    <td class="px-5 py-4"><span class="status-badge status-failed"><span class="status-dot status-dot-error"></span>Failed</span></td>
+                                </tr>
+                                <tr class="table-row-hover">
+                                    <td class="whitespace-nowrap px-5 py-4 font-bold text-slate-700 sm:px-6">10:25 AM</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">QR Attendance</td>
+                                    <td class="whitespace-nowrap px-5 py-4 text-slate-500">Unified Attendance</td>
+                                    <td class="min-w-44 px-5 py-4 font-medium text-slate-500">QR attendance synchronization</td>
+                                    <td class="whitespace-nowrap px-5 py-4 font-semibold text-slate-600">18 records</td>
+                                    <td class="px-5 py-4"><span class="status-badge status-success"><span class="status-dot status-dot-online"></span>Success</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </article>
+
+                <article id="integration-errors" class="dashboard-card" aria-labelledby="errors-title">
+                    <div class="flex items-center justify-between gap-4 border-b border-slate-100 px-5 py-5">
+                        <div>
+                            <p class="section-kicker text-au-red">Needs attention</p>
+                            <h2 id="errors-title" class="mt-1 text-base font-extrabold text-au-navy">Integration Errors Requiring Attention</h2>
+                        </div>
+                        <span class="grid h-8 min-w-8 place-items-center rounded-full bg-red-50 px-2 text-xs font-extrabold text-au-red">3</span>
+                    </div>
+
+                    <div class="space-y-3 p-5">
+                        <div class="rounded-xl border border-red-100 bg-red-50/50 p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-au-red shadow-sm">
+                                    <i class="fa-solid fa-triangle-exclamation h-4 w-4" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-700">Payroll Integration</p>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">Connection timeout while sending verified attendance.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-red-100 pt-3">
+                                <span class="text-[10px] font-semibold text-slate-400">10:31 AM · Retry Available</span>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view payroll error details">View Details</button>
+                                    <button type="button" class="rounded-lg bg-au-navy px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-au-blue" data-retry-action="Payroll Integration">Retry</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-amber-700 shadow-sm">
+                                    <i class="fa-solid fa-triangle-exclamation h-4 w-4" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-700">Bundy / Biometric ETL</p>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">3 attendance records could not be matched to HRPS IDs.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-amber-100 pt-3">
+                                <span class="text-[10px] font-semibold text-slate-400">09:58 AM · Review Required</span>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view bundy error details">View Details</button>
+                                    <button type="button" class="rounded-lg bg-au-navy px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-au-blue" data-retry-action="Bundy / Biometric ETL">Retry</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-xl border border-slate-200 bg-slate-50/70 p-4">
+                            <div class="flex items-start gap-3">
+                                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-white text-slate-600 shadow-sm">
+                                    <i class="fa-solid fa-chart-line h-4 w-4" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0">
+                                    <p class="text-xs font-extrabold text-slate-700">Integration Layer</p>
+                                    <p class="mt-1 text-[11px] leading-5 text-slate-500">One pending audit event has exceeded its processing window.</p>
+                                </div>
+                            </div>
+                            <div class="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-3">
+                                <span class="text-[10px] font-semibold text-slate-400">09:44 AM · Retry Available</span>
+                                <div class="flex items-center gap-3">
+                                    <button type="button" class="text-[11px] font-bold text-slate-500 transition hover:text-au-navy" data-ui-action="view audit error details">View Details</button>
+                                    <button type="button" class="rounded-lg bg-au-navy px-2.5 py-1.5 text-[11px] font-bold text-white transition hover:bg-au-blue" data-retry-action="Integration Layer">Retry</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section id="unified-attendance" class="dashboard-card p-5 sm:p-6" aria-labelledby="attendance-summary-title">
+                <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+                    <div>
+                        <p class="section-kicker">Standardized attendance</p>
+                        <h2 id="attendance-summary-title" class="mt-1 text-base font-extrabold text-au-navy">Unified Attendance Today</h2>
+                        <p class="mt-1 text-xs font-medium leading-5 text-slate-400">Bundy and QR records standardized into one attendance source for validation.</p>
+                    </div>
+                    <span class="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-bold text-slate-500">Last updated 1 minute ago</span>
+                </div>
+
+                <div class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+                    <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">Bundy Records</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">326</p>
+                        <p class="mt-1 text-[11px] font-medium text-slate-400">Device imports</p>
+                    </div>
+                    <div class="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">QR Records</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">42</p>
+                        <p class="mt-1 text-[11px] font-medium text-slate-400">Additional source</p>
+                    </div>
+                    <div class="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-emerald-600">Matched</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">360</p>
+                        <p class="mt-1 text-[11px] font-medium text-emerald-700/60">Employee IDs linked</p>
+                    </div>
+                    <div class="rounded-xl border border-amber-100 bg-amber-50/50 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-amber-700">Unmatched</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">3</p>
+                        <p class="mt-1 text-[11px] font-medium text-amber-700/60">Requires review</p>
+                    </div>
+                    <div class="rounded-xl border border-red-100 bg-red-50/50 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-au-red">Duplicates</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">2</p>
+                        <p class="mt-1 text-[11px] font-medium text-red-700/60">Validation flags</p>
+                    </div>
+                    <div class="rounded-xl border border-orange-100 bg-orange-50/50 p-4">
+                        <p class="text-[10px] font-bold uppercase tracking-[0.1em] text-orange-700">Needs Review</p>
+                        <p class="mt-2 text-xl font-extrabold text-au-navy">3</p>
+                        <p class="mt-1 text-[11px] font-medium text-orange-700/60">Processing queue</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(22rem,.9fr)]">
+                <article class="dashboard-card p-5 sm:p-6" aria-labelledby="quick-actions-title">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Administrator tools</p>
+                            <h2 id="quick-actions-title" class="mt-1 text-base font-extrabold text-au-navy">Quick Actions</h2>
+                        </div>
+                        <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-au-blue">6 available</span>
+                    </div>
+
+                    <div class="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                        <button type="button" class="quick-action" data-ui-action="monitor integrations">
+                            <span class="quick-action-icon bg-blue-50 text-au-blue">
+                                <i class="fa-solid fa-chart-line h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>Monitor Integrations</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="quick-action" data-ui-action="view failed transfers">
+                            <span class="quick-action-icon bg-red-50 text-au-red">
+                                <i class="fa-solid fa-triangle-exclamation h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>View Failed Transfers</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="quick-action" data-ui-action="manage users">
+                            <span class="quick-action-icon bg-violet-50 text-violet-600">
+                                <i class="fa-solid fa-users h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>Manage Users</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="quick-action" data-ui-action="manage roles">
+                            <span class="quick-action-icon bg-amber-50 text-amber-600">
+                                <i class="fa-solid fa-user-shield h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>Manage Roles</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="quick-action" data-ui-action="view audit logs">
+                            <span class="quick-action-icon bg-emerald-50 text-emerald-600">
+                                <i class="fa-solid fa-list-check h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>View Audit Logs</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="quick-action" data-ui-action="open system settings">
+                            <span class="quick-action-icon bg-slate-100 text-slate-600">
+                                <i class="fa-solid fa-gear h-4 w-4" aria-hidden="true"></i>
+                            </span>
+                            <span>System Settings</span>
+                            <i class="fa-solid fa-arrow-right ml-auto text-slate-300" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </article>
+
+                <article id="audit-logs" class="dashboard-card p-5 sm:p-6" aria-labelledby="audit-title">
+                    <div class="flex items-center justify-between gap-4">
+                        <div>
+                            <p class="section-kicker">Security trail</p>
+                            <h2 id="audit-title" class="mt-1 text-base font-extrabold text-au-navy">Recent Audit Activity</h2>
+                        </div>
+                        <span class="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-600">
+                            <i class="fa-solid fa-list-check h-5 w-5" aria-hidden="true"></i>
+                        </span>
+                    </div>
+
+                    <div class="mt-5 space-y-4">
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-blue-100 text-au-blue">
+                                <i class="fa-solid fa-arrow-down h-3.5 w-3.5" aria-hidden="true"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">Administrator retried Payroll synchronization.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">IT Administrator · 10:34 AM</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-amber-100 text-amber-700">
+                                <i class="fa-solid fa-user-shield h-3.5 w-3.5" aria-hidden="true"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">Role permission updated for Attendance Staff.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">IT Administrator · 10:12 AM</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-violet-100 text-violet-700">
+                                <i class="fa-solid fa-clock h-3.5 w-3.5" aria-hidden="true"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">Bundy ETL completed with 326 records.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">Integration Layer · 09:58 AM</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <span class="activity-dot bg-emerald-100 text-emerald-700">
+                                <i class="fa-solid fa-circle-check h-3.5 w-3.5" aria-hidden="true"></i>
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-semibold leading-5 text-slate-600">User account activated.</p>
+                                <p class="mt-1 text-[10px] font-medium text-slate-400">IT Administrator · 09:41 AM</p>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+
+    <script type="module" src="../js/admin-dashboard.js"></script>
+</body>
+</html>
