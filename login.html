@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AU Employee Portal — Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" type="text/css" href="login.css">
   </head>
   <body>
 
     <div class="page">
 
+      <!-- Left branding side -->
       <div class="brand-side">
         <img src="new-au-logo.png" alt="Arellano University Logo" class="brand-logo">
         <h2 class="brand-title">Integrated HRIS, QR Attendance,<br>Payroll, and Accounting System</h2>
@@ -17,11 +19,12 @@
         <p class="brand-subtitle">Employee Access Portal</p>
 
         <div class="brand-address">
-          <span class="icon">&#128205;</span>
-          <span>Arellano University &ndash; Juan Sumulong Campus<br>2600 Legarda St., Sampaloc, Manila</span>   
+          <i class="fa-solid fa-location-dot"></i>
+          <span>Arellano University &ndash; Juan Sumulong Campus<br>2600 Legarda St., Sampaloc, Manila</span>
         </div>
       </div>
 
+      <!-- Right login side -->
       <div class="login-side">
         <div class="container">
 
@@ -36,7 +39,7 @@
               <div class="form">
                 <label for="username">Username</label>
                 <div class="input-wrap">
-                  <span class="icon">&#128100;</span>
+                  <i class="fa-regular fa-user"></i>
                   <input type="text" id="username" name="username" required>
                 </div>
               </div>
@@ -44,7 +47,7 @@
               <div class="form">
                 <label for="password">Password</label>
                 <div class="input-wrap">
-                  <span class="icon">&#128273;</span>
+                  <i class="fa-solid fa-lock"></i>
                   <input type="password" id="password" name="password" required>
                 </div>
 
@@ -62,8 +65,8 @@
 
                 <div class="actions">
                   <input type="submit" value="Login" class="btn-primary btn-full">
-                  <a href="/forgot-password">Forgot password &#128273;</a>
-                  <a href="#" id="contactIt">&#128172; Contact IT Support</a>
+                  <a href="/forgot-password"><i class="fa-solid fa-key"></i> Forgot password</a>
+                  <a href="#" id="contactIt"><i class="fa-regular fa-comment-dots"></i> Contact IT Support</a>
                 </div>
               </div>
             </form>
