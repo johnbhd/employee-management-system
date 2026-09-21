@@ -1,0 +1,158 @@
+.employee-shell {
+  min-height: 100vh;
+  background: var(--employee-paper);
+  color: var(--employee-ink);
+}
+
+.employee-main-wrap {
+  min-width: 0;
+  min-height: 100vh;
+  margin-left: 15.4rem;
+}
+
+.employee-content {
+  min-width: 0;
+  padding: 0 1.75rem 2.5rem;
+}
+
+.employee-dashboard-page {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.employee-welcome {
+  min-height: 9.4rem;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.75rem;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12)), url("/images/au-watercolor.png");
+  background-position: center;
+  background-size: cover;
+  overflow: hidden;
+  padding: 1.5rem 1.8rem;
+}
+
+.employee-welcome h2,
+.employee-panel h2,
+.attendance-card h2 {
+  margin: 0;
+  color: var(--employee-navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 600;
+}
+
+.employee-welcome h2 {
+  font-size: 1.35rem;
+}
+
+.employee-welcome p {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+}
+
+.employee-welcome strong {
+  color: var(--employee-navy);
+}
+
+.employee-welcome .muted {
+  margin-top: 0.7rem;
+  color: var(--text-muted);
+}
+
+.employee-welcome .link-text {
+  color: var(--employee-blue);
+  font-weight: 700;
+}
+
+.employee-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.employee-stat-card {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.7rem;
+  background: #fff;
+}
+
+.employee-stat-icon,
+.announcement-icon {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.55rem;
+  font-size: 1rem;
+}
+
+.employee-stat-icon.success,
+.announcement-icon.success { background: #e5f3e9; color: var(--employee-green); }
+.employee-stat-icon.warning,
+.announcement-icon.warning { background: #f4ecd8; color: #8a6a1f; }
+.employee-stat-icon.danger,
+.announcement-icon.danger { background: #fbe7ea; color: var(--employee-red); }
+.employee-stat-icon.info,
+.announcement-icon.info { background: #e5eafb; color: var(--employee-blue); }
+
+.employee-stat-label,
+.employee-stat-note {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-stat-value {
+  margin-top: 0.15rem;
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.employee-stat-value span {
+  color: var(--text-muted);
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+}
+
+.employee-stat-note {
+  color: #a9adb8;
+  font-size: 0.65rem;
+}
+
+@media (max-width: 1050px) {
+  .employee-main-wrap {
+    margin-left: 0;
+  }
+
+  .employee-content {
+    padding-inline: 1rem;
+  }
+
+  .employee-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .employee-welcome {
+    padding: 1.2rem;
+  }
+
+  .employee-welcome h2 {
+    font-size: 1.1rem;
+  }
+
+  .employee-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,126 @@
+.employee-navbar {
+  display: flex;
+  min-height: 4.8rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem 1.75rem;
+}
+
+.employee-navbar-title,
+.employee-navbar-actions,
+.employee-user-chip,
+.employee-date {
+  display: flex;
+  align-items: center;
+}
+
+.employee-navbar-title {
+  gap: 0.85rem;
+}
+
+.employee-navbar-title h1 {
+  margin: 0;
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.employee-menu-button,
+.employee-icon-button {
+  display: grid;
+  min-width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.employee-menu-button {
+  display: none;
+}
+
+.employee-icon-button {
+  position: relative;
+  border-radius: 0.55rem;
+}
+
+.employee-icon-button:hover,
+.employee-menu-button:hover {
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--employee-navy);
+}
+
+.employee-icon-button > span {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.15rem;
+  display: grid;
+  min-width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--employee-red);
+  color: #fff;
+  font-size: 0.52rem;
+  font-weight: 800;
+}
+
+.employee-navbar-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-date {
+  gap: 0.35rem;
+}
+
+.employee-user-chip {
+  gap: 0.4rem;
+  color: var(--employee-ink);
+  font-weight: 700;
+}
+
+.employee-user-chip .ui-icon:last-child {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1050px) {
+  .employee-menu-button {
+    display: grid;
+  }
+}
+
+@media (max-width: 700px) {
+  .employee-navbar {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .employee-navbar-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .employee-date {
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 440px) {
+  .employee-date,
+  .employee-icon-button:nth-of-type(3) {
+    display: none;
+  }
+
+  .employee-user-chip {
+    font-size: 0.7rem;
+  }
+}

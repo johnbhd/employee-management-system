@@ -1,0 +1,294 @@
+.login-page {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 16px;
+  color: #333;
+  background-image:
+    linear-gradient(rgba(10, 15, 40, 0.55), rgba(10, 15, 40, 0.55)),
+    url("/images/au.jfif");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+.brand-side {
+  display: flex;
+  min-height: 100vh;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+  color: #fff;
+  text-align: center;
+}
+
+.brand-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 24px;
+}
+
+.brand-title {
+  max-width: 520px;
+  margin: 0 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.brand-divider {
+  width: 70px;
+  height: 3px;
+  margin-bottom: 16px;
+  background-color: #e2231a;
+}
+
+.brand-subtitle {
+  margin: 0 0 40px;
+  color: #ddd;
+  font-size: 18px;
+}
+
+.brand-address {
+  display: flex;
+  gap: 10px;
+  color: #cfcfcf;
+  font-size: 13.5px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.brand-address .ui-icon {
+  margin-top: 0.1rem;
+  color: #fff;
+}
+
+.login-side {
+  display: flex;
+  flex: 0 0 460px;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+.login-page .container {
+  width: 380px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  background-color: #fff;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Top brand panel — kept as the source prototype's plain white panel. */
+.brand-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 20px 20px;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  text-align: center;
+}
+
+.brand-panel .logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  margin-bottom: 14px;
+}
+
+.brand-panel h2 {
+  margin: 0;
+  color: #222;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.3px;
+}
+
+.brand-panel .subtitle {
+  margin: 4px 0 0;
+  color: #999;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Bottom form panel */
+.form-panel {
+  padding: 26px 24px 24px;
+}
+
+#loginform {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form > label:first-child {
+  color: #555;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0 10px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input-wrap:focus-within {
+  border-color: #e2231a;
+  box-shadow: 0 0 0 3px rgba(226, 35, 26, 0.12);
+}
+
+.input-wrap .ui-icon {
+  margin-right: 8px;
+  opacity: 0.6;
+}
+
+.input-wrap input {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  padding: 10px 0;
+  font-size: 15px;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #555;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.remember input {
+  accent-color: #e2231a;
+}
+
+.row-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.btn-full {
+  width: 100%;
+  min-height: 0;
+  border-radius: 6px;
+  padding: 11px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  border: 0;
+  background-color: #e2231a;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  border-color: transparent;
+  background-color: #b91912;
+  transform: none;
+}
+
+.auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 0;
+  background: transparent;
+  color: #e2231a;
+  font-size: 12.5px;
+  text-align: center;
+}
+
+.auth-link:hover {
+  color: #b91912;
+  text-decoration: underline;
+}
+
+.login-error {
+  margin: 2px 0 0;
+  color: #b91912;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-side {
+    min-height: auto;
+    padding: 40px 24px;
+  }
+
+  .brand-address {
+    text-align: left;
+  }
+
+  .login-side {
+    flex: none;
+    background-color: transparent;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-side {
+    padding: 32px 18px;
+  }
+
+  .brand-logo {
+    width: 78px;
+    height: 78px;
+    margin-bottom: 18px;
+  }
+
+  .brand-title {
+    font-size: 25px;
+  }
+
+  .brand-subtitle {
+    margin-bottom: 24px;
+    font-size: 16px;
+  }
+
+  .login-side {
+    padding: 24px 16px 36px;
+  }
+
+  .login-page .container {
+    width: 100%;
+  }
+}

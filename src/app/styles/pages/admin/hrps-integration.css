@@ -1,0 +1,8 @@
+.hrps-page .connection-summary,
+.hrps-page .source-summary {
+  min-height: 100%;
+}
+
+.hrps-page .list-row {
+  align-items: center;
+}

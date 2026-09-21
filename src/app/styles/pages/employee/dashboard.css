@@ -1,0 +1,252 @@
+.employee-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(26, 35, 70, 0.035);
+}
+
+.employee-panel-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.employee-section-kicker {
+  color: var(--employee-red);
+  font-size: 0.58rem;
+}
+
+.employee-panel-heading h2 {
+  margin: 0.25rem 0 0;
+  color: var(--employee-navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.employee-panel-heading > .ui-icon {
+  color: var(--employee-blue);
+  font-size: 1.25rem;
+}
+
+.employee-welcome-kicker {
+  color: var(--employee-red);
+}
+
+.employee-welcome .muted {
+  font-size: 0.7rem;
+}
+
+.attendance-card {
+  padding-bottom: 1.2rem;
+}
+
+.attendance-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 1.15rem 1.25rem 0;
+}
+
+.attendance-summary > div {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.85rem;
+  border-radius: 0.6rem;
+  background: #f7f8fb;
+}
+
+.attendance-summary span,
+.attendance-summary small {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.attendance-summary strong {
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.attendance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem 0;
+}
+
+.employee-primary-button,
+.employee-secondary-button,
+.employee-text-button {
+  display: inline-flex;
+  min-height: 2.45rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border-radius: 0.55rem;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.employee-primary-button {
+  border: 1px solid var(--employee-navy);
+  background: var(--employee-navy);
+  color: #fff;
+}
+
+.employee-primary-button:hover {
+  background: var(--employee-blue);
+}
+
+.employee-secondary-button {
+  border: 1px solid var(--employee-line);
+  background: #fff;
+  color: var(--employee-navy);
+}
+
+.employee-secondary-button:hover {
+  border-color: #b6bfd3;
+  background: #f8f9fc;
+}
+
+.employee-text-button {
+  min-height: auto;
+  border: 0;
+  padding: 0.2rem;
+  background: transparent;
+  color: var(--employee-blue);
+}
+
+.employee-text-button:hover {
+  color: var(--employee-red);
+}
+
+.employee-table-wrap {
+  padding-bottom: 0.2rem;
+}
+
+.employee-data-table {
+  min-width: 38rem;
+}
+
+.employee-data-table th {
+  background: #fbfbfc;
+}
+
+.employee-data-table td {
+  border-top-color: #f0f1f5;
+}
+
+.employee-bottom-grid {
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+  gap: 1.25rem;
+}
+
+.payroll-card {
+  padding-bottom: 1.25rem;
+}
+
+.payroll-card > .employee-panel-heading {
+  padding-bottom: 0.85rem;
+}
+
+.payroll-period,
+.payroll-meta {
+  margin: 1.1rem 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.payroll-amount {
+  display: block;
+  margin: 0.35rem 1.25rem 0;
+  color: var(--employee-navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.payroll-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+}
+
+.full-width {
+  width: calc(100% - 2.5rem);
+  margin: 1.15rem 1.25rem 0;
+}
+
+.announcement-list {
+  display: grid;
+}
+
+.announcement-item {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.announcement-item:last-child {
+  border-bottom: 0;
+}
+
+.announcement-item h3 {
+  margin: 0.35rem 0 0;
+  color: var(--employee-navy);
+  font-size: 0.76rem;
+}
+
+.announcement-item p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.announcement-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.announcement-meta time {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+}
+
+@media (max-width: 800px) {
+  .employee-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .attendance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-panel-heading {
+    padding-inline: 1rem;
+  }
+
+  .attendance-summary,
+  .attendance-actions {
+    padding-inline: 1rem;
+  }
+
+  .attendance-actions > button {
+    flex: 1 1 100%;
+  }
+}
