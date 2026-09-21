@@ -2,15 +2,31 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 
 type LoginRole = "employee" | "admin";
 
-const demoAccounts: Record<string, LoginRole> = {
-  "employee@aujsc.edu.ph": "employee",
-  "admin@aujsc.edu.ph": "admin",
+type DemoAccount = {
+  password: string;
+  role: LoginRole;
+  redirectTo: "/employee/dashboard" | "/admin/dashboard";
+};
+
+type LoginErrorField = "username" | "password" | "credentials" | null;
+
+const demoAccounts: Record<string, DemoAccount> = {
+  "aujsc.admin": {
+    password: "admin123",
+    role: "admin",
+    redirectTo: "/admin/dashboard",
+  },
+  employee1: {
+    password: "employee123",
+    role: "employee",
+    redirectTo: "/employee/dashboard",
+  },
 };
 
 export function LoginPage() {
@@ -19,20 +35,59 @@ export function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [errorField, setErrorField] = useState<LoginErrorField>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
+
+  const usernameHasError = errorField === "username" || errorField === "credentials";
+  const passwordHasError = errorField === "password" || errorField === "credentials";
+
+  function clearValidationError() {
+    setErrorMessage("");
+    setErrorField(null);
+  }
+
+  function handleUsernameChange(event: ChangeEvent<HTMLInputElement>) {
+    setUsername(event.target.value);
+    clearValidationError();
+  }
+
+  function handlePasswordChange(event: ChangeEvent<HTMLInputElement>) {
+    setPassword(event.target.value);
+    clearValidationError();
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const role = demoAccounts[username.trim().toLowerCase()];
+    const normalizedUsername = username.trim().toLowerCase();
 
-    if (!role || !password.trim()) {
-      setError("Please enter a valid AU username and password.");
+    if (!normalizedUsername) {
+      setErrorMessage("Please enter your username.");
+      setErrorField("username");
       return;
     }
 
-    setError("");
-    router.push(role === "employee" ? "/employee/dashboard" : "/admin/dashboard");
+    if (!password) {
+      setErrorMessage("Please enter your password.");
+      setErrorField("password");
+      return;
+    }
+
+    const account = demoAccounts[normalizedUsername];
+
+    if (!account || account.password !== password) {
+      setErrorMessage("Invalid username or password.");
+      setErrorField("credentials");
+      return;
+    }
+
+    setErrorMessage("");
+    setErrorField(null);
+    setIsSubmitting(true);
+    sessionStorage.setItem("prototypeRole", account.role);
+    sessionStorage.setItem("prototypeUsername", normalizedUsername);
+    router.push(account.redirectTo);
   }
 
   function showFeedback(message: string) {
@@ -62,20 +117,42 @@ export function LoginPage() {
           </div>
 
           <div className="form-panel">
-            <form id="loginform" onSubmit={handleSubmit}>
+            <form id="loginform" onSubmit={handleSubmit} noValidate>
               <div className="form">
                 <label htmlFor="username">Username</label>
-                <div className="input-wrap">
+                <div className={usernameHasError ? "input-wrap is-error" : "input-wrap"}>
                   <Icon name="user" />
-                  <input type="text" id="username" name="username" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
+                  <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    autoComplete="username"
+                    placeholder="Enter your username"
+                    aria-invalid={usernameHasError}
+                    aria-describedby={errorMessage ? "login-error" : undefined}
+                    required
+                  />
                 </div>
               </div>
 
               <div className="form">
                 <label htmlFor="password">Password</label>
-                <div className="input-wrap">
+                <div className={passwordHasError ? "input-wrap is-error" : "input-wrap"}>
                   <Icon name="lock" />
-                  <input type={showPassword ? "text" : "password"} id="password" name="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    autoComplete="current-password"
+                    placeholder="Enter your password"
+                    aria-invalid={passwordHasError}
+                    aria-describedby={errorMessage ? "login-error" : undefined}
+                    required
+                  />
                 </div>
 
                 <label className="remember" htmlFor="showPassword">
@@ -90,10 +167,12 @@ export function LoginPage() {
                   </label>
                 </div>
 
-                {error ? <p className="login-error" role="alert">{error}</p> : null}
+                {errorMessage ? <p id="login-error" className="login-error" role="alert">{errorMessage}</p> : null}
 
                 <div className="actions">
-                  <button type="submit" className="btn-primary btn-full">Login</button>
+                  <button type="submit" className="btn-primary btn-full" disabled={isSubmitting}>
+                    {isSubmitting ? "Logging in..." : "Login"}
+                  </button>
                   <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
                   <button type="button" className="auth-link" onClick={() => showFeedback("IT support contact is a prototype action.")}><Icon name="comment" /> Contact IT Support</button>
                 </div>

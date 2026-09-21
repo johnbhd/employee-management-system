@@ -1,6 +1,7 @@
 .login-page {
   display: flex;
   min-height: 100vh;
+  padding-inline: max(0px, calc((100vw - 1280px) / 2));
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 16px;
   color: #333;
@@ -73,7 +74,6 @@
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background-color: rgba(255, 255, 255, 0.03);
 }
 
 .login-page .container {
@@ -148,15 +148,24 @@
 .input-wrap {
   display: flex;
   align-items: center;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 6px;
   padding: 0 10px;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input-wrap:focus-within {
-  border-color: #e2231a;
-  box-shadow: 0 0 0 3px rgba(226, 35, 26, 0.12);
+  border-color: var(--au-blue);
+  box-shadow: 0 0 0 3px rgba(49, 84, 156, 0.18);
+}
+
+.input-wrap.is-error {
+  border-color: var(--danger);
+}
+
+.input-wrap.is-error:focus-within {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.15);
 }
 
 .input-wrap .ui-icon {
@@ -170,6 +179,12 @@
   outline: 0;
   padding: 10px 0;
   font-size: 15px;
+}
+
+.input-wrap input:focus,
+.input-wrap input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .remember {
@@ -219,6 +234,11 @@
   transform: none;
 }
 
+.btn-primary:disabled {
+  cursor: wait;
+  opacity: 0.75;
+}
+
 .auth-link {
   display: inline-flex;
   align-items: center;
@@ -238,7 +258,7 @@
 
 .login-error {
   margin: 2px 0 0;
-  color: #b91912;
+  color: var(--danger);
   font-size: 12.5px;
   line-height: 1.45;
 }
