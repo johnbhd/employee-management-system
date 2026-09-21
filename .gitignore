@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+# Keep only the root README as tracked Markdown documentation
+*.md
+!/README.md
+
+# Local workflow and project-context files
+Workflows/
