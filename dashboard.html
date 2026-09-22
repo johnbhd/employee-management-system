@@ -23,9 +23,9 @@
         </div>
 
         <nav class="sidebar-nav">
-          <a href="#" class="nav-item active"><i class="fa-solid fa-house"></i>Dashboard</a>
-          <a href="#" class="nav-item"><i class="fa-regular fa-calendar-check"></i>My Attendance</a>
-          <a href="#" class="nav-item"><i class="fa-solid fa-qrcode"></i>Show Attendance QR</a>
+          <a href="dashboard.html" class="nav-item active"><i class="fa-solid fa-house"></i>Dashboard</a>
+          <a href="myattendance.html" class="nav-item"><i class="fa-regular fa-calendar-check"></i>My Attendance</a>
+          <a href="attendance-qr.html" class="nav-item"><i class="fa-solid fa-qrcode"></i>Show Attendance QR</a>
           <a href="#" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>Attendance History</a>
           <a href="#" class="nav-item"><i class="fa-solid fa-money-check-dollar"></i>My Payslips</a>
           <a href="#" class="nav-item"><i class="fa-regular fa-user"></i>My Profile</a>
@@ -33,7 +33,7 @@
           <a href="#" class="nav-item"><i class="fa-regular fa-circle-question"></i>Help and Support</a>
         </nav>
 
-        <a href="#" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a>
+        <a href="login.html" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a>
       </aside>
 
       <!-- Main content -->
@@ -130,7 +130,7 @@
             </div>
           </div>
 
-          <button class="btn-navy"><i class="fa-solid fa-qrcode"></i> Show My QR Code</button>
+          <a href="attendance-qr.html" class="btn-navy"><i class="fa-solid fa-qrcode"></i> Show My QR Code</a>
           <button class="btn-outline">View Attendance History <i class="fa-solid fa-chevron-right"></i></button>
         </section>
 
@@ -264,5 +264,11 @@
 
       </div>
     </div>
+
+    <script>
+      document.querySelector('.menu-icon').addEventListener('click', function () {
+        document.querySelector('.sidebar-nav').classList.toggle('nav-open');
+      });
+    </script>
   </body>
 </html>

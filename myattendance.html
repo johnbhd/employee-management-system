@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance — AU Employee Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="dashboard.css">
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i>Dashboard</a>
+          <a href="myattendance.html" class="nav-item active"><i class="fa-regular fa-calendar-check"></i>My Attendance</a>
+          <a href="attendance-qr.html" class="nav-item"><i class="fa-solid fa-qrcode"></i>Show Attendance QR</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>Attendance History</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-money-check-dollar"></i>My Payslips</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-user"></i>My Profile</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-circle-question"></i>Help and Support</a>
+        </nav>
+
+        <a href="login.html" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a>
+      </aside>
+
+      <!-- Main content -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <i class="fa-solid fa-bars menu-icon"></i>
+            <h1>My Attendance</h1>
+          </div>
+          <div class="topbar-right">
+            <span class="date"><i class="fa-regular fa-calendar"></i> July 23, 2026 &middot; Wednesday</span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="icon-btn"><i class="fa-solid fa-gear"></i></span>
+            <span class="user-chip"><i class="fa-regular fa-user"></i> John Benedict <i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+        </header>
+
+        <!-- Employee + schedule + status -->
+        <section class="attn-top-card">
+          <div class="attn-employee">
+            <div class="avatar-circle"><i class="fa-solid fa-user"></i></div>
+            <div>
+              <h3>John Benedict M. Villegas</h3>
+              <p>Employee ID: <strong>AU-EMP-2026-001</strong></p>
+              <p>Department: <strong>Information Technology Department</strong></p>
+            </div>
+          </div>
+
+          <div class="attn-divider"></div>
+
+          <div class="attn-schedule">
+            <i class="fa-regular fa-calendar"></i>
+            <div>
+              <span class="label">Today's Schedule</span>
+              <span class="value">7:30 AM &ndash; 5:00 PM</span>
+              <span class="sub">Regular Shift</span>
+            </div>
+          </div>
+
+          <div class="attn-status-box">
+            <span class="label">Current Status</span>
+            <span class="value"><i class="fa-solid fa-circle"></i> Present</span>
+            <span class="sub">On time</span>
+          </div>
+        </section>
+
+        <!-- Stats row -->
+        <section class="attn-stats-row">
+          <div class="attn-stat">
+            <i class="fa-solid fa-right-to-bracket stat-icon green"></i>
+            <div>
+              <span class="label">Time-In</span>
+              <span class="value">7:24 AM</span>
+              <span class="sub">via Bundy</span>
+            </div>
+          </div>
+          <div class="attn-stat">
+            <i class="fa-solid fa-right-from-bracket stat-icon slate"></i>
+            <div>
+              <span class="label">Time-Out</span>
+              <span class="value muted">&mdash;</span>
+              <span class="sub">Not yet timed out</span>
+            </div>
+          </div>
+          <div class="attn-stat">
+            <i class="fa-solid fa-database stat-icon slate"></i>
+            <div>
+              <span class="label">Attendance Source</span>
+              <span class="value">Bundy</span>
+              <span class="sub">Time-in recorded via Bundy Clock</span>
+            </div>
+          </div>
+          <div class="attn-stat">
+            <i class="fa-regular fa-clock stat-icon red"></i>
+            <div>
+              <span class="label">Late Minutes</span>
+              <span class="value">0 min</span>
+              <span class="sub">On time</span>
+            </div>
+          </div>
+          <div class="attn-stat">
+            <i class="fa-regular fa-hourglass stat-icon gold"></i>
+            <div>
+              <span class="label">Undertime</span>
+              <span class="value muted">&mdash;</span>
+              <span class="sub">Not applicable yet</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick actions -->
+        <section class="quick-actions">
+          <span class="quick-label">Quick actions</span>
+          <h2>What would you like to do?</h2>
+
+          <div class="quick-grid">
+            <a href="attendance-qr.html" class="quick-card active">
+              <i class="fa-solid fa-qrcode"></i>
+              <div>
+                <strong>Open QR</strong>
+                <span>Show your attendance QR code</span>
+              </div>
+            </a>
+            <a href="#" class="quick-card">
+              <i class="fa-regular fa-clock"></i>
+              <div>
+                <strong>View Attendance History</strong>
+                <span>See your past attendance records</span>
+              </div>
+            </a>
+            <a href="#" class="quick-card">
+              <i class="fa-regular fa-file-lines"></i>
+              <div>
+                <strong>Request Correction</strong>
+                <span>Report or request attendance correction</span>
+              </div>
+            </a>
+          </div>
+        </section>
+
+        <!-- Reminders / Help -->
+        <section class="notes-grid">
+          <div class="reminder-card">
+            <div class="notes-head">
+              <i class="fa-solid fa-bullhorn"></i>
+              <h3>Important Reminders</h3>
+            </div>
+            <ul>
+              <li>Always record your Time-Out before leaving the campus.</li>
+              <li>Make sure to use the official Bundy Clock or authorized QR stations.</li>
+              <li>For any attendance issues, request a correction with proper justification.</li>
+            </ul>
+          </div>
+
+          <div class="help-card">
+            <div class="notes-head">
+              <i class="fa-regular fa-circle-question"></i>
+              <h3>Need Help?</h3>
+            </div>
+            <p>For attendance-related concerns, please contact the HR Office or your department head.</p>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+      document.querySelector('.menu-icon').addEventListener('click', function () {
+        document.querySelector('.sidebar-nav').classList.toggle('nav-open');
+      });
+    </script>
+  </body>
+</html>
