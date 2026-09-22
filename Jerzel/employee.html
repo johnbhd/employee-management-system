@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Employee Attendance History</title>
+<style>
+  :root {
+    --bg: #eef1f6;
+    --panel: #ffffff;
+    --border: #e6e9f0;
+    --text: #1c2333;
+    --text-muted: #7b8394;
+    --blue: #2f5cf6;
+    --blue-light: #eaf0ff;
+    --orange: #f5a524;
+    --orange-light: #fff4e0;
+    --red: #f0483e;
+    --red-light: #fdeceb;
+    --purple: #7c5cf6;
+    --purple-light: #efeaff;
+    --green: #12b76a;
+    --green-light: #e7f9ef;
+    --yellow-light: #fff8e1;
+    --yellow-text: #b98900;
+    --radius: 14px;
+    --shadow: 0 1px 2px rgba(20, 24, 40, .04), 0 1px 3px rgba(20, 24, 40, .05);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: 24px;
+    padding-top: max(24px, env(safe-area-inset-top));
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+  .app {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  .crumb {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.3px; }
+  .subtitle { color: var(--text-muted); font-size: 14px; margin: 0 0 20px; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+  .stat-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon svg { width: 18px; height: 18px; }
+  .stat-icon.blue { background: var(--blue-light); color: var(--blue); }
+  .stat-icon.orange { background: var(--orange-light); color: var(--orange); }
+  .stat-icon.red { background: var(--red-light); color: var(--red); }
+  .stat-icon.purple { background: var(--purple-light); color: var(--purple); }
+  .stat-label { font-size: 12.5px; color: var(--text-muted); margin: 0 0 4px; }
+  .stat-value { font-size: 19px; font-weight: 700; margin: 0; }
+  .stat-value span { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+  .stat-sub { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; }
+
+  .filters {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .filters-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .field label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+  .field-input {
+    display: flex; align-items: center; gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 9px 10px;
+    font-size: 13.5px;
+    color: var(--text);
+    background: #fff;
+  }
+  .field-input svg { width: 15px; height: 15px; color: var(--text-muted); flex-shrink: 0; }
+  .field-input select, .field-input input {
+    border: none; outline: none; background: transparent;
+    font-size: 13.5px; color: var(--text); flex: 1;
+    font-family: inherit;
+  }
+  .field-input .chev { margin-left: auto; }
+  .filters-actions { display: flex; justify-content: space-between; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13.5px; font-weight: 600;
+    border-radius: 9px; padding: 9px 16px;
+    cursor: pointer; border: none;
+    font-family: inherit;
+  }
+  .btn svg { width: 14px; height: 14px; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #2748d1; }
+  .btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: #f4f6fa; }
+  .btn-outline-blue { background: #fff; color: var(--blue); border: 1px solid var(--border); }
+  .btn-outline-blue:hover { background: var(--blue-light); }
+  .filters-left { display: flex; gap: 10px; }
+
+  .table-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  thead th {
+    text-align: left;
+    font-size: 12px;
+    text-transform: none;
+    color: var(--text-muted);
+    font-weight: 600;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr { cursor: pointer; transition: background .12s; }
+  tbody tr:hover { background: #f7f9fc; }
+  tbody tr.selected { background: var(--blue-light); }
+  .time-ok { color: var(--green); display: inline-flex; align-items: center; gap: 4px; }
+  .time-late { color: var(--orange); display: inline-flex; align-items: center; gap: 4px; }
+  .time-none { color: var(--red); }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .badge.ontime { background: var(--green-light); color: #0a8a52; }
+  .badge.ontime::before { background: #0a8a52; }
+  .badge.late { background: var(--yellow-light); color: var(--yellow-text); }
+  .badge.late::before { background: var(--yellow-text); }
+  .badge.absent { background: var(--red-light); color: var(--red); }
+  .badge.absent::before { background: var(--red); }
+  .badge.overtime { background: var(--purple-light); color: var(--purple); }
+  .badge.overtime::before { background: var(--purple); }
+  .action-link { color: var(--blue); font-weight: 600; font-size: 13px; text-decoration: none; }
+  .action-link:hover { text-decoration: underline; }
+
+  .table-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .pager { display: flex; align-items: center; gap: 6px; }
+  .pager button {
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 8px;
+    width: 30px; height: 30px;
+    font-size: 13px; cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+  }
+  .pager button.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .pager button.nav { width: auto; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px; }
+  .rows-select { display: flex; align-items: center; gap: 8px; }
+  .rows-select select {
+    border: 1px solid var(--border); border-radius: 8px; padding: 5px 8px;
+    font-family: inherit; font-size: 13px; color: var(--text);
+  }
+
+  .side-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px;
+    position: sticky;
+    top: 24px;
+  }
+  .side-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .side-head h3 { margin: 0; font-size: 15px; font-weight: 700; }
+  .side-head button {
+    border: none; background: transparent; cursor: pointer; color: var(--text-muted);
+    font-size: 16px; line-height: 1;
+  }
+  .date-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: #f4f6fa; border-radius: 9px;
+    padding: 9px 12px; font-size: 13px; font-weight: 500;
+    margin-bottom: 16px;
+  }
+  .date-pill svg { width: 15px; height: 15px; color: var(--text-muted); }
+
+  .profile-row { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+  .avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg,#c7d2fe,#a5b4fc);
+    display: flex; align-items: center; justify-content: center;
+    color: #3730a3; font-weight: 700; font-size: 15px;
+    flex-shrink: 0;
+  }
+  .profile-name { font-weight: 700; font-size: 14.5px; margin: 0 0 2px; }
+  .profile-sub { font-size: 12.5px; color: var(--text-muted); margin: 0 0 1px; }
+
+  .detail-list { display: flex; flex-direction: column; }
+  .detail-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-row:last-of-type { border-bottom: none; }
+  .detail-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: #f4f6fa;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; color: var(--text-muted);
+  }
+  .detail-icon svg { width: 15px; height: 15px; }
+  .detail-label { font-size: 12.5px; color: var(--text-muted); margin: 0; }
+  .detail-value { font-size: 13.5px; font-weight: 600; margin: 1px 0 0; }
+
+  .note-box {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--blue-light);
+    border-radius: 10px;
+    padding: 12px;
+    margin-top: 14px;
+    font-size: 12px;
+    color: #3452c9;
+  }
+  .note-box svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  @media (max-width: 980px) {
+    .app { grid-template-columns: 1fr; }
+    .stat-row, .filters-grid { grid-template-columns: repeat(2, 1fr); }
+    .side-panel { position: static; }
+    .table-panel { overflow-x: auto; }
+  }
+  @media (max-width: 560px) {
+    .stat-row, .filters-grid { grid-template-columns: 1fr; }
+    body { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="main">
+    <div class="crumb">Dashboard / Attendance History</div>
+    <h1>Attendance History</h1>
+    <p class="subtitle">View and review your recorded attendance.</p>
+
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="m9 16 2 2 4-4"/></svg>
+        </div>
+        <div>
+          <p class="stat-label">Days Present</p>
+          <p class="stat-value">18 <span>days</span></p>
+          <p class="stat-sub">This Month</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon orange">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <div>
+          <p class="stat-label">Days Late</p>
+          <p class="stat-value">2 <span>days</span></p>
+          <p class="stat-sub">This Month</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M9 15l2 2 4-4" transform="translate(0,0)"/><path d="m15 14-4 4M11 14l4 4" stroke="currentColor"/></svg>
+        </div>
+        <div>
+          <p class="stat-label">Days Absent</p>
+          <p class="stat-value">1 <span>day</span></p>
+          <p class="stat-sub">This Month</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/><path d="M18 5l2-1"/></svg>
+        </div>
+        <div>
+          <p class="stat-label">Overtime Hours</p>
+          <p class="stat-value">6.5 <span>hours</span></p>
+          <p class="stat-sub">This Month</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filters-grid">
+        <div class="field">
+          <label>Date Range</label>
+          <div class="field-input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>July 1 – July 23, 2026</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="field">
+          <label>Month</label>
+          <div class="field-input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span>July 2026</span>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="field">
+          <label>Status</label>
+          <div class="field-input">
+            <select>
+              <option>All Status</option>
+              <option>On Time</option>
+              <option>Late</option>
+              <option>Absent</option>
+              <option>Overtime</option>
+            </select>
+            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+        </div>
+        <div class="field">
+          <label>Search by Date</label>
+          <div class="field-input">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <input type="text" placeholder="Select date">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="filters-actions">
+        <div class="filters-left">
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/></svg>
+            Apply Filter
+          </button>
+          <button class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.6-6.36"/><path d="M21 3v6h-6"/></svg>
+            Reset
+          </button>
+        </div>
+        <button class="btn btn-outline-blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+          Export Report
+        </button>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Scheduled Time</th>
+            <th>Time-In</th>
+            <th>Time-Out</th>
+            <th>Total Hours</th>
+            <th>Overtime</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="table-footer">
+        <div class="pager">
+          <button class="nav">‹ Previous</button>
+          <button class="active">1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>4</button>
+          <button>5</button>
+          <button class="nav">Next ›</button>
+        </div>
+        <div class="rows-select">
+          Rows per page:
+          <select><option>10</option><option>25</option><option>50</option></select>
+          <span>1–10 of 42 records</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="side-panel">
+    <div class="side-head">
+      <h3>Record Details</h3>
+      <button aria-label="Close">✕</button>
+    </div>
+    <div class="date-pill">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+      <span id="panelDate">July 23, 2026 (Wednesday)</span>
+    </div>
+    <div class="profile-row">
+      <div class="avatar">JV</div>
+      <div>
+        <p class="profile-name">John Benedict M. Villegas</p>
+        <p class="profile-sub">Employee ID: AU-EMP-2026-001</p>
+        <p class="profile-sub">Department: Information Technology Department</p>
+      </div>
+    </div>
+    <div class="detail-list" id="detailList">
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><p class="detail-label">Schedule</p><p class="detail-value" id="dSchedule">7:30 AM – 5:00 PM</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><p class="detail-label">Time-In</p><p class="detail-value" id="dIn">7:24 AM</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div><p class="detail-label">Time-Out</p><p class="detail-value" id="dOut">5:05 PM</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M21 12a9 9 0 1 1-9-9"/><path d="M17 3v4h4"/></svg></div>
+        <div><p class="detail-label">Total Hours</p><p class="detail-value" id="dTotal">9h 41m</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3M21 12a9 9 0 1 1-9-9"/><path d="M17 3v4h4"/></svg></div>
+        <div><p class="detail-label">Overtime</p><p class="detail-value" id="dOT">0h 0m</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg></div>
+        <div><p class="detail-label">Attendance Status</p><p class="detail-value" id="dStatus"><span class="badge ontime">On Time</span></p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div><p class="detail-label">Scanner Location</p><p class="detail-value" id="dLoc">3rd Floor – Main Entrance</p></div>
+      </div>
+      <div class="detail-row">
+        <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v12H7l-3 3V4Z"/></svg></div>
+        <div><p class="detail-label">Remarks</p><p class="detail-value" id="dRemarks">—</p></div>
+      </div>
+    </div>
+    <div class="note-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+      <span>This record was captured by the authorized attendance system.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+const records = [
+  { date: "July 23, 2026 (Wed)", full:"July 23, 2026 (Wednesday)", sched: "7:30 AM – 5:00 PM", inT: "7:24 AM", inOk:true, outT: "5:05 PM", outOk:true, total:"9h 41m", ot:"0h", status:"ontime", statusLabel:"On Time", remarks:"—" },
+  { date: "July 22, 2026 (Tue)", full:"July 22, 2026 (Tuesday)", sched: "7:30 AM – 5:00 PM", inT: "7:42 AM", inOk:false, outT: "5:10 PM", outOk:true, total:"9h 28m", ot:"0h", status:"late", statusLabel:"Late", remarks:"Arrived past grace period" },
+  { date: "July 21, 2026 (Mon)", full:"July 21, 2026 (Monday)", sched: "7:30 AM – 5:00 PM", inT: "Not Recorded", inOk:null, outT: "Not Recorded", outOk:null, total:"0h 0m", ot:"0h", status:"absent", statusLabel:"Absent", remarks:"No time record on file" },
+  { date: "July 20, 2026 (Sun)", full:"July 20, 2026 (Sunday)", sched: "7:30 AM – 5:00 PM", inT: "7:31 AM", inOk:true, outT: "5:02 PM", outOk:true, total:"9h 31m", ot:"0h", status:"ontime", statusLabel:"On Time", remarks:"—" },
+  { date: "July 19, 2026 (Sat)", full:"July 19, 2026 (Saturday)", sched: "7:30 AM – 5:00 PM", inT: "Not Recorded", inOk:null, outT: "Not Recorded", outOk:null, total:"0h 0m", ot:"0h", status:"absent", statusLabel:"Absent", remarks:"No time record on file" },
+  { date: "July 18, 2026 (Fri)", full:"July 18, 2026 (Friday)", sched: "7:30 AM – 5:00 PM", inT: "7:20 AM", inOk:true, outT: "5:35 PM", outOk:false, total:"10h 15m", ot:"1h 15m", status:"overtime", statusLabel:"Overtime", remarks:"Approved overtime for release" },
+  { date: "July 17, 2026 (Thu)", full:"July 17, 2026 (Thursday)", sched: "7:30 AM – 5:00 PM", inT: "7:33 AM", inOk:true, outT: "5:04 PM", outOk:true, total:"9h 31m", ot:"0h", status:"ontime", statusLabel:"On Time", remarks:"—" },
+  { date: "July 16, 2026 (Wed)", full:"July 16, 2026 (Wednesday)", sched: "7:30 AM – 5:00 PM", inT: "7:48 AM", inOk:false, outT: "5:08 PM", outOk:true, total:"9h 20m", ot:"0h", status:"late", statusLabel:"Late", remarks:"Arrived past grace period" },
+];
+
+function timeCell(text, ok) {
+  if (ok === null) return `<span class="time-none">${text}</span>`;
+  const cls = ok ? 'time-ok' : 'time-late';
+  const icon = ok
+    ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m5 12 5 5 9-9"/></svg>`
+    : `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`;
+  return `<span class="${cls}">${text} ${icon}</span>`;
+}
+
+function badge(status, label) {
+  return `<span class="badge ${status}">${label}</span>`;
+}
+
+const tbody = document.getElementById('tbody');
+
+function render() {
+  tbody.innerHTML = records.map((r, i) => `
+    <tr data-idx="${i}" class="${i===0 ? 'selected' : ''}">
+      <td>${r.date}</td>
+      <td>${r.sched}</td>
+      <td>${timeCell(r.inT, r.inOk)}</td>
+      <td>${timeCell(r.outT, r.outOk)}</td>
+      <td>${r.total}</td>
+      <td>${r.ot}</td>
+      <td>${badge(r.status, r.statusLabel)}</td>
+      <td><a href="#" class="action-link">View Details</a></td>
+    </tr>
+  `).join('');
+
+  tbody.querySelectorAll('tr').forEach(tr => {
+    tr.addEventListener('click', (e) => {
+      e.preventDefault();
+      tbody.querySelectorAll('tr').forEach(t => t.classList.remove('selected'));
+      tr.classList.add('selected');
+      showDetails(records[+tr.dataset.idx]);
+    });
+  });
+}
+
+function showDetails(r) {
+  document.getElementById('panelDate').textContent = r.full;
+  document.getElementById('dSchedule').textContent = r.sched;
+  document.getElementById('dIn').textContent = r.inT;
+  document.getElementById('dOut').textContent = r.outT;
+  document.getElementById('dTotal').textContent = r.total;
+  document.getElementById('dOT').textContent = r.ot === '0h' ? '0h 0m' : r.ot;
+  document.getElementById('dStatus').innerHTML = badge(r.status, r.statusLabel);
+  document.getElementById('dRemarks').textContent = r.remarks;
+}
+
+render();
+showDetails(records[0]);
+</script>
+</body>
+</html>
