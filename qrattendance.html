@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance QR — AU Employee Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="dashboard.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="dashboard.html" class="nav-item"><i class="fa-solid fa-house"></i>Dashboard</a>
+          <a href="myattendance.html" class="nav-item"><i class="fa-regular fa-calendar-check"></i>My Attendance</a>
+          <a href="attendance-qr.html" class="nav-item active"><i class="fa-solid fa-qrcode"></i>Show Attendance QR</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>Attendance History</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-money-check-dollar"></i>My Payslips</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-user"></i>My Profile</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-bullhorn"></i>Announcements</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-circle-question"></i>Help and Support</a>
+        </nav>
+
+        <a href="login.html" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>Log out</a>
+      </aside>
+
+      <!-- Main content -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <i class="fa-solid fa-bars menu-icon"></i>
+            <h1>Attendance QR</h1>
+          </div>
+          <div class="topbar-right">
+            <span class="date"><i class="fa-regular fa-calendar"></i> July 23, 2026 &middot; Wednesday</span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="icon-btn"><i class="fa-solid fa-gear"></i></span>
+            <span class="user-chip"><i class="fa-regular fa-user"></i> John Benedict <i class="fa-solid fa-chevron-down"></i></span>
+          </div>
+        </header>
+
+        <div class="breadcrumb">
+          <a href="dashboard.html">Dashboard</a> <i class="fa-solid fa-chevron-right"></i> <span class="current">Show Attendance QR</span>
+        </div>
+        <p class="page-sub">Present this QR code at an authorized campus attendance station.</p>
+
+        <section class="qr-layout">
+
+          <!-- QR card -->
+          <div class="qr-card">
+            <div class="qr-employee">
+              <div class="avatar-circle"><i class="fa-solid fa-user"></i></div>
+              <div>
+                <h3>John Benedict M. Villegas</h3>
+                <p>Employee ID: <strong>AU-EMP-2026-001</strong></p>
+                <p>Department: <strong>Information Technology Department</strong></p>
+              </div>
+            </div>
+
+            <div class="qr-divider"></div>
+
+            <div class="qr-code-wrap">
+              <div id="qrcode"></div>
+            </div>
+
+            <div class="qr-meta">
+              <span class="qr-timer"><i class="fa-regular fa-clock"></i> QR expires in <strong class="expire-badge" id="expireTimer">00:42</strong></span>
+              <span class="qr-datetime">July 23, 2026 &middot; 7:24 AM</span>
+            </div>
+
+            <div class="qr-divider"></div>
+
+            <div class="qr-status-row">
+              <div>
+                <span class="label">Current Status</span>
+                <span class="pill muted">Not Yet Timed In</span>
+              </div>
+              <div>
+                <span class="label">Schedule</span>
+                <span class="value">7:30 AM &ndash; 5:00 PM</span>
+              </div>
+              <div>
+                <span class="label">Time-In</span>
+                <span class="pill muted">Not Recorded</span>
+              </div>
+              <div>
+                <span class="label">Time-Out</span>
+                <span class="pill muted">Not Recorded</span>
+              </div>
+            </div>
+
+            <div class="qr-actions">
+              <button class="btn-outline-blue" id="refreshQr"><i class="fa-solid fa-rotate"></i> Refresh QR Code</button>
+              <a href="#" class="btn-outline-blue"><i class="fa-regular fa-clock"></i> View Attendance History <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+          </div>
+
+          <!-- Side column -->
+          <div class="qr-side">
+            <div class="info-card">
+              <div class="info-head">
+                <i class="fa-regular fa-circle-question"></i>
+                <h3>How to Record Attendance</h3>
+              </div>
+              <ol class="step-list">
+                <li><span class="step-num">1</span><p>Open your attendance QR code.</p></li>
+                <li><span class="step-num">2</span><p>Present it to the campus attendance scanner.</p></li>
+                <li><span class="step-num">3</span><p>Wait for the Time-In or Time-Out confirmation.</p></li>
+              </ol>
+            </div>
+
+            <div class="notice-card">
+              <div class="notice-head">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h3>Security Notice</h3>
+              </div>
+              <p>This QR code is personal, temporary, and valid only at authorized attendance stations. Do not share screenshots of your QR code.</p>
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+      document.querySelector('.menu-icon').addEventListener('click', function () {
+        document.querySelector('.sidebar-nav').classList.toggle('nav-open');
+      });
+
+      // Generate a mock secure QR (prototype only — encodes a placeholder token, not real credentials)
+      new QRCode(document.getElementById("qrcode"), {
+        text: "AU-ATTENDANCE|AU-EMP-2026-001|" + Date.now(),
+        width: 220,
+        height: 220,
+        colorDark: "#12182b",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      // Countdown timer for QR expiry
+      let seconds = 42;
+      const timerEl = document.getElementById("expireTimer");
+      setInterval(() => {
+        seconds = seconds > 0 ? seconds - 1 : 42;
+        timerEl.textContent = "00:" + String(seconds).padStart(2, "0");
+      }, 1000);
+    </script>
+  </body>
+</html>
