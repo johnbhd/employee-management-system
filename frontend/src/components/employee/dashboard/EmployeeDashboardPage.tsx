@@ -39,7 +39,7 @@ export function EmployeeDashboardPage() {
         </div>
         <div className="attendance-actions">
           <Link href="/employee/attendance-qr" className="employee-primary-button"><Icon name="qr" /> Show attendance QR</Link>
-          <button type="button" className="employee-secondary-button"><Icon name="clock" /> View history</button>
+          <Link href="/employee/attendance-history" className="employee-secondary-button"><Icon name="clock" /> View history</Link>
         </div>
       </section>
 

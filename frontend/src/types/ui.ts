@@ -28,6 +28,7 @@ export type IconName =
   | "warning"
   | "info"
   | "refresh"
+  | "download"
   | "arrow"
   | "filter"
   | "lock"

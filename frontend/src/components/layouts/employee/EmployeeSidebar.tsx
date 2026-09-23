@@ -15,7 +15,7 @@ const employeeLinks = [
   { label: "Dashboard", icon: "dashboard" as const, href: "/employee/dashboard" },
   { label: "My Attendance", icon: "calendar" as const, href: "/employee/my-attendance" },
   { label: "Show Attendance QR", icon: "qr" as const, href: "/employee/attendance-qr" },
-  { label: "Attendance History", icon: "clock" as const },
+  { label: "Attendance History", icon: "clock" as const, href: "/employee/attendance-history" },
   { label: "My Payslips", icon: "payroll" as const },
   { label: "My Profile", icon: "user" as const },
   { label: "Announcements", icon: "activity" as const },

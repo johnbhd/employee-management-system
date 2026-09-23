@@ -16,6 +16,8 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
     ? "My Attendance"
     : pathname === "/employee/attendance-qr"
       ? "Attendance QR"
+      : pathname === "/employee/attendance-history"
+        ? "Attendance History"
       : "Employee Dashboard";
 
   function notify(message: string) {

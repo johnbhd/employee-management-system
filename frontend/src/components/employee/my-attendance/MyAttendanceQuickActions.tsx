@@ -16,6 +16,7 @@ const quickActions = [
     icon: "clock" as const,
     title: "View Attendance History",
     description: "Review your past attendance records",
+    href: "/employee/attendance-history",
     message: "You are viewing the current attendance page.",
   },
   {

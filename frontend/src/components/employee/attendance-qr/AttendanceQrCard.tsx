@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 import { Icon } from "@/components/ui/Icon";
 import { employeeQrProfile, employeeQrStatus } from "@/data/attendance-qr";
@@ -29,10 +30,6 @@ export function AttendanceQrCard() {
     setQrVersion((version) => version + 1);
     setRemainingSeconds(QR_EXPIRY_SECONDS);
     setFeedback("A new prototype QR code was generated.");
-  }
-
-  function showHistoryNotice() {
-    setFeedback("Attendance history is not connected in this prototype.");
   }
 
   return (
@@ -93,11 +90,11 @@ export function AttendanceQrCard() {
           <Icon name="refresh" />
           Refresh QR Code
         </button>
-        <button type="button" className="attendance-qr-outline-button" onClick={showHistoryNotice}>
+        <Link href="/employee/attendance-history" className="attendance-qr-outline-button">
           <Icon name="clock" />
           View Attendance History
           <Icon name="chevron" />
-        </button>
+        </Link>
       </div>
       <p className="attendance-qr-feedback" role="status" aria-live="polite">
         {feedback}
