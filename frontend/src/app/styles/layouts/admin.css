@@ -1,13 +1,15 @@
 .admin-shell {
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
   min-height: 100vh;
   background: var(--au-background);
 }
 
 .admin-main-wrap {
+  grid-column: 2;
   width: 100%;
   min-width: 0;
   min-height: 100vh;
-  padding-left: 18rem;
 }
 
 .admin-content {
@@ -391,8 +393,12 @@
 }
 
 @media (max-width: 1050px) {
+  .admin-shell {
+    display: block;
+  }
+
   .admin-main-wrap {
-    padding-left: 0;
+    grid-column: auto;
   }
 
   .two-column,
