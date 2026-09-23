@@ -7,7 +7,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "bundy-biometric-etl", label: "Bundy / Biometric ETL", href: "/admin/bundy-biometric-etl", icon: "bundy" },
   { id: "qr-attendance", label: "QR Attendance", href: "/admin/qr-attendance", icon: "qr" },
   { id: "unified-attendance", label: "Unified Attendance", href: "/admin/unified-attendance", icon: "unified" },
-  { id: "payroll-integration", label: "Payroll Integration", icon: "payroll" },
+  { id: "payroll-integration", label: "Payroll Integration", href: "/admin/payroll-integration", icon: "payroll" },
   { id: "accounting-integration", label: "Accounting Integration", icon: "accounting" },
   { id: "integration-errors", label: "Integration Errors", icon: "errors" },
   { id: "user-accounts", label: "User Accounts", icon: "users" },

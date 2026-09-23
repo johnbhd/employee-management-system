@@ -17,6 +17,7 @@
 @import "./pages/admin/bundy-biometric-etl.css";
 @import "./pages/admin/qr-attendance.css";
 @import "./pages/admin/unified-attendance.css";
+@import "./pages/admin/payroll-integration.css";
 
 *,
 *::before,
