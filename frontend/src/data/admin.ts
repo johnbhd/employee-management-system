@@ -8,7 +8,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "qr-attendance", label: "QR Attendance", href: "/admin/qr-attendance", icon: "qr" },
   { id: "unified-attendance", label: "Unified Attendance", href: "/admin/unified-attendance", icon: "unified" },
   { id: "payroll-integration", label: "Payroll Integration", href: "/admin/payroll-integration", icon: "payroll" },
-  { id: "accounting-integration", label: "Accounting Integration", icon: "accounting" },
+  { id: "accounting-integration", label: "Accounting Integration", href: "/admin/accounting-integration", icon: "accounting" },
   { id: "integration-errors", label: "Integration Errors", icon: "errors" },
   { id: "user-accounts", label: "User Accounts", icon: "users" },
   { id: "roles-permissions", label: "Roles & Permissions", icon: "roles" },
