@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Icon } from "../../ui/Icon";
 
@@ -11,8 +12,8 @@ type EmployeeSidebarProps = {
 };
 
 const employeeLinks = [
-  { label: "Dashboard", icon: "dashboard" as const, active: true },
-  { label: "My Attendance", icon: "calendar" as const },
+  { label: "Dashboard", icon: "dashboard" as const, href: "/employee/dashboard" },
+  { label: "My Attendance", icon: "calendar" as const, href: "/employee/attendance-history" },
   { label: "Show Attendance QR", icon: "qr" as const },
   { label: "Attendance History", icon: "clock" as const },
   { label: "My Payslips", icon: "payroll" as const },
@@ -22,6 +23,8 @@ const employeeLinks = [
 ];
 
 export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {
+  const pathname = usePathname();
+
   return (
     <>
       <button type="button" className={`employee-sidebar-overlay ${isOpen ? "is-visible" : ""}`} onClick={onClose} aria-label="Close employee navigation" />
@@ -31,12 +34,32 @@ export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {
           <span><strong>Arellano University</strong><small>Juan Sumulong Campus</small></span>
         </div>
         <nav className="employee-nav" aria-label="Employee portal navigation">
-          {employeeLinks.map((item) => (
-            <span className={`employee-nav-link ${item.active ? "is-active" : ""}`} key={item.label} aria-current={item.active ? "page" : undefined}>
-              <Icon name={item.icon} />
-              {item.label}
-            </span>
-          ))}
+          {employeeLinks.map((item) => {
+            const isActive = item.href === pathname;
+            const className = `employee-nav-link ${isActive ? "is-active" : ""}`;
+            const content = (
+              <>
+                <Icon name={item.icon} />
+                {item.label}
+              </>
+            );
+
+            return item.href ? (
+              <Link
+                href={item.href}
+                className={className}
+                key={item.label}
+                onClick={onClose}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {content}
+              </Link>
+            ) : (
+              <span className={className} key={item.label}>
+                {content}
+              </span>
+            );
+          })}
         </nav>
         <Link href="/" className="employee-logout" onClick={onClose}>
           <Icon name="logout" />

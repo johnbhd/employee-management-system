@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { Icon } from "../../ui/Icon";
@@ -10,6 +11,8 @@ type EmployeeNavbarProps = {
 
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const [feedback, setFeedback] = useState("");
+  const pathname = usePathname();
+  const pageTitle = pathname === "/employee/attendance-history" ? "My Attendance" : "Employee Dashboard";
 
   function notify(message: string) {
     setFeedback(message);
@@ -20,7 +23,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
     <header className="employee-navbar">
       <div className="employee-navbar-title">
         <button type="button" className="employee-menu-button" onClick={onOpenSidebar} aria-label="Open employee navigation"><Icon name="menu" /></button>
-        <h1>Employee Dashboard</h1>
+        <h1>{pageTitle}</h1>
       </div>
       <div className="employee-navbar-actions">
         <span className="employee-date"><Icon name="calendar" /> July 23, 2026 · Wednesday</span>
