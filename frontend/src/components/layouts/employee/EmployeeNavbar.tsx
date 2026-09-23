@@ -12,7 +12,11 @@ type EmployeeNavbarProps = {
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const [feedback, setFeedback] = useState("");
   const pathname = usePathname();
-  const pageTitle = pathname === "/employee/my-attendance" ? "My Attendance" : "Employee Dashboard";
+  const pageTitle = pathname === "/employee/my-attendance"
+    ? "My Attendance"
+    : pathname === "/employee/attendance-qr"
+      ? "Attendance QR"
+      : "Employee Dashboard";
 
   function notify(message: string) {
     setFeedback(message);

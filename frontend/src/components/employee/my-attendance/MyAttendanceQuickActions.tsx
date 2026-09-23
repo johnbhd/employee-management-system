@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
@@ -9,7 +10,7 @@ const quickActions = [
     icon: "qr" as const,
     title: "Open QR",
     description: "Show your attendance QR code",
-    message: "The attendance QR page is not connected in this prototype.",
+    href: "/employee/attendance-qr",
   },
   {
     icon: "clock" as const,
@@ -32,18 +33,28 @@ export function MyAttendanceQuickActions() {
     <>
       <div className="my-attendance-quick-grid">
         {quickActions.map((action) => (
-          <button
-            type="button"
-            className="my-attendance-quick-card"
-            key={action.title}
-            onClick={() => setFeedback(action.message)}
-          >
-            <Icon name={action.icon} />
-            <span>
-              <strong>{action.title}</strong>
-              <small>{action.description}</small>
-            </span>
-          </button>
+          action.href ? (
+            <Link className="my-attendance-quick-card" href={action.href} key={action.title}>
+              <Icon name={action.icon} />
+              <span>
+                <strong>{action.title}</strong>
+                <small>{action.description}</small>
+              </span>
+            </Link>
+          ) : (
+            <button
+              type="button"
+              className="my-attendance-quick-card"
+              key={action.title}
+              onClick={() => setFeedback(action.message ?? "")}
+            >
+              <Icon name={action.icon} />
+              <span>
+                <strong>{action.title}</strong>
+                <small>{action.description}</small>
+              </span>
+            </button>
+          )
         ))}
       </div>
       <p

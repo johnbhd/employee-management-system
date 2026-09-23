@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { announcements, attendanceHistory, employeeStats } from "@/data/employee";
 
 import { Icon } from "@/components/ui/Icon";
@@ -36,7 +38,7 @@ export function EmployeeDashboardPage() {
           <div><span>Work hours</span><strong>—</strong><small>Calculated after time out</small></div>
         </div>
         <div className="attendance-actions">
-          <button type="button" className="employee-primary-button"><Icon name="qr" /> Show attendance QR</button>
+          <Link href="/employee/attendance-qr" className="employee-primary-button"><Icon name="qr" /> Show attendance QR</Link>
           <button type="button" className="employee-secondary-button"><Icon name="clock" /> View history</button>
         </div>
       </section>
