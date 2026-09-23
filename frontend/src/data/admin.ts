@@ -10,7 +10,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "payroll-integration", label: "Payroll Integration", href: "/admin/payroll-integration", icon: "payroll" },
   { id: "accounting-integration", label: "Accounting Integration", href: "/admin/accounting-integration", icon: "accounting" },
   { id: "integration-errors", label: "Integration Errors", href: "/admin/integration-errors", icon: "errors" },
-  { id: "user-accounts", label: "User Accounts", icon: "users" },
+  { id: "user-accounts", label: "User Accounts", href: "/admin/user-accounts", icon: "users" },
   { id: "roles-permissions", label: "Roles & Permissions", icon: "roles" },
   { id: "audit-logs", label: "Audit Logs", icon: "audit" },
   { id: "system-settings", label: "System Settings", icon: "settings" },

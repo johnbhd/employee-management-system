@@ -20,6 +20,7 @@
 @import "./pages/admin/payroll-integration.css";
 @import "./pages/admin/accounting-integration.css";
 @import "./pages/admin/integration-errors.css";
+@import "./pages/admin/user-accounts.css";
 
 *,
 *::before,
