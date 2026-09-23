@@ -1,0 +1,350 @@
+.my-attendance-page {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.my-attendance-top-card,
+.my-attendance-stat,
+.my-attendance-quick-card,
+.my-attendance-note-card {
+  border: 1px solid var(--employee-line);
+  background: #fff;
+}
+
+.my-attendance-top-card {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  border-radius: 0.75rem;
+  padding: 1.25rem 1.5rem;
+}
+
+.my-attendance-employee {
+  display: flex;
+  min-width: min(100%, 15rem);
+  flex: 1 1 20rem;
+  align-items: center;
+  gap: 0.875rem;
+}
+
+.my-attendance-employee-copy {
+  min-width: 0;
+}
+
+.my-attendance-avatar {
+  display: grid;
+  width: 3.25rem;
+  height: 3.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--employee-navy);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.my-attendance-employee h2,
+.my-attendance-quick-actions h2,
+.my-attendance-note-heading h2 {
+  margin: 0;
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 600;
+}
+
+.my-attendance-employee h2 {
+  overflow-wrap: anywhere;
+  font-size: 1rem;
+}
+
+.my-attendance-employee p {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.my-attendance-employee p strong {
+  color: var(--employee-blue);
+  font-weight: 700;
+}
+
+.my-attendance-divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--employee-line);
+}
+
+.my-attendance-schedule {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  min-width: 0;
+}
+
+.my-attendance-schedule > .ui-icon {
+  margin-top: 0.2rem;
+  color: var(--employee-blue);
+}
+
+.my-attendance-label,
+.my-attendance-subtext {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.my-attendance-value,
+.my-attendance-stat-value,
+.my-attendance-status-value {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.my-attendance-value {
+  margin: 0.15rem 0;
+  color: var(--employee-ink);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.my-attendance-subtext {
+  color: #a9adb8;
+  font-size: 0.68rem;
+}
+
+.my-attendance-status-box {
+  min-width: 8rem;
+  border-radius: 0.625rem;
+  padding: 0.75rem 1.25rem;
+  background: #e5f3e9;
+  text-align: center;
+}
+
+.my-attendance-status-value {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin: 0.15rem 0;
+  color: var(--employee-green);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.my-attendance-status-dot {
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.my-attendance-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+.my-attendance-stat {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.625rem;
+  border-radius: 0.625rem;
+  padding: 0.875rem 1rem;
+}
+
+.my-attendance-stat-icon {
+  display: grid;
+  width: 2.125rem;
+  height: 2.125rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.my-attendance-stat-icon-success {
+  background: #e5f3e9;
+  color: var(--employee-green);
+}
+
+.my-attendance-stat-icon-warning {
+  background: #f4ecd8;
+  color: #8a6a1f;
+}
+
+.my-attendance-stat-icon-danger {
+  background: #fbe7ea;
+  color: var(--employee-red);
+}
+
+.my-attendance-stat-icon-muted {
+  background: #edeef2;
+  color: var(--text-muted);
+}
+
+.my-attendance-stat-copy {
+  min-width: 0;
+}
+
+.my-attendance-stat-value {
+  margin: 0.15rem 0;
+  color: var(--employee-ink);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.my-attendance-kicker {
+  display: block;
+  color: var(--employee-red);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.my-attendance-quick-actions h2 {
+  margin: 0.25rem 0 0.875rem;
+  font-size: 1.2rem;
+}
+
+.my-attendance-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.875rem;
+}
+
+.my-attendance-quick-card {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.875rem;
+  border-radius: 0.625rem;
+  padding: 1rem 1.125rem;
+  color: var(--employee-blue);
+  text-align: left;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.my-attendance-quick-card:hover {
+  border-color: var(--employee-blue);
+  background: #f4f6ff;
+}
+
+.my-attendance-quick-card > .ui-icon {
+  width: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.my-attendance-quick-card > span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.my-attendance-quick-card strong {
+  color: var(--employee-ink);
+  font-size: 0.84rem;
+}
+
+.my-attendance-quick-card small {
+  margin-top: 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.my-attendance-action-feedback {
+  min-height: 1.2rem;
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.my-attendance-notes {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.my-attendance-note-card {
+  min-width: 0;
+  border-radius: 0.75rem;
+  padding: 1.125rem 1.25rem;
+}
+
+.my-attendance-note-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 0.75rem;
+}
+
+.my-attendance-note-heading > .ui-icon {
+  font-size: 0.95rem;
+}
+
+.my-attendance-reminder-card .my-attendance-note-heading > .ui-icon {
+  color: var(--employee-red);
+}
+
+.my-attendance-help-card .my-attendance-note-heading > .ui-icon {
+  color: var(--employee-blue);
+}
+
+.my-attendance-note-heading h2 {
+  font-size: 0.95rem;
+}
+
+.my-attendance-note-card ul {
+  margin: 0;
+  padding-left: 1.125rem;
+  color: var(--employee-ink);
+  font-size: 0.78rem;
+  line-height: 1.8;
+}
+
+.my-attendance-note-card p {
+  margin: 0;
+  color: var(--employee-ink);
+  font-size: 0.78rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 1100px) {
+  .my-attendance-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .my-attendance-quick-grid,
+  .my-attendance-notes {
+    grid-template-columns: 1fr;
+  }
+
+  .my-attendance-top-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .my-attendance-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+@media (max-width: 600px) {
+  .my-attendance-top-card {
+    padding: 1.1rem;
+  }
+
+  .my-attendance-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .my-attendance-quick-card {
+    padding-inline: 1rem;
+  }
+}

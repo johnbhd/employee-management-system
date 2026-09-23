@@ -11,8 +11,9 @@
   position: relative;
   display: flex;
   min-height: 4.75rem;
+  min-width: 0;
   align-items: center;
-  width: min(1600px, 100%);
+  width: 100%;
   margin: 0 auto;
   padding: 0.75rem clamp(1rem, 3vw, 2rem);
 }
@@ -49,7 +50,7 @@
 }
 
 .navbar-title {
-  min-width: 11rem;
+  min-width: 0;
   flex: 0 1 18rem;
 }
 
@@ -299,12 +300,15 @@
   display: none;
 }
 
-@media (max-width: 1279px) {
+@media (max-width: 1400px) {
   .desktop-search {
     display: none;
   }
 
-  .sidebar-open-button,
+  .navbar-title {
+    flex: 1 1 auto;
+  }
+
   .search-trigger {
     display: grid;
   }
@@ -318,10 +322,20 @@
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1279px) {
+  .sidebar-open-button {
+    display: grid;
+  }
+}
+
+@media (max-width: 700px) {
   .admin-navbar-inner {
     min-height: 4.35rem;
     padding: 0.65rem 0.9rem;
+  }
+
+  .admin-navbar-normal {
+    gap: 0.45rem;
   }
 
   .navbar-title span,
@@ -337,5 +351,15 @@
 
   .compact-status {
     padding: 0.55rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .compact-status strong {
+    display: none;
+  }
+
+  .profile-trigger {
+    padding-inline: 0.15rem;
   }
 }
