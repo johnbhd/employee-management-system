@@ -25,16 +25,16 @@ const quickActions = [
   },
 ];
 
-export function AttendanceQuickActions() {
+export function MyAttendanceQuickActions() {
   const [feedback, setFeedback] = useState("");
 
   return (
     <>
-      <div className="attendance-history-quick-grid">
+      <div className="my-attendance-quick-grid">
         {quickActions.map((action) => (
           <button
             type="button"
-            className="attendance-history-quick-card"
+            className="my-attendance-quick-card"
             key={action.title}
             onClick={() => setFeedback(action.message)}
           >
@@ -47,7 +47,7 @@ export function AttendanceQuickActions() {
         ))}
       </div>
       <p
-        className="attendance-history-action-feedback"
+        className="my-attendance-action-feedback"
         role="status"
         aria-live="polite"
       >

@@ -13,7 +13,7 @@ type EmployeeSidebarProps = {
 
 const employeeLinks = [
   { label: "Dashboard", icon: "dashboard" as const, href: "/employee/dashboard" },
-  { label: "My Attendance", icon: "calendar" as const, href: "/employee/attendance-history" },
+  { label: "My Attendance", icon: "calendar" as const, href: "/employee/my-attendance" },
   { label: "Show Attendance QR", icon: "qr" as const },
   { label: "Attendance History", icon: "clock" as const },
   { label: "My Payslips", icon: "payroll" as const },
