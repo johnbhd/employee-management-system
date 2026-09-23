@@ -21,8 +21,13 @@
 
 .admin-page {
   display: grid;
+  width: 100%;
   min-width: 0;
   gap: 1.5rem;
+}
+
+.admin-page > * {
+  min-width: 0;
 }
 
 .page-header {

@@ -25,6 +25,8 @@
 
 .accounting-relationship-grid {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
   gap: 0.65rem;
@@ -179,6 +181,7 @@
 }
 
 .accounting-table-wrap {
+  width: 100%;
   min-width: 0;
   overflow-x: auto;
 }

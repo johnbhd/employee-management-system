@@ -23,6 +23,8 @@
 
 .integration-error-overview-grid {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
 }
@@ -98,11 +100,14 @@
 }
 
 .integration-errors-explorer {
+  width: 100%;
   min-width: 0;
 }
 
 .integration-errors-toolbar {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: minmax(15rem, 2fr) repeat(4, minmax(8rem, 1fr)) auto;
   align-items: end;
   gap: 0.75rem;
@@ -120,6 +125,7 @@
 }
 
 .integration-errors-table-scroll {
+  width: 100%;
   min-width: 0;
   overflow-x: auto;
 }
@@ -187,6 +193,8 @@
 
 .integration-error-detail-grid {
   display: grid;
+  width: 100%;
+  min-width: 0;
   grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
   gap: 1rem;
 }
@@ -357,6 +365,7 @@
 }
 
 .integration-error-history-table {
+  width: 100%;
   min-width: 0;
 }
 
