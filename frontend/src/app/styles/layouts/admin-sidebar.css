@@ -255,7 +255,7 @@
   color: #fff;
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 700px) {
   .admin-sidebar {
     transform: translateX(-105%);
     transition: transform 220ms ease;
