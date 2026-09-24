@@ -206,6 +206,11 @@
   align-items: flex-start;
 }
 
+.sidebar-account > .account-avatar {
+  display: grid;
+  place-items: center;
+}
+
 .sidebar-account strong,
 .sidebar-account small {
   max-width: 9.8rem;
