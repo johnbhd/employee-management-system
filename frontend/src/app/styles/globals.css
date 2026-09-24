@@ -2,6 +2,9 @@
 @import "./layouts/admin.css";
 @import "./layouts/admin-sidebar.css";
 @import "./layouts/admin-navbar.css";
+@import "./layouts/hr.css";
+@import "./layouts/hr-sidebar.css";
+@import "./layouts/hr-navbar.css";
 @import "./layouts/employee.css";
 @import "./layouts/employee-sidebar.css";
 @import "./layouts/employee-navbar.css";
@@ -15,6 +18,7 @@
 @import "./pages/employee/attendance-qr.css";
 @import "./pages/employee/attendance-history.css";
 @import "./pages/employee/profile.css";
+@import "./pages/hr/dashboard.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/hrps-integration.css";

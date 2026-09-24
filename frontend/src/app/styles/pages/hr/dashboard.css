@@ -1,0 +1,452 @@
+.hr-dashboard-page {
+  display: grid;
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-inline: auto;
+  gap: 1.35rem;
+}
+
+.hr-dashboard-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.hr-dashboard-heading {
+  min-width: 0;
+}
+
+.hr-dashboard-eyebrow,
+.hr-section-kicker {
+  margin: 0;
+  color: var(--au-red);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.hr-dashboard-heading h1,
+.hr-panel-header h2 {
+  margin: 0.3rem 0 0;
+  color: var(--au-navy);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+
+.hr-dashboard-heading h1 {
+  font-size: clamp(1.55rem, 2.5vw, 2.2rem);
+}
+
+.hr-dashboard-description {
+  max-width: 48rem;
+  margin: 0.65rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.hr-dashboard-date {
+  margin: 0.6rem 0 0;
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.hr-dashboard-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.hr-dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.hr-summary-card {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 7rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--hr-summary-accent, var(--au-blue));
+  border-radius: 0.75rem;
+  background: var(--surface);
+  padding: 1rem;
+  box-shadow: 0 8px 22px rgba(15, 35, 80, 0.035);
+}
+
+.hr-summary-card-success { --hr-summary-accent: var(--success); }
+.hr-summary-card-warning { --hr-summary-accent: var(--warning); }
+.hr-summary-card-danger { --hr-summary-accent: var(--danger); }
+.hr-summary-card-info { --hr-summary-accent: var(--au-blue); }
+.hr-summary-card-muted { --hr-summary-accent: var(--text-muted); }
+
+.hr-summary-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.6rem;
+  background: #f1f5f9;
+  color: var(--hr-summary-accent);
+  font-size: 0.95rem;
+}
+
+.hr-summary-card-success .hr-summary-icon { background: var(--success-soft); }
+.hr-summary-card-warning .hr-summary-icon { background: var(--warning-soft); }
+.hr-summary-card-danger .hr-summary-icon { background: var(--danger-soft); }
+.hr-summary-card-info .hr-summary-icon { background: var(--info-soft); }
+
+.hr-summary-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.hr-summary-copy p,
+.hr-summary-copy span {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  line-height: 1.35;
+}
+
+.hr-summary-copy p {
+  font-weight: 700;
+}
+
+.hr-summary-copy strong {
+  color: var(--au-navy);
+  font-size: 1.45rem;
+  line-height: 1.1;
+}
+
+.hr-summary-copy span {
+  color: var(--text-faint);
+}
+
+.hr-dashboard-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface);
+  box-shadow: 0 8px 22px rgba(15, 35, 80, 0.035);
+}
+
+.hr-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.hr-panel-header h2 {
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.hr-panel-description {
+  max-width: 45rem;
+  margin: 0.45rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.hr-prototype-label {
+  flex: 0 0 auto;
+  border: 1px solid #eadfbd;
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+  color: #8a6a1f;
+  font-size: 0.6rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hr-dashboard-table-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.hr-dashboard-table {
+  width: 100%;
+  min-width: 64rem;
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.hr-dashboard-table th,
+.hr-dashboard-table td {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.hr-dashboard-table th {
+  background: #fbfcfe;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hr-dashboard-table td {
+  border-top: 1px solid #edf1f6;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.hr-dashboard-table tbody tr:hover {
+  background: #fcfdff;
+}
+
+.hr-dashboard-table .status-badge {
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hr-employee-name,
+.hr-employee-id {
+  display: block;
+}
+
+.hr-employee-name {
+  color: #334155;
+  font-size: 0.74rem;
+}
+
+.hr-employee-id {
+  margin-top: 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.62rem;
+}
+
+.hr-empty-state {
+  margin: 0;
+  padding: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.hr-dashboard-lower-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  gap: 1.35rem;
+}
+
+.hr-action-list,
+.hr-issue-list {
+  display: grid;
+}
+
+.hr-action-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.15rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.hr-action-row:last-child,
+.hr-issue-row:last-child {
+  border-bottom: 0;
+}
+
+.hr-action-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.55rem;
+  background: #f1f5f9;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.hr-action-icon-info {
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.hr-action-icon-warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.hr-action-icon-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.hr-action-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.18rem;
+}
+
+.hr-action-copy strong {
+  overflow: hidden;
+  color: #334155;
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-action-copy span {
+  color: var(--text-faint);
+  font-size: 0.64rem;
+}
+
+.hr-action-count {
+  color: var(--au-navy);
+  font-size: 1.15rem;
+}
+
+.hr-issue-row {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.95rem 1.15rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.hr-issue-marker {
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  margin-top: 0.35rem;
+  border-radius: 999px;
+  background: var(--text-muted);
+}
+
+.hr-issue-marker-warning { background: var(--warning); }
+.hr-issue-marker-danger { background: var(--danger); }
+
+.hr-issue-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.hr-issue-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.hr-issue-heading strong {
+  color: #334155;
+  font-size: 0.76rem;
+}
+
+.hr-issue-heading span,
+.hr-issue-copy small {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+}
+
+.hr-issue-copy h3 {
+  margin: 0.35rem 0 0;
+  color: var(--au-navy);
+  font-size: 0.75rem;
+}
+
+.hr-issue-copy p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.hr-issue-copy small {
+  display: block;
+  margin-top: 0.35rem;
+}
+
+.hr-issue-row > .status-badge {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+@media (max-width: 1400px) {
+  .hr-dashboard-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1050px) {
+  .hr-dashboard-lower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .hr-dashboard-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .hr-dashboard-actions {
+    justify-content: flex-start;
+  }
+
+  .hr-panel-header {
+    flex-direction: column;
+  }
+
+  .hr-prototype-label {
+    align-self: flex-start;
+  }
+
+  .hr-dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hr-issue-row {
+    flex-wrap: wrap;
+  }
+
+  .hr-issue-row > .status-badge {
+    margin-left: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hr-dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .hr-summary-card {
+    min-height: auto;
+  }
+
+  .hr-panel-header {
+    padding-inline: 1rem;
+  }
+
+  .hr-action-row,
+  .hr-issue-row {
+    padding-inline: 1rem;
+  }
+}
