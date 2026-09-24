@@ -29,6 +29,7 @@
 @import "./pages/admin/accounting-integration.css";
 @import "./pages/admin/integration-errors.css";
 @import "./pages/admin/user-accounts.css";
+@import "./pages/admin/roles-permissions.css";
 
 *,
 *::before,
