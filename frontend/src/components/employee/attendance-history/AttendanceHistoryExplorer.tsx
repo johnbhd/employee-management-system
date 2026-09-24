@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
@@ -36,9 +36,9 @@ export function AttendanceHistoryExplorer() {
   const [draftDate, setDraftDate] = useState("");
   const [appliedStatus, setAppliedStatus] = useState<StatusFilter>("all");
   const [appliedDate, setAppliedDate] = useState("");
-  const [selectedId, setSelectedId] = useState(attendanceHistoryRecords[0]?.id ?? "");
+  const [selectedId, setSelectedId] = useState("");
   const [rowsPerPage, setRowsPerPage] = useState("10");
-  const [detailsOpen, setDetailsOpen] = useState(true);
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
   const filteredRecords = useMemo(() => {
@@ -51,8 +51,26 @@ export function AttendanceHistoryExplorer() {
     });
   }, [appliedDate, appliedStatus]);
 
-  const selectedRecord = filteredRecords.find((record) => record.id === selectedId) ?? filteredRecords[0];
+  const selectedRecord = selectedId
+    ? filteredRecords.find((record) => record.id === selectedId)
+    : undefined;
   const displayedCount = Math.min(Number(rowsPerPage), filteredRecords.length);
+
+  useEffect(() => {
+    if (!detailsOpen) {
+      return;
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setDetailsOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEscape);
+
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, [detailsOpen]);
 
   function selectRecord(record: AttendanceHistoryRecord) {
     setSelectedId(record.id);
@@ -62,6 +80,8 @@ export function AttendanceHistoryExplorer() {
   function applyFilters() {
     setAppliedStatus(draftStatus);
     setAppliedDate(draftDate);
+    setSelectedId("");
+    setDetailsOpen(false);
     setFeedback("Attendance history filters applied.");
   }
 
@@ -70,6 +90,8 @@ export function AttendanceHistoryExplorer() {
     setDraftDate("");
     setAppliedStatus("all");
     setAppliedDate("");
+    setSelectedId("");
+    setDetailsOpen(false);
     setFeedback("Attendance history filters reset.");
   }
 
@@ -196,7 +218,11 @@ export function AttendanceHistoryExplorer() {
         </section>
       </div>
 
-      <AttendanceHistoryDetails record={selectedRecord} open={detailsOpen} onClose={() => setDetailsOpen(false)} onOpen={() => setDetailsOpen(true)} />
+      <AttendanceHistoryDetails
+        record={selectedRecord}
+        open={detailsOpen}
+        onClose={() => setDetailsOpen(false)}
+      />
     </div>
   );
 }
@@ -227,51 +253,122 @@ function TimeCell({ value, state }: { value: string; state: AttendanceTimeState 
   );
 }
 
-function AttendanceHistoryDetails({ record, open, onClose, onOpen }: { record?: AttendanceHistoryRecord; open: boolean; onClose: () => void; onOpen: () => void }) {
-  return (
-    <aside className={`attendance-history-details ${open ? "" : "is-closed"}`} aria-labelledby="attendance-history-details-title">
-      <div className="attendance-history-details-heading">
-        <h2 id="attendance-history-details-title">Record Details</h2>
-        <button type="button" className="attendance-history-close-button" onClick={open ? onClose : onOpen} aria-label={open ? "Close record details" : "Open record details"}>
-          <Icon name={open ? "close" : "chevron"} />
-        </button>
-      </div>
+function AttendanceHistoryDetails({
+  record,
+  open,
+  onClose,
+}: {
+  record?: AttendanceHistoryRecord;
+  open: boolean;
+  onClose: () => void;
+}) {
+  if (!open || !record) {
+    return null;
+  }
 
-      {open && record ? (
-        <>
-          <div className="attendance-history-date-pill"><Icon name="calendar" /><span>{record.fullDate}</span></div>
-          <div className="attendance-history-profile-row">
-            <div className="attendance-history-avatar" aria-hidden="true">JV</div>
-            <div>
-              <p className="attendance-history-profile-name">John Benedict M. Villegas</p>
-              <p className="attendance-history-profile-sub">Employee ID: AU-EMP-2026-001</p>
-              <p className="attendance-history-profile-sub">Department: Information Technology Department</p>
-            </div>
+  return (
+    <div className="attendance-history-drawer-layer">
+      <button
+        type="button"
+        className="attendance-history-drawer-backdrop"
+        onClick={onClose}
+        aria-label="Close record details"
+      />
+      <aside
+        className="attendance-history-details"
+        aria-labelledby="attendance-history-details-title"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div className="attendance-history-details-heading">
+          <div>
+            <span className="attendance-history-details-kicker">Selected record</span>
+            <h2 id="attendance-history-details-title">Record details</h2>
           </div>
-          <div className="attendance-history-detail-list">
-            <DetailRow icon="clock" label="Schedule" value={record.schedule} />
-            <DetailRow icon="clock" label="Time-In" value={record.timeIn} />
-            <DetailRow icon="clock" label="Time-Out" value={record.timeOut} />
-            <DetailRow icon="clock" label="Total Hours" value={record.totalHours} />
-            <DetailRow icon="clock" label="Overtime" value={record.overtime === "0h" ? "0h 0m" : record.overtime} />
-            <DetailRow icon="check" label="Attendance Status" value={<StatusBadge tone={statusTones[record.status]}>{record.statusLabel}</StatusBadge>} />
-            <DetailRow icon="location" label="Scanner Location" value={record.scannerLocation} />
-            <DetailRow icon="comment" label="Remarks" value={record.remarks} />
+          <button
+            type="button"
+            className="attendance-history-close-button"
+            onClick={onClose}
+            aria-label="Close record details"
+            autoFocus
+          >
+            <Icon name="close" />
+          </button>
+        </div>
+
+        <div className="attendance-history-date-pill">
+          <Icon name="calendar" />
+          <span>{record.fullDate}</span>
+        </div>
+        <div className="attendance-history-profile-row">
+          <div className="attendance-history-avatar" aria-hidden="true">
+            JV
           </div>
-          <div className="attendance-history-note"><Icon name="info" /><span>This record was captured by the authorized attendance system.</span></div>
-        </>
-      ) : (
-        <p className="attendance-history-details-closed">Select a record to view its details.</p>
-      )}
-    </aside>
+          <div>
+            <p className="attendance-history-profile-name">
+              John Benedict M. Villegas
+            </p>
+            <p className="attendance-history-profile-sub">
+              Employee ID: AU-EMP-2026-001
+            </p>
+            <p className="attendance-history-profile-sub">
+              Department: Information Technology Department
+            </p>
+          </div>
+        </div>
+        <div className="attendance-history-detail-list">
+          <DetailRow icon="clock" label="Schedule" value={record.schedule} />
+          <DetailRow icon="clock" label="Time-In" value={record.timeIn} />
+          <DetailRow icon="clock" label="Time-Out" value={record.timeOut} />
+          <DetailRow icon="clock" label="Total Hours" value={record.totalHours} />
+          <DetailRow
+            icon="clock"
+            label="Overtime"
+            value={record.overtime === "0h" ? "0h 0m" : record.overtime}
+          />
+          <DetailRow
+            icon="check"
+            label="Attendance Status"
+            value={
+              <StatusBadge tone={statusTones[record.status]}>
+                {record.statusLabel}
+              </StatusBadge>
+            }
+          />
+          <DetailRow
+            icon="location"
+            label="Scanner Location"
+            value={record.scannerLocation}
+          />
+          <DetailRow icon="comment" label="Remarks" value={record.remarks} />
+        </div>
+        <div className="attendance-history-note">
+          <Icon name="info" />
+          <span>This record was captured by the authorized attendance system.</span>
+        </div>
+      </aside>
+    </div>
   );
 }
 
-function DetailRow({ icon, label, value }: { icon: "clock" | "check" | "location" | "comment"; label: string; value: ReactNode }) {
+function DetailRow({
+  icon,
+  label,
+  value,
+}: {
+  icon: "clock" | "check" | "location" | "comment";
+  label: string;
+  value: ReactNode;
+}) {
   return (
     <div className="attendance-history-detail-row">
-      <span className="attendance-history-detail-icon" aria-hidden="true"><Icon name={icon} /></span>
-      <div><p>{label}</p><strong>{value}</strong></div>
+      <span className="attendance-history-detail-icon" aria-hidden="true">
+        <Icon name={icon} />
+      </span>
+      <div>
+        <p>{label}</p>
+        <strong>{value}</strong>
+      </div>
     </div>
   );
 }

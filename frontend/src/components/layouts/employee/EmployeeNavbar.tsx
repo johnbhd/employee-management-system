@@ -32,7 +32,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
         <h1>{pageTitle}</h1>
       </div>
       <div className="employee-navbar-actions">
-        <span className="employee-date"><Icon name="calendar" /> July 23, 2026 · Wednesday</span>
+        <span className="employee-date"><Icon name="calendar" /> July 23, 2026 · Thursday</span>
         <button type="button" className="employee-icon-button" onClick={() => notify("You have 3 notifications.")} aria-label="Notifications"><Icon name="bell" /><span>3</span></button>
         <button type="button" className="employee-icon-button" onClick={() => notify("Help center is a prototype action.")} aria-label="Help"><Icon name="help" /></button>
         <button type="button" className="employee-icon-button" onClick={() => notify("Theme preferences are not connected in the prototype.")} aria-label="Theme"><Icon name="sun" /></button>

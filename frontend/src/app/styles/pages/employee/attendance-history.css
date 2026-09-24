@@ -24,17 +24,21 @@
   transform: rotate(-90deg);
 }
 
-.attendance-history-heading h2 {
-  margin: 0;
-  color: var(--employee-navy);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(1.45rem, 2.6vw, 1.8rem);
-  font-weight: 600;
-  letter-spacing: -0.02em;
+.attendance-history-heading {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.attendance-history-heading-label {
+  color: var(--employee-red);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .attendance-history-heading p {
-  margin: 0.35rem 0 0;
+  margin: 0;
   color: var(--text-muted);
   font-size: 0.8rem;
 }
@@ -42,34 +46,39 @@
 .attendance-history-stat-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.875rem;
+  overflow: hidden;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.65rem;
+  background: #fff;
 }
 
 .attendance-history-stat-card {
   display: flex;
   min-width: 0;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem 1.125rem;
-  border: 1px solid var(--employee-line);
-  border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 1px 3px rgba(20, 24, 40, 0.05);
+  align-items: center;
+  gap: 0.7rem;
+  border-right: 1px solid var(--employee-line);
+  padding: 0.85rem 1rem;
+}
+
+.attendance-history-stat-card:last-child {
+  border-right: 0;
 }
 
 .attendance-history-stat-icon {
   display: grid;
-  width: 2.375rem;
-  height: 2.375rem;
+  width: 1.2rem;
+  height: 1.2rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.625rem;
-  font-size: 1rem;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 0.8rem;
 }
 
-.attendance-history-stat-icon-info { background: var(--info-soft); color: var(--info); }
-.attendance-history-stat-icon-warning { background: var(--warning-soft); color: var(--warning); }
-.attendance-history-stat-icon-danger { background: var(--danger-soft); color: var(--danger); }
+.attendance-history-stat-icon-info { color: var(--employee-blue); }
+.attendance-history-stat-icon-warning { color: var(--warning); }
+.attendance-history-stat-icon-danger { color: var(--employee-red); }
 
 .attendance-history-stat-label,
 .attendance-history-stat-value,
@@ -79,96 +88,97 @@
 
 .attendance-history-stat-label {
   color: var(--text-muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
 }
 
 .attendance-history-stat-value {
-  margin-top: 0.2rem;
+  margin-top: 0.15rem;
   color: var(--employee-ink);
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 800;
 }
 
 .attendance-history-stat-value span {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
 .attendance-history-stat-note {
-  margin-top: 0.2rem;
-  color: var(--text-muted);
-  font-size: 0.66rem;
+  margin-top: 0.15rem;
+  color: var(--text-faint);
+  font-size: 0.62rem;
 }
 
-.attendance-history-workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(18rem, 300px);
-  gap: 1.125rem;
-  align-items: start;
-}
-
+.attendance-history-workspace,
 .attendance-history-main-column {
   display: grid;
   min-width: 0;
+}
+
+.attendance-history-workspace {
+  gap: 1rem;
+}
+
+.attendance-history-main-column {
   gap: 1rem;
 }
 
 .attendance-history-filters,
-.attendance-history-table-panel,
-.attendance-history-details {
+.attendance-history-table-panel {
   min-width: 0;
   border: 1px solid var(--employee-line);
-  border-radius: 0.75rem;
+  border-radius: 0.65rem;
   background: #fff;
-  box-shadow: 0 1px 3px rgba(20, 24, 40, 0.05);
 }
 
 .attendance-history-filters {
-  padding: 1rem 1.125rem;
+  padding: 0.9rem 1rem;
 }
 
 .attendance-history-filter-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.875rem;
-  margin-bottom: 0.875rem;
+  gap: 0.7rem;
+  margin-bottom: 0.75rem;
 }
 
 .attendance-history-field {
   display: grid;
   min-width: 0;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
 .attendance-history-field > span:first-child {
-  color: var(--employee-ink);
-  font-size: 0.72rem;
-  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .attendance-history-field-input {
   display: flex;
   min-width: 0;
-  min-height: 2.45rem;
+  min-height: 2.35rem;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   border: 1px solid var(--employee-line);
-  border-radius: 0.55rem;
-  padding: 0.5rem 0.625rem;
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  background: #fbfcfe;
   color: var(--employee-ink);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .attendance-history-field-input > .ui-icon {
   flex: 0 0 auto;
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
 }
 
 .attendance-history-field-input > .ui-icon:last-child {
   margin-left: auto;
-  transform: rotate(0deg);
 }
 
 .attendance-history-field-input select,
@@ -179,11 +189,16 @@
   outline: 0;
   background: transparent;
   color: var(--employee-ink);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .attendance-history-field-input input::placeholder {
   color: var(--text-faint);
+}
+
+.attendance-history-field-input:focus-within {
+  border-color: var(--employee-blue);
+  box-shadow: 0 0 0 3px rgba(47, 78, 214, 0.12);
 }
 
 .attendance-history-field-button {
@@ -191,10 +206,6 @@
   justify-content: flex-start;
   cursor: pointer;
   text-align: left;
-}
-
-.attendance-history-field-button > .ui-icon:last-child {
-  margin-left: auto;
 }
 
 .attendance-history-filter-actions {
@@ -207,54 +218,61 @@
 
 .attendance-history-filter-buttons {
   display: flex;
-  gap: 0.625rem;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
 .attendance-history-button {
   display: inline-flex;
-  min-height: 2.45rem;
+  min-height: 2.35rem;
   align-items: center;
   justify-content: center;
-  gap: 0.45rem;
-  border-radius: 0.55rem;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.75rem;
+  gap: 0.4rem;
+  border-radius: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.7rem;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .attendance-history-button-primary {
-  border: 1px solid var(--employee-blue);
-  background: var(--employee-blue);
+  border: 1px solid var(--employee-navy);
+  background: var(--employee-navy);
   color: #fff;
 }
 
 .attendance-history-button-primary:hover {
-  background: #2542bc;
+  border-color: var(--employee-blue);
+  background: var(--employee-blue);
 }
 
-.attendance-history-button-ghost,
-.attendance-history-button-outline {
-  border: 1px solid var(--employee-line);
-  background: #fff;
+.attendance-history-button-ghost {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.attendance-history-button-ghost:hover {
+  background: #f4f6fa;
   color: var(--employee-ink);
 }
 
-.attendance-history-button-ghost:hover,
-.attendance-history-button-outline:hover {
-  background: #f4f6fa;
-}
-
 .attendance-history-button-outline {
+  border: 1px solid var(--employee-line);
+  background: #fff;
   color: var(--employee-blue);
 }
 
+.attendance-history-button-outline:hover {
+  border-color: var(--employee-blue);
+  background: #f4f6ff;
+}
+
 .attendance-history-feedback {
-  min-height: 1.1rem;
-  margin: 0.5rem 0 0;
+  min-height: 1rem;
+  margin: 0.45rem 0 0;
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
 .attendance-history-table-panel {
@@ -271,20 +289,23 @@
   min-width: 60rem;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .attendance-history-table th {
-  padding: 0.8rem 1rem;
+  padding: 0.75rem 0.95rem;
   border-bottom: 1px solid var(--employee-line);
+  background: #fbfcfe;
   color: var(--text-muted);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   font-weight: 800;
+  letter-spacing: 0.08em;
   white-space: nowrap;
+  text-transform: uppercase;
 }
 
 .attendance-history-table td {
-  padding: 0.85rem 1rem;
+  padding: 0.8rem 0.95rem;
   border-top: 1px solid #edf1f6;
   color: #475569;
   vertical-align: middle;
@@ -299,7 +320,7 @@
 
 .attendance-history-table tbody tr:hover,
 .attendance-history-table tbody tr:focus-visible {
-  background: #f7f9fc;
+  background: #fbfdff;
 }
 
 .attendance-history-table tbody tr:focus-visible {
@@ -308,7 +329,7 @@
 }
 
 .attendance-history-table tbody tr.is-selected {
-  background: #edf2ff;
+  background: #f1f4ff;
 }
 
 .attendance-history-table td:first-child {
@@ -330,7 +351,7 @@
 
 .attendance-history-time-ok .ui-icon,
 .attendance-history-time-late .ui-icon {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
 .attendance-history-action-link {
@@ -338,8 +359,8 @@
   padding: 0;
   background: transparent;
   color: var(--employee-blue);
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .attendance-history-action-link:hover {
@@ -357,9 +378,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.875rem 1rem;
+  padding: 0.8rem 0.95rem;
+  border-top: 1px solid var(--employee-line);
   color: var(--text-muted);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   flex-wrap: wrap;
 }
 
@@ -367,19 +389,19 @@
 .attendance-history-rows-select {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
 .attendance-history-page-button {
-  min-width: 1.9rem;
-  min-height: 1.9rem;
+  min-width: 1.85rem;
+  min-height: 1.85rem;
   border: 1px solid var(--employee-line);
-  border-radius: 0.45rem;
-  padding: 0.25rem 0.45rem;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.4rem;
   background: #fff;
   color: var(--employee-ink);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
 .attendance-history-page-button:hover,
@@ -390,53 +412,86 @@
 }
 
 .attendance-history-page-nav {
-  padding-inline: 0.625rem;
+  padding-inline: 0.55rem;
 }
 
 .attendance-history-rows-select select {
-  min-height: 1.9rem;
+  min-height: 1.85rem;
   border: 1px solid var(--employee-line);
-  border-radius: 0.45rem;
-  padding: 0.25rem 0.45rem;
+  border-radius: 0.4rem;
+  padding: 0.2rem 0.4rem;
   background: #fff;
   color: var(--employee-ink);
-  font-size: 0.7rem;
+  font-size: 0.68rem;
+}
+
+.attendance-history-drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.attendance-history-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: rgba(12, 20, 43, 0.38);
+  cursor: default;
 }
 
 .attendance-history-details {
-  position: sticky;
-  top: 1rem;
-  padding: 1.125rem;
+  position: relative;
+  width: min(30rem, 100%);
+  height: 100%;
+  overflow-y: auto;
+  border-left: 1px solid var(--employee-line);
+  padding: 1.35rem;
+  background: #fff;
+  box-shadow: -16px 0 36px rgba(18, 24, 43, 0.12);
 }
 
 .attendance-history-details-heading {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.75rem;
-  margin-bottom: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.attendance-history-details-kicker {
+  display: block;
+  color: var(--employee-red);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .attendance-history-details-heading h2 {
-  margin: 0;
+  margin: 0.2rem 0 0;
   color: var(--employee-ink);
-  font-size: 0.95rem;
-  font-weight: 800;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
 .attendance-history-close-button {
   display: grid;
-  width: 2rem;
-  height: 2rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: 0 0 auto;
   place-items: center;
-  border: 0;
+  border: 1px solid var(--employee-line);
   border-radius: 0.45rem;
-  background: transparent;
+  background: #fff;
   color: var(--text-muted);
 }
 
 .attendance-history-close-button:hover {
-  background: #f4f6fa;
+  border-color: var(--employee-blue);
   color: var(--employee-ink);
 }
 
@@ -444,28 +499,16 @@
   font-size: 0.75rem;
 }
 
-.attendance-history-details.is-closed {
-  min-height: 8rem;
-}
-
-.attendance-history-details-closed {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
 .attendance-history-date-pill {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  border-radius: 0.55rem;
-  padding: 0.6rem 0.75rem;
-  background: #f4f6fa;
+  border-bottom: 1px solid var(--employee-line);
+  padding: 0 0 0.85rem;
   color: var(--employee-ink);
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .attendance-history-date-pill .ui-icon {
@@ -485,14 +528,14 @@
 
 .attendance-history-avatar {
   display: grid;
-  width: 2.875rem;
-  height: 2.875rem;
+  width: 2.65rem;
+  height: 2.65rem;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 999px;
-  background: linear-gradient(135deg, #c7d2fe, #a5b4fc);
-  color: #3730a3;
-  font-size: 0.85rem;
+  background: var(--employee-navy);
+  color: #fff;
+  font-size: 0.78rem;
   font-weight: 800;
 }
 
@@ -503,7 +546,7 @@
 
 .attendance-history-profile-name {
   color: var(--employee-ink);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 800;
   overflow-wrap: anywhere;
 }
@@ -511,7 +554,7 @@
 .attendance-history-profile-sub {
   margin-top: 0.1rem;
   color: var(--text-muted);
-  font-size: 0.67rem;
+  font-size: 0.66rem;
   line-height: 1.35;
 }
 
@@ -529,17 +572,15 @@
 
 .attendance-history-detail-icon {
   display: grid;
-  width: 1.875rem;
-  height: 1.875rem;
+  width: 1.65rem;
+  height: 1.65rem;
   flex: 0 0 auto;
   place-items: center;
-  border-radius: 0.5rem;
-  background: #f4f6fa;
   color: var(--text-muted);
 }
 
 .attendance-history-detail-icon .ui-icon {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
 }
 
 .attendance-history-detail-row p,
@@ -549,26 +590,26 @@
 
 .attendance-history-detail-row p {
   color: var(--text-muted);
-  font-size: 0.67rem;
+  font-size: 0.66rem;
 }
 
 .attendance-history-detail-row strong {
   display: block;
   margin-top: 0.1rem;
   color: var(--employee-ink);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .attendance-history-note {
   display: flex;
   align-items: flex-start;
   gap: 0.55rem;
-  margin-top: 0.875rem;
-  border-radius: 0.55rem;
-  padding: 0.7rem;
-  background: var(--info-soft);
-  color: #3452c9;
+  margin-top: 0.9rem;
+  border-left: 2px solid var(--employee-blue);
+  padding: 0.65rem 0 0.65rem 0.75rem;
+  color: var(--text-muted);
   font-size: 0.68rem;
   line-height: 1.45;
 }
@@ -576,32 +617,30 @@
 .attendance-history-note .ui-icon {
   flex: 0 0 auto;
   margin-top: 0.05rem;
+  color: var(--employee-blue);
 }
 
 @media (max-width: 1100px) {
-  .attendance-history-workspace {
-    grid-template-columns: 1fr;
-  }
-
-  .attendance-history-details {
-    position: static;
-  }
-
-  .attendance-history-stat-grid,
-  .attendance-history-filter-grid {
+  .attendance-history-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .attendance-history-stat-card:nth-child(2) {
+    border-right: 0;
+  }
+
+  .attendance-history-stat-card:nth-child(n + 3) {
+    border-top: 1px solid var(--employee-line);
   }
 }
 
-@media (max-width: 600px) {
-  .attendance-history-stat-grid,
+@media (max-width: 650px) {
   .attendance-history-filter-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .attendance-history-filters,
-  .attendance-history-details {
-    padding: 1rem;
+  .attendance-history-stat-card {
+    padding-inline: 0.75rem;
   }
 
   .attendance-history-filter-actions {
@@ -614,10 +653,7 @@
     width: 100%;
   }
 
-  .attendance-history-filter-buttons .attendance-history-button {
-    flex: 1;
-  }
-
+  .attendance-history-filter-buttons .attendance-history-button,
   .attendance-history-button-outline {
     flex: 1;
   }
@@ -625,5 +661,31 @@
   .attendance-history-table-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+}
+
+@media (max-width: 430px) {
+  .attendance-history-stat-grid,
+  .attendance-history-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-history-stat-card,
+  .attendance-history-stat-card:nth-child(2) {
+    border-right: 0;
+    border-top: 1px solid var(--employee-line);
+  }
+
+  .attendance-history-stat-card:first-child {
+    border-top: 0;
+  }
+
+  .attendance-history-filters,
+  .attendance-history-details {
+    padding: 1rem;
+  }
+
+  .attendance-history-details {
+    width: 100%;
   }
 }

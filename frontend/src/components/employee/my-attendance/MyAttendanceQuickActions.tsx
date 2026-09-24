@@ -8,13 +8,13 @@ import { Icon } from "@/components/ui/Icon";
 const quickActions = [
   {
     icon: "qr" as const,
-    title: "Open QR",
+    title: "Show QR",
     description: "Show your attendance QR code",
     href: "/employee/attendance-qr",
   },
   {
     icon: "clock" as const,
-    title: "View Attendance History",
+    title: "View History",
     description: "Review your past attendance records",
     href: "/employee/attendance-history",
     message: "You are viewing the current attendance page.",
@@ -32,10 +32,14 @@ export function MyAttendanceQuickActions() {
 
   return (
     <>
-      <div className="my-attendance-quick-grid">
+      <div className="my-attendance-action-list">
         {quickActions.map((action) => (
           action.href ? (
-            <Link className="my-attendance-quick-card" href={action.href} key={action.title}>
+            <Link
+              className={`my-attendance-action ${action.title === "Show QR" ? "is-primary" : ""}`}
+              href={action.href}
+              key={action.title}
+            >
               <Icon name={action.icon} />
               <span>
                 <strong>{action.title}</strong>
@@ -45,7 +49,7 @@ export function MyAttendanceQuickActions() {
           ) : (
             <button
               type="button"
-              className="my-attendance-quick-card"
+              className="my-attendance-action"
               key={action.title}
               onClick={() => setFeedback(action.message ?? "")}
             >
