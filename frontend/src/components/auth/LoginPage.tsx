@@ -6,12 +6,12 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 
-type LoginRole = "employee" | "admin";
+type LoginRole = "employee" | "admin" | "hr";
 
 type DemoAccount = {
   password: string;
   role: LoginRole;
-  redirectTo: "/employee/dashboard" | "/admin/dashboard";
+  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard";
 };
 
 type LoginErrorField = "username" | "password" | "credentials" | null;
@@ -21,6 +21,11 @@ const demoAccounts: Record<string, DemoAccount> = {
     password: "admin123",
     role: "admin",
     redirectTo: "/admin/dashboard",
+  },
+  "aujsc.hr": {
+    password: "hr123",
+    role: "hr",
+    redirectTo: "/hr/dashboard",
   },
   employee1: {
     password: "employee123",
