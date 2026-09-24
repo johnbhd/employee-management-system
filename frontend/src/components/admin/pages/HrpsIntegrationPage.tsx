@@ -20,7 +20,6 @@ export function HrpsIntegrationPage() {
   return (
     <div className="admin-page hrps-page">
       <AdminPageHeader eyebrow="Employee master data" title="HRPS Integration" description="Review the HRPS connection and the employee records synchronized into the integration layer." actions={<><ActionButton icon="refresh" action="HRPS synchronization queued.">Sync now</ActionButton><ActionButton variant="secondary" action="Connection test completed successfully.">Test connection</ActionButton></>} />
-      <section className="notice"><Icon name="info" /><p><strong>HRPS is the authoritative employee information source.</strong> This page shows a mock synchronization view; employee records are not written to or fetched from a live HRPS service.</p></section>
       <div className="metric-grid hrps-metrics">{hrpsMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <div className="two-column">
