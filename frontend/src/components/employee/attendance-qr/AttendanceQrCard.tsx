@@ -39,6 +39,7 @@ export function AttendanceQrCard() {
           <Icon name="user" />
         </div>
         <div className="attendance-qr-employee-copy">
+          <span className="attendance-qr-employee-kicker">Personal attendance QR</span>
           <h2 id="attendance-qr-employee">{employeeQrProfile.name}</h2>
           <p>
             Employee ID: <strong>{employeeQrProfile.employeeId}</strong>
@@ -86,13 +87,13 @@ export function AttendanceQrCard() {
       </div>
 
       <div className="attendance-qr-actions">
-        <button type="button" className="attendance-qr-outline-button" onClick={refreshQr}>
+        <button type="button" className="attendance-qr-primary-button" onClick={refreshQr}>
           <Icon name="refresh" />
-          Refresh QR Code
+          Refresh QR
         </button>
-        <Link href="/employee/attendance-history" className="attendance-qr-outline-button">
+        <Link href="/employee/attendance-history" className="attendance-qr-secondary-button">
           <Icon name="clock" />
-          View Attendance History
+          View History
           <Icon name="chevron" />
         </Link>
       </div>

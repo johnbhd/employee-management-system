@@ -12,7 +12,7 @@ export function MyAttendancePage() {
   return (
     <div className="my-attendance-page">
       <section
-        className="my-attendance-top-card"
+        className="my-attendance-overview"
         aria-labelledby="my-attendance-profile"
       >
         <div className="my-attendance-employee">
@@ -20,19 +20,19 @@ export function MyAttendancePage() {
             <Icon name="user" />
           </div>
           <div className="my-attendance-employee-copy">
+            <span className="my-attendance-kicker">Employee attendance</span>
             <h2 id="my-attendance-profile">
               {employeeAttendanceProfile.name}
             </h2>
-            <p>
-              Employee ID: <strong>{employeeAttendanceProfile.employeeId}</strong>
-            </p>
-            <p>
-              Department: <strong>{employeeAttendanceProfile.department}</strong>
+            <p className="my-attendance-employee-meta">
+              <span>{employeeAttendanceProfile.employeeId}</span>
+              <span aria-hidden="true">·</span>
+              <span>{employeeAttendanceProfile.department}</span>
             </p>
           </div>
         </div>
 
-        <div className="my-attendance-divider" aria-hidden="true" />
+        <div className="my-attendance-overview-divider" aria-hidden="true" />
 
         <div className="my-attendance-schedule">
           <Icon name="calendar" />
@@ -60,36 +60,45 @@ export function MyAttendancePage() {
       </section>
 
       <section
-        className="my-attendance-stats"
-        aria-label="Attendance summary"
+        className="my-attendance-details-section"
+        aria-labelledby="my-attendance-details-title"
       >
-        {employeeAttendanceStats.map((stat) => (
-          <article className="my-attendance-stat" key={stat.label}>
-            <div
-              className={`my-attendance-stat-icon my-attendance-stat-icon-${stat.tone}`}
-              aria-hidden="true"
-            >
-              <Icon name={stat.icon} />
-            </div>
-            <div className="my-attendance-stat-copy">
+        <div className="my-attendance-section-heading">
+          <div>
+            <span className="my-attendance-kicker">Today</span>
+            <h2 id="my-attendance-details-title">Attendance details</h2>
+          </div>
+          <span className="my-attendance-section-note">
+            Authorized attendance record
+          </span>
+        </div>
+
+        <div className="my-attendance-details-grid">
+          {employeeAttendanceStats.map((stat) => (
+            <article className="my-attendance-detail" key={stat.label}>
               <span className="my-attendance-label">{stat.label}</span>
-              <strong className="my-attendance-stat-value">
+              <strong className="my-attendance-detail-value">
                 {stat.value}
               </strong>
               <span className="my-attendance-subtext">{stat.note}</span>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </div>
       </section>
 
       <section
         className="my-attendance-quick-actions"
         aria-labelledby="my-attendance-quick-actions-title"
       >
-        <span className="my-attendance-kicker">Quick actions</span>
-        <h2 id="my-attendance-quick-actions-title">
-          What would you like to do?
-        </h2>
+        <div className="my-attendance-section-heading">
+          <div>
+            <span className="my-attendance-kicker">Next steps</span>
+            <h2 id="my-attendance-quick-actions-title">Attendance actions</h2>
+          </div>
+          <span className="my-attendance-section-note">
+            Choose an action to continue
+          </span>
+        </div>
         <MyAttendanceQuickActions />
       </section>
 
@@ -103,9 +112,10 @@ export function MyAttendancePage() {
         >
           <div className="my-attendance-note-heading">
             <Icon name="activity" />
-            <h2 id="my-attendance-reminders-title">
-              Important Reminders
-            </h2>
+            <div>
+              <span className="my-attendance-note-kicker">Keep in mind</span>
+              <h2 id="my-attendance-reminders-title">Important reminders</h2>
+            </div>
           </div>
           <ul>
             {employeeAttendanceReminders.map((reminder) => (
@@ -120,7 +130,10 @@ export function MyAttendancePage() {
         >
           <div className="my-attendance-note-heading">
             <Icon name="help" />
-            <h2 id="my-attendance-help-title">Need Help?</h2>
+            <div>
+              <span className="my-attendance-note-kicker">Support</span>
+              <h2 id="my-attendance-help-title">Need help?</h2>
+            </div>
           </div>
           <p>{employeeAttendanceHelp}</p>
         </article>

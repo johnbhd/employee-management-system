@@ -1,6 +1,6 @@
 # AU Employee Management System
 
-A Next.js frontend prototype for an employee management system at Angeles University (AU). The application provides a branded login experience, an employee dashboard, and an IT Administrator workspace for monitoring attendance and external-system integrations.
+A Next.js frontend prototype for an employee management system at Arellano University (AU). The application provides a branded login experience, an employee dashboard, and an IT Administrator workspace for monitoring attendance and external-system integrations.
 
 ## Included Areas
 

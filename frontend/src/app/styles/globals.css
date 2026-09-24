@@ -14,6 +14,7 @@
 @import "./pages/employee/my-attendance.css";
 @import "./pages/employee/attendance-qr.css";
 @import "./pages/employee/attendance-history.css";
+@import "./pages/employee/profile.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/hrps-integration.css";

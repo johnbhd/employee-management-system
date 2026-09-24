@@ -15,8 +15,8 @@ export function AttendanceHistoryPage() {
       </nav>
 
       <div className="attendance-history-heading">
-        <h2>Attendance History</h2>
-        <p>View and review your recorded attendance.</p>
+        <span className="attendance-history-heading-label">My attendance</span>
+        <p>Review your recorded attendance for the selected period.</p>
       </div>
 
       <section className="attendance-history-stat-grid" aria-label="Monthly attendance summary">
