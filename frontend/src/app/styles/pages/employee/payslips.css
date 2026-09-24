@@ -140,6 +140,10 @@
 }
 
 .employee-payslips-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  column-gap: 1rem;
   padding: 0.9rem 1rem;
 }
 
@@ -208,7 +212,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  margin-top: 0.75rem;
 }
 
 .employee-payslips-filter-buttons {
@@ -254,6 +257,7 @@
 }
 
 .employee-payslips-feedback {
+  grid-column: 1 / -1;
   min-height: 1rem;
   margin: 0.45rem 0 0;
   color: var(--text-muted);
@@ -379,6 +383,10 @@
 }
 
 @media (max-width: 650px) {
+  .employee-payslips-filters {
+    display: block;
+  }
+
   .employee-payslips-stat-grid {
     grid-template-columns: 1fr;
   }
@@ -395,6 +403,7 @@
 
   .employee-payslips-filter-actions {
     align-items: stretch;
+    margin-top: 0.75rem;
   }
 
   .employee-payslips-filter-buttons .employee-payslips-button {
