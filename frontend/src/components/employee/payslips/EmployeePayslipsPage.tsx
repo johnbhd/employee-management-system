@@ -20,18 +20,6 @@ export function EmployeePayslipsPage() {
         <p>View and download your payroll records.</p>
       </header>
 
-      <aside className="employee-payslips-notice" aria-label="Payroll information notice">
-        <span className="employee-payslips-notice-icon" aria-hidden="true">i</span>
-        <div>
-          <p className="employee-payslips-notice-main">
-            The page displays payroll information received from the Existing Payroll System; the SIA application does not calculate the employee&apos;s payroll itself.
-          </p>
-          <p className="employee-payslips-notice-sub">
-            For any payroll concerns, such as discrepancies or a missing payslip, please contact the HR or Accounting Office.
-          </p>
-        </div>
-      </aside>
-
       <section className="employee-payslips-stat-grid" aria-label="Payroll summary">
         {employeePayslipStats.map((stat) => (
           <article className="employee-payslips-stat-card" key={stat.label}>
