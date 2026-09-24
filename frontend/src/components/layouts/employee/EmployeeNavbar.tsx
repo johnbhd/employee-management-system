@@ -22,9 +22,11 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
       ? "Attendance QR"
       : pathname === "/employee/attendance-history"
         ? "Attendance History"
-        : pathname === "/employee/profile"
-          ? "My Profile"
-          : "Employee Dashboard";
+        : pathname === "/employee/payslips"
+          ? "My Payslips"
+          : pathname === "/employee/profile"
+            ? "My Profile"
+            : "Employee Dashboard";
 
   useEffect(() => {
     if (!accountMenuOpen) return;
