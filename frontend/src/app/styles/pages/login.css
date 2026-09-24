@@ -208,6 +208,13 @@
   padding-top: 0.75rem;
 }
 
+.auth-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .btn-full {
   width: 100%;
   min-height: 0;
