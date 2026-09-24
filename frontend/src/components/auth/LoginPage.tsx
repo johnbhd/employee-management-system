@@ -39,7 +39,6 @@ export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorField, setErrorField] = useState<LoginErrorField>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,16 +159,10 @@ export function LoginPage() {
                   />
                 </div>
 
-                <div className="row-between">
-                  <label className="remember" htmlFor="showPassword">
-                    <input type="checkbox" id="showPassword" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />
-                    Show password
-                  </label>
-                  <label className="remember" htmlFor="rememberMe">
-                    <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
-                    Remember me
-                  </label>
-                </div>
+                <label className="remember" htmlFor="showPassword">
+                  <input type="checkbox" id="showPassword" checked={showPassword} onChange={(event) => setShowPassword(event.target.checked)} />
+                  Show password
+                </label>
 
                 {errorMessage ? <p id="login-error" className="login-error" role="alert">{errorMessage}</p> : null}
 
