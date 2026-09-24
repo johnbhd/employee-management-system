@@ -63,14 +63,6 @@ export function RolesPermissionsPage() {
         {roleMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>
 
-      <section className="notice roles-permissions-prototype-notice">
-        <Icon name="info" />
-        <p>
-          <strong>Frontend-only permission simulation.</strong>
-          Changes made here are not enforced by backend authorization and do not change access inside HRPS, Bundy / Biometric, Payroll, or Accounting systems.
-        </p>
-      </section>
-
       <RolesPermissionsManager roles={roles} permissions={permissionDefinitions} />
 
       <SectionCard title="Access Control Boundary" eyebrow="Keep domains separate">
