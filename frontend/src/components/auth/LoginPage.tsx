@@ -166,6 +166,7 @@ export function LoginPage() {
                 </label>
 
                 <div className="row-between">
+                  <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
                   <label className="remember" htmlFor="rememberMe">
                     <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
                     Remember me
@@ -178,7 +179,6 @@ export function LoginPage() {
                   <button type="submit" className="btn-primary btn-full" disabled={isSubmitting}>
                     {isSubmitting ? "Logging in..." : "Login"}
                   </button>
-                  <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
                   <button type="button" className="auth-link" onClick={() => showFeedback("IT support contact is a prototype action.")}><Icon name="comment" /> Contact IT Support</button>
                 </div>
               </div>

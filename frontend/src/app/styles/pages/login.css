@@ -204,6 +204,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.row-between .auth-link {
+  justify-content: flex-start;
+  text-align: left;
 }
 
 .actions {
