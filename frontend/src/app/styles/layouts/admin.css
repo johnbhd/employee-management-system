@@ -400,6 +400,13 @@
 }
 
 @media (max-width: 1050px) {
+  .two-column,
+  .two-column-wide {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
   .admin-shell {
     display: block;
   }
@@ -408,13 +415,6 @@
     grid-column: auto;
   }
 
-  .two-column,
-  .two-column-wide {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 700px) {
   .admin-content {
     padding: 1.25rem 0.9rem 2rem;
   }

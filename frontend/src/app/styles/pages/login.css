@@ -200,17 +200,19 @@
   accent-color: #e2231a;
 }
 
-.row-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
 .actions {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-top: 4px;
+  padding-top: 0.75rem;
+}
+
+.auth-links-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .btn-full {

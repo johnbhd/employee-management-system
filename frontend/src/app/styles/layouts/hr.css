@@ -1,0 +1,38 @@
+.hr-shell {
+  display: grid;
+  grid-template-columns: 18rem minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--au-background);
+}
+
+.hr-main-wrap {
+  grid-column: 2;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+.hr-content {
+  width: 100%;
+  min-width: 0;
+  padding: 2rem clamp(1rem, 3vw, 2rem) 3rem;
+}
+
+.hr-content > * {
+  min-width: 0;
+}
+
+@media (max-width: 1050px) {
+  .hr-shell {
+    display: block;
+  }
+
+  .hr-main-wrap {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 700px) {
+  .hr-content {
+    padding: 1.25rem 0.9rem 2rem;
+  }
+}

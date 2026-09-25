@@ -6,12 +6,12 @@ import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 
-type LoginRole = "employee" | "admin";
+type LoginRole = "employee" | "admin" | "hr";
 
 type DemoAccount = {
   password: string;
   role: LoginRole;
-  redirectTo: "/employee/dashboard" | "/admin/dashboard";
+  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard";
 };
 
 type LoginErrorField = "username" | "password" | "credentials" | null;
@@ -21,6 +21,11 @@ const demoAccounts: Record<string, DemoAccount> = {
     password: "admin123",
     role: "admin",
     redirectTo: "/admin/dashboard",
+  },
+  "aujsc.hr": {
+    password: "hr123",
+    role: "hr",
+    redirectTo: "/hr/dashboard",
   },
   employee1: {
     password: "employee123",
@@ -34,7 +39,6 @@ export function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorField, setErrorField] = useState<LoginErrorField>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -160,21 +164,16 @@ export function LoginPage() {
                   Show password
                 </label>
 
-                <div className="row-between">
-                  <label className="remember" htmlFor="rememberMe">
-                    <input type="checkbox" id="rememberMe" checked={rememberMe} onChange={(event) => setRememberMe(event.target.checked)} />
-                    Remember me
-                  </label>
-                </div>
-
                 {errorMessage ? <p id="login-error" className="login-error" role="alert">{errorMessage}</p> : null}
 
                 <div className="actions">
                   <button type="submit" className="btn-primary btn-full" disabled={isSubmitting}>
                     {isSubmitting ? "Logging in..." : "Login"}
                   </button>
-                  <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
-                  <button type="button" className="auth-link" onClick={() => showFeedback("IT support contact is a prototype action.")}><Icon name="comment" /> Contact IT Support</button>
+                  <div className="auth-links-row">
+                    <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
+                    <button type="button" className="auth-link" onClick={() => showFeedback("IT support contact is a prototype action.")}><Icon name="comment" /> Contact IT Support</button>
+                  </div>
                 </div>
               </div>
             </form>

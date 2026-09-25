@@ -52,15 +52,6 @@ export function UserAccountsPage() {
         actions={<StatusBadge tone="info"><Icon name="shield" /> Prototype access only</StatusBadge>}
       />
 
-      <section className="notice user-accounts-prototype-notice">
-        <Icon name="info" />
-        <p>
-          <strong>Simulated account management.</strong>
-          Create, edit, enable, disable, and password-reset actions update this page only.
-          No live authentication provider or external system is contacted.
-        </p>
-      </section>
-
       <div className="metric-grid user-account-metrics">
         {accountMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>

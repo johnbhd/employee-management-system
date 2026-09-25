@@ -24,8 +24,6 @@ export function AdminDashboardPage() {
         {dashboardMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>
 
-      <section className="notice"><Icon name="info" /><p><strong>Prototype monitoring view.</strong> Values are mock operational data for the current integration-first prototype; no live system connections are made.</p></section>
-
       <div className="two-column">
         <SectionCard title="Integration health" eyebrow="Connected systems">
           <div className="panel-body list-stack">

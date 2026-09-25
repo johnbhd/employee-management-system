@@ -20,7 +20,6 @@ export function IntegrationMonitoringPage() {
   return (
     <div className="admin-page monitoring-page">
       <AdminPageHeader eyebrow="Operations" title="Integration Monitoring" description="Observe connection health, synchronization activity, and transfer quality across the employee management system." actions={<ActionButton icon="refresh" action="Monitoring data refreshed.">Refresh monitoring</ActionButton>} />
-      <section className="notice"><Icon name="info" /><p>Monitoring is read-only in this prototype. Refresh and retry controls provide interface feedback without contacting external systems.</p></section>
       <div className="metric-grid monitoring-metrics">{monitoringMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <SectionCard title="Connected systems" eyebrow="Current health">

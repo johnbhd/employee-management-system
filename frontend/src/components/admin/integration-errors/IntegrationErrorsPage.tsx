@@ -47,11 +47,6 @@ export function IntegrationErrorsPage() {
         actions={<ActionButton icon="refresh" action="Error queue refreshed in the prototype.">Refresh error queue</ActionButton>}
       />
 
-      <section className="notice integration-errors-notice">
-        <Icon name="info" />
-        <p>This is a read-only monitoring prototype. Retry and acknowledgement controls update local interface state only and do not contact HRPS, Payroll, Accounting, or attendance systems.</p>
-      </section>
-
       <div className="metric-grid integration-error-metrics">
         {summaryMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>

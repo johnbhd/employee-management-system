@@ -76,7 +76,7 @@ export function EmployeeDashboardPage() {
           <p className="payroll-period">July 1–15, 2026</p>
           <strong className="payroll-amount">₱24,850.00</strong>
           <div className="payroll-meta"><span>Released July 18, 2026</span><StatusBadge tone="success">Available</StatusBadge></div>
-          <button type="button" className="employee-secondary-button full-width"><Icon name="file" /> View payslip</button>
+          <Link href="/employee/payslips" className="employee-secondary-button full-width"><Icon name="file" /> View payslip</Link>
         </section>
 
         <section className="employee-panel announcements-card">

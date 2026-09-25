@@ -11,7 +11,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "accounting-integration", label: "Accounting Integration", href: "/admin/accounting-integration", icon: "accounting" },
   { id: "integration-errors", label: "Integration Errors", href: "/admin/integration-errors", icon: "errors" },
   { id: "user-accounts", label: "User Accounts", href: "/admin/user-accounts", icon: "users" },
-  { id: "roles-permissions", label: "Roles & Permissions", icon: "roles" },
+  { id: "roles-permissions", label: "Roles & Permissions", href: "/admin/roles-permissions", icon: "roles" },
   { id: "audit-logs", label: "Audit Logs", icon: "audit" },
   { id: "system-settings", label: "System Settings", icon: "settings" },
 ];
