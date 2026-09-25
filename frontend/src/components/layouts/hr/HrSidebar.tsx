@@ -12,7 +12,7 @@ const hrNavigation = [
   { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests" },
   { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules" },
   { id: "employee-directory", label: "Employee Directory", icon: "users" as const, href: "/hr/employee-directory" },
-  { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, planned: true },
+  { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, href: "/hr/attendance-reports" },
   { id: "audit-history", label: "Audit History", icon: "audit" as const, planned: true },
 ];
 
@@ -85,13 +85,6 @@ export function HrSidebar({ isOpen, onClose }: HrSidebarProps) {
           </div>
 
           <div className="hr-sidebar-footer">
-            <div className="hr-sidebar-note">
-              <div>
-                <span className="hr-note-dot" />
-                <strong>Prototype workspace</strong>
-              </div>
-              <p>HRPS remains the source of truth for employee information.</p>
-            </div>
             <div className="hr-sidebar-account">
               <span className="hr-account-avatar"><Icon name="user" /></span>
               <span>
