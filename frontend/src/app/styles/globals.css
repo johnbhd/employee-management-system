@@ -22,6 +22,7 @@
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
 @import "./pages/hr/correction-requests.css";
+@import "./pages/hr/employee-schedules.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/hrps-integration.css";

@@ -10,7 +10,7 @@ const hrNavigation = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard" },
   { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring" },
   { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests" },
-  { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, planned: true },
+  { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules" },
   { id: "employee-directory", label: "Employee Directory", icon: "users" as const, planned: true },
   { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, planned: true },
   { id: "audit-history", label: "Audit History", icon: "audit" as const, planned: true },
