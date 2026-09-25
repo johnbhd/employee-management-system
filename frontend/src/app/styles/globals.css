@@ -25,6 +25,7 @@
 @import "./pages/hr/employee-schedules.css";
 @import "./pages/hr/employee-directory.css";
 @import "./pages/hr/attendance-reports.css";
+@import "./pages/hr/audit-history.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/hrps-integration.css";

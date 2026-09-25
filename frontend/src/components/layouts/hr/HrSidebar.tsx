@@ -5,15 +5,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Icon } from "../../ui/Icon";
+import type { IconName } from "@/types/ui";
 
-const hrNavigation = [
+type HrNavigationItem = {
+  id: string;
+  label: string;
+  icon: IconName;
+  href?: string;
+  planned?: boolean;
+};
+
+const hrNavigation: HrNavigationItem[] = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard" },
   { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring" },
   { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests" },
   { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules" },
   { id: "employee-directory", label: "Employee Directory", icon: "users" as const, href: "/hr/employee-directory" },
   { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, href: "/hr/attendance-reports" },
-  { id: "audit-history", label: "Audit History", icon: "audit" as const, planned: true },
+  { id: "audit-history", label: "Audit History", icon: "audit" as const, href: "/hr/audit-history" },
 ];
 
 type HrSidebarProps = {
