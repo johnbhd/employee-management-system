@@ -8,7 +8,7 @@ import { Icon } from "../../ui/Icon";
 
 const hrNavigation = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard" },
-  { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, planned: true },
+  { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring" },
   { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, planned: true },
   { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, planned: true },
   { id: "employee-directory", label: "Employee Directory", icon: "users" as const, planned: true },
