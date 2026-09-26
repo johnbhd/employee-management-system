@@ -20,7 +20,6 @@ export function BundyBiometricEtlPage() {
   return (
     <div className="admin-page bundy-page">
       <AdminPageHeader eyebrow="Attendance source ingestion" title="Bundy / Biometric ETL" description="Inspect the imported biometric logs, employee ID matching, and standardized attendance output." actions={<><ActionButton icon="refresh" action="Bundy ETL batch processing queued.">Run ETL</ActionButton><ActionButton variant="secondary" action="Latest Bundy file preview opened.">View source file</ActionButton></>} />
-      <section className="notice"><Icon name="info" /><p><strong>Bundy is an existing attendance source.</strong> This ETL view represents the boundary that imports, validates, and standardizes biometric logs before unified attendance processing.</p></section>
       <div className="metric-grid bundy-metrics">{bundyMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <div className="two-column">

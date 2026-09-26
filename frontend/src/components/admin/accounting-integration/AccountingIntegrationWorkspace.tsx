@@ -47,14 +47,6 @@ export function AccountingIntegrationWorkspace() {
         )}
       />
 
-      <section className="notice accounting-integration-notice" aria-label="Accounting integration boundary">
-        <Icon name="info" />
-        <p>
-          <strong>Prototype / simulated integration.</strong> This workspace monitors approved Payroll information;
-          it does not calculate payroll, post journal entries, or contact a live Accounting API.
-        </p>
-      </section>
-
       <section className="metric-grid accounting-integration-summary" aria-label="Accounting transfer summary">
         {accountingSummaryMetrics.map((metric) => (
           <article className="metric-card" key={metric.label}>

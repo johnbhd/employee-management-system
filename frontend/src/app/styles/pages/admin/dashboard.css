@@ -1,18 +1,12 @@
 .admin-dashboard-page .notice,
 .monitoring-page .notice,
-.hrps-page .notice,
-.bundy-page .notice,
-.qr-page .notice,
-.unified-page .notice {
+.hrps-page .notice {
   align-items: flex-start;
 }
 
 .admin-dashboard-page .notice > .ui-icon,
 .monitoring-page .notice > .ui-icon,
-.hrps-page .notice > .ui-icon,
-.bundy-page .notice > .ui-icon,
-.qr-page .notice > .ui-icon,
-.unified-page .notice > .ui-icon {
+.hrps-page .notice > .ui-icon {
   display: grid;
   width: 1.25rem;
   height: 1.25rem;

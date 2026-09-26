@@ -49,14 +49,6 @@ export function PayrollAccountingFlowPage() {
         )}
       />
 
-      <section className="notice payroll-accounting-flow-notice" aria-label="Payroll integration boundary">
-        <Icon name="info" />
-        <p>
-          <strong>Prototype / simulated integration.</strong> This workspace monitors verified attendance transfer;
-          it does not calculate salary, deductions, payroll totals, or payslips.
-        </p>
-      </section>
-
       <section className="metric-grid payroll-accounting-flow-summary" aria-label="Payroll transfer summary">
         {payrollAccountingSummaryMetrics.map((metric) => (
           <SummaryCard key={metric.label} {...metric} />

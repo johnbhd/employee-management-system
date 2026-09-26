@@ -21,7 +21,6 @@ export function QrAttendancePage() {
   return (
     <div className="admin-page qr-page">
       <AdminPageHeader eyebrow="Additional attendance source" title="QR Attendance" description="Monitor QR attendance stations, employee validation, and accepted records entering the integration layer." actions={<><ActionButton icon="refresh" action="QR source data refreshed.">Refresh source</ActionButton><ActionButton variant="secondary" action="Station health check completed.">Check stations</ActionButton></>} />
-      <section className="notice"><Icon name="info" /><p><strong>QR Attendance is an additional source.</strong> Validated scans are standardized alongside Bundy records; invalid or duplicate scans stay out of the unified output.</p></section>
       <div className="metric-grid qr-metrics">{qrMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <div className="two-column">

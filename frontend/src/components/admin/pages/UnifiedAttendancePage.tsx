@@ -3,7 +3,6 @@ import { FlowDiagram } from "@/components/admin/shared/FlowDiagram";
 import { ProgressList } from "@/components/admin/shared/ProgressList";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { FilterableTable } from "@/components/ui/FilterableTable";
-import { Icon } from "@/components/ui/Icon";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
@@ -20,7 +19,6 @@ export function UnifiedAttendancePage() {
   return (
     <div className="admin-page unified-page">
       <AdminPageHeader eyebrow="Standardized attendance layer" title="Unified Attendance" description="Review normalized attendance records from Bundy and QR sources before verified downstream transfer." actions={<><ActionButton icon="refresh" action="Unified attendance processing queued.">Process records</ActionButton><ActionButton variant="secondary" action="Transfer preview opened.">Preview transfer</ActionButton></>} />
-      <section className="notice"><Icon name="info" /><p><strong>Unified Attendance is the standardized internal layer.</strong> It does not calculate payroll. It validates and prepares attendance records for existing downstream systems.</p></section>
       <div className="metric-grid unified-metrics">{unifiedMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <SectionCard title="Unified data flow" eyebrow="Source normalization"><FlowDiagram nodes={[{ label: "HRPS", detail: "Employee reference", icon: "hrps", status: "Reference", tone: "info" }, { label: "Bundy", detail: "Biometric source", icon: "bundy", status: "Ingested", tone: "success" }, { label: "QR Attendance", detail: "Additional source", icon: "qr", status: "Ingested", tone: "success" }, { label: "Validate + unify", detail: "Deduplicate + review", icon: "shield", status: "Processing", tone: "warning" }, { label: "Downstream systems", detail: "Existing payroll / accounting", icon: "building", status: "Verified only", tone: "muted" }]} /></SectionCard>
