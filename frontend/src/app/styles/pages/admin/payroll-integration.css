@@ -1,39 +1,71 @@
-.payroll-page .notice {
+.payroll-page {
+  width: 100%;
+  min-width: 0;
+  gap: 1.25rem;
+}
+
+.payroll-page > * {
+  min-width: 0;
+}
+
+.payroll-page .dashboard-card,
+.payroll-page .panel-body {
+  min-width: 0;
+}
+
+.payroll-notice {
   align-items: flex-start;
 }
 
-.payroll-page .notice > .ui-icon {
+.payroll-notice > .ui-icon {
   display: grid;
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.3rem;
+  height: 1.3rem;
   flex: 0 0 auto;
   place-items: center;
   border-radius: 999px;
   background: #d8eaff;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.72rem;
 }
 
-.payroll-page .notice p,
-.payroll-boundary-notice p {
+.payroll-notice p {
+  min-width: 0;
   margin: 0;
 }
 
+.payroll-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
 .payroll-metrics .metric-card {
-  min-height: 7.8rem;
+  min-height: 7.4rem;
+  padding: 1rem;
+}
+
+.payroll-metrics .metric-label,
+.payroll-metrics .metric-note {
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.payroll-section {
+  width: 100%;
+  min-width: 0;
 }
 
 .payroll-period-grid {
   display: grid;
   width: 100%;
   min-width: 0;
-  grid-template-columns: 1.4fr repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
 .payroll-period-item {
   display: grid;
   min-width: 0;
+  align-content: start;
   gap: 0.35rem;
   padding: 0.9rem;
   border: 1px solid #e9eef5;
@@ -56,6 +88,7 @@
 .payroll-period-item strong {
   color: var(--au-navy);
   font-size: 0.95rem;
+  overflow-wrap: anywhere;
 }
 
 .payroll-period-item small {
@@ -69,9 +102,10 @@
 
 .payroll-period-note {
   display: flex;
+  min-width: 0;
   align-items: flex-start;
   gap: 0.55rem;
-  margin-top: 0.85rem;
+  margin: 0.85rem 0 0;
   color: var(--text-muted);
   font-size: 0.7rem;
   line-height: 1.55;
@@ -83,31 +117,61 @@
   color: var(--au-blue);
 }
 
-.payroll-period-note p {
-  margin: 0;
+.payroll-period-note span {
+  min-width: 0;
+}
+
+.payroll-flow {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-x: contain;
+}
+
+.payroll-flow .flow-segment {
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
 .payroll-flow .flow-node {
+  width: 9.6rem;
   min-width: 9.2rem;
+  max-width: 11rem;
 }
 
-.payroll-overview-grid,
-.payroll-issues-grid,
-.payroll-health-grid-layout {
+.payroll-flow .flow-node strong {
+  overflow-wrap: anywhere;
+}
+
+.payroll-flow-note {
+  max-width: calc(100% - 2.5rem);
+  overflow-wrap: anywhere;
+}
+
+.payroll-overview-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: stretch;
+  gap: 1rem;
+}
+
+.payroll-overview-grid > * {
+  min-width: 0;
 }
 
 .payroll-validation-list,
 .payroll-health-list {
   display: grid;
+  min-width: 0;
   gap: 0.65rem;
 }
 
 .payroll-validation-item,
-.payroll-safeguard,
-.payroll-health-item {
-  display: flex;
+.payroll-safeguard {
+  display: grid;
   min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.65rem;
   padding: 0.7rem 0.75rem;
@@ -146,7 +210,6 @@
 .payroll-safeguard > span:nth-child(2) {
   display: grid;
   min-width: 0;
-  flex: 1;
   gap: 0.18rem;
 }
 
@@ -154,6 +217,7 @@
 .payroll-safeguard strong {
   color: #334155;
   font-size: 0.7rem;
+  overflow-wrap: anywhere;
 }
 
 .payroll-validation-copy small,
@@ -161,10 +225,11 @@
   color: var(--text-muted);
   font-size: 0.64rem;
   line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 .payroll-safeguard {
-  align-items: flex-start;
+  align-items: start;
   margin-top: 0.3rem;
   border-color: #cfe1fa;
   background: var(--info-soft);
@@ -175,22 +240,27 @@
   color: var(--info);
 }
 
+.payroll-validation-item .status-badge,
 .payroll-safeguard .status-badge {
-  flex: 0 0 auto;
+  justify-self: end;
 }
 
 .payroll-table-wrap {
   width: 100%;
+  max-width: 100%;
   min-width: 0;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
 }
 
 .payroll-table {
-  min-width: 70rem;
+  width: 100%;
+  min-width: 68rem;
 }
 
 .payroll-record-table-wrap .payroll-table {
-  min-width: 88rem;
+  min-width: 86rem;
 }
 
 .payroll-mapping-table-wrap .payroll-table {
@@ -218,6 +288,7 @@
   color: var(--au-blue);
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.68rem;
+  overflow-wrap: anywhere;
 }
 
 .payroll-action-cell {
@@ -225,17 +296,29 @@
 }
 
 .payroll-health-item {
-  justify-content: space-between;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
   gap: 0.75rem;
+  padding: 0.7rem 0.75rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.7rem;
+  background: var(--surface-muted);
 }
 
 .payroll-health-item > span:first-child {
+  min-width: 0;
   color: var(--text-muted);
   font-size: 0.7rem;
+  overflow-wrap: anywhere;
 }
 
 .payroll-health-item .status-badge {
-  text-align: right;
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .payroll-health-summary {
@@ -258,17 +341,18 @@
 }
 
 .payroll-audit-grid {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: start;
   gap: 1rem;
 }
 
 .payroll-audit-grid > div {
   display: grid;
+  min-width: 0;
   grid-template-columns: auto minmax(0, 1fr);
   gap: 0.25rem 0.65rem;
-  min-width: 0;
 }
 
 .payroll-audit-grid > div > .ui-icon {
@@ -282,13 +366,21 @@
 }
 
 .payroll-audit-grid p {
+  margin: 0;
   color: var(--text-muted);
   font-size: 0.7rem;
   line-height: 1.55;
 }
 
+.payroll-audit-grid > .status-badge {
+  max-width: 100%;
+  white-space: normal;
+  line-height: 1.4;
+}
+
 .payroll-boundary-notice {
   display: flex;
+  min-width: 0;
   align-items: flex-start;
   gap: 0.8rem;
   padding: 1rem 1.1rem;
@@ -303,60 +395,83 @@
   margin-top: 0.2rem;
 }
 
+.payroll-boundary-notice > div {
+  min-width: 0;
+}
+
 .payroll-boundary-notice h2 {
   margin: 0.3rem 0 0;
   color: var(--au-navy);
   font-size: 0.9rem;
+  overflow-wrap: anywhere;
 }
 
 .payroll-boundary-notice > div > p:last-child {
-  margin-top: 0.45rem;
+  margin: 0.45rem 0 0;
   color: #31577c;
   font-size: 0.72rem;
   line-height: 1.6;
 }
 
-@media (max-width: 1150px) {
+@media (max-width: 1200px) {
+  .payroll-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .payroll-period-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payroll-overview-grid {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media (max-width: 700px) {
-  .payroll-period-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .payroll-validation-item,
-  .payroll-safeguard,
-  .payroll-health-item,
-  .payroll-audit-grid {
-    align-items: flex-start;
+  .payroll-flow .flow-node {
+    width: min(100%, 22rem);
+    min-width: 0;
+    max-width: 22rem;
   }
 
   .payroll-validation-item,
   .payroll-safeguard {
-    flex-wrap: wrap;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
   }
 
   .payroll-validation-item .status-badge,
   .payroll-safeguard .status-badge {
-    margin-left: 2.3rem;
+    grid-column: 2;
+    justify-self: start;
   }
 
   .payroll-audit-grid {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .payroll-audit-grid > .status-badge {
+    justify-self: start;
   }
 }
 
 @media (max-width: 480px) {
+  .payroll-metrics,
+  .payroll-period-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .payroll-page .panel-body {
+    padding: 1rem;
+  }
+
   .payroll-health-item {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
   }
 
   .payroll-health-item .status-badge {
-    align-self: flex-start;
-    text-align: left;
+    justify-self: start;
   }
 
   .payroll-boundary-notice {
