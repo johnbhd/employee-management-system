@@ -12,10 +12,14 @@ type AttendanceMonitoringFiltersProps = {
   status: string;
   source: string;
   validation: string;
+  verification: string;
+  payrollReadiness: string;
   departments: readonly FilterOption[];
   statuses: readonly FilterOption[];
   sources: readonly FilterOption[];
   validations: readonly FilterOption[];
+  verifications: readonly FilterOption[];
+  payrollReadinessOptions: readonly FilterOption[];
   activeFilterCount: number;
   onSearchChange: (value: string) => void;
   onDateChange: (value: string) => void;
@@ -23,6 +27,8 @@ type AttendanceMonitoringFiltersProps = {
   onStatusChange: (value: string) => void;
   onSourceChange: (value: string) => void;
   onValidationChange: (value: string) => void;
+  onVerificationChange: (value: string) => void;
+  onPayrollReadinessChange: (value: string) => void;
   onReset: () => void;
 };
 
@@ -33,10 +39,14 @@ export function AttendanceMonitoringFilters({
   status,
   source,
   validation,
+  verification,
+  payrollReadiness,
   departments,
   statuses,
   sources,
   validations,
+  verifications,
+  payrollReadinessOptions,
   activeFilterCount,
   onSearchChange,
   onDateChange,
@@ -44,6 +54,8 @@ export function AttendanceMonitoringFilters({
   onStatusChange,
   onSourceChange,
   onValidationChange,
+  onVerificationChange,
+  onPayrollReadinessChange,
   onReset,
 }: AttendanceMonitoringFiltersProps) {
   return (
@@ -115,6 +127,28 @@ export function AttendanceMonitoringFilters({
           <span>Validation</span>
           <select value={validation} onChange={(event) => onValidationChange(event.target.value)}>
             {validations.map((option) => (
+              <option value={option.value} key={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="hr-monitoring-field">
+          <span>HR verification</span>
+          <select value={verification} onChange={(event) => onVerificationChange(event.target.value)}>
+            {verifications.map((option) => (
+              <option value={option.value} key={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="hr-monitoring-field">
+          <span>Payroll readiness</span>
+          <select value={payrollReadiness} onChange={(event) => onPayrollReadinessChange(event.target.value)}>
+            {payrollReadinessOptions.map((option) => (
               <option value={option.value} key={option.value}>
                 {option.label}
               </option>

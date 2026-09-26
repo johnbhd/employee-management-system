@@ -1,5 +1,4 @@
 import { ActionButton } from "@/components/ui/ActionButton";
-import { hrAttendanceMonitoringRecords } from "@/data/hr";
 
 import { AttendanceMonitoringExplorer } from "./AttendanceMonitoringExplorer";
 
@@ -21,7 +20,7 @@ export function AttendanceMonitoringPage() {
         </div>
       </header>
 
-      <AttendanceMonitoringExplorer records={hrAttendanceMonitoringRecords} />
+      <AttendanceMonitoringExplorer />
     </div>
   );
 }

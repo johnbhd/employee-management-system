@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
+import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
 import {
   auditActionOptions,
   auditActorRoleOptions,
@@ -22,10 +23,6 @@ import { AuditHistoryTable } from "./AuditHistoryTable";
 
 const allValue = "all" as const;
 const pageSize = 10;
-
-type AuditHistoryExplorerProps = {
-  events: readonly AttendanceAuditEvent[];
-};
 
 function escapeCsv(value: string | number) {
   return `"${String(value).replaceAll('"', '""')}"`;
@@ -59,7 +56,7 @@ function createAuditCsv(events: readonly AttendanceAuditEvent[]) {
       event.employee.employeeId,
       event.employee.name,
       event.attendanceRecordId,
-      event.correctionRequest.id,
+      event.correctionRequest?.id ?? "—",
       change.field,
       change.previousValue,
       change.newValue,
@@ -77,7 +74,8 @@ function exportRangeLabel(fromDate: string, toDate: string) {
   return "all-records";
 }
 
-export function AuditHistoryExplorer({ events }: AuditHistoryExplorerProps) {
+export function AuditHistoryExplorer() {
+  const { auditEvents: events } = useHrWorkflow();
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -114,7 +112,7 @@ export function AuditHistoryExplorer({ events }: AuditHistoryExplorerProps) {
           event.employee.name,
           event.employee.employeeId,
           event.attendanceRecordId,
-          event.correctionRequest.id,
+          event.correctionRequest?.id ?? "",
           event.note ?? "",
         ];
         const matchesSearch = !normalizedSearch
@@ -146,7 +144,13 @@ export function AuditHistoryExplorer({ events }: AuditHistoryExplorerProps) {
   const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
   const relatedEvents = selectedEvent
     ? events
-      .filter((event) => event.correctionRequest.id === selectedEvent.correctionRequest.id)
+      .filter((event) => {
+        if (selectedEvent.correctionRequest && event.correctionRequest) {
+          return event.correctionRequest.id === selectedEvent.correctionRequest.id;
+        }
+
+        return event.attendanceRecordId === selectedEvent.attendanceRecordId;
+      })
       .sort((first, second) => first.occurredAtTimestamp - second.occurredAtTimestamp)
     : [];
   const exportHref = filteredEvents.length > 0

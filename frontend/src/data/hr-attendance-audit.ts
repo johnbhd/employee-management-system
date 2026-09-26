@@ -11,16 +11,18 @@ export type AttendanceAuditAction =
   | "Correction Reviewed"
   | "Correction Approved"
   | "Correction Rejected"
-  | "Information Requested";
+  | "Information Requested"
+  | "Attendance Verified";
 
-export type AttendanceAuditArea = "Correction Requests";
+export type AttendanceAuditArea = "Correction Requests" | "Attendance Monitoring";
 export type AttendanceAuditActorRole = "Employee" | "HR / Attendance Staff";
 export type AttendanceAuditOutcome =
   | "Submitted"
   | "Under Review"
   | "Approved"
   | "Rejected"
-  | "Needs Information";
+  | "Needs Information"
+  | "Verified";
 
 export type AttendanceAuditChange = {
   field: string;
@@ -65,7 +67,7 @@ export type AttendanceAuditEvent = {
   actor: AttendanceAuditActor;
   employee: AttendanceAuditEmployee;
   attendanceRecordId: string;
-  correctionRequest: AttendanceAuditRequest;
+  correctionRequest: AttendanceAuditRequest | null;
   attendanceRecord: AttendanceAuditRecord | null;
   changes: readonly AttendanceAuditChange[];
   note?: string;
@@ -81,11 +83,13 @@ export const auditActionOptions = [
   { value: "Correction Approved", label: "Correction Approved" },
   { value: "Correction Rejected", label: "Correction Rejected" },
   { value: "Information Requested", label: "Information Requested" },
+  { value: "Attendance Verified", label: "Attendance Verified" },
 ] as const;
 
 export const auditAreaOptions = [
   { value: allValue, label: "All areas" },
   { value: "Correction Requests", label: "Correction Requests" },
+  { value: "Attendance Monitoring", label: "Attendance Monitoring" },
 ] as const;
 
 export const auditActorRoleOptions = [
@@ -101,6 +105,7 @@ export const auditOutcomeOptions = [
   { value: "Approved", label: "Approved" },
   { value: "Rejected", label: "Rejected" },
   { value: "Needs Information", label: "Needs Information" },
+  { value: "Verified", label: "Verified" },
 ] as const;
 
 const fieldLabels = {
@@ -156,6 +161,7 @@ function mapOutcome(action: AttendanceAuditAction): AttendanceAuditOutcome {
   if (action === "Correction Reviewed") return "Under Review";
   if (action === "Correction Approved") return "Approved";
   if (action === "Correction Rejected") return "Rejected";
+  if (action === "Attendance Verified") return "Verified";
   return "Needs Information";
 }
 
@@ -244,3 +250,124 @@ function buildEventsForRequest(request: HrCorrectionRequest): AttendanceAuditEve
 export const hrAttendanceAuditEvents: AttendanceAuditEvent[] = hrCorrectionRequests
   .flatMap(buildEventsForRequest)
   .sort((first, second) => second.occurredAtTimestamp - first.occurredAtTimestamp);
+
+function formatLocalAuditTimestamp(value: Date) {
+  const datePart = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(value);
+  const timePart = new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(value);
+
+  return `${datePart} · ${timePart}`;
+}
+
+function formatLocalAuditDate(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+export function createAttendanceVerifiedAuditEvent({
+  record,
+  previousVerification,
+  previousPayrollReadiness,
+  occurredAt = new Date(),
+}: {
+  record: HrAttendanceMonitoringRecord;
+  previousVerification: string;
+  previousPayrollReadiness: string;
+  occurredAt?: Date;
+}): AttendanceAuditEvent {
+  return {
+    id: `AUD-${record.id.replace("AU-EMP-", "VERIFY-")}-${occurredAt.getTime()}`,
+    occurredAt: formatLocalAuditTimestamp(occurredAt),
+    occurredAtDate: formatLocalAuditDate(occurredAt),
+    occurredAtTimestamp: occurredAt.getTime(),
+    action: "Attendance Verified",
+    area: "Attendance Monitoring",
+    actor: {
+      name: "HR / Attendance Staff",
+      role: "HR / Attendance Staff",
+    },
+    employee: {
+      employeeId: record.employeeId,
+      name: record.employeeName,
+      department: record.department,
+    },
+    attendanceRecordId: record.id,
+    correctionRequest: null,
+    attendanceRecord: buildAttendanceRecord(record),
+    changes: [
+      {
+        field: "HR Verification",
+        previousValue: previousVerification,
+        newValue: "Verified",
+      },
+      {
+        field: "Payroll Readiness",
+        previousValue: previousPayrollReadiness,
+        newValue: "Ready for Payroll",
+      },
+    ],
+    note: "Attendance was reviewed by HR and is now eligible for Payroll handoff.",
+    outcome: "Verified",
+  };
+}
+
+export function createCorrectionWorkflowAuditEvent({
+  request,
+  action,
+  previousStatus,
+  note,
+  occurredAt = new Date(),
+}: {
+  request: HrCorrectionRequest;
+  action: Exclude<AttendanceAuditAction, "Attendance Verified">;
+  previousStatus: HrCorrectionRequestStatus | "No Correction Request";
+  note?: string;
+  occurredAt?: Date;
+}): AttendanceAuditEvent {
+  const outcome = mapOutcome(action);
+  const changes = previousStatus === request.status
+    ? []
+    : [{
+      field: "Correction Status",
+      previousValue: previousStatus,
+      newValue: request.status,
+    }];
+
+  return {
+    id: `AUD-${request.id.replace("CR-", "")}-${occurredAt.getTime()}`,
+    occurredAt: formatLocalAuditTimestamp(occurredAt),
+    occurredAtDate: formatLocalAuditDate(occurredAt),
+    occurredAtTimestamp: occurredAt.getTime(),
+    action,
+    area: "Correction Requests",
+    actor: {
+      name: "HR / Attendance Staff",
+      role: "HR / Attendance Staff",
+    },
+    employee: {
+      employeeId: request.employeeId,
+      name: request.employeeName,
+      department: request.department,
+    },
+    attendanceRecordId: request.attendanceRecordId,
+    correctionRequest: {
+      id: request.id,
+      issueType: request.issueType,
+      status: request.status,
+      attendanceDate: request.attendanceDate,
+    },
+    attendanceRecord: buildAttendanceRecord(attendanceRecordById.get(request.attendanceRecordId)),
+    changes,
+    note,
+    outcome,
+  };
+}

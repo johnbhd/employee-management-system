@@ -1,10 +1,10 @@
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { HrAttendanceMonitoringRecord } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 
 type AttendanceMonitoringTableProps = {
-  records: readonly HrAttendanceMonitoringRecord[];
-  onSelectRecord: (record: HrAttendanceMonitoringRecord) => void;
+  records: readonly HrWorkflowAttendanceRecord[];
+  onSelectRecord: (record: HrWorkflowAttendanceRecord) => void;
 };
 
 function formatDate(value: string) {
@@ -18,7 +18,7 @@ function formatDate(value: string) {
   }).format(new Date(Date.UTC(year, month - 1, day)));
 }
 
-function sourceTone(source: HrAttendanceMonitoringRecord["source"]) {
+function sourceTone(source: HrWorkflowAttendanceRecord["source"]) {
   if (source === "QR") return "info" as const;
   if (source === "Bundy") return "muted" as const;
   return "danger" as const;
@@ -39,6 +39,7 @@ export function AttendanceMonitoringTable({ records, onSelectRecord }: Attendanc
             <th scope="col">Source</th>
             <th scope="col">Status</th>
             <th scope="col">Validation</th>
+            <th scope="col">HR Verification</th>
             <th scope="col">Action</th>
           </tr>
         </thead>
@@ -71,6 +72,11 @@ export function AttendanceMonitoringTable({ records, onSelectRecord }: Attendanc
                 <StatusBadge tone={record.validationTone}>{record.validationStatus}</StatusBadge>
               </td>
               <td>
+                <StatusBadge tone={record.hrVerificationStatus === "Verified" ? "success" : record.hrVerificationStatus === "Needs Correction" ? "warning" : "info"}>
+                  {record.hrVerificationStatus}
+                </StatusBadge>
+              </td>
+              <td>
                 <button
                   type="button"
                   className="button-secondary hr-monitoring-view-button"
@@ -84,7 +90,7 @@ export function AttendanceMonitoringTable({ records, onSelectRecord }: Attendanc
           ))}
           {records.length === 0 ? (
             <tr>
-              <td colSpan={9} className="hr-monitoring-empty-row">
+              <td colSpan={10} className="hr-monitoring-empty-row">
                 No attendance records match the selected filters.
               </td>
             </tr>

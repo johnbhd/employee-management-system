@@ -8,6 +8,7 @@ import { AttendanceReportSummary } from "@/components/hr/attendance-reports/Atte
 import { AttendanceReportTable } from "@/components/hr/attendance-reports/AttendanceReportTable";
 import { AttendanceReportToolbar } from "@/components/hr/attendance-reports/AttendanceReportToolbar";
 import { AttendanceSourceBreakdown } from "@/components/hr/attendance-reports/AttendanceSourceBreakdown";
+import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
 import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
 import {
   attendanceReportTypes,
@@ -18,11 +19,6 @@ import {
   type AttendanceReportRecord,
   type AttendanceReportType,
 } from "@/data/hr-attendance-reports";
-
-type AttendanceReportsExplorerProps = {
-  records: readonly AttendanceReportRecord[];
-  correctionRequests: readonly HrCorrectionRequest[];
-};
 
 type FilterOption = {
   value: string;
@@ -98,12 +94,20 @@ function buildExportData(
   }
 
   return createCsv(
-    ["Employee", "Employee ID", "Department", "Date", "Schedule", "Time in", "Time out", "Source", "Status", "Validation", "Late minutes", "Undertime minutes"],
-    records.map((record) => [record.employeeName, record.employeeId, record.department, record.date, record.schedule, record.timeIn, record.timeOut, record.source ?? "No source", record.status, record.validationStatus, record.lateMinutes ?? 0, record.undertimeMinutes ?? 0]),
+    ["Employee", "Employee ID", "Department", "Date", "Schedule", "Time in", "Time out", "Source", "Status", "Validation", "HR Verification", "Payroll Readiness", "Late minutes", "Undertime minutes"],
+    records.map((record) => [record.employeeName, record.employeeId, record.department, record.date, record.schedule, record.timeIn, record.timeOut, record.source ?? "No source", record.status, record.validationStatus, record.hrVerificationStatus ?? "Pending Review", record.payrollReadiness ?? "Not Ready", record.lateMinutes ?? 0, record.undertimeMinutes ?? 0]),
   );
 }
 
-export function AttendanceReportsExplorer({ records, correctionRequests }: AttendanceReportsExplorerProps) {
+export function AttendanceReportsExplorer() {
+  const { attendanceRecords, correctionRequests } = useHrWorkflow();
+  const records = useMemo<AttendanceReportRecord[]>(() => attendanceRecords.map((record) => ({
+    ...record,
+    correctionRequestId: record.correctionStatus === "No Correction Request"
+      ? undefined
+      : correctionRequests.find((request) => request.attendanceRecordId === record.id)?.id,
+    correctionStatus: record.correctionStatus === "No Correction Request" ? undefined : record.correctionStatus,
+  })), [attendanceRecords, correctionRequests]);
   const [reportType, setReportType] = useState<AttendanceReportType>("daily");
   const [date, setDate] = useState(defaultAttendanceReportDate);
   const [month, setMonth] = useState(defaultAttendanceReportMonth);

@@ -1,6 +1,3 @@
-import { hrCorrectionRequests } from "@/data/hr-correction-requests";
-import { hrAttendanceReportRecords } from "@/data/hr-attendance-reports";
-
 import { AttendanceReportsExplorer } from "./AttendanceReportsExplorer";
 
 export function AttendanceReportsPage() {
@@ -16,7 +13,7 @@ export function AttendanceReportsPage() {
         </div>
       </header>
 
-      <AttendanceReportsExplorer records={hrAttendanceReportRecords} correctionRequests={hrCorrectionRequests} />
+      <AttendanceReportsExplorer />
     </div>
   );
 }

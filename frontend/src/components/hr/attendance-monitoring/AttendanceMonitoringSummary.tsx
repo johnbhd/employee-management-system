@@ -1,9 +1,9 @@
 import { Icon } from "@/components/ui/Icon";
-import type { HrAttendanceMonitoringRecord } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 import type { IconName, StatusTone } from "@/types/ui";
 
 type AttendanceMonitoringSummaryProps = {
-  records: readonly HrAttendanceMonitoringRecord[];
+  records: readonly HrWorkflowAttendanceRecord[];
 };
 
 type SummaryMetric = {
@@ -40,9 +40,15 @@ export function AttendanceMonitoringSummary({ records }: AttendanceMonitoringSum
       tone: "warning",
     },
     {
-      label: "Needs Review",
-      value: records.filter((record) => record.validationStatus !== "Verified").length,
-      icon: "filter",
+      label: "Pending Verification",
+      value: records.filter((record) => record.hrVerificationStatus === "Pending Review").length,
+      icon: "activity",
+      tone: "info",
+    },
+    {
+      label: "Verified",
+      value: records.filter((record) => record.hrVerificationStatus === "Verified").length,
+      icon: "check",
       tone: "info",
     },
   ];

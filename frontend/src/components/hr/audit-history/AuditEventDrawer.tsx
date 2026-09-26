@@ -18,6 +18,7 @@ function outcomeTone(outcome: AttendanceAuditEvent["outcome"]) {
   if (outcome === "Rejected") return "danger" as const;
   if (outcome === "Needs Information") return "warning" as const;
   if (outcome === "Under Review") return "info" as const;
+  if (outcome === "Verified") return "success" as const;
   return "muted" as const;
 }
 
@@ -110,15 +111,17 @@ export function AuditEventDrawer({ event, relatedEvents, onClose }: AuditEventDr
           )}
         </section>
 
-        <section className="hr-audit-detail-section" aria-labelledby="hr-audit-request-heading">
-          <h3 id="hr-audit-request-heading">Related correction request</h3>
-          <dl className="hr-audit-detail-list">
-            <DetailRow label="Request ID" value={event.correctionRequest.id} />
-            <DetailRow label="Issue type" value={event.correctionRequest.issueType} />
-            <DetailRow label="Attendance date" value={formatDate(event.correctionRequest.attendanceDate)} />
-            <DetailRow label="Current request status" value={event.correctionRequest.status} />
-          </dl>
-        </section>
+        {event.correctionRequest ? (
+          <section className="hr-audit-detail-section" aria-labelledby="hr-audit-request-heading">
+            <h3 id="hr-audit-request-heading">Related correction request</h3>
+            <dl className="hr-audit-detail-list">
+              <DetailRow label="Request ID" value={event.correctionRequest.id} />
+              <DetailRow label="Issue type" value={event.correctionRequest.issueType} />
+              <DetailRow label="Attendance date" value={formatDate(event.correctionRequest.attendanceDate)} />
+              <DetailRow label="Current request status" value={event.correctionRequest.status} />
+            </dl>
+          </section>
+        ) : null}
 
         {event.note ? (
           <section className="hr-audit-detail-section" aria-labelledby="hr-audit-note-heading">

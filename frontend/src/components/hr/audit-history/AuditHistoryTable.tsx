@@ -12,6 +12,7 @@ function actionTone(action: AttendanceAuditAction) {
   if (action === "Correction Rejected") return "danger" as const;
   if (action === "Information Requested") return "warning" as const;
   if (action === "Correction Reviewed") return "info" as const;
+  if (action === "Attendance Verified") return "success" as const;
   return "muted" as const;
 }
 
@@ -63,7 +64,7 @@ export function AuditHistoryTable({ events, onSelectEvent }: AuditHistoryTablePr
               <td>{event.area}</td>
               <td className="hr-audit-change-cell">{changeSummary(event)}</td>
               <td>
-                <strong className="hr-audit-reference">{event.correctionRequest.id}</strong>
+                <strong className="hr-audit-reference">{event.correctionRequest?.id ?? "Attendance record"}</strong>
                 <span className="hr-audit-cell-meta">{event.attendanceRecordId}</span>
               </td>
               <td>

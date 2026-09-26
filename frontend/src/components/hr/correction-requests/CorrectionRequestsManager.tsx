@@ -2,11 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { hrAttendanceMonitoringRecords } from "@/data/hr";
-import type {
-  HrCorrectionRequest,
-  HrCorrectionRequestStatus,
-} from "@/data/hr-correction-requests";
+import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
+import type { HrCorrectionRequest, HrCorrectionRequestStatus } from "@/data/hr-correction-requests";
 
 import { CorrectionRequestDrawer } from "./CorrectionRequestDrawer";
 import { CorrectionRequestFilters } from "./CorrectionRequestFilters";
@@ -16,8 +13,6 @@ import { CorrectionRequestsTable } from "./CorrectionRequestsTable";
 import type { CorrectionDecisionType } from "./types";
 
 const allValue = "all";
-const decisionTimestamp = "Sep 16, 2026 · 11:30 AM";
-
 const statusOptions = [
   { value: allValue, label: "All statuses" },
   { value: "Submitted", label: "Submitted" },
@@ -45,12 +40,8 @@ const decisionConfig: Record<CorrectionDecisionType, { status: HrCorrectionReque
   },
 };
 
-type CorrectionRequestsManagerProps = {
-  requests: readonly HrCorrectionRequest[];
-};
-
-export function CorrectionRequestsManager({ requests }: CorrectionRequestsManagerProps) {
-  const [requestState, setRequestState] = useState([...requests]);
+export function CorrectionRequestsManager() {
+  const { correctionRequests, attendanceRecords, updateCorrectionRequest } = useHrWorkflow();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(allValue);
   const [issueType, setIssueType] = useState(allValue);
@@ -65,17 +56,17 @@ export function CorrectionRequestsManager({ requests }: CorrectionRequestsManage
   const departments = useMemo(
     () => [
       { value: allValue, label: "All departments" },
-      ...Array.from(new Set(requestState.map((request) => request.department)))
+      ...Array.from(new Set(correctionRequests.map((request) => request.department)))
         .sort()
         .map((value) => ({ value, label: value })),
     ],
-    [requestState],
+    [correctionRequests],
   );
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return requestState.filter((request) => {
+    return correctionRequests.filter((request) => {
       const matchesSearch = !normalizedSearch
         || request.id.toLowerCase().includes(normalizedSearch)
         || request.employeeName.toLowerCase().includes(normalizedSearch)
@@ -93,11 +84,11 @@ export function CorrectionRequestsManager({ requests }: CorrectionRequestsManage
         && matchesSubmittedDate
         && matchesAttendanceDate;
     });
-  }, [attendanceDate, department, issueType, requestState, search, status, submittedDate]);
+  }, [attendanceDate, correctionRequests, department, issueType, search, status, submittedDate]);
 
-  const selectedRequest = requestState.find((request) => request.id === selectedRequestId) ?? null;
+  const selectedRequest = correctionRequests.find((request) => request.id === selectedRequestId) ?? null;
   const selectedAttendanceRecord = selectedRequest
-    ? hrAttendanceMonitoringRecords.find((record) => record.id === selectedRequest.attendanceRecordId) ?? null
+    ? attendanceRecords.find((record) => record.id === selectedRequest.attendanceRecordId) ?? null
     : null;
 
   const activeFilterCount = [
@@ -147,36 +138,18 @@ export function CorrectionRequestsManager({ requests }: CorrectionRequestsManage
     const note = decisionNote.trim();
     const historyNote = note || undefined;
 
-    setRequestState((currentRequests) => currentRequests.map((request) => {
-      if (request.id !== selectedRequest.id) return request;
+    updateCorrectionRequest(selectedRequest.id, selectedDecision.status, historyNote);
 
-      return {
-        ...request,
-        status: selectedDecision.status,
-        statusTone: selectedDecision.tone,
-        decisionAt: decisionTimestamp,
-        decisionNote: historyNote,
-        history: [
-          ...request.history,
-          {
-            id: `${request.id}-${decision}-${Date.now()}`,
-            action: selectedDecision.action,
-            actor: "HR / Attendance Staff",
-            occurredAt: decisionTimestamp,
-            note: historyNote,
-          },
-        ],
-      };
-    }));
-
-    setFeedback(`${selectedDecision.action}.`);
+    setFeedback(selectedDecision.status === "Approved"
+      ? "Correction request approved. The attendance record is now pending final HR verification."
+      : `${selectedDecision.action}.`);
     setDecision(null);
     setDecisionNote("");
   }
 
   return (
     <div className="hr-correction-manager">
-      <CorrectionRequestSummary requests={requestState} />
+      <CorrectionRequestSummary requests={correctionRequests} />
 
       <CorrectionRequestFilters
         search={search}
@@ -205,7 +178,7 @@ export function CorrectionRequestsManager({ requests }: CorrectionRequestsManage
             <h2 id="hr-correction-queue-heading">Correction request queue</h2>
             <p className="hr-panel-description">Review the current attendance record and the employee&apos;s requested change before deciding.</p>
           </div>
-          <span className="hr-correction-result-count">Showing {filteredRequests.length} of {requestState.length} requests</span>
+          <span className="hr-correction-result-count">Showing {filteredRequests.length} of {correctionRequests.length} requests</span>
         </div>
 
         <CorrectionRequestsTable requests={filteredRequests} onSelectRequest={setSelectedRequestId} />

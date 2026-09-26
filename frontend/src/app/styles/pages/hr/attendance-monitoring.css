@@ -10,7 +10,7 @@
 
 .hr-monitoring-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -108,7 +108,7 @@
 
 .hr-monitoring-filter-grid {
   display: grid;
-  grid-template-columns: minmax(12rem, 2fr) repeat(5, minmax(8rem, 1fr));
+  grid-template-columns: minmax(12rem, 2fr) repeat(7, minmax(8rem, 1fr));
   gap: 0.75rem;
   padding: 1rem 1.25rem 0.9rem;
 }
@@ -409,6 +409,85 @@
   padding-top: 1rem;
 }
 
+.hr-monitoring-verification-panel {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid #dbe7f5;
+  border-radius: 0.7rem;
+  background: #f7faff;
+  padding: 0.9rem;
+}
+
+.hr-monitoring-verification-panel h3 {
+  margin: 0.25rem 0 0;
+  color: var(--au-navy);
+  font-size: 0.8rem;
+}
+
+.hr-monitoring-verification-panel p:not(.hr-section-kicker):not(.hr-monitoring-verification-feedback) {
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  line-height: 1.5;
+}
+
+.hr-monitoring-verification-feedback {
+  margin: 0;
+  color: var(--success);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.hr-monitoring-verification-dialog-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.hr-monitoring-verification-dialog {
+  position: relative;
+  width: min(28rem, 100%);
+  border: 1px solid var(--border);
+  border-radius: 0.8rem;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgba(15, 35, 80, 0.2);
+  padding: 1.25rem;
+}
+
+.hr-monitoring-verification-dialog-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.6rem;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.hr-monitoring-verification-dialog h2 {
+  margin: 0.65rem 0 0;
+  color: var(--au-navy);
+  font-size: 1.05rem;
+}
+
+.hr-monitoring-verification-dialog > p:not(.hr-section-kicker) {
+  margin: 0.65rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.hr-monitoring-verification-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
 @media (max-width: 1200px) {
   .hr-monitoring-filter-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -454,6 +533,14 @@
 
   .hr-monitoring-drawer {
     width: min(100%, 32rem);
+  }
+
+  .hr-monitoring-verification-dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .hr-monitoring-verification-dialog-actions button {
+    width: 100%;
   }
 }
 

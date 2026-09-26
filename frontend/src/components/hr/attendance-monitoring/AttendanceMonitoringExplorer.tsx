@@ -2,15 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  hrAttendanceMonitoringDate,
-  type HrAttendanceMonitoringRecord,
-} from "@/data/hr";
+import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
+import { hrAttendanceMonitoringDate } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 
 import { AttendanceMonitoringFilters } from "./AttendanceMonitoringFilters";
 import { AttendanceMonitoringSummary } from "./AttendanceMonitoringSummary";
 import { AttendanceMonitoringTable } from "./AttendanceMonitoringTable";
 import { AttendanceRecordDrawer } from "./AttendanceRecordDrawer";
+import { HrVerificationDialog } from "./HrVerificationDialog";
 
 const allValue = "all";
 
@@ -38,18 +38,32 @@ const validationOptions = [
   { value: "Schedule Mismatch", label: "Schedule Mismatch" },
 ];
 
-type AttendanceMonitoringExplorerProps = {
-  records: readonly HrAttendanceMonitoringRecord[];
-};
-
-export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringExplorerProps) {
+export function AttendanceMonitoringExplorer() {
+  const { attendanceRecords, verifyAttendance } = useHrWorkflow();
+  const records = attendanceRecords;
   const [search, setSearch] = useState("");
   const [date, setDate] = useState(hrAttendanceMonitoringDate);
   const [department, setDepartment] = useState(allValue);
   const [status, setStatus] = useState(allValue);
   const [source, setSource] = useState(allValue);
   const [validation, setValidation] = useState(allValue);
-  const [selectedRecord, setSelectedRecord] = useState<HrAttendanceMonitoringRecord | null>(null);
+  const [verification, setVerification] = useState(allValue);
+  const [payrollReadiness, setPayrollReadiness] = useState(allValue);
+  const [selectedRecord, setSelectedRecord] = useState<HrWorkflowAttendanceRecord | null>(null);
+  const [verificationTarget, setVerificationTarget] = useState<HrWorkflowAttendanceRecord | null>(null);
+  const [verificationFeedback, setVerificationFeedback] = useState("");
+
+  const verificationOptions = [
+    { value: allValue, label: "All HR verification" },
+    { value: "Pending Review", label: "Pending Review" },
+    { value: "Needs Correction", label: "Needs Correction" },
+    { value: "Verified", label: "Verified" },
+  ];
+  const payrollReadinessOptions = [
+    { value: allValue, label: "All payroll readiness" },
+    { value: "Ready for Payroll", label: "Ready for Payroll" },
+    { value: "Not Ready", label: "Not Ready" },
+  ];
 
   const departments = useMemo(
     () => [
@@ -75,10 +89,12 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
       const sourceValue = record.source ?? "none";
       const matchesSource = source === allValue || sourceValue === source;
       const matchesValidation = validation === allValue || record.validationStatus === validation;
+      const matchesVerification = verification === allValue || record.hrVerificationStatus === verification;
+      const matchesPayrollReadiness = payrollReadiness === allValue || record.payrollReadiness === payrollReadiness;
 
-      return matchesSearch && matchesDate && matchesDepartment && matchesStatus && matchesSource && matchesValidation;
+      return matchesSearch && matchesDate && matchesDepartment && matchesStatus && matchesSource && matchesValidation && matchesVerification && matchesPayrollReadiness;
     });
-  }, [date, department, records, search, source, status, validation]);
+  }, [date, department, payrollReadiness, records, search, source, status, validation, verification]);
 
   const activeFilterCount = [
     search.trim(),
@@ -87,13 +103,18 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
     status !== allValue ? status : "",
     source !== allValue ? source : "",
     validation !== allValue ? validation : "",
+    verification !== allValue ? verification : "",
+    payrollReadiness !== allValue ? payrollReadiness : "",
   ].filter(Boolean).length;
 
   useEffect(() => {
     if (!selectedRecord) return;
 
     function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setSelectedRecord(null);
+      if (event.key === "Escape") {
+        setSelectedRecord(null);
+        setVerificationTarget(null);
+      }
     }
 
     document.addEventListener("keydown", closeOnEscape);
@@ -110,6 +131,27 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
     setStatus(allValue);
     setSource(allValue);
     setValidation(allValue);
+    setVerification(allValue);
+    setPayrollReadiness(allValue);
+  }
+
+  function openVerification() {
+    if (!selectedRecord) return;
+    setVerificationFeedback("");
+    setVerificationTarget(selectedRecord);
+  }
+
+  function confirmVerification() {
+    if (!verificationTarget) return;
+    const result = verifyAttendance(verificationTarget.id);
+    if (!result.ok) {
+      setVerificationFeedback(result.reason);
+      setVerificationTarget(null);
+      return;
+    }
+
+    setVerificationFeedback("Attendance verified. The record is ready for payroll handoff.");
+    setVerificationTarget(null);
   }
 
   return (
@@ -123,10 +165,14 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
         status={status}
         source={source}
         validation={validation}
+        verification={verification}
+        payrollReadiness={payrollReadiness}
         departments={departments}
         statuses={statusOptions}
         sources={sourceOptions}
         validations={validationOptions}
+        verifications={verificationOptions}
+        payrollReadinessOptions={payrollReadinessOptions}
         activeFilterCount={activeFilterCount}
         onSearchChange={setSearch}
         onDateChange={setDate}
@@ -134,6 +180,8 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
         onStatusChange={setStatus}
         onSourceChange={setSource}
         onValidationChange={setValidation}
+        onVerificationChange={setVerification}
+        onPayrollReadinessChange={setPayrollReadiness}
         onReset={resetFilters}
       />
 
@@ -150,7 +198,17 @@ export function AttendanceMonitoringExplorer({ records }: AttendanceMonitoringEx
         <AttendanceMonitoringTable records={filteredRecords} onSelectRecord={setSelectedRecord} />
       </section>
 
-      <AttendanceRecordDrawer record={selectedRecord} onClose={() => setSelectedRecord(null)} />
+      <AttendanceRecordDrawer
+        record={selectedRecord ? attendanceRecords.find((record) => record.id === selectedRecord.id) ?? null : null}
+        onClose={() => setSelectedRecord(null)}
+        onVerify={openVerification}
+        verificationFeedback={verificationFeedback}
+      />
+      <HrVerificationDialog
+        record={verificationTarget}
+        onClose={() => setVerificationTarget(null)}
+        onConfirm={confirmVerification}
+      />
     </div>
   );
 }

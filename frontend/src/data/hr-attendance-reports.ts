@@ -8,6 +8,7 @@ import {
   hrAttendanceMonitoringRecords,
   type HrAttendanceMonitoringRecord,
 } from "./hr";
+import type { HrVerificationStatus, PayrollReadiness } from "./hr-workflow";
 
 export type AttendanceReportType =
   | "daily"
@@ -21,6 +22,8 @@ export type AttendanceReportType =
 export type AttendanceReportRecord = HrAttendanceMonitoringRecord & {
   correctionRequestId?: string;
   correctionStatus?: HrCorrectionRequestStatus;
+  hrVerificationStatus?: HrVerificationStatus;
+  payrollReadiness?: PayrollReadiness;
 };
 
 export type MonthlyAttendanceRow = {

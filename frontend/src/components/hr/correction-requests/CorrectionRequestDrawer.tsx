@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { HrAttendanceMonitoringRecord } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
 
 import { CorrectionComparison } from "./CorrectionComparison";
@@ -12,7 +12,7 @@ import type { CorrectionDecisionType } from "./types";
 
 type CorrectionRequestDrawerProps = {
   request: HrCorrectionRequest | null;
-  attendanceRecord: HrAttendanceMonitoringRecord | null;
+  attendanceRecord: HrWorkflowAttendanceRecord | null;
   onClose: () => void;
   onDecision: (decision: CorrectionDecisionType) => void;
 };
@@ -98,6 +98,9 @@ export function CorrectionRequestDrawer({
               <DetailRow label="Source" value={attendanceRecord.source ?? "No source recorded"} />
               <DetailRow label="Attendance status" value={<StatusBadge tone={attendanceRecord.statusTone}>{attendanceRecord.status}</StatusBadge>} />
               <DetailRow label="Validation status" value={<StatusBadge tone={attendanceRecord.validationTone}>{attendanceRecord.validationStatus}</StatusBadge>} />
+              <DetailRow label="Correction status" value={attendanceRecord.correctionStatus === "No Correction Request" ? "No correction request" : attendanceRecord.correctionStatus} />
+              <DetailRow label="HR verification" value={<StatusBadge tone={attendanceRecord.hrVerificationStatus === "Verified" ? "success" : attendanceRecord.hrVerificationStatus === "Needs Correction" ? "warning" : "info"}>{attendanceRecord.hrVerificationStatus}</StatusBadge>} />
+              <DetailRow label="Payroll readiness" value={<StatusBadge tone={attendanceRecord.payrollReadiness === "Ready for Payroll" ? "success" : "muted"}>{attendanceRecord.payrollReadiness}</StatusBadge>} />
               {attendanceRecord.lateMinutes !== undefined ? <DetailRow label="Late minutes" value={`${attendanceRecord.lateMinutes} min`} /> : null}
               {attendanceRecord.undertimeMinutes !== undefined ? <DetailRow label="Undertime minutes" value={`${attendanceRecord.undertimeMinutes} min`} /> : null}
             </dl>

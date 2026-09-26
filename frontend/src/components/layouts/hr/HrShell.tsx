@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { HrMain } from "./HrMain";
 import { HrNavbar } from "./HrNavbar";
 import { HrSidebar } from "./HrSidebar";
+import { HrWorkflowProvider } from "./HrWorkflowContext";
 
 type HrShellProps = {
   children: ReactNode;
@@ -26,12 +27,14 @@ export function HrShell({ children }: HrShellProps) {
   }, []);
 
   return (
-    <div className="hr-shell">
-      <HrSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <div className="hr-main-wrap">
-        <HrNavbar onOpenSidebar={() => setSidebarOpen(true)} />
-        <HrMain>{children}</HrMain>
+    <HrWorkflowProvider>
+      <div className="hr-shell">
+        <HrSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="hr-main-wrap">
+          <HrNavbar onOpenSidebar={() => setSidebarOpen(true)} />
+          <HrMain>{children}</HrMain>
+        </div>
       </div>
-    </div>
+    </HrWorkflowProvider>
   );
 }

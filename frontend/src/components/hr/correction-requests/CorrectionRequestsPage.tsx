@@ -1,5 +1,4 @@
 import { ActionButton } from "@/components/ui/ActionButton";
-import { hrCorrectionRequests } from "@/data/hr-correction-requests";
 
 import { CorrectionRequestsManager } from "./CorrectionRequestsManager";
 
@@ -21,7 +20,7 @@ export function CorrectionRequestsPage() {
         </div>
       </header>
 
-      <CorrectionRequestsManager requests={hrCorrectionRequests} />
+      <CorrectionRequestsManager />
     </div>
   );
 }

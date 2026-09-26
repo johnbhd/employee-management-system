@@ -1,9 +1,9 @@
-import type { HrAttendanceRecord } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type HrTodayAttendanceProps = {
-  records: readonly HrAttendanceRecord[];
+  records: readonly HrWorkflowAttendanceRecord[];
 };
 
 export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
@@ -15,7 +15,6 @@ export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
           <h2 id="hr-today-attendance-heading">Today&apos;s Attendance</h2>
           <p className="hr-panel-description">Latest attendance records from the Bundy and QR source views.</p>
         </div>
-        <span className="hr-prototype-label">Prototype data</span>
       </div>
 
       {records.length > 0 ? (
@@ -31,6 +30,7 @@ export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
                 <th scope="col">Source</th>
                 <th scope="col">Status</th>
                 <th scope="col">Validation</th>
+                <th scope="col">HR Verification</th>
               </tr>
             </thead>
             <tbody>
@@ -46,6 +46,7 @@ export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
                   <td>{record.source ?? "—"}</td>
                   <td><StatusBadge tone={record.statusTone}>{record.status}</StatusBadge></td>
                   <td><StatusBadge tone={record.validationTone}>{record.validationStatus}</StatusBadge></td>
+                  <td><StatusBadge tone={record.hrVerificationStatus === "Verified" ? "success" : record.hrVerificationStatus === "Needs Correction" ? "warning" : "info"}>{record.hrVerificationStatus}</StatusBadge></td>
                 </tr>
               ))}
             </tbody>

@@ -63,7 +63,7 @@ export const hrSummaryMetrics: HrSummaryMetric[] = [
   { label: "Absent", value: "4", note: "Needs review", icon: "close", tone: "danger" },
   { label: "Missing Time-Out", value: "6", note: "Open attendance gaps", icon: "warning", tone: "warning" },
   { label: "Pending Corrections", value: "5", note: "Awaiting review", icon: "comment", tone: "info" },
-  { label: "Pending Approval", value: "3", note: "Needs authorized action", icon: "check", tone: "warning" },
+  { label: "Pending Verification", value: "3", note: "Needs final HR review", icon: "activity", tone: "warning" },
 ];
 
 export const hrTodayAttendance: HrAttendanceRecord[] = [

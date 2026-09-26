@@ -1,5 +1,3 @@
-import { hrAttendanceAuditEvents } from "@/data/hr-attendance-audit";
-
 import { AuditHistoryExplorer } from "./AuditHistoryExplorer";
 
 export function AuditHistoryPage() {
@@ -15,7 +13,7 @@ export function AuditHistoryPage() {
         </div>
       </header>
 
-      <AuditHistoryExplorer events={hrAttendanceAuditEvents} />
+      <AuditHistoryExplorer />
     </div>
   );
 }

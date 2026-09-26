@@ -116,7 +116,7 @@ export const hrCorrectionRequests: HrCorrectionRequest[] = [
     evidence: [
       {
         id: "evidence-0043",
-        fileName: "supervisor-note.pdf",
+        fileName: "attendance-note.pdf",
         fileType: "PDF",
         submittedAt: "Sep 16, 2026 · 5:38 PM",
       },
@@ -210,13 +210,13 @@ export const hrCorrectionRequests: HrCorrectionRequest[] = [
     issueType: "Missing Time-Out",
     status: "Approved",
     statusTone: "success",
-    explanation: "The Time-out was missed during a busy closing period. My supervisor confirmed that I left at 5:01 PM.",
+    explanation: "The Time-out was missed during a busy closing period. My attendance confirmation indicates that I left at 5:01 PM.",
     currentValues: { timeOut: "—" },
     requestedValues: { timeOut: "5:01 PM" },
     evidence: [
       {
         id: "evidence-0046",
-        fileName: "supervisor-confirmation.pdf",
+        fileName: "attendance-confirmation.pdf",
         fileType: "PDF",
         submittedAt: "Sep 16, 2026 · 5:27 PM",
       },
@@ -233,11 +233,11 @@ export const hrCorrectionRequests: HrCorrectionRequest[] = [
         action: "Correction approved",
         actor: hrReviewer,
         occurredAt: "Sep 16, 2026 · 5:48 PM",
-        note: "The submitted supervisor confirmation supported the requested Time-out.",
+        note: "The submitted attendance confirmation supported the requested Time-out.",
       },
     ],
     decisionAt: "Sep 16, 2026 · 5:48 PM",
-    decisionNote: "The submitted supervisor confirmation supported the requested Time-out.",
+    decisionNote: "The submitted attendance confirmation supported the requested Time-out.",
   },
   {
     id: "CR-2026-0047",

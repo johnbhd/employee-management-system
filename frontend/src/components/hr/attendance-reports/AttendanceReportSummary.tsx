@@ -40,6 +40,8 @@ function metricsForReport({ reportType, records, monthlyRows, correctionRequests
       { label: "Present records", value: String(monthlyRows.reduce((total, row) => total + row.present, 0)), note: "Attendance marked present", icon: "check", tone: "success" },
       { label: "Late records", value: String(monthlyRows.reduce((total, row) => total + row.late, 0)), note: "Attendance marked late", icon: "clock", tone: "warning" },
       { label: "Absent records", value: String(monthlyRows.reduce((total, row) => total + row.absent, 0)), note: "Attendance marked absent", icon: "close", tone: "danger" },
+      { label: "HR verified", value: String(records.filter((record) => record.hrVerificationStatus === "Verified").length), note: "Final HR verification", icon: "check", tone: "success" },
+      { label: "Ready for payroll", value: String(records.filter((record) => record.payrollReadiness === "Ready for Payroll").length), note: "Eligible for handoff", icon: "activity", tone: "info" },
     ];
   }
 
@@ -102,6 +104,9 @@ function metricsForReport({ reportType, records, monthlyRows, correctionRequests
     { label: "Late", value: String(records.filter((record) => record.status === "Late").length), note: "Attendance marked late", icon: "clock", tone: "warning" },
     { label: "Absent", value: String(records.filter((record) => record.status === "Absent").length), note: "Attendance marked absent", icon: "close", tone: "danger" },
     { label: "Missing time-out", value: String(records.filter((record) => record.status === "Missing Time-Out").length), note: "Open attendance gaps", icon: "warning", tone: "warning" },
+    { label: "HR verified", value: String(records.filter((record) => record.hrVerificationStatus === "Verified").length), note: "Final HR verification", icon: "check", tone: "success" },
+    { label: "Ready for payroll", value: String(records.filter((record) => record.payrollReadiness === "Ready for Payroll").length), note: "Eligible for handoff", icon: "activity", tone: "info" },
+    { label: "Pending verification", value: String(records.filter((record) => record.hrVerificationStatus !== "Verified").length), note: "Needs final HR review", icon: "activity", tone: "warning" },
   ];
 }
 

@@ -22,10 +22,10 @@ export function AuditHistorySummary({ events }: AuditHistorySummaryProps) {
       tone: "info",
     },
     {
-      label: "Corrections submitted",
-      value: events.filter((event) => event.action === "Correction Submitted").length,
-      icon: "comment",
-      tone: "muted",
+      label: "Attendance verified",
+      value: events.filter((event) => event.action === "Attendance Verified").length,
+      icon: "check",
+      tone: "success",
     },
     {
       label: "Corrections approved",

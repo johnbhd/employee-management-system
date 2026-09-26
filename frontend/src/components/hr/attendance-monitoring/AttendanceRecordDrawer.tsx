@@ -2,11 +2,13 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { HrAttendanceMonitoringRecord } from "@/data/hr";
+import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
 
 type AttendanceRecordDrawerProps = {
-  record: HrAttendanceMonitoringRecord | null;
+  record: HrWorkflowAttendanceRecord | null;
   onClose: () => void;
+  onVerify: () => void;
+  verificationFeedback?: string;
 };
 
 function formatDate(value: string) {
@@ -28,7 +30,7 @@ function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-export function AttendanceRecordDrawer({ record, onClose }: AttendanceRecordDrawerProps) {
+export function AttendanceRecordDrawer({ record, onClose, onVerify, verificationFeedback }: AttendanceRecordDrawerProps) {
   if (!record) return null;
 
   return (
@@ -92,7 +94,42 @@ export function AttendanceRecordDrawer({ record, onClose }: AttendanceRecordDraw
               label="Validation status"
               value={<StatusBadge tone={record.validationTone}>{record.validationStatus}</StatusBadge>}
             />
+            <DetailRow
+              label="Correction status"
+              value={record.correctionStatus === "No Correction Request" ? "No correction request" : record.correctionStatus}
+            />
+            <DetailRow
+              label="HR verification"
+              value={<StatusBadge tone={record.hrVerificationStatus === "Verified" ? "success" : record.hrVerificationStatus === "Needs Correction" ? "warning" : "info"}>{record.hrVerificationStatus}</StatusBadge>}
+            />
+            <DetailRow
+              label="Payroll readiness"
+              value={<StatusBadge tone={record.payrollReadiness === "Ready for Payroll" ? "success" : "muted"}>{record.payrollReadiness}</StatusBadge>}
+            />
           </dl>
+        </section>
+
+        <section className="hr-monitoring-verification-panel" aria-labelledby="hr-monitoring-verification-heading">
+          <div>
+            <p className="hr-section-kicker">Final HR review</p>
+            <h3 id="hr-monitoring-verification-heading">Attendance verification</h3>
+            <p>
+              {record.hrVerificationStatus === "Verified"
+                ? "This record has been verified by HR and is ready for payroll handoff."
+                : record.validationStatus !== "Verified"
+                  ? "Resolve the validation issue before verifying this attendance record."
+                  : record.correctionStatus !== "No Correction Request" && record.correctionStatus !== "Approved"
+                    ? "Resolve the correction request before verifying this attendance record."
+                    : "Confirm the attendance record after reviewing its source, status, and correction history."}
+            </p>
+          </div>
+          {record.hrVerificationStatus === "Pending Review" && record.validationStatus === "Verified" && (record.correctionStatus === "No Correction Request" || record.correctionStatus === "Approved") ? (
+            <button type="button" className="button-primary" onClick={onVerify}>
+              <Icon name="check" />
+              Verify Attendance
+            </button>
+          ) : null}
+          {verificationFeedback ? <p className="hr-monitoring-verification-feedback" role="status">{verificationFeedback}</p> : null}
         </section>
 
         <section className="hr-monitoring-detail-section" aria-labelledby="hr-monitoring-evaluation-heading">
