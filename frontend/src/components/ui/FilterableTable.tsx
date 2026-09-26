@@ -23,15 +23,19 @@ type FilterableTableProps = {
 function toneFor(value: string) {
   const normalized = value.toLowerCase();
 
-  if (["success", "online", "processed", "matched", "valid", "updated", "on time", "active"].includes(normalized)) {
+  if (["success", "online", "processed", "matched", "valid", "updated", "on time", "active", "resolved"].includes(normalized)) {
     return "success";
   }
 
-  if (["failed", "rejected", "inactive employee", "error"].includes(normalized)) {
+  if (normalized === "low") {
+    return "info";
+  }
+
+  if (["failed", "rejected", "inactive employee", "error", "open", "critical", "high"].includes(normalized)) {
     return "danger";
   }
 
-  if (["warning", "pending", "needs review", "unmatched", "duplicate", "not ready", "missing time-in", "missing time-out"].includes(normalized)) {
+  if (["warning", "pending", "needs review", "under review", "retry pending", "unmatched", "duplicate", "not ready", "missing time-in", "missing time-out", "medium"].includes(normalized)) {
     return "warning";
   }
 
@@ -102,7 +106,7 @@ export function FilterableTable({
               <tr key={`${row[columns[0]?.key] ?? "row"}-${rowIndex}`}>
                 {columns.map((column) => {
                   const value = row[column.key] ?? "—";
-                  const isStatus = ["status", "tone", "match", "processing", "validation", "result", "employment"].includes(column.key);
+                  const isStatus = ["status", "severity", "tone", "match", "processing", "validation", "result", "employment"].includes(column.key);
 
                   return (
                     <td key={column.key}>

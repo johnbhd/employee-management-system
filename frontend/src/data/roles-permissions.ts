@@ -62,13 +62,13 @@ export const permissionDefinitions: readonly PermissionDefinition[] = [
   {
     id: "view-integration-errors",
     name: "View Integration Errors",
-    description: "Inspect technical integration error records and timelines.",
+    description: "Review the operational error queue and recovery status.",
     category: "Integration Monitoring",
   },
   {
     id: "retry-integration-errors",
     name: "Retry Technical Integration Errors",
-    description: "Simulate retry and acknowledgement actions for technical errors.",
+    description: "Simulate controlled retry actions for eligible technical errors.",
     category: "Integration Monitoring",
   },
   {
