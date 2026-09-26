@@ -1,5 +1,5 @@
-import { UserAccountsPage } from "@/components/admin/user-accounts/UserAccountsPage";
+import { UserAccountsHrpsPage } from "@/components/admin/pages/UserAccountsHrpsPage";
 
 export default function Page() {
-  return <UserAccountsPage />;
+  return <UserAccountsHrpsPage />;
 }

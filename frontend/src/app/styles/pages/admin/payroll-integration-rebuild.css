@@ -1,0 +1,179 @@
+.payroll-integration-rebuild {
+  gap: 1.5rem;
+}
+
+.payroll-integration-rebuild > *,
+.payroll-integration-rebuild .dashboard-card,
+.payroll-integration-rebuild .panel-body {
+  min-width: 0;
+}
+
+.payroll-rebuild-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.payroll-rebuild-metrics .metric-card {
+  min-height: 8rem;
+}
+
+.payroll-rebuild-health-list {
+  gap: 0.65rem;
+}
+
+.payroll-rebuild-health-row {
+  align-items: center;
+}
+
+.payroll-rebuild-health-row p {
+  max-width: 26rem;
+}
+
+.payroll-rebuild-flow {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overscroll-behavior-x: contain;
+}
+
+.payroll-rebuild-flow .flow-node strong,
+.payroll-rebuild-flow .flow-node small {
+  overflow-wrap: anywhere;
+}
+
+.payroll-rebuild-flow-note {
+  max-width: calc(100% - 2.7rem);
+  overflow-wrap: anywhere;
+}
+
+.payroll-rebuild-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: thin;
+}
+
+.payroll-rebuild-table {
+  width: 100%;
+  min-width: 68rem;
+}
+
+.payroll-rebuild-table td {
+  overflow-wrap: anywhere;
+}
+
+.payroll-rebuild-table td:first-child,
+.payroll-rebuild-table td:nth-child(4),
+.payroll-rebuild-table td:last-child {
+  white-space: nowrap;
+}
+
+.payroll-rebuild-employee {
+  color: #334155;
+}
+
+.payroll-rebuild-issues .issue-card {
+  align-items: center;
+}
+
+.payroll-rebuild-transfer-list .timeline-item {
+  align-items: center;
+}
+
+.payroll-rebuild-transfer-meta {
+  display: grid;
+  flex: 0 0 auto;
+  justify-items: end;
+  gap: 0.35rem;
+}
+
+.payroll-rebuild-transfer-meta small {
+  margin-top: 0;
+}
+
+.payroll-rebuild-boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.payroll-rebuild-boundary-icon {
+  display: grid;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.75rem;
+  background: var(--info-soft);
+  color: var(--au-blue);
+  font-size: 1.1rem;
+}
+
+.payroll-rebuild-boundary > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.payroll-rebuild-boundary strong {
+  color: #334155;
+  font-size: 0.78rem;
+}
+
+.payroll-rebuild-boundary p {
+  max-width: 62rem;
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.payroll-rebuild-boundary > .status-badge {
+  flex: 0 0 auto;
+  white-space: normal;
+}
+
+.payroll-rebuild-feedback {
+  margin-top: 0;
+}
+
+@media (max-width: 1200px) {
+  .payroll-rebuild-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .payroll-rebuild-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-rebuild-health-row,
+  .payroll-rebuild-issues .issue-card,
+  .payroll-rebuild-transfer-list .timeline-item,
+  .payroll-rebuild-boundary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .payroll-rebuild-health-row .status-badge,
+  .payroll-rebuild-issues .action-control,
+  .payroll-rebuild-boundary > .status-badge {
+    align-self: flex-start;
+  }
+
+  .payroll-rebuild-transfer-meta {
+    justify-items: start;
+  }
+
+  .payroll-rebuild-boundary-icon {
+    width: 2.2rem;
+    height: 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .payroll-rebuild-table {
+    min-width: 62rem;
+  }
+}
