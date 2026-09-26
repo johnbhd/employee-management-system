@@ -466,3 +466,10 @@
     border-left: 0;
   }
 }
+
+@media (min-width: 481px) and (max-width: 900px) {
+  .integration-error-metrics,
+  .integration-error-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
