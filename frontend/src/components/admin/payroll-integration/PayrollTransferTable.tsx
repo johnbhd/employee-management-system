@@ -2,15 +2,14 @@ import type { ReactNode } from "react";
 
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-
 import {
   blockedPayrollRecords,
   failedPayrollTransfers,
   payrollReadyRecords,
-  synchronizationHistory,
-  transferBatches,
+  payrollSynchronizationHistory,
+  payrollTransferBatches,
   type PayrollFieldMapping,
-} from "@/data/payroll";
+} from "@/data/payroll-integration";
 
 type PayrollTableProps = {
   caption: string;
@@ -20,8 +19,8 @@ type PayrollTableProps = {
 
 function PayrollTable({ caption, children, className = "" }: PayrollTableProps) {
   return (
-    <div className={`payroll-table-wrap ${className}`.trim()}>
-      <table className="data-table payroll-table">
+    <div className={`payroll-integration-table-wrap ${className}`.trim()}>
+      <table className="data-table payroll-integration-table">
         <caption className="sr-only">{caption}</caption>
         {children}
       </table>
@@ -31,7 +30,7 @@ function PayrollTable({ caption, children, className = "" }: PayrollTableProps) 
 
 export function PayrollReadyTable() {
   return (
-    <PayrollTable caption="Payroll-ready attendance records" className="payroll-record-table-wrap">
+    <PayrollTable caption="Payroll-ready attendance records" className="payroll-ready-table-wrap">
       <thead>
         <tr>
           <th>Employee ID</th>
@@ -52,15 +51,23 @@ export function PayrollReadyTable() {
             <td>{record.employee}</td>
             <td>{record.department}</td>
             <td>{record.payrollPeriod}</td>
-            <td><StatusBadge tone={record.attendanceStatus.tone}>{record.attendanceStatus.label}</StatusBadge></td>
-            <td><StatusBadge tone={record.verificationStatus.tone}>{record.verificationStatus.label}</StatusBadge></td>
-            <td><StatusBadge tone={record.readinessStatus.tone}>{record.readinessStatus.label}</StatusBadge></td>
-            <td><StatusBadge tone={record.transferStatus.tone}>{record.transferStatus.label}</StatusBadge></td>
-            <td className="payroll-action-cell">
+            <td>
+              <StatusBadge tone={record.attendanceStatus.tone}>{record.attendanceStatus.label}</StatusBadge>
+            </td>
+            <td>
+              <StatusBadge tone={record.verificationStatus.tone}>{record.verificationStatus.label}</StatusBadge>
+            </td>
+            <td>
+              <StatusBadge tone={record.readinessStatus.tone}>{record.readinessStatus.label}</StatusBadge>
+            </td>
+            <td>
+              <StatusBadge tone={record.transferStatus.tone}>{record.transferStatus.label}</StatusBadge>
+            </td>
+            <td>
               <ActionButton
                 variant="link"
                 icon="file"
-                action={`${record.employeeId} attendance details opened.`}
+                action={`${record.employeeId} attendance details opened in prototype mode.`}
               >
                 View
               </ActionButton>
@@ -90,8 +97,12 @@ export function PayrollFieldMappingTable({ mappings }: PayrollFieldMappingTableP
         {mappings.map((mapping) => (
           <tr key={mapping.sourceField}>
             <td>{mapping.sourceField}</td>
-            <td><code>{mapping.targetField}</code></td>
-            <td><StatusBadge tone={mapping.tone}>{mapping.status}</StatusBadge></td>
+            <td>
+              <code>{mapping.targetField}</code>
+            </td>
+            <td>
+              <StatusBadge tone={mapping.tone}>{mapping.status}</StatusBadge>
+            </td>
           </tr>
         ))}
       </tbody>
@@ -99,7 +110,7 @@ export function PayrollFieldMappingTable({ mappings }: PayrollFieldMappingTableP
   );
 }
 
-export function TransferBatchTable() {
+export function PayrollBatchTable() {
   return (
     <PayrollTable caption="Payroll transfer batches" className="payroll-batch-table-wrap">
       <thead>
@@ -115,37 +126,29 @@ export function TransferBatchTable() {
         </tr>
       </thead>
       <tbody>
-        {transferBatches.map((batch) => (
+        {payrollTransferBatches.map((batch) => (
           <tr key={batch.id}>
             <td>{batch.id}</td>
             <td>{batch.payrollPeriod}</td>
             <td>{batch.employeeCount}</td>
             <td>{batch.recordCount}</td>
             <td>{batch.preparedAt}</td>
-            <td><StatusBadge tone={batch.transferStatus.tone}>{batch.transferStatus.label}</StatusBadge></td>
+            <td>
+              <StatusBadge tone={batch.transferStatus.tone}>{batch.transferStatus.label}</StatusBadge>
+            </td>
             <td>
               <StatusBadge tone={batch.acknowledgementStatus.tone}>
                 {batch.acknowledgementStatus.label}
               </StatusBadge>
             </td>
-            <td className="payroll-action-cell">
-              {batch.transferStatus.label === "Failed" ? (
-                <ActionButton
-                  variant="link"
-                  icon="refresh"
-                  action={`${batch.id} retry queued in prototype mode.`}
-                >
-                  Retry
-                </ActionButton>
-              ) : (
-                <ActionButton
-                  variant="link"
-                  icon="file"
-                  action={`${batch.id} transfer details opened.`}
-                >
-                  View
-                </ActionButton>
-              )}
+            <td>
+              <ActionButton
+                variant="link"
+                icon={batch.transferStatus.label === "Failed" ? "refresh" : "file"}
+                action={`${batch.id} ${batch.transferStatus.label === "Failed" ? "retry queued" : "details opened"} in prototype mode.`}
+              >
+                {batch.transferStatus.label === "Failed" ? "Retry" : "View"}
+              </ActionButton>
             </td>
           </tr>
         ))}
@@ -154,9 +157,9 @@ export function TransferBatchTable() {
   );
 }
 
-export function BlockedRecordsTable() {
+export function PayrollBlockedTable() {
   return (
-    <PayrollTable caption="Blocked payroll records" className="payroll-blocked-table-wrap">
+    <PayrollTable caption="Blocked Payroll records" className="payroll-blocked-table-wrap">
       <thead>
         <tr>
           <th>Employee ID</th>
@@ -174,14 +177,20 @@ export function BlockedRecordsTable() {
             <td>{record.employeeId}</td>
             <td>{record.employee}</td>
             <td>{record.issue}</td>
-            <td><StatusBadge tone={record.attendanceStatus.tone}>{record.attendanceStatus.label}</StatusBadge></td>
-            <td><StatusBadge tone={record.reviewStatus.tone}>{record.reviewStatus.label}</StatusBadge></td>
-            <td><StatusBadge tone={record.readinessStatus.tone}>{record.readinessStatus.label}</StatusBadge></td>
-            <td className="payroll-action-cell">
+            <td>
+              <StatusBadge tone={record.attendanceStatus.tone}>{record.attendanceStatus.label}</StatusBadge>
+            </td>
+            <td>
+              <StatusBadge tone={record.reviewStatus.tone}>{record.reviewStatus.label}</StatusBadge>
+            </td>
+            <td>
+              <StatusBadge tone={record.readinessStatus.tone}>{record.readinessStatus.label}</StatusBadge>
+            </td>
+            <td>
               <ActionButton
                 variant="link"
                 icon="info"
-                action={`${record.employeeId} validation issue opened.`}
+                action={`${record.employeeId} validation issue opened in prototype mode.`}
               >
                 Inspect
               </ActionButton>
@@ -193,9 +202,9 @@ export function BlockedRecordsTable() {
   );
 }
 
-export function FailedTransfersTable() {
+export function PayrollFailedTable() {
   return (
-    <PayrollTable caption="Failed payroll transfers" className="payroll-failed-table-wrap">
+    <PayrollTable caption="Failed Payroll transfers" className="payroll-failed-table-wrap">
       <thead>
         <tr>
           <th>Batch ID</th>
@@ -213,8 +222,10 @@ export function FailedTransfersTable() {
             <td>{transfer.timestamp}</td>
             <td>{transfer.recordCount}</td>
             <td>{transfer.failureType}</td>
-            <td><StatusBadge tone={transfer.status.tone}>{transfer.status.label}</StatusBadge></td>
-            <td className="payroll-action-cell">
+            <td>
+              <StatusBadge tone={transfer.status.tone}>{transfer.status.label}</StatusBadge>
+            </td>
+            <td>
               <ActionButton
                 variant="link"
                 icon="refresh"
@@ -230,7 +241,7 @@ export function FailedTransfersTable() {
   );
 }
 
-export function SynchronizationHistoryTable() {
+export function PayrollHistoryTable() {
   return (
     <PayrollTable caption="Payroll synchronization history" className="payroll-history-table-wrap">
       <thead>
@@ -245,14 +256,16 @@ export function SynchronizationHistoryTable() {
         </tr>
       </thead>
       <tbody>
-        {synchronizationHistory.map((event) => (
+        {payrollSynchronizationHistory.map((event) => (
           <tr key={`${event.timestamp}-${event.batchId}`}>
             <td>{event.timestamp}</td>
             <td>{event.batchId}</td>
             <td>{event.payrollPeriod}</td>
             <td>{event.recordCount}</td>
             <td>{event.operation}</td>
-            <td><StatusBadge tone={event.status.tone}>{event.status.label}</StatusBadge></td>
+            <td>
+              <StatusBadge tone={event.status.tone}>{event.status.label}</StatusBadge>
+            </td>
             <td>{event.details}</td>
           </tr>
         ))}

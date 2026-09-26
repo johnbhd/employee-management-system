@@ -1,4 +1,97 @@
-import type { StatusTone } from "@/types/ui";
+import type { Metric, StatusTone } from "@/types/ui";
+
+export const payrollSummaryMetrics = [
+  {
+    label: "Payroll-ready employees",
+    value: "124",
+    note: "Verified attendance only",
+    icon: "check",
+    tone: "success",
+  },
+  {
+    label: "Pending review",
+    value: "8",
+    note: "Held from transfer",
+    icon: "clock",
+    tone: "warning",
+  },
+  {
+    label: "Successful transfers",
+    value: "116",
+    note: "Acknowledgements received",
+    icon: "arrow",
+    tone: "info",
+  },
+  {
+    label: "Failed transfers",
+    value: "2",
+    note: "Retry attention needed",
+    icon: "warning",
+    tone: "danger",
+  },
+] as const satisfies readonly Metric[];
+
+export const payrollReadinessItems = [
+  { label: "Ready for Payroll", value: "124", percent: 88, tone: "success" as const },
+  { label: "Pending HR verification", value: "5", percent: 22, tone: "warning" as const },
+  { label: "Correction requests pending", value: "3", percent: 16, tone: "warning" as const },
+  { label: "Blocked by validation", value: "2", percent: 10, tone: "warning" as const },
+  { label: "Transferred", value: "116", percent: 82, tone: "success" as const },
+];
+
+export type PayrollValidationStatus = "Passed" | "Warning" | "Failed";
+
+export type PayrollValidationCheck = {
+  label: string;
+  detail: string;
+  status: PayrollValidationStatus;
+  tone: StatusTone;
+};
+
+export const payrollValidationChecks: readonly PayrollValidationCheck[] = [
+  {
+    label: "Employee ID present",
+    detail: "The required HRPS-linked identifier is available.",
+    status: "Passed",
+    tone: "success",
+  },
+  {
+    label: "Employee matched with HRPS",
+    detail: "The prototype employee reference match completed.",
+    status: "Passed",
+    tone: "success",
+  },
+  {
+    label: "Attendance verified",
+    detail: "Only verified records can continue to the transfer gate.",
+    status: "Passed",
+    tone: "success",
+  },
+  {
+    label: "Required attendance fields complete",
+    detail: "Time and source completeness still require review.",
+    status: "Warning",
+    tone: "warning",
+  },
+  {
+    label: "Duplicate transfer check",
+    detail: "Acknowledged records are checked before batching.",
+    status: "Passed",
+    tone: "success",
+  },
+  {
+    label: "Payroll period assigned",
+    detail: "Production cutoff ownership remains To Be Confirmed.",
+    status: "Warning",
+    tone: "warning",
+  },
+  {
+    label: "Payload structure valid",
+    detail: "The prototype field shape is ready for review.",
+    status: "Passed",
+    tone: "success",
+  },
+];
 
 export type PayrollStatus = {
   label: string;
@@ -14,57 +107,6 @@ export type PayrollReadyRecord = {
   verificationStatus: PayrollStatus;
   readinessStatus: PayrollStatus;
   transferStatus: PayrollStatus;
-};
-
-export type PayrollFieldMapping = {
-  sourceField: string;
-  targetField: string;
-  status: string;
-  tone: StatusTone;
-};
-
-export type PayrollTransferBatch = {
-  id: string;
-  payrollPeriod: string;
-  employeeCount: number;
-  recordCount: number;
-  preparedAt: string;
-  transferStatus: PayrollStatus;
-  acknowledgementStatus: PayrollStatus;
-};
-
-export type BlockedPayrollRecord = {
-  employeeId: string;
-  employee: string;
-  issue: string;
-  attendanceStatus: PayrollStatus;
-  reviewStatus: PayrollStatus;
-  readinessStatus: PayrollStatus;
-};
-
-export type FailedPayrollTransfer = {
-  batchId: string;
-  timestamp: string;
-  recordCount: number;
-  failureType: string;
-  status: PayrollStatus;
-};
-
-export type PayrollHistoryEvent = {
-  timestamp: string;
-  batchId: string;
-  payrollPeriod: string;
-  recordCount: number;
-  operation: string;
-  status: PayrollStatus;
-  details: string;
-};
-
-export type PayrollValidationCheck = {
-  label: string;
-  detail: string;
-  status: "Passed" | "Warning" | "Failed";
-  tone: StatusTone;
 };
 
 export const payrollReadyRecords: readonly PayrollReadyRecord[] = [
@@ -110,40 +152,12 @@ export const payrollReadyRecords: readonly PayrollReadyRecord[] = [
   },
 ];
 
-export const payrollValidationChecks: readonly PayrollValidationCheck[] = [
-  { label: "Employee ID present", detail: "Required identifier is available.", status: "Passed", tone: "success" },
-  {
-    label: "Employee matched with HRPS",
-    detail: "Prototype HRPS reference match completed.",
-    status: "Passed",
-    tone: "success",
-  },
-  { label: "Attendance verified", detail: "Only verified records can continue.", status: "Passed", tone: "success" },
-  {
-    label: "Required attendance fields complete",
-    detail: "Time and source completeness is still reviewed.",
-    status: "Warning",
-    tone: "warning",
-  },
-  {
-    label: "Duplicate transfer check",
-    detail: "Acknowledged records are checked before batching.",
-    status: "Passed",
-    tone: "success",
-  },
-  {
-    label: "Payroll period assigned",
-    detail: "Production cutoff ownership is To Be Confirmed.",
-    status: "Warning",
-    tone: "warning",
-  },
-  {
-    label: "Payload structure valid",
-    detail: "Prototype field shape is ready for review.",
-    status: "Passed",
-    tone: "success",
-  },
-];
+export type PayrollFieldMapping = {
+  sourceField: string;
+  targetField: string;
+  status: string;
+  tone: StatusTone;
+};
 
 export const payrollFieldMappings: readonly PayrollFieldMapping[] = [
   { sourceField: "Employee ID", targetField: "employee_id", status: "Mapped", tone: "success" },
@@ -165,7 +179,17 @@ export const payrollFieldMappings: readonly PayrollFieldMapping[] = [
   },
 ];
 
-export const transferBatches: readonly PayrollTransferBatch[] = [
+export type PayrollTransferBatch = {
+  id: string;
+  payrollPeriod: string;
+  employeeCount: number;
+  recordCount: number;
+  preparedAt: string;
+  transferStatus: PayrollStatus;
+  acknowledgementStatus: PayrollStatus;
+};
+
+export const payrollTransferBatches: readonly PayrollTransferBatch[] = [
   {
     id: "PAY-2026-09-A",
     payrollPeriod: "Sep 1–15, 2026",
@@ -195,6 +219,15 @@ export const transferBatches: readonly PayrollTransferBatch[] = [
   },
 ];
 
+export type BlockedPayrollRecord = {
+  employeeId: string;
+  employee: string;
+  issue: string;
+  attendanceStatus: PayrollStatus;
+  reviewStatus: PayrollStatus;
+  readinessStatus: PayrollStatus;
+};
+
 export const blockedPayrollRecords: readonly BlockedPayrollRecord[] = [
   {
     employeeId: "AU-EMP-2026-0332",
@@ -222,6 +255,14 @@ export const blockedPayrollRecords: readonly BlockedPayrollRecord[] = [
   },
 ];
 
+export type FailedPayrollTransfer = {
+  batchId: string;
+  timestamp: string;
+  recordCount: number;
+  failureType: string;
+  status: PayrollStatus;
+};
+
 export const failedPayrollTransfers: readonly FailedPayrollTransfer[] = [
   {
     batchId: "PAY-2026-09-B",
@@ -239,7 +280,17 @@ export const failedPayrollTransfers: readonly FailedPayrollTransfer[] = [
   },
 ];
 
-export const synchronizationHistory: readonly PayrollHistoryEvent[] = [
+export type PayrollHistoryEvent = {
+  timestamp: string;
+  batchId: string;
+  payrollPeriod: string;
+  recordCount: number;
+  operation: string;
+  status: PayrollStatus;
+  details: string;
+};
+
+export const payrollSynchronizationHistory: readonly PayrollHistoryEvent[] = [
   {
     timestamp: "Sep 23, 2026 · 10:42 AM",
     batchId: "PAY-2026-09-A",

@@ -1,5 +1,5 @@
-import { PayrollIntegrationPage } from "@/components/admin/payroll-integration/PayrollIntegrationPage";
+import { PayrollIntegrationWorkspace } from "@/components/admin/payroll-integration/PayrollIntegrationWorkspace";
 
 export default function Page() {
-  return <PayrollIntegrationPage />;
+  return <PayrollIntegrationWorkspace />;
 }
