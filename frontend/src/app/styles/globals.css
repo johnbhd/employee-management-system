@@ -32,8 +32,7 @@
 @import "./pages/admin/bundy-biometric-etl.css";
 @import "./pages/admin/qr-attendance.css";
 @import "./pages/admin/unified-attendance.css";
-@import "./pages/admin/payroll-integration-page.css";
-@import "./pages/admin/payroll-integration-rebuild.css";
+@import "./pages/admin/payroll-accounting-flow.css";
 @import "./pages/admin/accounting-integration-page.css";
 @import "./pages/admin/integration-errors.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
