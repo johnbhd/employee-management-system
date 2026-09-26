@@ -1,0 +1,315 @@
+.accounting-integration-workspace .accounting-integration-notice {
+  align-items: flex-start;
+}
+
+.accounting-integration-notice > .ui-icon {
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #d8eaff;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.accounting-integration-notice p {
+  margin: 0;
+}
+
+.accounting-integration-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.accounting-integration-workspace .dashboard-card,
+.accounting-integration-workspace .accounting-integration-boundary,
+.accounting-integration-workspace .accounting-integration-summary > * {
+  min-width: 0;
+}
+
+.accounting-integration-flow {
+  min-width: 0;
+}
+
+.accounting-flow-note,
+.accounting-table-note {
+  overflow-wrap: anywhere;
+}
+
+.accounting-ownership-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.accounting-ownership-node {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+  align-content: start;
+  padding: 1rem;
+  border: 1px solid #e7edf5;
+  border-radius: 0.8rem;
+  background: var(--surface-muted);
+}
+
+.accounting-ownership-node-active {
+  border-color: #b9cfee;
+  background: #f5f9ff;
+}
+
+.accounting-ownership-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.accounting-ownership-label {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.accounting-ownership-node strong {
+  color: #334155;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.accounting-ownership-arrow {
+  display: grid;
+  align-self: center;
+  color: #9aa9bd;
+  font-size: 1.1rem;
+  place-items: center;
+}
+
+.accounting-integration-overview,
+.accounting-integration-secondary {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 1.5rem;
+}
+
+.accounting-validation-list,
+.accounting-health-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.accounting-validation-row,
+.accounting-health-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.accounting-validation-icon {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.accounting-validation-icon.status-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.accounting-validation-icon.status-warning {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.accounting-validation-icon.status-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.accounting-validation-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 0.2rem;
+}
+
+.accounting-validation-copy strong {
+  color: #334155;
+  font-size: 0.73rem;
+}
+
+.accounting-validation-copy small {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.accounting-health-row {
+  justify-content: space-between;
+}
+
+.accounting-health-row > span:first-child {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.accounting-integration-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+}
+
+.accounting-integration-table {
+  min-width: 46rem;
+}
+
+.accounting-integration-table th,
+.accounting-integration-table td {
+  white-space: nowrap;
+}
+
+.accounting-integration-table td:nth-child(3) {
+  white-space: normal;
+}
+
+.accounting-integration-table code {
+  color: var(--au-blue);
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.accounting-audit-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.accounting-audit-copy {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.accounting-audit-icon {
+  display: grid;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.accounting-audit-copy strong {
+  color: #334155;
+  font-size: 0.76rem;
+}
+
+.accounting-audit-copy p {
+  max-width: 52rem;
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.accounting-integration-boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid #d8e5f7;
+  border-radius: var(--radius);
+  background: #f5f9ff;
+}
+
+.accounting-integration-boundary > .ui-icon {
+  margin-top: 0.1rem;
+  color: var(--au-blue);
+  font-size: 1.25rem;
+}
+
+.accounting-integration-boundary h2 {
+  margin: 0.35rem 0 0;
+  color: var(--au-navy);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.accounting-integration-boundary p:last-child {
+  max-width: 60rem;
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 1200px) {
+  .accounting-integration-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1050px) {
+  .accounting-integration-overview,
+  .accounting-integration-secondary {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .accounting-ownership-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accounting-ownership-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .accounting-integration-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .accounting-validation-row,
+  .accounting-health-row,
+  .accounting-audit-panel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accounting-integration-boundary {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .accounting-integration-summary {
+    grid-template-columns: 1fr;
+  }
+}

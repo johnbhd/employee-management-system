@@ -1,5 +1,5 @@
-import { AccountingIntegrationPage } from "@/components/admin/accounting-integration/AccountingIntegrationPage";
+import { AccountingIntegrationWorkspace } from "@/components/admin/accounting-integration/AccountingIntegrationWorkspace";
 
 export default function Page() {
-  return <AccountingIntegrationPage />;
+  return <AccountingIntegrationWorkspace />;
 }
