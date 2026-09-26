@@ -1,3 +1,10 @@
+.user-accounts-page,
+.user-accounts-page > *,
+.user-accounts-page .dashboard-card,
+.user-accounts-page .panel-body {
+  min-width: 0;
+}
+
 .user-accounts-page .notice p,
 .user-account-boundary-card p,
 .user-account-action-boundary,
@@ -706,8 +713,31 @@
   }
 }
 
-@media (min-width: 481px) and (max-width: 900px) {
+@media (min-width: 481px) and (max-width: 1200px) {
   .user-account-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 481px) and (max-width: 1050px) {
+  .user-accounts-page .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .user-accounts-page .page-actions {
+    justify-content: flex-start;
+  }
+
+  .user-accounts-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .user-accounts-search {
+    grid-column: span 2;
+  }
+
+  .user-accounts-clear {
+    justify-self: start;
   }
 }

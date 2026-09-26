@@ -427,6 +427,17 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .payroll-page .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .payroll-page .page-actions {
+    justify-content: flex-start;
+  }
+}
+
 @media (max-width: 700px) {
   .payroll-flow .flow-node {
     width: min(100%, 22rem);

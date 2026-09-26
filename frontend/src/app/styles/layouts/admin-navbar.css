@@ -322,7 +322,7 @@
   }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1100px) {
   .help-button,
   .profile-copy,
   .profile-trigger > .ui-icon {

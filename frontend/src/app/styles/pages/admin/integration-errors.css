@@ -1,3 +1,10 @@
+.integration-errors-page,
+.integration-errors-page > *,
+.integration-errors-page .dashboard-card,
+.integration-errors-page .panel-body {
+  min-width: 0;
+}
+
 .integration-errors-page .notice p,
 .integration-error-privacy p {
   margin: 0;
@@ -467,9 +474,32 @@
   }
 }
 
-@media (min-width: 481px) and (max-width: 900px) {
+@media (min-width: 481px) and (max-width: 1200px) {
   .integration-error-metrics,
   .integration-error-overview-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 481px) and (max-width: 1050px) {
+  .integration-errors-page .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .integration-errors-page .page-actions {
+    justify-content: flex-start;
+  }
+
+  .integration-errors-toolbar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .integration-errors-toolbar .field-search {
+    grid-column: span 2;
+  }
+
+  .integration-errors-clear {
+    justify-self: start;
   }
 }

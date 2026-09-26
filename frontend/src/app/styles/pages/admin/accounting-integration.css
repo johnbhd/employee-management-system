@@ -1,3 +1,10 @@
+.accounting-page,
+.accounting-page > *,
+.accounting-page .dashboard-card,
+.accounting-page .panel-body {
+  min-width: 0;
+}
+
 .accounting-page .notice {
   align-items: flex-start;
 }
@@ -152,6 +159,15 @@
 }
 
 .accounting-validation-copy strong,
+.accounting-validation-copy small,
+.accounting-safeguard strong,
+.accounting-safeguard small,
+.accounting-health-item > span:first-child,
+.accounting-health-item .status-badge {
+  overflow-wrap: anywhere;
+}
+
+.accounting-validation-copy strong,
 .accounting-safeguard strong {
   color: #334155;
   font-size: 0.7rem;
@@ -234,6 +250,7 @@
 }
 
 .accounting-health-item > span:first-child {
+  min-width: 0;
   color: var(--text-muted);
   font-size: 0.7rem;
 }
@@ -321,9 +338,20 @@
   line-height: 1.6;
 }
 
-@media (min-width: 481px) and (max-width: 900px) {
+@media (min-width: 481px) and (max-width: 1200px) {
   .accounting-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1200px) {
+  .accounting-page .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .accounting-page .page-actions {
+    justify-content: flex-start;
   }
 }
 
