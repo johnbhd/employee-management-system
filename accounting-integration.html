@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounting Integration Status — AU Accounting Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="accounting.css">
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <div class="workspace-row">
+          <span class="workspace-label">Workspace</span>
+          <span class="workspace-badge">Accounting Staff</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="#" class="nav-item"><i class="fa-solid fa-table-cells-large"></i>Dashboard</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-file-lines"></i>Approved Payroll Information</a>
+          <a href="accounting-integration.html" class="nav-item active"><i class="fa-solid fa-link"></i>Integration Status</a>
+          <a href="transaction-history.html" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i>Transaction History</a>
+        </nav>
+
+        <div class="live-card">
+          <span class="live-dot"></span>
+          <span class="live-label">Live</span>
+          <h4>Accounting Integration</h4>
+          <p>Approved payroll transfers are monitored before synchronization with the Existing Accounting System.</p>
+        </div>
+
+        <div class="sidebar-footer">
+          <div class="user-block">
+            <div class="avatar-circle small"><i class="fa-solid fa-user"></i></div>
+            <div>
+              <strong>Accounting Staff</strong>
+              <span>AU-JSC Accounting Account</span>
+            </div>
+          </div>
+          <a href="login.html" class="logout-icon" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+        </div>
+
+        <a href="login.html" class="logout-full"><i class="fa-solid fa-power-off"></i> Logout</a>
+      </aside>
+
+      <!-- Main -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <i class="fa-solid fa-bars menu-icon"></i>
+            <div>
+              <h1>Accounting Integration Status</h1>
+              <span class="topbar-sub">Accounting integration workspace</span>
+            </div>
+          </div>
+          <div class="topbar-right">
+            <span class="ratio-badge">5 / 6</span>
+            <span class="icon-btn"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="user-chip">
+              <i class="fa-regular fa-user"></i>
+              <span>
+                <strong>Accounting Staff</strong>
+                <small>Accounting</small>
+              </span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+          </div>
+        </header>
+
+        <div class="page-head">
+          <div>
+            <span class="eyebrow"><i class="fa-solid fa-diagram-project"></i> System Integration</span>
+            <h2>Accounting Integration Status</h2>
+            <p class="page-sub">Monitor synchronization between approved payroll information and the Existing Accounting System.</p>
+          </div>
+          <button class="btn-white"><i class="fa-solid fa-rotate"></i> Refresh data</button>
+        </div>
+
+        <!-- Stat grid -->
+        <section class="acc-stats-grid">
+          <div class="acc-stat">
+            <i class="fa-solid fa-wifi stat-icon blue"></i>
+            <div>
+              <span class="label">Connection Status</span>
+              <span class="value">Online</span>
+              <span class="sub">All systems connected</span>
+            </div>
+          </div>
+          <div class="acc-stat">
+            <i class="fa-solid fa-check stat-icon green"></i>
+            <div>
+              <span class="label">Successful Transfers</span>
+              <span class="value">24</span>
+              <span class="sub">Completed transfers</span>
+            </div>
+          </div>
+          <div class="acc-stat">
+            <i class="fa-regular fa-clock stat-icon amber"></i>
+            <div>
+              <span class="label">Pending Records</span>
+              <span class="value">3</span>
+              <span class="sub">Awaiting synchronization</span>
+            </div>
+          </div>
+          <div class="acc-stat">
+            <i class="fa-solid fa-triangle-exclamation stat-icon red"></i>
+            <div>
+              <span class="label">Failed Transfers</span>
+              <span class="value">2</span>
+              <span class="sub">Needs attention</span>
+            </div>
+          </div>
+          <div class="acc-stat">
+            <i class="fa-solid fa-rotate stat-icon blue"></i>
+            <div>
+              <span class="label">Last Synchronization</span>
+              <span class="value">10:42 AM</span>
+              <span class="sub">Today</span>
+            </div>
+          </div>
+          <div class="acc-stat">
+            <i class="fa-solid fa-triangle-exclamation stat-icon red"></i>
+            <div>
+              <span class="label">Integration Errors</span>
+              <span class="value">2</span>
+              <span class="sub">Open issues</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Integration flow -->
+        <section class="panel flow-panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-diagram-project"></i> Integration Flow</h3>
+          </div>
+          <div class="flow-row">
+            <div class="flow-step">
+              <i class="fa-solid fa-database flow-icon blue"></i>
+              <strong>Existing Payroll System</strong>
+              <span>Source of approved payroll information</span>
+            </div>
+            <i class="fa-solid fa-arrow-right flow-arrow"></i>
+            <div class="flow-step">
+              <i class="fa-regular fa-file-lines flow-icon blue"></i>
+              <strong>Approved Payroll Information</strong>
+              <span>Verified and approved data</span>
+            </div>
+            <i class="fa-solid fa-arrow-right flow-arrow"></i>
+            <div class="flow-step">
+              <i class="fa-solid fa-gear flow-icon green"></i>
+              <strong>Accounting Integration Service</strong>
+              <span>Transforms and validates data</span>
+            </div>
+            <i class="fa-solid fa-arrow-right flow-arrow"></i>
+            <div class="flow-step highlight">
+              <i class="fa-solid fa-circle-check flow-icon solid-blue"></i>
+              <strong>Validation</strong>
+              <span>Data validation and mapping</span>
+            </div>
+            <i class="fa-solid fa-arrow-right flow-arrow"></i>
+            <div class="flow-step">
+              <i class="fa-solid fa-rotate flow-icon blue"></i>
+              <strong>Transfer</strong>
+              <span>Sends data to accounting system</span>
+            </div>
+            <i class="fa-solid fa-arrow-right flow-arrow"></i>
+            <div class="flow-step">
+              <i class="fa-solid fa-database flow-icon purple"></i>
+              <strong>Existing Accounting System</strong>
+              <span>Receives payroll transactions</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Connection status + transfers requiring attention -->
+        <section class="two-col">
+          <div class="panel">
+            <div class="panel-head">
+              <h3><i class="fa-solid fa-server"></i> System Connection Status</h3>
+            </div>
+            <table>
+              <thead>
+                <tr><th>System</th><th>Status</th><th>Last Sync</th><th>Details</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Existing Payroll System</td>
+                  <td><span class="status-dot green"></span> Connected</td>
+                  <td>Today, 10:42 AM</td>
+                  <td>Last successful transfer &ndash; 24 records (&#8369;482,650.00)</td>
+                </tr>
+                <tr>
+                  <td>Accounting Integration Service</td>
+                  <td><span class="status-dot green"></span> Operational</td>
+                  <td>Today, 10:42 AM</td>
+                  <td>Processing normally</td>
+                </tr>
+                <tr>
+                  <td>Existing Accounting System</td>
+                  <td><span class="status-dot green"></span> Connected</td>
+                  <td>Today, 10:42 AM</td>
+                  <td>Last successful receipt &ndash; 24 records (&#8369;482,650.00)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <h3><i class="fa-solid fa-triangle-exclamation warn"></i> Transfers Requiring Attention</h3>
+            </div>
+            <table class="attn-table">
+              <thead>
+                <tr>
+                  <th>Transaction Ref.</th><th>Payroll Ref.</th><th>Period</th><th>Date / Time</th><th>Amount</th><th>Error</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>ACC-TXN-1042</td>
+                  <td>PAY-2024-074</td>
+                  <td>Aug 16&ndash;31, 2026</td>
+                  <td>Sep 1, 2026<br><span class="muted-sm">9:50 AM</span></td>
+                  <td>&#8369;823,650.00</td>
+                  <td>Validation mismatch</td>
+                  <td><span class="tag failed">Failed</span></td>
+                  <td>
+                    <div class="row-actions">
+                      <a href="#" class="btn-tiny outline">View Error</a>
+                      <a href="#" class="btn-tiny solid">Retry</a>
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+                  <td>ACC-TXN-1039</td>
+                  <td>PAY-2024-073</td>
+                  <td>Jul 1&ndash;15, 2026</td>
+                  <td>Jul 18, 2026<br><span class="muted-sm">2:18 PM</span></td>
+                  <td>&#8369;462,900.00</td>
+                  <td>No acknowledgment</td>
+                  <td><span class="tag failed">Failed</span></td>
+                  <td>
+                    <div class="row-actions">
+                      <a href="#" class="btn-tiny outline">View Error</a>
+                      <a href="#" class="btn-tiny solid">Retry</a>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Synchronization history -->
+        <section class="panel">
+          <div class="panel-head">
+            <h3><i class="fa-solid fa-clock-rotate-left"></i> Synchronization History</h3>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Date / Time</th><th>Transaction Ref.</th><th>Payroll Ref.</th><th>Records</th><th>Amount</th><th>Result</th><th>Acknowledgment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Sep 1, 2026 &ndash; 10:42 AM</td>
+                <td>ACC-TXN-1041</td>
+                <td>PAY-2026-016</td>
+                <td>24</td>
+                <td>&#8369;482,650.00</td>
+                <td><span class="tag success">Success</span></td>
+                <td>Received by accounting system</td>
+              </tr>
+              <tr>
+                <td>Sep 1, 2026 &ndash; 9:55 AM</td>
+                <td>ACC-TXN-1042</td>
+                <td>PAY-2026-016</td>
+                <td>24</td>
+                <td>&#8369;432,550.00</td>
+                <td><span class="tag failed">Failed</span></td>
+                <td>No acknowledgment</td>
+              </tr>
+              <tr>
+                <td>Aug 18, 2026 &ndash; 2:18 PM</td>
+                <td>ACC-TXN-1039</td>
+                <td>PAY-2026-013</td>
+                <td>22</td>
+                <td>&#8369;462,900.00</td>
+                <td><span class="tag failed">Failed</span></td>
+                <td>No acknowledgment</td>
+              </tr>
+              <tr>
+                <td>Aug 12, 2026 &ndash; 10:24 AM</td>
+                <td>ACC-TXN-1038</td>
+                <td>PAY-2026-013</td>
+                <td>20</td>
+                <td>&#8369;415,200.00</td>
+                <td><span class="tag success">Success</span></td>
+                <td>Received by accounting system</td>
+              </tr>
+              <tr>
+                <td>Aug 5, 2026 &ndash; 11:03 AM</td>
+                <td>ACC-TXN-1037</td>
+                <td>PAY-2026-012</td>
+                <td>24</td>
+                <td>&#8369;498,300.00</td>
+                <td><span class="tag success">Success</span></td>
+                <td>Received by accounting system</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+      </div>
+    </div>
+
+    <script>
+      document.querySelector('.menu-icon').addEventListener('click', function () {
+        document.querySelector('.sidebar-nav').classList.toggle('nav-open');
+      });
+    </script>
+  </body>
+</html>
