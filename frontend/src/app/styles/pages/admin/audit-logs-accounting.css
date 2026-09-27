@@ -1,0 +1,595 @@
+.admin-audit-accounting-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-audit-accounting-page .dashboard-card,
+.admin-audit-accounting-page .admin-audit-accounting-boundary,
+.admin-audit-accounting-page .admin-audit-accounting-summary > * {
+  min-width: 0;
+}
+
+.admin-audit-accounting-flow {
+  min-width: 0;
+}
+
+.admin-audit-accounting-flow-note {
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-coverage-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.admin-audit-accounting-coverage-node {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+  align-content: start;
+  padding: 1rem;
+  border: 1px solid #e7edf5;
+  border-radius: 0.8rem;
+  background: var(--surface-muted);
+}
+
+.admin-audit-accounting-coverage-node-active {
+  border-color: #b9cfee;
+  background: #f5f9ff;
+}
+
+.admin-audit-accounting-coverage-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.admin-audit-accounting-coverage-label {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-audit-accounting-coverage-node strong {
+  color: #334155;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-coverage-arrow {
+  display: grid;
+  align-self: center;
+  color: #9aa9bd;
+  font-size: 1.1rem;
+  place-items: center;
+}
+
+.admin-audit-accounting-overview {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 1.5rem;
+}
+
+.admin-audit-accounting-filter-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.admin-audit-accounting-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-audit-accounting-field {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 0.35rem;
+}
+
+.admin-audit-accounting-field > span:first-child {
+  color: var(--text-faint);
+  font-size: 0.63rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.admin-audit-accounting-search-field {
+  grid-column: span 2;
+}
+
+.admin-audit-accounting-field input,
+.admin-audit-accounting-field select {
+  width: 100%;
+  min-width: 0;
+  min-height: 2.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: #475569;
+  font-size: 0.75rem;
+  outline: none;
+  padding: 0.55rem 0.7rem;
+}
+
+.admin-audit-accounting-field input:focus,
+.admin-audit-accounting-field select:focus,
+.admin-audit-accounting-input-wrap:focus-within {
+  border-color: #9bb7e4;
+  box-shadow: 0 0 0 3px #eaf2ff;
+}
+
+.admin-audit-accounting-input-wrap {
+  display: flex;
+  min-width: 0;
+  min-height: 2.55rem;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--surface);
+  color: var(--text-muted);
+  padding: 0 0.7rem;
+}
+
+.admin-audit-accounting-input-wrap input {
+  min-height: 2.4rem;
+  border: 0;
+  padding: 0.5rem 0;
+  outline: 0;
+  box-shadow: none;
+}
+
+.admin-audit-accounting-input-wrap input:focus {
+  box-shadow: none;
+}
+
+.admin-audit-accounting-filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid #edf1f6;
+  color: var(--text-faint);
+  font-size: 0.68rem;
+}
+
+.admin-audit-accounting-outcome-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.admin-audit-accounting-outcome-row {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding: 0.75rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.admin-audit-accounting-outcome-row > span:first-child {
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-table-meta {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.admin-audit-accounting-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: thin;
+}
+
+.admin-audit-accounting-table {
+  min-width: 72rem;
+}
+
+.admin-audit-accounting-table th,
+.admin-audit-accounting-table td {
+  white-space: nowrap;
+}
+
+.admin-audit-accounting-table td:nth-child(2),
+.admin-audit-accounting-table td:nth-child(6) {
+  white-space: normal;
+}
+
+.admin-audit-accounting-table td strong,
+.admin-audit-accounting-cell-meta {
+  display: block;
+}
+
+.admin-audit-accounting-cell-meta {
+  margin-top: 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.64rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.admin-audit-accounting-view-button {
+  white-space: nowrap;
+}
+
+.admin-audit-accounting-empty-state {
+  padding: 1.5rem !important;
+  color: var(--text-muted) !important;
+  text-align: center;
+}
+
+.admin-audit-accounting-pagination {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 0.85rem 1.35rem 1.25rem;
+  border-top: 1px solid #edf1f6;
+}
+
+.admin-audit-accounting-pagination .button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.admin-audit-accounting-arrow-previous {
+  transform: rotate(180deg);
+}
+
+.admin-audit-accounting-boundary {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid #d8e5f7;
+  border-radius: var(--radius);
+  background: #f5f9ff;
+}
+
+.admin-audit-accounting-boundary > .ui-icon {
+  margin-top: 0.1rem;
+  color: var(--au-blue);
+  font-size: 1.25rem;
+}
+
+.admin-audit-accounting-boundary h2 {
+  margin: 0.35rem 0 0;
+  color: var(--au-navy);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.admin-audit-accounting-boundary p:last-child {
+  max-width: 60rem;
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.admin-audit-accounting-drawer-layer {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.admin-audit-accounting-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  background: rgba(15, 35, 80, 0.32);
+}
+
+.admin-audit-accounting-drawer {
+  position: relative;
+  display: flex;
+  width: min(36rem, 100%);
+  max-height: 100%;
+  flex-direction: column;
+  overflow-y: auto;
+  background: var(--surface);
+  box-shadow: -16px 0 40px rgba(15, 35, 80, 0.16);
+}
+
+.admin-audit-accounting-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #edf1f6;
+  padding: 1.35rem 1.5rem 1.1rem;
+}
+
+.admin-audit-accounting-drawer-header > div {
+  min-width: 0;
+}
+
+.admin-audit-accounting-drawer-header h2 {
+  margin: 0.35rem 0 0;
+  color: var(--au-navy);
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.admin-audit-accounting-drawer-header p:last-child {
+  margin: 0.55rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-close-button {
+  flex: 0 0 auto;
+}
+
+.admin-audit-accounting-drawer-section {
+  display: grid;
+  gap: 0.75rem;
+  border-bottom: 1px solid #edf1f6;
+  padding: 1.1rem 1.5rem;
+}
+
+.admin-audit-accounting-drawer-section h3 {
+  margin: 0;
+  color: var(--au-navy);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.admin-audit-accounting-detail-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.admin-audit-accounting-detail-row {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, 0.7fr) minmax(0, 1.3fr);
+  gap: 1rem;
+  align-items: baseline;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #f0f3f7;
+}
+
+.admin-audit-accounting-detail-row:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.admin-audit-accounting-detail-row dt,
+.admin-audit-accounting-detail-row dd {
+  margin: 0;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.admin-audit-accounting-detail-row dt {
+  color: var(--text-faint);
+}
+
+.admin-audit-accounting-detail-row dd {
+  color: #475569;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-change-list {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.admin-audit-accounting-change-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+  color: #475569;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.admin-audit-accounting-change-row strong {
+  color: #334155;
+}
+
+.admin-audit-accounting-change-row span {
+  display: block;
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.admin-audit-accounting-change-row p {
+  margin: 0.2rem 0 0;
+  color: #475569;
+  font-size: 0.68rem;
+}
+
+.admin-audit-accounting-drawer-note {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.admin-audit-accounting-activity-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-audit-accounting-activity-list li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 0.7rem;
+  padding: 0 0 1rem;
+}
+
+.admin-audit-accounting-activity-list li:last-child {
+  padding-bottom: 0;
+}
+
+.admin-audit-accounting-activity-marker {
+  position: relative;
+  display: block;
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-top: 0.25rem;
+  border: 2px solid var(--au-blue);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.admin-audit-accounting-activity-list li:not(:last-child) .admin-audit-accounting-activity-marker::after {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.1rem;
+  width: 1px;
+  height: calc(100% + 1rem);
+  background: #dbe5f2;
+  content: "";
+}
+
+.admin-audit-accounting-activity-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.admin-audit-accounting-activity-heading strong {
+  color: #334155;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.admin-audit-accounting-activity-list p,
+.admin-audit-accounting-activity-list small {
+  display: block;
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.admin-audit-accounting-activity-list small {
+  color: var(--text-faint);
+}
+
+.admin-audit-accounting-drawer-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding: 1rem 1.5rem 1.35rem;
+}
+
+@media (max-width: 1200px) {
+  .admin-audit-accounting-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1050px) {
+  .admin-audit-accounting-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .admin-audit-accounting-coverage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-audit-accounting-coverage-arrow {
+    transform: rotate(90deg);
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-audit-accounting-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-audit-accounting-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-audit-accounting-search-field {
+    grid-column: span 2;
+  }
+
+  .admin-audit-accounting-filter-footer,
+  .admin-audit-accounting-outcome-row,
+  .admin-audit-accounting-boundary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-audit-accounting-drawer {
+    width: 100%;
+  }
+
+  .admin-audit-accounting-drawer-header,
+  .admin-audit-accounting-drawer-section,
+  .admin-audit-accounting-drawer-footer {
+    padding-right: 1rem;
+    padding-left: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-audit-accounting-summary,
+  .admin-audit-accounting-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-audit-accounting-search-field {
+    grid-column: auto;
+  }
+
+  .admin-audit-accounting-change-row,
+  .admin-audit-accounting-detail-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .admin-audit-accounting-pagination {
+    justify-content: space-between;
+  }
+}

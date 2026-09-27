@@ -2,7 +2,7 @@ import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { AdminAuditLog, AdminAuditOutcome } from "@/data/admin-audit-logs";
 
-type AuditLogsTableProps = {
+type AuditLogAccountingTableProps = {
   events: readonly AdminAuditLog[];
   onSelectEvent: (eventId: string) => void;
 };
@@ -13,10 +13,10 @@ function outcomeTone(outcome: AdminAuditOutcome) {
   return "warning" as const;
 }
 
-export function AuditLogsTable({ events, onSelectEvent }: AuditLogsTableProps) {
+export function AuditLogAccountingTable({ events, onSelectEvent }: AuditLogAccountingTableProps) {
   return (
-    <div className="admin-audit-table-scroll">
-      <table className="admin-audit-table">
+    <div className="admin-audit-accounting-table-wrap">
+      <table className="data-table admin-audit-accounting-table">
         <caption className="sr-only">Application-wide administrator audit events</caption>
         <thead>
           <tr>
@@ -39,21 +39,23 @@ export function AuditLogsTable({ events, onSelectEvent }: AuditLogsTableProps) {
             return (
               <tr key={event.id}>
                 <td>
-                  <strong className="admin-audit-date">{date}</strong>
-                  <span className="admin-audit-cell-meta">{time}</span>
+                  <strong>{date}</strong>
+                  <span className="admin-audit-accounting-cell-meta">{time}</span>
                 </td>
                 <td>
                   <StatusBadge tone={outcomeTone(event.outcome)}>{event.action}</StatusBadge>
                 </td>
                 <td>
-                  <strong className="admin-audit-cell-primary">{event.actor.name}</strong>
-                  {event.actor.userId ? <span className="admin-audit-cell-meta">{event.actor.userId}</span> : null}
+                  <strong>{event.actor.name}</strong>
+                  {event.actor.userId ? (
+                    <span className="admin-audit-accounting-cell-meta">{event.actor.userId}</span>
+                  ) : null}
                 </td>
                 <td>{event.actor.role}</td>
                 <td>{event.module}</td>
                 <td>
-                  <strong className="admin-audit-cell-primary">{event.target.label}</strong>
-                  <span className="admin-audit-cell-meta">{event.target.reference}</span>
+                  <strong>{event.target.label}</strong>
+                  <span className="admin-audit-accounting-cell-meta">{event.target.reference}</span>
                 </td>
                 <td>
                   <StatusBadge tone={outcomeTone(event.outcome)}>{event.outcome}</StatusBadge>
@@ -61,11 +63,11 @@ export function AuditLogsTable({ events, onSelectEvent }: AuditLogsTableProps) {
                 <td>
                   <button
                     type="button"
-                    className="button-secondary admin-audit-view-button"
+                    className="button-secondary admin-audit-accounting-view-button"
                     onClick={() => onSelectEvent(event.id)}
                   >
                     <Icon name="file" />
-                    View details
+                    View
                   </button>
                 </td>
               </tr>
@@ -73,7 +75,7 @@ export function AuditLogsTable({ events, onSelectEvent }: AuditLogsTableProps) {
           })}
           {events.length === 0 ? (
             <tr>
-              <td colSpan={8} className="admin-audit-empty-row">
+              <td colSpan={8} className="admin-audit-accounting-empty-state">
                 No audit events match the selected filters.
               </td>
             </tr>
