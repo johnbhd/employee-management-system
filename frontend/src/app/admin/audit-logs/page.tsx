@@ -1,5 +1,5 @@
-import { AdminAuditLogAccountingPage } from "@/components/admin/audit-logs-accounting/AdminAuditLogAccountingPage";
+import { AdminAuditLogsPage } from "@/components/admin/audit-logs/AdminAuditLogsPage";
 
 export default function Page() {
-  return <AdminAuditLogAccountingPage />;
+  return <AdminAuditLogsPage />;
 }

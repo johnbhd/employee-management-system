@@ -13,7 +13,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "user-accounts", label: "User Accounts", href: "/admin/user-accounts", icon: "users" },
   { id: "roles-permissions", label: "Roles & Permissions", href: "/admin/roles-permissions", icon: "roles" },
   { id: "audit-logs", label: "Audit Logs", href: "/admin/audit-logs", icon: "audit" },
-  { id: "system-settings", label: "System Settings", icon: "settings" },
+  { id: "system-settings", label: "System & Settings", href: "/admin/settings", icon: "settings" },
 ];
 
 export const dashboardMetrics: Metric[] = [
