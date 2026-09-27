@@ -37,6 +37,7 @@
 @import "./pages/admin/integration-errors.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
 @import "./pages/admin/roles-permissions.css";
+@import "./pages/admin/audit-logs.css";
 
 *,
 *::before,

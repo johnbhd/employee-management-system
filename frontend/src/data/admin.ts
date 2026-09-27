@@ -12,7 +12,7 @@ export const adminNavigation: NavigationItem[] = [
   { id: "integration-errors", label: "Integration Errors", href: "/admin/integration-errors", icon: "errors" },
   { id: "user-accounts", label: "User Accounts", href: "/admin/user-accounts", icon: "users" },
   { id: "roles-permissions", label: "Roles & Permissions", href: "/admin/roles-permissions", icon: "roles" },
-  { id: "audit-logs", label: "Audit Logs", icon: "audit" },
+  { id: "audit-logs", label: "Audit Logs", href: "/admin/audit-logs", icon: "audit" },
   { id: "system-settings", label: "System Settings", icon: "settings" },
 ];
 
