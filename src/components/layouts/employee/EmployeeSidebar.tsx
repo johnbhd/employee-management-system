@@ -19,7 +19,7 @@ const employeeLinks = [
   { label: "My Payslips", icon: "payroll" as const, href: "/employee/payslips" },
   { label: "My Profile", icon: "user" as const, href: "/employee/profile" },
   { label: "Announcements", icon: "activity" as const, href: "/employee/announcements" },
-  { label: "Help and Support", icon: "help" as const },
+  { label: "Help and Support", icon: "help" as const, href: "/employee/help-support" },
 ];
 
 export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {

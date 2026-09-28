@@ -10,6 +10,27 @@ type EmployeeNavbarProps = {
   onOpenSidebar: () => void;
 };
 
+function getEmployeePageTitle(pathname: string) {
+  switch (pathname) {
+    case "/employee/my-attendance":
+      return "My Attendance";
+    case "/employee/attendance-qr":
+      return "Attendance QR";
+    case "/employee/attendance-history":
+      return "Attendance History";
+    case "/employee/payslips":
+      return "My Payslips";
+    case "/employee/profile":
+      return "My Profile";
+    case "/employee/announcements":
+      return "Announcements";
+    case "/employee/help-support":
+      return "Help & Support";
+    default:
+      return "Employee Dashboard";
+  }
+}
+
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const [feedback, setFeedback] = useState("");
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
@@ -20,19 +41,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const pageTitle = pathname === "/employee/my-attendance"
-    ? "My Attendance"
-    : pathname === "/employee/attendance-qr"
-      ? "Attendance QR"
-      : pathname === "/employee/attendance-history"
-        ? "Attendance History"
-        : pathname === "/employee/payslips"
-          ? "My Payslips"
-          : pathname === "/employee/profile"
-            ? "My Profile"
-            : pathname === "/employee/announcements"
-              ? "Announcements"
-              : "Employee Dashboard";
+  const pageTitle = getEmployeePageTitle(pathname);
 
   useEffect(() => {
     if (!notificationMenuOpen && !profileMenuOpen) return;

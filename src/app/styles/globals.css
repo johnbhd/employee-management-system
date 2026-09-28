@@ -20,6 +20,7 @@
 @import "./pages/employee/profile.css";
 @import "./pages/employee/payslips.css";
 @import "./pages/employee/announcements.css";
+@import "./pages/employee/help-support.css";
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
 @import "./pages/hr/correction-requests.css";
