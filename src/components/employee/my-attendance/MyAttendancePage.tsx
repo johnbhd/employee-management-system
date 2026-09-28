@@ -6,6 +6,7 @@ import {
 } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
 
+import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
 import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
 export function MyAttendancePage() {
@@ -101,6 +102,8 @@ export function MyAttendancePage() {
         </div>
         <MyAttendanceQuickActions />
       </section>
+
+      <MonthlyAttendanceCalendar />
 
       <section
         className="my-attendance-notes"

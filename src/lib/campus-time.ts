@@ -1,4 +1,4 @@
-const CAMPUS_TIME_ZONE = "Asia/Manila";
+export const CAMPUS_TIME_ZONE = "Asia/Manila";
 
 const campusDateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -21,6 +21,25 @@ const campusTimeFormatter = new Intl.DateTimeFormat("en-US", {
   hour12: true,
   timeZone: CAMPUS_TIME_ZONE,
 });
+
+const campusCalendarDateFormatter = new Intl.DateTimeFormat("en-US", {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  timeZone: CAMPUS_TIME_ZONE,
+});
+
+const campusMonthYearFormatter = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  year: "numeric",
+  timeZone: CAMPUS_TIME_ZONE,
+});
+
+export type CampusDateParts = {
+  year: number;
+  month: number;
+  day: number;
+};
 
 function getDatePart(parts: Intl.DateTimeFormatPart[], type: string) {
   return parts.find((part) => part.type === type)?.value ?? "";
@@ -46,4 +65,18 @@ export function formatCampusDateTime(date: Date) {
 
 export function formatCampusTime(date: Date) {
   return campusTimeFormatter.format(date);
+}
+
+export function getCampusDateParts(date: Date): CampusDateParts {
+  const parts = campusCalendarDateFormatter.formatToParts(date);
+
+  return {
+    year: Number(getDatePart(parts, "year")),
+    month: Number(getDatePart(parts, "month")),
+    day: Number(getDatePart(parts, "day")),
+  };
+}
+
+export function formatCampusMonthYear(date: Date) {
+  return campusMonthYearFormatter.format(date);
 }
