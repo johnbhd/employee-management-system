@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+
 import { Icon } from "../../ui/Icon";
 
 type AdminNavbarProps = {
@@ -27,6 +29,11 @@ export function AdminNavbar({ searchOpen, onOpenSidebar, onOpenSearch, onCloseSe
   function notify(message: string) {
     setFeedback(message);
     window.setTimeout(() => setFeedback(""), 2200);
+  }
+
+  function handleLogout() {
+    logoutFromPrototype();
+    setProfileOpen(false);
   }
 
   return (
@@ -71,7 +78,10 @@ export function AdminNavbar({ searchOpen, onOpenSidebar, onOpenSearch, onCloseSe
                 <strong>Administrator account</strong>
                 <small>AU-JSC integration access</small>
                 <button type="button" onClick={() => notify("Account settings are not connected in the prototype.")}><Icon name="settings" />Account settings</button>
-                <Link href="/"><Icon name="logout" />Logout</Link>
+                <Link href="/" onClick={handleLogout}>
+                  <Icon name="logout" />
+                  Logout
+                </Link>
               </div>
             ) : null}
           </div>

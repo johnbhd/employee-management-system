@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
+import { AuthToastHost } from "@/components/auth/AuthToastHost";
+
 import "./styles/globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <AuthToastHost />
+        {children}
+      </body>
     </html>
   );
 }

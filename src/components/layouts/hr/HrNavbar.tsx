@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+
 import { Icon } from "../../ui/Icon";
 
 type HrNavbarProps = {
@@ -47,6 +49,11 @@ export function HrNavbar({ onOpenSidebar }: HrNavbarProps) {
     setProfileOpen(false);
     setFeedback(message);
     window.setTimeout(() => setFeedback(""), 2200);
+  }
+
+  function handleLogout() {
+    logoutFromPrototype();
+    setProfileOpen(false);
   }
 
   return (
@@ -96,7 +103,7 @@ export function HrNavbar({ onOpenSidebar }: HrNavbarProps) {
                   <Icon name="settings" />
                   Settings
                 </button>
-                <Link href="/" onClick={() => setProfileOpen(false)}>
+                <Link href="/" onClick={handleLogout}>
                   <Icon name="logout" />
                   Log out
                 </Link>

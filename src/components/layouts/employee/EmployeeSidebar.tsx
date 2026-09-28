@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+
 import { Icon } from "../../ui/Icon";
 
 type EmployeeSidebarProps = {
@@ -24,6 +26,11 @@ const employeeLinks = [
 
 export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {
   const pathname = usePathname();
+
+  function handleLogout() {
+    logoutFromPrototype();
+    onClose();
+  }
 
   return (
     <>
@@ -61,7 +68,7 @@ export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {
             );
           })}
         </nav>
-        <Link href="/" className="employee-logout" onClick={onClose}>
+        <Link href="/" className="employee-logout" onClick={handleLogout}>
           <Icon name="logout" />
           Log out
         </Link>

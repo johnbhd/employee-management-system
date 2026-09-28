@@ -12,6 +12,7 @@
 @import "./components/tables.css";
 @import "./components/badges.css";
 @import "./components/buttons.css";
+@import "./components/auth-toast.css";
 @import "./pages/login.css";
 @import "./pages/employee/dashboard.css";
 @import "./pages/employee/my-attendance.css";

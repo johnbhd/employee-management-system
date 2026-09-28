@@ -5,12 +5,14 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-
-type LoginRole = "employee" | "admin" | "hr";
+import {
+  setAuthFlashToast,
+  type AuthRole,
+} from "@/lib/auth-flash-toast";
 
 type DemoAccount = {
   password: string;
-  role: LoginRole;
+  role: AuthRole;
   redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard";
 };
 
@@ -91,6 +93,7 @@ export function LoginPage() {
     setIsSubmitting(true);
     sessionStorage.setItem("prototypeRole", account.role);
     sessionStorage.setItem("prototypeUsername", normalizedUsername);
+    setAuthFlashToast({ type: "login-success", role: account.role });
     router.push(account.redirectTo);
   }
 

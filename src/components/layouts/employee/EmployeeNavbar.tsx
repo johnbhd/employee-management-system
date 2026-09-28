@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
 
 import { Icon } from "../../ui/Icon";
 
@@ -130,6 +131,11 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
     setNotificationMenuOpen(true);
   }
 
+  function handleLogout() {
+    logoutFromPrototype();
+    setProfileMenuOpen(false);
+  }
+
   return (
     <header className="employee-navbar">
       <div className="employee-navbar-title">
@@ -246,7 +252,11 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
                 <span>Calendar</span>
               </Link>
 
-              <Link href="/" className="employee-profile-menu-item employee-profile-menu-item-danger" onClick={() => setProfileMenuOpen(false)}>
+              <Link
+                href="/"
+                className="employee-profile-menu-item employee-profile-menu-item-danger"
+                onClick={handleLogout}
+              >
                 <Icon name="logout" />
                 <span>Log out</span>
               </Link>

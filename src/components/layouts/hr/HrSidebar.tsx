@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+
 import { Icon } from "../../ui/Icon";
 import type { IconName } from "@/types/ui";
 
@@ -32,6 +34,11 @@ type HrSidebarProps = {
 
 export function HrSidebar({ isOpen, onClose }: HrSidebarProps) {
   const pathname = usePathname();
+
+  function handleLogout() {
+    logoutFromPrototype();
+    onClose();
+  }
 
   return (
     <>
@@ -101,7 +108,7 @@ export function HrSidebar({ isOpen, onClose }: HrSidebarProps) {
                 <small>AU-JSC Operations Account</small>
               </span>
             </div>
-            <Link href="/" className="hr-sidebar-logout" onClick={onClose}>
+            <Link href="/" className="hr-sidebar-logout" onClick={handleLogout}>
               <Icon name="logout" />
               Log out
             </Link>

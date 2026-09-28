@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { adminNavigation } from "@/data/admin";
+import { logoutFromPrototype } from "@/lib/auth-flash-toast";
 
 import { Icon } from "../../ui/Icon";
 
@@ -15,6 +16,11 @@ type AdminSidebarProps = {
 
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+
+  function handleLogout() {
+    logoutFromPrototype();
+    onClose();
+  }
 
   return (
     <>
@@ -88,11 +94,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 <strong>IT Administrator</strong>
                 <small>AU-JSC Admin Account</small>
               </span>
-              <Link href="/" aria-label="Log out" onClick={onClose}>
+              <Link href="/" aria-label="Log out" onClick={handleLogout}>
                 <Icon name="logout" />
               </Link>
             </div>
-            <Link href="/" className="sidebar-logout" onClick={onClose}>
+            <Link href="/" className="sidebar-logout" onClick={handleLogout}>
               <Icon name="logout" />
               Logout
             </Link>
