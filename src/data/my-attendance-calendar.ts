@@ -9,24 +9,24 @@ export type CalendarAttendanceStatus =
   | "absent"
   | "no-record";
 
-const demoAttendanceByDay: Record<number, CalendarAttendanceStatus> = {
-  1: "present",
-  2: "present",
-  3: "late",
-  4: "present",
-  5: "present",
-  6: "absent",
-  7: "present",
-  8: "present",
-  9: "present",
-  10: "late",
-  11: "present",
-  12: "present",
-  13: "present",
-  14: "present",
-  15: "late",
-  16: "present",
-  17: "absent",
+const demoAttendanceByDate: Record<string, CalendarAttendanceStatus> = {
+  "2026-09-01": "present",
+  "2026-09-02": "present",
+  "2026-09-03": "late",
+  "2026-09-04": "present",
+  "2026-09-05": "present",
+  "2026-09-06": "absent",
+  "2026-09-07": "present",
+  "2026-09-08": "present",
+  "2026-09-09": "present",
+  "2026-09-10": "late",
+  "2026-09-11": "present",
+  "2026-09-12": "present",
+  "2026-09-13": "present",
+  "2026-09-14": "present",
+  "2026-09-15": "late",
+  "2026-09-16": "present",
+  "2026-09-17": "absent",
 };
 
 function mapHistoryStatus(
@@ -48,23 +48,24 @@ export function getAttendanceCalendarStatus(
   month: number,
   day: number,
 ): CalendarAttendanceStatus {
+  const dateKey = formatCalendarDateKey(year, month, day);
   const matchingHistoryRecord = attendanceHistoryRecords.find((record) => {
-    const [recordYear, recordMonth, recordDay] = record.id
-      .split("-")
-      .map(Number);
-
-    return (
-      recordYear === year &&
-      recordMonth === month &&
-      recordDay === day
-    );
+    return record.id === dateKey;
   });
 
   if (matchingHistoryRecord) {
     return mapHistoryStatus(matchingHistoryRecord.status);
   }
 
-  return demoAttendanceByDay[day] ?? "no-record";
+  return demoAttendanceByDate[dateKey] ?? "no-record";
+}
+
+function formatCalendarDateKey(year: number, month: number, day: number) {
+  return [
+    year,
+    String(month).padStart(2, "0"),
+    String(day).padStart(2, "0"),
+  ].join("-");
 }
 
 export function getCalendarStatusFromLabel(

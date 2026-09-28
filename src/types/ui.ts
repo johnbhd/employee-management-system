@@ -23,6 +23,8 @@ export type IconName =
   | "logout"
   | "close"
   | "calendar"
+  | "chevron-left"
+  | "chevron-right"
   | "check"
   | "clock"
   | "warning"

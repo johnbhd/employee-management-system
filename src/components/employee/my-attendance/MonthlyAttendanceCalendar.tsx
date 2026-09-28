@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { Icon } from "@/components/ui/Icon";
 import {
   getAttendanceCalendarStatus,
   getCalendarStatusFromLabel,
@@ -13,9 +14,23 @@ import {
   getCampusDateParts,
   type CampusDateParts,
 } from "@/lib/campus-time";
-import { Icon } from "@/components/ui/Icon";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const supportedCalendarYears = [2025, 2026] as const;
+const monthOptions = [
+  { value: 1, label: "January" },
+  { value: 2, label: "February" },
+  { value: 3, label: "March" },
+  { value: 4, label: "April" },
+  { value: 5, label: "May" },
+  { value: 6, label: "June" },
+  { value: 7, label: "July" },
+  { value: 8, label: "August" },
+  { value: 9, label: "September" },
+  { value: 10, label: "October" },
+  { value: 11, label: "November" },
+  { value: 12, label: "December" },
+] as const;
 
 const statusPresentation: Record<
   CalendarAttendanceStatus,
@@ -27,6 +42,11 @@ const statusPresentation: Record<
   "no-record": { label: "No Record" },
 };
 
+type CalendarView = {
+  year: number;
+  month: number;
+};
+
 type CalendarDay = {
   day: number | null;
   key: string;
@@ -34,17 +54,27 @@ type CalendarDay = {
 
 export function MonthlyAttendanceCalendar() {
   const [campusDate, setCampusDate] = useState<CampusDateParts | null>(null);
-  const calendarDays = campusDate
-    ? buildCalendarDays(campusDate.year, campusDate.month)
-    : [];
+  const [calendarView, setCalendarView] = useState<CalendarView | null>(null);
 
   useEffect(() => {
-    const initialUpdateId = window.setTimeout(() => {
-      setCampusDate(getCampusDateParts(new Date()));
-    }, 0);
-    const intervalId = window.setInterval(() => {
-      setCampusDate(getCampusDateParts(new Date()));
-    }, 60_000);
+    const updateCampusDate = () => {
+      const nextCampusDate = getCampusDateParts(new Date());
+
+      setCampusDate(nextCampusDate);
+      setCalendarView((currentView) => {
+        if (currentView) {
+          return currentView;
+        }
+
+        return {
+          year: nextCampusDate.year,
+          month: nextCampusDate.month,
+        };
+      });
+    };
+
+    const initialUpdateId = window.setTimeout(updateCampusDate, 0);
+    const intervalId = window.setInterval(updateCampusDate, 60_000);
 
     return () => {
       window.clearTimeout(initialUpdateId);
@@ -52,7 +82,7 @@ export function MonthlyAttendanceCalendar() {
     };
   }, []);
 
-  if (!campusDate) {
+  if (!campusDate || !calendarView) {
     return (
       <section
         className="my-attendance-calendar-section"
@@ -75,13 +105,60 @@ export function MonthlyAttendanceCalendar() {
     );
   }
 
+  const calendarDays = buildCalendarDays(calendarView.year, calendarView.month);
   const monthDate = new Date(
-    Date.UTC(campusDate.year, campusDate.month - 1, 1, 12),
+    Date.UTC(calendarView.year, calendarView.month - 1, 1, 12),
   );
   const monthLabel = formatCampusMonthYear(monthDate);
   const currentDayStatus = getCalendarStatusFromLabel(
     employeeAttendanceProfile.status,
   );
+  const yearOptions = getYearOptions(calendarView.year);
+
+  function handlePreviousMonth() {
+    moveCalendarView(-1);
+  }
+
+  function handleNextMonth() {
+    moveCalendarView(1);
+  }
+
+  function handleMonthChange(nextMonth: number) {
+    setCalendarView((currentView) => {
+      if (!currentView) {
+        return currentView;
+      }
+
+      return { ...currentView, month: nextMonth };
+    });
+  }
+
+  function handleYearChange(nextYear: number) {
+    setCalendarView((currentView) => {
+      if (!currentView) {
+        return currentView;
+      }
+
+      return { year: nextYear, month: 1 };
+    });
+  }
+
+  function moveCalendarView(monthOffset: number) {
+    setCalendarView((currentView) => {
+      if (!currentView) {
+        return currentView;
+      }
+
+      const nextMonthDate = new Date(
+        Date.UTC(currentView.year, currentView.month - 1 + monthOffset, 1, 12),
+      );
+
+      return {
+        year: nextMonthDate.getUTCFullYear(),
+        month: nextMonthDate.getUTCMonth() + 1,
+      };
+    });
+  }
 
   return (
     <section
@@ -94,18 +171,82 @@ export function MonthlyAttendanceCalendar() {
           <h2 id="my-attendance-calendar-title">Attendance Calendar</h2>
         </div>
         <span className="my-attendance-section-note">
-          Review your attendance for this month
+          Review your attendance for the selected month
         </span>
       </div>
 
       <div className="my-attendance-calendar-surface">
         <div className="my-attendance-calendar-toolbar">
-          <div className="my-attendance-calendar-month">
-            <Icon name="calendar" />
-            <h3>{monthLabel}</h3>
+          <div className="my-attendance-calendar-toolbar-main">
+            <div className="my-attendance-calendar-month">
+              <Icon name="calendar" />
+              <h3>{monthLabel}</h3>
+            </div>
+
+            <div
+              className="my-attendance-calendar-navigation"
+              role="group"
+              aria-label="Attendance calendar navigation"
+            >
+              <button
+                type="button"
+                className="my-attendance-calendar-nav-button"
+                onClick={handlePreviousMonth}
+                aria-label="Previous month"
+              >
+                <Icon name="chevron-left" />
+              </button>
+
+              <div className="my-attendance-calendar-controls">
+                <label className="my-attendance-calendar-control">
+                  <span>Month</span>
+                  <select
+                    value={calendarView.month}
+                    onChange={(event) => {
+                      handleMonthChange(Number(event.target.value));
+                    }}
+                    aria-label="Select attendance month"
+                  >
+                    {monthOptions.map((option) => (
+                      <option value={option.value} key={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="my-attendance-calendar-control">
+                  <span>Year</span>
+                  <select
+                    value={calendarView.year}
+                    onChange={(event) => {
+                      handleYearChange(Number(event.target.value));
+                    }}
+                    aria-label="Select attendance year"
+                  >
+                    {yearOptions.map((year) => (
+                      <option value={year} key={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="my-attendance-calendar-nav-button"
+                onClick={handleNextMonth}
+                aria-label="Next month"
+              >
+                <Icon name="chevron-right" />
+              </button>
+            </div>
           </div>
+
           <div
             className="my-attendance-calendar-legend"
+            role="group"
             aria-label="Attendance status legend"
           >
             <LegendItem status="present" />
@@ -137,15 +278,25 @@ export function MonthlyAttendanceCalendar() {
               );
             }
 
-            const isToday = calendarDay.day === campusDate.day;
-            const isFuture = calendarDay.day > campusDate.day;
+            const isToday = isSameCalendarDate(
+              calendarView.year,
+              calendarView.month,
+              calendarDay.day,
+              campusDate,
+            );
+            const isFuture = isCalendarDateAfter(
+              calendarView.year,
+              calendarView.month,
+              calendarDay.day,
+              campusDate,
+            );
             const status = isFuture
               ? null
               : isToday
                 ? currentDayStatus
                 : getAttendanceCalendarStatus(
-                    campusDate.year,
-                    campusDate.month,
+                    calendarView.year,
+                    calendarView.month,
                     calendarDay.day,
                   );
 
@@ -165,6 +316,12 @@ export function MonthlyAttendanceCalendar() {
   );
 }
 
+function getYearOptions(selectedYear: number) {
+  return Array.from(new Set([...supportedCalendarYears, selectedYear])).sort(
+    (firstYear, secondYear) => firstYear - secondYear,
+  );
+}
+
 function buildCalendarDays(year: number, month: number): CalendarDay[] {
   const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -172,12 +329,52 @@ function buildCalendarDays(year: number, month: number): CalendarDay[] {
 
   return Array.from({ length: totalCells }, (_, index) => {
     const day = index - firstWeekday + 1;
+    const isDateCell = day > 0 && day <= daysInMonth;
 
     return {
-      day: day > 0 && day <= daysInMonth ? day : null,
-      key: `${year}-${month}-${index}`,
+      day: isDateCell ? day : null,
+      key: isDateCell
+        ? formatCalendarDateKey(year, month, day)
+        : `empty-${year}-${month}-${index}`,
     };
   });
+}
+
+function formatCalendarDateKey(year: number, month: number, day: number) {
+  return [
+    year,
+    String(month).padStart(2, "0"),
+    String(day).padStart(2, "0"),
+  ].join("-");
+}
+
+function isSameCalendarDate(
+  year: number,
+  month: number,
+  day: number,
+  referenceDate: CampusDateParts,
+) {
+  return (
+    year === referenceDate.year
+    && month === referenceDate.month
+    && day === referenceDate.day
+  );
+}
+
+function isCalendarDateAfter(
+  year: number,
+  month: number,
+  day: number,
+  referenceDate: CampusDateParts,
+) {
+  const calendarDate = Date.UTC(year, month - 1, day);
+  const referenceCalendarDate = Date.UTC(
+    referenceDate.year,
+    referenceDate.month - 1,
+    referenceDate.day,
+  );
+
+  return calendarDate > referenceCalendarDate;
 }
 
 function LegendItem({ status }: { status: CalendarAttendanceStatus }) {
