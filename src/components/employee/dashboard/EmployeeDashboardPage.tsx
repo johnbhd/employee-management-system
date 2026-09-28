@@ -82,11 +82,11 @@ export function EmployeeDashboardPage() {
         <section className="employee-panel announcements-card">
           <div className="employee-panel-heading">
             <div><p className="employee-section-kicker">Campus updates</p><h2>Announcements</h2></div>
-            <button type="button" className="employee-text-button">View all <Icon name="arrow" /></button>
+            <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
           </div>
           <div className="announcement-list">
-            {announcements.map((announcement) => (
-              <article className="announcement-item" key={announcement.title}>
+            {announcements.slice(0, 3).map((announcement) => (
+              <article className="announcement-item" key={announcement.id}>
                 <div className={`announcement-icon ${announcement.tone}`}><Icon name="info" /></div>
                 <div><div className="announcement-meta"><StatusBadge tone={announcement.tone}>{announcement.category}</StatusBadge><time>{announcement.date}</time></div><h3>{announcement.title}</h3><p>{announcement.message}</p></div>
               </article>

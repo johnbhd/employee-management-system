@@ -30,7 +30,9 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
           ? "My Payslips"
           : pathname === "/employee/profile"
             ? "My Profile"
-            : "Employee Dashboard";
+            : pathname === "/employee/announcements"
+              ? "Announcements"
+              : "Employee Dashboard";
 
   useEffect(() => {
     if (!notificationMenuOpen && !profileMenuOpen) return;
@@ -179,10 +181,15 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
                 <span>Notifications</span>
                 <strong className="employee-profile-menu-count">3</strong>
               </button>
-              <button type="button" className="employee-profile-menu-item" onClick={() => notify("Calendar view is not connected in the prototype.")}>
+              <Link
+                href="/employee/my-attendance"
+                className="employee-profile-menu-item"
+                onClick={() => setProfileMenuOpen(false)}
+              >
                 <Icon name="calendar" />
                 <span>Calendar</span>
-              </button>
+              </Link>
+
               <Link href="/" className="employee-profile-menu-item employee-profile-menu-item-danger" onClick={() => setProfileMenuOpen(false)}>
                 <Icon name="logout" />
                 <span>Log out</span>
