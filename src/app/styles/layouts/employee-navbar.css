@@ -93,6 +93,7 @@
 
 .employee-date {
   gap: 0.35rem;
+  white-space: nowrap;
 }
 
 .employee-user-chip {

@@ -1,17 +1,41 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { employeeQrProfile, employeeQrStatus } from "@/data/attendance-qr";
+import { employeeQrProfile } from "@/data/attendance-qr";
+import { formatCampusDateTime } from "@/lib/campus-time";
+
+import { QrScanFeedback } from "./QrScanFeedback";
+import type {
+  DemoAttendanceState,
+  QrScanFeedbackState,
+} from "./attendance-qr-types";
 
 const QR_SIZE = 29;
 const QR_EXPIRY_SECONDS = 42;
+const NOT_RECORDED_LABEL = "Not Recorded";
 
 type Matrix = boolean[][];
 
-export function AttendanceQrCard() {
+type AttendanceQrCardProps = {
+  demoAttendanceState: DemoAttendanceState;
+  qrGeneratedAt: Date | null;
+  scanFeedback: QrScanFeedbackState | null;
+  timeIn: string | null;
+  timeOut: string | null;
+  onQrRefreshed: () => void;
+};
+
+export function AttendanceQrCard({
+  demoAttendanceState,
+  qrGeneratedAt,
+  scanFeedback,
+  timeIn,
+  timeOut,
+  onQrRefreshed,
+}: AttendanceQrCardProps) {
   const [remainingSeconds, setRemainingSeconds] = useState(QR_EXPIRY_SECONDS);
   const [qrVersion, setQrVersion] = useState(0);
   const [feedback, setFeedback] = useState("");
@@ -30,7 +54,35 @@ export function AttendanceQrCard() {
     setQrVersion((version) => version + 1);
     setRemainingSeconds(QR_EXPIRY_SECONDS);
     setFeedback("A new prototype QR code was generated.");
+    onQrRefreshed();
   }
+
+  const attendanceStatus = [
+    {
+      label: "Current Status",
+      value: getDemoAttendanceStatusLabel(demoAttendanceState),
+      isPill: true,
+      tone: demoAttendanceState === "not-timed-in" ? "muted" : "success",
+    },
+    {
+      label: "Schedule",
+      value: employeeQrProfile.schedule,
+      isPill: false,
+      tone: "plain",
+    },
+    {
+      label: "Time-In",
+      value: timeIn ?? NOT_RECORDED_LABEL,
+      isPill: timeIn === null,
+      tone: timeIn === null ? "muted" : "success",
+    },
+    {
+      label: "Time-Out",
+      value: timeOut ?? NOT_RECORDED_LABEL,
+      isPill: timeOut === null,
+      tone: timeOut === null ? "muted" : "success",
+    },
+  ] as const;
 
   return (
     <article className="attendance-qr-card" aria-labelledby="attendance-qr-employee">
@@ -54,6 +106,7 @@ export function AttendanceQrCard() {
 
       <div className="attendance-qr-code-wrap">
         <PrototypeQrCode version={qrVersion} matrix={qrMatrix} />
+        {scanFeedback ? <QrScanFeedback feedback={scanFeedback} /> : null}
       </div>
 
       <div className="attendance-qr-meta">
@@ -68,17 +121,21 @@ export function AttendanceQrCard() {
             {formatCountdown(remainingSeconds)}
           </strong>
         </span>
-        <span className="attendance-qr-datetime">{employeeQrProfile.dateTime}</span>
+        <span className="attendance-qr-datetime">
+          {qrGeneratedAt ? formatCampusDateTime(qrGeneratedAt) : "Generating QR timestamp…"}
+        </span>
       </div>
 
       <div className="attendance-qr-divider" aria-hidden="true" />
 
       <div className="attendance-qr-status-row" aria-label="Attendance status">
-        {employeeQrStatus.map((status) => (
+        {attendanceStatus.map((status) => (
           <div key={status.label}>
             <span className="attendance-qr-label">{status.label}</span>
             {status.isPill ? (
-              <span className="attendance-qr-pill attendance-qr-pill-muted">{status.value}</span>
+              <span className={`attendance-qr-pill attendance-qr-pill-${status.tone}`}>
+                {status.value}
+              </span>
             ) : (
               <span className="attendance-qr-value">{status.value}</span>
             )}
@@ -102,6 +159,18 @@ export function AttendanceQrCard() {
       </p>
     </article>
   );
+}
+
+function getDemoAttendanceStatusLabel(state: DemoAttendanceState) {
+  if (state === "timed-in") {
+    return "Present";
+  }
+
+  if (state === "completed") {
+    return "Completed";
+  }
+
+  return "Not Yet Timed In";
 }
 
 function PrototypeQrCode({ matrix, version }: { matrix: Matrix; version: number }) {

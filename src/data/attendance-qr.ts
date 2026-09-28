@@ -5,10 +5,6 @@ export const employeeQrProfile = {
   employeeId: "AU-EMP-2026-001",
   department: "Information Technology Department",
   schedule: "7:30 AM – 5:00 PM",
-  status: "Not Yet Timed In",
-  timeIn: "Not Recorded",
-  timeOut: "Not Recorded",
-  dateTime: "July 23, 2026 · 7:24 AM",
 } as const;
 
 export const employeeQrSteps = [
@@ -16,17 +12,6 @@ export const employeeQrSteps = [
   "Present it to the campus attendance scanner.",
   "Wait for the Time-In or Time-Out confirmation.",
 ] as const;
-
-export const employeeQrStatus = [
-  { label: "Current Status", value: employeeQrProfile.status, isPill: true },
-  { label: "Schedule", value: employeeQrProfile.schedule, isPill: false },
-  { label: "Time-In", value: employeeQrProfile.timeIn, isPill: true },
-  { label: "Time-Out", value: employeeQrProfile.timeOut, isPill: true },
-] as const satisfies ReadonlyArray<{
-  label: string;
-  value: string;
-  isPill: boolean;
-}>;
 
 export const employeeQrInfo = {
   title: "How to Record Attendance",

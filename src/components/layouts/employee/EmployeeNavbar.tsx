@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { formatCampusNavbarDate } from "@/lib/campus-time";
+
 import { Icon } from "../../ui/Icon";
 
 type EmployeeNavbarProps = {
@@ -33,6 +35,7 @@ function getEmployeePageTitle(pathname: string) {
 
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const [feedback, setFeedback] = useState("");
+  const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const notificationMenuRef = useRef<HTMLDivElement>(null);
@@ -42,6 +45,17 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const pageTitle = getEmployeePageTitle(pathname);
+
+  useEffect(() => {
+    function updateCampusTime() {
+      setCampusNow(new Date());
+    }
+
+    updateCampusTime();
+    const interval = window.setInterval(updateCampusTime, 60_000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!notificationMenuOpen && !profileMenuOpen) return;
@@ -115,7 +129,10 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
         <h1>{pageTitle}</h1>
       </div>
       <div className="employee-navbar-actions">
-        <span className="employee-date"><Icon name="calendar" /> July 23, 2026 · Thursday</span>
+        <span className="employee-date">
+          <Icon name="calendar" />
+          {campusNow ? formatCampusNavbarDate(campusNow) : "Loading date"}
+        </span>
         <div className={`employee-notification-wrap ${notificationMenuOpen ? "is-open" : ""}`} ref={notificationMenuRef}>
           <button
             type="button"

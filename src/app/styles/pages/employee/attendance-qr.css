@@ -109,6 +109,7 @@
 }
 
 .attendance-qr-code-wrap {
+  position: relative;
   display: flex;
   justify-content: center;
   border: 1px dashed #cfd5e2;
@@ -124,6 +125,74 @@
   border: 0.45rem solid #fff;
   border-radius: 0.25rem;
   box-shadow: 0 0 0 1px #e1e5ed;
+}
+
+.attendance-qr-scan-feedback {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.45rem;
+  padding: 1.25rem;
+  border-radius: 0.65rem;
+  text-align: center;
+  animation: attendance-qr-feedback-in 180ms ease both;
+}
+
+.attendance-qr-scan-feedback.is-success {
+  background: rgba(244, 251, 246, 0.98);
+  color: var(--employee-green);
+}
+
+.attendance-qr-scan-feedback.is-neutral {
+  background: rgba(247, 249, 253, 0.98);
+  color: var(--employee-blue);
+}
+
+.attendance-qr-scan-feedback-icon {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #dff3e5;
+  font-size: 1.1rem;
+}
+
+.attendance-qr-scan-feedback.is-neutral .attendance-qr-scan-feedback-icon {
+  background: #e9edff;
+}
+
+.attendance-qr-scan-feedback strong {
+  color: var(--employee-navy);
+  font-size: 0.95rem;
+}
+
+.attendance-qr-scan-feedback p,
+.attendance-qr-scan-feedback time {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.attendance-qr-scan-feedback time {
+  color: var(--employee-navy);
+  font-weight: 800;
+}
+
+@keyframes attendance-qr-feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .attendance-qr-meta {
@@ -192,6 +261,11 @@
 .attendance-qr-pill-muted {
   background: #edeef2;
   color: var(--text-muted);
+}
+
+.attendance-qr-pill-success {
+  background: #e5f3e9;
+  color: var(--employee-green);
 }
 
 .attendance-qr-actions {
@@ -273,8 +347,31 @@
 }
 
 .attendance-qr-info-heading .ui-icon {
-  margin-top: 0.15rem;
   color: var(--employee-blue);
+}
+
+.attendance-qr-help-trigger {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  flex: 0 0 auto;
+  margin: 0.15rem 0 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--employee-blue);
+  cursor: default;
+  font: inherit;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.attendance-qr-help-trigger:hover,
+.attendance-qr-help-trigger:active {
+  background: transparent;
+  color: var(--employee-blue);
+  transform: none;
+  box-shadow: none;
 }
 
 .attendance-qr-info-heading h2,
@@ -383,5 +480,19 @@
   .attendance-qr-primary-button,
   .attendance-qr-secondary-button {
     flex-basis: auto;
+  }
+
+  .attendance-qr-scan-feedback {
+    padding: 1rem;
+  }
+
+  .attendance-qr-scan-feedback strong {
+    font-size: 0.86rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .attendance-qr-scan-feedback {
+    animation: none;
   }
 }
