@@ -6,17 +6,12 @@ import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 
+import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
+
 export function EmployeeDashboardPage() {
   return (
     <div className="employee-dashboard-page">
-      <section className="employee-welcome">
-        <div>
-          <p className="employee-welcome-kicker">Thursday, July 23, 2026</p>
-          <h2>Welcome back, John Benedict!</h2>
-          <p>Here is your employee dashboard for today.</p>
-          <p className="muted">Employee ID: <strong>AU-EMP-2026-001</strong> · Information Technology</p>
-        </div>
-      </section>
+      <EmployeeDashboardWelcome />
 
       <section className="employee-stats-grid" aria-label="Attendance summary">
         {employeeStats.map((stat) => (
@@ -49,7 +44,9 @@ export function EmployeeDashboardPage() {
             <p className="employee-section-kicker">Recent records</p>
             <h2>Attendance history</h2>
           </div>
-          <button type="button" className="employee-text-button">View all <Icon name="arrow" /></button>
+          <Link href="/employee/attendance-history" className="employee-text-button">
+            View all <Icon name="arrow" />
+          </Link>
         </div>
         <div className="table-wrap employee-table-wrap">
           <table className="data-table employee-data-table">
