@@ -5,10 +5,10 @@ import {
   employeeHelpFaqs,
   employeeHelpQuickLinks,
   employeeHelpTopics,
-  employeeSupportChannels,
 } from "@/data/employee-help";
 
 import { HelpSupportFaq } from "./HelpSupportFaq";
+import { SupportRequestSection } from "./SupportRequestSection";
 
 export function EmployeeHelpSupportPage() {
   return (
@@ -21,6 +21,8 @@ export function EmployeeHelpSupportPage() {
           corrections, payslips, and account access.
         </p>
       </header>
+
+      <SupportRequestSection />
 
       <section
         className="employee-help-section employee-help-quick-help"
@@ -104,40 +106,6 @@ export function EmployeeHelpSupportPage() {
         </div>
 
         <HelpSupportFaq faqs={employeeHelpFaqs} />
-      </section>
-
-      <section
-        className="employee-help-section employee-help-support"
-        aria-labelledby="employee-help-support-title"
-      >
-        <div className="employee-help-section-heading">
-          <div>
-            <span className="employee-help-section-kicker">Escalation guidance</span>
-            <h2 id="employee-help-support-title">Need More Help?</h2>
-          </div>
-          <span className="employee-help-section-note">Choose the appropriate support channel</span>
-        </div>
-
-        <div className="employee-help-support-list">
-          {employeeSupportChannels.map((channel) => (
-            <article className="employee-help-support-item" key={channel.id}>
-              <div className="employee-help-icon employee-help-icon-gold" aria-hidden="true">
-                <Icon name={channel.icon} />
-              </div>
-              <div className="employee-help-item-copy">
-                <h3>{channel.title}</h3>
-                <p>{channel.description}</p>
-                <strong className="employee-help-contact-label">{channel.contactLabel}</strong>
-                {channel.href && channel.linkLabel ? (
-                  <Link href={channel.href} className="employee-help-inline-link">
-                    {channel.linkLabel}
-                    <Icon name="arrow" />
-                  </Link>
-                ) : null}
-              </div>
-            </article>
-          ))}
-        </div>
       </section>
     </div>
   );

@@ -25,14 +25,18 @@ export type EmployeeFaq = {
   answer: string;
 };
 
-export type EmployeeSupportChannel = {
-  id: string;
-  title: string;
-  icon: IconName;
-  description: string;
-  contactLabel: string;
-  href?: string;
-  linkLabel?: string;
+export type EmployeeSupportConcernType =
+  | "technical"
+  | "account-access"
+  | "attendance"
+  | "payroll"
+  | "general";
+
+export type EmployeeSupportConcernOption = {
+  value: EmployeeSupportConcernType;
+  label: string;
+  destination: string;
+  guidance: string;
 };
 
 export const employeeHelpQuickLinks: readonly EmployeeHelpLink[] = [
@@ -219,39 +223,35 @@ export const employeeHelpFaqs: readonly EmployeeFaq[] = [
   },
 ];
 
-export const employeeSupportChannels: readonly EmployeeSupportChannel[] = [
+export const employeeSupportConcernOptions: readonly EmployeeSupportConcernOption[] = [
   {
-    id: "attendance-support",
-    title: "Attendance / Correction Concern",
-    icon: "clock",
-    description: "For missing Time In, missing Time Out, attendance status, or correction-request concerns, contact HR / Attendance Staff.",
-    contactLabel: "HR / Attendance Staff",
-    href: "/employee/attendance-history",
-    linkLabel: "Review attendance history",
+    value: "technical",
+    label: "Technical System Problem",
+    destination: "IT Support",
+    guidance: "For system errors, unavailable features, or pages that do not work as expected.",
   },
   {
-    id: "account-support",
-    title: "Account Access Concern",
-    icon: "user",
-    description: "If you cannot access your account or believe your application access is incorrect, contact the system administrator or authorized support staff.",
-    contactLabel: "System administrator or authorized support staff",
-    href: "/employee/profile",
-    linkLabel: "Review profile",
+    value: "account-access",
+    label: "Account Access Concern",
+    destination: "IT Support / IT Administrator",
+    guidance: "For application access or account-related problems. Do not include password values.",
   },
   {
-    id: "payroll-support",
-    title: "Payslip / Payroll Concern",
-    icon: "file",
-    description: "For questions about payroll values or released payslips, contact the appropriate Payroll / HR office.",
-    contactLabel: "Payroll / HR office",
-    href: "/employee/payslips",
-    linkLabel: "Review payslips",
+    value: "attendance",
+    label: "Attendance Concern",
+    destination: "HR / Attendance Staff",
+    guidance: "For attendance questions. Use the correction workflow when an official record must be changed.",
   },
   {
-    id: "technical-support",
-    title: "Technical System Problem",
-    icon: "support",
-    description: "If a page does not load or an application feature does not work as expected, report the issue to IT support.",
-    contactLabel: "IT Support",
+    value: "payroll",
+    label: "Payslip / Payroll Concern",
+    destination: "Payroll / HR Staff",
+    guidance: "For questions about payslip or payroll information displayed in the portal.",
+  },
+  {
+    value: "general",
+    label: "General Employee Concern",
+    destination: "HR / Appropriate Staff",
+    guidance: "For employee concerns that do not fit the categories above.",
   },
 ];

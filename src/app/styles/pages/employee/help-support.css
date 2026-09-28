@@ -76,14 +76,232 @@
   text-align: right;
 }
 
+.employee-help-request {
+  box-shadow: none;
+}
+
+.employee-help-request-body {
+  padding: 1.05rem 1.25rem 1.15rem;
+}
+
+.employee-help-request-intro {
+  max-width: 52rem;
+  margin: 0 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.employee-help-form {
+  display: grid;
+  min-width: 0;
+  gap: 0.9rem;
+}
+
+.employee-help-form-grid {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem 1rem;
+}
+
+.employee-help-field {
+  display: grid;
+  min-width: 0;
+  gap: 0.38rem;
+}
+
+.employee-help-field label {
+  color: var(--employee-navy);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.employee-help-field input,
+.employee-help-field select,
+.employee-help-field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.45rem;
+  background: #fff;
+  color: var(--employee-ink);
+  font-size: 0.73rem;
+  line-height: 1.45;
+}
+
+.employee-help-field input,
+.employee-help-field select {
+  min-height: 2.4rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.employee-help-field select {
+  cursor: pointer;
+}
+
+.employee-help-field textarea {
+  min-height: 6rem;
+  padding: 0.65rem 0.7rem;
+  resize: vertical;
+}
+
+.employee-help-field input::placeholder,
+.employee-help-field textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.employee-help-field input:focus,
+.employee-help-field select:focus,
+.employee-help-field textarea:focus {
+  border-color: var(--employee-blue);
+  box-shadow: 0 0 0 3px rgba(47, 78, 214, 0.12);
+  outline: 0;
+}
+
+.employee-help-field input[aria-invalid="true"],
+.employee-help-field select[aria-invalid="true"],
+.employee-help-field textarea[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.employee-help-field-error {
+  color: var(--danger);
+  font-size: 0.65rem;
+  line-height: 1.4;
+}
+
+.employee-help-request-routing,
+.employee-help-request-routing-empty {
+  min-width: 0;
+  border-radius: 0.5rem;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.employee-help-request-routing {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem 0.8rem;
+}
+
+.employee-help-request-routing-icon {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf5ff;
+  color: var(--employee-blue);
+  font-size: 0.7rem;
+}
+
+.employee-help-request-routing-label {
+  display: block;
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.employee-help-request-routing strong {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--employee-navy);
+  font-size: 0.72rem;
+}
+
+.employee-help-request-routing p {
+  margin: 0.15rem 0 0;
+  overflow-wrap: anywhere;
+}
+
+.employee-help-request-routing-empty {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+}
+
+.employee-help-request-attendance-note {
+  margin: -0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.67rem;
+  line-height: 1.55;
+}
+
+.employee-help-request-attendance-note a {
+  color: var(--employee-blue);
+  font-weight: 800;
+}
+
+.employee-help-request-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.2rem;
+}
+
+.employee-help-request-prototype-note {
+  color: var(--text-faint);
+  font-size: 0.63rem;
+  line-height: 1.45;
+}
+
+.employee-help-submit {
+  display: inline-flex;
+  min-height: 2.35rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border: 1px solid var(--employee-navy);
+  border-radius: 0.45rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--employee-navy);
+  color: #fff;
+  font-size: 0.69rem;
+  font-weight: 800;
+}
+
+.employee-help-submit:hover {
+  border-color: var(--employee-blue);
+  background: var(--employee-blue);
+}
+
+.employee-help-submit .ui-icon {
+  font-size: 0.58rem;
+}
+
+.employee-help-success {
+  display: grid;
+  gap: 0.18rem;
+  margin-top: 0.9rem;
+  border: 1px solid #b8dec8;
+  border-radius: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.employee-help-success strong {
+  font-size: 0.7rem;
+}
+
 .employee-help-quick-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .employee-help-quick-item,
-.employee-help-topic,
-.employee-help-support-item {
+.employee-help-topic {
   display: flex;
   min-width: 0;
   gap: 0.8rem;
@@ -121,11 +339,6 @@
 .employee-help-icon-red {
   background: #fff0f2;
   color: var(--employee-red);
-}
-
-.employee-help-icon-gold {
-  background: #fff8e9;
-  color: var(--employee-gold);
 }
 
 .employee-help-item-copy {
@@ -278,33 +491,6 @@
   max-height: 12rem;
 }
 
-.employee-help-support-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.employee-help-support-item {
-  padding: 1.15rem 1.25rem;
-  border-bottom: 1px solid #edf0f4;
-}
-
-.employee-help-support-item:nth-child(odd) {
-  border-right: 1px solid #edf0f4;
-}
-
-.employee-help-support-item:nth-last-child(-n + 2) {
-  border-bottom: 0;
-}
-
-.employee-help-contact-label {
-  display: block;
-  margin-top: 0.65rem;
-  color: var(--employee-navy);
-  font-size: 0.68rem;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
 @media (max-width: 900px) {
   .employee-help-quick-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -329,23 +515,23 @@
 }
 
 @media (max-width: 720px) {
-  .employee-help-topic-list,
-  .employee-help-support-list {
+  .employee-help-topic-list {
     grid-template-columns: 1fr;
   }
 
-  .employee-help-topic:nth-child(odd),
-  .employee-help-support-item:nth-child(odd) {
+  .employee-help-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-help-topic:nth-child(odd) {
     border-right: 0;
   }
 
-  .employee-help-topic:nth-last-child(-n + 2),
-  .employee-help-support-item:nth-last-child(-n + 2) {
+  .employee-help-topic:nth-last-child(-n + 2) {
     border-bottom: 1px solid #edf0f4;
   }
 
-  .employee-help-topic:last-child,
-  .employee-help-support-item:last-child {
+  .employee-help-topic:last-child {
     border-bottom: 0;
   }
 }
@@ -370,8 +556,7 @@
   }
 
   .employee-help-quick-item,
-  .employee-help-topic,
-  .employee-help-support-item {
+  .employee-help-topic {
     padding: 1rem;
   }
 
@@ -398,5 +583,18 @@
 
   .employee-help-faq-answer p {
     padding-right: 0;
+  }
+
+  .employee-help-request-body {
+    padding: 1rem;
+  }
+
+  .employee-help-request-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .employee-help-submit {
+    width: 100%;
   }
 }
