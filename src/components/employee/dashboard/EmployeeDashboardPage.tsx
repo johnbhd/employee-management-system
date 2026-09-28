@@ -10,6 +10,7 @@ import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 
+import { EmployeeDashboardAttendanceCard } from "./EmployeeDashboardAttendanceCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
 
 export function EmployeeDashboardPage() {
@@ -25,24 +26,7 @@ export function EmployeeDashboardPage() {
         ))}
       </section>
 
-      <section className="employee-panel attendance-card">
-        <div className="employee-panel-heading">
-          <div>
-            <p className="employee-section-kicker">My attendance</p>
-            <h2>Today&apos;s attendance</h2>
-          </div>
-          <StatusBadge tone="success">On time</StatusBadge>
-        </div>
-        <div className="attendance-summary">
-          <div><span>Time in</span><strong>7:24 AM</strong><small>Recorded via Bundy</small></div>
-          <div><span>Time out</span><strong>—</strong><small>Not recorded yet</small></div>
-          <div><span>Work hours</span><strong>—</strong><small>Calculated after time out</small></div>
-        </div>
-        <div className="attendance-actions">
-          <Link href="/employee/attendance-qr" className="employee-primary-button"><Icon name="qr" /> Show attendance QR</Link>
-          <Link href="/employee/attendance-history" className="employee-secondary-button"><Icon name="clock" /> View history</Link>
-        </div>
-      </section>
+      <EmployeeDashboardAttendanceCard />
 
       <section className="employee-panel">
         <div className="employee-panel-heading">

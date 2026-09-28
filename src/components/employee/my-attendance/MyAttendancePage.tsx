@@ -1,91 +1,17 @@
 import {
   employeeAttendanceHelp,
-  employeeAttendanceProfile,
   employeeAttendanceReminders,
-  employeeAttendanceStats,
 } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
 
 import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
+import { MyAttendanceToday } from "./MyAttendanceToday";
 import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
 export function MyAttendancePage() {
   return (
     <div className="my-attendance-page">
-      <section
-        className="my-attendance-overview"
-        aria-labelledby="my-attendance-profile"
-      >
-        <div className="my-attendance-employee">
-          <div className="my-attendance-avatar" aria-hidden="true">
-            <Icon name="user" />
-          </div>
-          <div className="my-attendance-employee-copy">
-            <span className="my-attendance-kicker">Employee attendance</span>
-            <h2 id="my-attendance-profile">
-              {employeeAttendanceProfile.name}
-            </h2>
-            <p className="my-attendance-employee-meta">
-              <span>{employeeAttendanceProfile.employeeId}</span>
-              <span aria-hidden="true">·</span>
-              <span>{employeeAttendanceProfile.department}</span>
-            </p>
-          </div>
-        </div>
-
-        <div className="my-attendance-overview-divider" aria-hidden="true" />
-
-        <div className="my-attendance-schedule">
-          <Icon name="calendar" />
-          <div>
-            <span className="my-attendance-label">Today&apos;s Schedule</span>
-            <strong className="my-attendance-value">
-              {employeeAttendanceProfile.schedule}
-            </strong>
-            <span className="my-attendance-subtext">
-              {employeeAttendanceProfile.scheduleType}
-            </span>
-          </div>
-        </div>
-
-        <div className="my-attendance-status-box">
-          <span className="my-attendance-label">Current Status</span>
-          <strong className="my-attendance-status-value">
-            <span className="my-attendance-status-dot" aria-hidden="true" />
-            {employeeAttendanceProfile.status}
-          </strong>
-          <span className="my-attendance-subtext">
-            {employeeAttendanceProfile.statusNote}
-          </span>
-        </div>
-      </section>
-
-      <section
-        className="my-attendance-details-section"
-        aria-labelledby="my-attendance-details-title"
-      >
-        <div className="my-attendance-section-heading">
-          <div>
-            <span className="my-attendance-kicker">Today</span>
-            <h2 id="my-attendance-details-title">Attendance details</h2>
-          </div>
-          <span className="my-attendance-section-note">
-            Authorized attendance record
-          </span>
-        </div>
-
-        <div className="my-attendance-details-grid">
-          {employeeAttendanceStats.map((stat) => (
-            <article className="my-attendance-detail" key={stat.label}>
-              <span className="my-attendance-label">{stat.label}</span>
-              <strong className="my-attendance-detail-value">
-                {stat.value}
-              </strong>
-              <span className="my-attendance-subtext">{stat.note}</span>
-            </article>
-          ))}
-        </div>
-      </section>
+      <MyAttendanceToday />
 
       <section
         className="my-attendance-quick-actions"

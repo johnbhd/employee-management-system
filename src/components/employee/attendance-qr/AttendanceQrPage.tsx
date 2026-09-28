@@ -9,7 +9,7 @@ import {
   employeeQrSteps,
 } from "@/data/attendance-qr";
 import { Icon } from "@/components/ui/Icon";
-import { formatCampusTime } from "@/lib/campus-time";
+import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
 
 import { AttendanceQrCard } from "./AttendanceQrCard";
 import type {
@@ -20,12 +20,16 @@ import type {
 const SCAN_FEEDBACK_DURATION_MS = 2600;
 
 export function AttendanceQrPage() {
-  const [demoAttendanceState, setDemoAttendanceState] = useState<DemoAttendanceState>("not-timed-in");
   const [qrGeneratedAt, setQrGeneratedAt] = useState<Date | null>(null);
   const [scanFeedback, setScanFeedback] = useState<QrScanFeedbackState | null>(null);
-  const [timeIn, setTimeIn] = useState<string | null>(null);
-  const [timeOut, setTimeOut] = useState<string | null>(null);
   const scanFeedbackTimeoutRef = useRef<number | null>(null);
+  const {
+    demoAttendance,
+    recordQrScan,
+    resetDemoAttendance,
+  } = useEmployeeQrDemoAttendance(employeeQrProfile.employeeId);
+
+  const demoAttendanceState = getDemoAttendanceState(demoAttendance?.status);
 
   useEffect(() => {
     const qrInitializationTimer = window.setTimeout(() => {
@@ -56,23 +60,23 @@ export function AttendanceQrPage() {
   // Temporary presentation behavior: the help question-mark icon simulates
   // an authorized QR scan until a real attendance scanner is connected.
   function handleDemoQrScan() {
-    const scanTime = formatCampusTime(new Date());
+    const scanResult = recordQrScan(new Date());
 
-    if (demoAttendanceState === "not-timed-in") {
-      setTimeIn(scanTime);
-      setDemoAttendanceState("timed-in");
-      showScanFeedback({ type: "time-in", time: scanTime });
+    if (scanResult.action === "time-in" || scanResult.action === "time-out") {
+      const scanTime = scanResult.action === "time-in"
+        ? scanResult.attendance.timeIn
+        : scanResult.attendance.timeOut;
+
+      showScanFeedback({
+        type: scanResult.action,
+        time: scanTime ?? "",
+      });
       return;
     }
 
-    if (demoAttendanceState === "timed-in") {
-      setTimeOut(scanTime);
-      setDemoAttendanceState("completed");
-      showScanFeedback({ type: "time-out", time: scanTime });
-      return;
+    if (scanResult.action === "completed") {
+      showScanFeedback({ type: "completed" });
     }
-
-    showScanFeedback({ type: "completed" });
   }
 
   function handleQrRefreshed() {
@@ -97,8 +101,8 @@ export function AttendanceQrPage() {
           onQrRefreshed={handleQrRefreshed}
           qrGeneratedAt={qrGeneratedAt}
           scanFeedback={scanFeedback}
-          timeIn={timeIn}
-          timeOut={timeOut}
+          timeIn={demoAttendance?.timeIn ?? null}
+          timeOut={demoAttendance?.timeOut ?? null}
         />
 
         <aside className="attendance-qr-side" aria-label="Attendance QR guidance">
@@ -128,7 +132,14 @@ export function AttendanceQrPage() {
 
           <div className="attendance-qr-notice-card">
             <div className="attendance-qr-notice-heading">
-              <Icon name={employeeQrInfo.securityIcon} />
+              <button
+                type="button"
+                className="attendance-qr-security-trigger"
+                onClick={resetDemoAttendance}
+                aria-label="Reset temporary attendance demo"
+              >
+                <Icon name={employeeQrInfo.securityIcon} />
+              </button>
               <h2>{employeeQrInfo.securityTitle}</h2>
             </div>
             <p>{employeeQrInfo.securityMessage}</p>
@@ -141,4 +152,18 @@ export function AttendanceQrPage() {
       </p>
     </div>
   );
+}
+
+function getDemoAttendanceState(
+  status: "Present" | "Completed" | undefined,
+): DemoAttendanceState {
+  if (status === "Completed") {
+    return "completed";
+  }
+
+  if (status === "Present") {
+    return "timed-in";
+  }
+
+  return "not-timed-in";
 }

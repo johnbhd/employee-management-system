@@ -9,6 +9,7 @@ import {
   type CalendarAttendanceStatus,
 } from "@/data/my-attendance-calendar";
 import { employeeAttendanceProfile } from "@/data/my-attendance";
+import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
 import {
   formatCampusMonthYear,
   getCampusDateParts,
@@ -55,6 +56,9 @@ type CalendarDay = {
 export function MonthlyAttendanceCalendar() {
   const [campusDate, setCampusDate] = useState<CampusDateParts | null>(null);
   const [calendarView, setCalendarView] = useState<CalendarView | null>(null);
+  const { demoAttendance } = useEmployeeQrDemoAttendance(
+    employeeAttendanceProfile.employeeId,
+  );
 
   useEffect(() => {
     const updateCampusDate = () => {
@@ -111,7 +115,9 @@ export function MonthlyAttendanceCalendar() {
   );
   const monthLabel = formatCampusMonthYear(monthDate);
   const currentDayStatus = getCalendarStatusFromLabel(
-    employeeAttendanceProfile.status,
+    demoAttendance?.status === "Completed"
+      ? "Present"
+      : demoAttendance?.status ?? employeeAttendanceProfile.status,
   );
   const yearOptions = getYearOptions(calendarView.year);
 

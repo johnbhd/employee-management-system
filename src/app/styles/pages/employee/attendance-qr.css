@@ -393,6 +393,35 @@
   color: var(--employee-red);
 }
 
+.attendance-qr-security-trigger {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin: 0.15rem 0 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--employee-red);
+  cursor: default;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.attendance-qr-security-trigger:hover,
+.attendance-qr-security-trigger:active {
+  background: transparent;
+  color: var(--employee-red);
+  transform: none;
+  box-shadow: none;
+}
+
+.attendance-qr-security-trigger:focus-visible {
+  outline: 2px solid rgba(178, 41, 57, 0.35);
+  outline-offset: 2px;
+}
+
 .attendance-qr-notice-card p {
   margin: 0;
   color: #7a2331;

@@ -77,6 +77,16 @@ export function getCampusDateParts(date: Date): CampusDateParts {
   };
 }
 
+export function formatCampusDateKey(date: Date) {
+  const { year, month, day } = getCampusDateParts(date);
+
+  return [
+    year,
+    String(month).padStart(2, "0"),
+    String(day).padStart(2, "0"),
+  ].join("-");
+}
+
 export function formatCampusMonthYear(date: Date) {
   return campusMonthYearFormatter.format(date);
 }
