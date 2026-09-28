@@ -1,6 +1,10 @@
 import Link from "next/link";
 
-import { announcements, attendanceHistory, employeeStats } from "@/data/employee";
+import {
+  attendanceHistory,
+  employeeStats,
+  getLatestAnnouncements,
+} from "@/data/employee";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -9,6 +13,8 @@ import { SummaryCard } from "@/components/ui/SummaryCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
 
 export function EmployeeDashboardPage() {
+  const latestAnnouncements = getLatestAnnouncements(3);
+
   return (
     <div className="employee-dashboard-page">
       <EmployeeDashboardWelcome />
@@ -82,7 +88,7 @@ export function EmployeeDashboardPage() {
             <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
           </div>
           <div className="announcement-list">
-            {announcements.slice(0, 3).map((announcement) => (
+            {latestAnnouncements.map((announcement) => (
               <article className="announcement-item" key={announcement.id}>
                 <div className={`announcement-icon ${announcement.tone}`}><Icon name="info" /></div>
                 <div><div className="announcement-meta"><StatusBadge tone={announcement.tone}>{announcement.category}</StatusBadge><time>{announcement.date}</time></div><h3>{announcement.title}</h3><p>{announcement.message}</p></div>

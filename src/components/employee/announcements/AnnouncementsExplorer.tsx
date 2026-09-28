@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
+  getAnnouncementsNewestFirst,
   type EmployeeAnnouncement,
   type EmployeeAnnouncementCategory,
 } from "@/data/employee";
@@ -28,14 +30,34 @@ export function AnnouncementsExplorer({ announcements }: AnnouncementsExplorerPr
   const [selectedCategory, setSelectedCategory] = useState<AnnouncementFilter>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<EmployeeAnnouncement | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const linkedAnnouncementId = searchParams.get("announcement");
+  const linkedAnnouncement = linkedAnnouncementId
+    ? announcements.find(
+      (announcement) => announcement.id === linkedAnnouncementId,
+    ) ?? null
+    : null;
+  const activeAnnouncement = linkedAnnouncement ?? selectedAnnouncement;
+
   const closeAnnouncement = useCallback(() => {
     setSelectedAnnouncement(null);
-  }, []);
+
+    if (!searchParams.has("announcement")) {
+      return;
+    }
+
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    nextSearchParams.delete("announcement");
+    const nextQuery = nextSearchParams.toString();
+
+    router.replace(nextQuery ? `/employee/announcements?${nextQuery}` : "/employee/announcements");
+  }, [router, searchParams]);
 
   const filteredAnnouncements = useMemo(() => {
     const search = searchQuery.trim().toLowerCase();
 
-    return [...announcements]
+    return getAnnouncementsNewestFirst(announcements)
       .filter((announcement) => {
         const matchesCategory = selectedCategory === "All"
           || announcement.category === selectedCategory;
@@ -47,8 +69,7 @@ export function AnnouncementsExplorer({ announcements }: AnnouncementsExplorerPr
         const matchesSearch = !search || searchableText.includes(search);
 
         return matchesCategory && matchesSearch;
-      })
-      .sort((left, right) => right.postedAt.localeCompare(left.postedAt));
+      });
   }, [announcements, searchQuery, selectedCategory]);
 
   const hasFilters = selectedCategory !== "All" || searchQuery.trim().length > 0;
@@ -155,7 +176,7 @@ export function AnnouncementsExplorer({ announcements }: AnnouncementsExplorerPr
       )}
 
       <AnnouncementDetailsModal
-        announcement={selectedAnnouncement}
+        announcement={activeAnnouncement}
         onClose={closeAnnouncement}
       />
     </div>

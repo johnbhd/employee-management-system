@@ -168,6 +168,9 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.3rem 0.45rem 0.6rem;
+  border-bottom: 1px solid #edf0f4;
 }
 
 .employee-notification-menu-header strong,
@@ -201,29 +204,87 @@
   padding: 0.7rem 0.55rem;
 }
 
-.employee-notification-item > span:last-child {
+.employee-notification-icon {
   display: grid;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.45rem;
+  font-size: 0.68rem;
+}
+
+.employee-notification-icon.danger {
+  background: #fff0f2;
+  color: var(--employee-red);
+}
+
+.employee-notification-icon.info {
+  background: #edf1ff;
+  color: var(--employee-blue);
+}
+
+.employee-notification-icon.warning {
+  background: #fff8e9;
+  color: var(--employee-gold);
+}
+
+.employee-notification-copy {
+  display: grid;
+  min-width: 0;
   gap: 0.2rem;
 }
 
-.employee-notification-item strong {
+.employee-notification-copy strong {
+  min-width: 0;
   color: var(--employee-ink);
   font-size: 0.7rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
-.employee-notification-item small {
+.employee-notification-meta,
+.employee-notification-preview {
+  min-width: 0;
   color: var(--text-muted);
   font-size: 0.64rem;
   line-height: 1.35;
 }
 
-.employee-notification-dot {
-  width: 0.5rem;
-  height: 0.5rem;
-  flex: 0 0 auto;
-  margin-top: 0.25rem;
-  border-radius: 999px;
-  background: var(--employee-red);
+.employee-notification-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.employee-notification-empty {
+  margin: 0;
+  padding: 0.8rem 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  line-height: 1.4;
+}
+
+.employee-notification-view-all {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid #edf0f4;
+  padding: 0.7rem 0.55rem 0.15rem;
+  color: var(--employee-blue);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.employee-notification-view-all:hover {
+  color: var(--employee-red);
+}
+
+.employee-notification-view-all .ui-icon {
+  font-size: 0.58rem;
 }
 
 .employee-notification-item:hover,

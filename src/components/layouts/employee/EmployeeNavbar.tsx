@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
 
 import { Icon } from "../../ui/Icon";
@@ -33,18 +34,24 @@ function getEmployeePageTitle(pathname: string) {
   }
 }
 
+const latestNotifications = getLatestAnnouncements(5);
+const notificationCount = announcements.length;
+const notificationBadge = notificationCount > 9 ? "9+" : String(notificationCount);
+
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
-  const [feedback, setFeedback] = useState("");
+  const pathname = usePathname();
   const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [menuPathname, setMenuPathname] = useState(pathname);
   const notificationMenuRef = useRef<HTMLDivElement>(null);
   const notificationTriggerRef = useRef<HTMLButtonElement>(null);
   const notificationMenuOpenedFromProfileRef = useRef(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
-  const pathname = usePathname();
   const pageTitle = getEmployeePageTitle(pathname);
+  const notificationMenuIsOpen = notificationMenuOpen && menuPathname === pathname;
+  const profileMenuIsOpen = profileMenuOpen && menuPathname === pathname;
 
   useEffect(() => {
     function updateCampusTime() {
@@ -58,7 +65,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   }, []);
 
   useEffect(() => {
-    if (!notificationMenuOpen && !profileMenuOpen) return;
+    if (!notificationMenuIsOpen && !profileMenuIsOpen) return;
 
     function closeOnOutsidePointer(event: PointerEvent) {
       const target = event.target as Node;
@@ -76,7 +83,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
       if (event.key === "Escape") {
         const focusTarget = notificationMenuOpenedFromProfileRef.current
           ? profileTriggerRef.current
-          : notificationMenuOpen
+          : notificationMenuIsOpen
             ? notificationTriggerRef.current
             : profileTriggerRef.current;
 
@@ -94,30 +101,31 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
       document.removeEventListener("pointerdown", closeOnOutsidePointer);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [notificationMenuOpen, profileMenuOpen]);
+  }, [notificationMenuIsOpen, profileMenuIsOpen]);
 
-  function notify(message: string) {
+  function closeMenus() {
     setNotificationMenuOpen(false);
     setProfileMenuOpen(false);
     notificationMenuOpenedFromProfileRef.current = false;
-    setFeedback(message);
-    window.setTimeout(() => setFeedback(""), 2200);
   }
 
   function toggleNotificationMenu() {
     notificationMenuOpenedFromProfileRef.current = false;
-    setNotificationMenuOpen((open) => !open);
+    setMenuPathname(pathname);
+    setNotificationMenuOpen(!notificationMenuIsOpen);
     setProfileMenuOpen(false);
   }
 
   function toggleProfileMenu() {
     notificationMenuOpenedFromProfileRef.current = false;
-    setProfileMenuOpen((open) => !open);
+    setMenuPathname(pathname);
+    setProfileMenuOpen(!profileMenuIsOpen);
     setNotificationMenuOpen(false);
   }
 
   function openNotificationMenu() {
     notificationMenuOpenedFromProfileRef.current = true;
+    setMenuPathname(pathname);
     setProfileMenuOpen(false);
     setNotificationMenuOpen(true);
   }
@@ -133,7 +141,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
           <Icon name="calendar" />
           {campusNow ? formatCampusNavbarDate(campusNow) : "Loading date"}
         </span>
-        <div className={`employee-notification-wrap ${notificationMenuOpen ? "is-open" : ""}`} ref={notificationMenuRef}>
+        <div className={`employee-notification-wrap ${notificationMenuIsOpen ? "is-open" : ""}`} ref={notificationMenuRef}>
           <button
             type="button"
             ref={notificationTriggerRef}
@@ -141,39 +149,61 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
             onClick={toggleNotificationMenu}
             aria-label="Open notifications"
             aria-controls="employee-notification-menu"
-            aria-expanded={notificationMenuOpen}
+            aria-expanded={notificationMenuIsOpen}
             aria-haspopup="menu"
           >
             <Icon name="bell" />
-            <span>3</span>
+            <span>{notificationBadge}</span>
           </button>
-          {notificationMenuOpen ? (
+          {notificationMenuIsOpen ? (
             <div id="employee-notification-menu" className="employee-notification-menu" role="menu" aria-label="Employee notifications">
               <div className="employee-notification-menu-header">
                 <strong>Notifications</strong>
-                <span>3 unread</span>
+                <span>{notificationCount} available</span>
               </div>
-              <button type="button" className="employee-notification-item" onClick={() => notify("Attendance notification opened.")} role="menuitem">
-                <span className="employee-notification-dot" />
-                <span>
-                  <strong>Attendance recorded</strong>
-                  <small>Your latest attendance entry is ready to review.</small>
-                </span>
-              </button>
-              <button type="button" className="employee-notification-item" onClick={() => notify("Payslip notification opened.")} role="menuitem">
-                <span className="employee-notification-dot" />
-                <span>
-                  <strong>Payslip available</strong>
-                  <small>Your latest payslip is ready to view.</small>
-                </span>
-              </button>
-              <button type="button" className="employee-notification-item" onClick={() => notify("Schedule notification opened.")} role="menuitem">
-                <span className="employee-notification-dot" />
-                <span>
-                  <strong>Schedule reminder</strong>
-                  <small>Review your assigned attendance schedule.</small>
-                </span>
-              </button>
+              {latestNotifications.length > 0 ? (
+                latestNotifications.map((announcement) => (
+                  <Link
+                    href={{
+                      pathname: "/employee/announcements",
+                      query: { announcement: announcement.id },
+                    }}
+                    className="employee-notification-item"
+                    key={announcement.id}
+                    onClick={closeMenus}
+                    role="menuitem"
+                    aria-label={`Open announcement: ${announcement.title}`}
+                  >
+                    <span
+                      className={`employee-notification-icon ${announcement.tone}`}
+                      aria-hidden="true"
+                    >
+                      <Icon name="info" />
+                    </span>
+                    <span className="employee-notification-copy">
+                      <strong>{announcement.title}</strong>
+                      <small className="employee-notification-meta">
+                        {announcement.category} ·{" "}
+                        <time dateTime={announcement.postedAt}>{announcement.date}</time>
+                      </small>
+                      <small className="employee-notification-preview">
+                        {announcement.message}
+                      </small>
+                    </span>
+                  </Link>
+                ))
+              ) : (
+                <p className="employee-notification-empty">No notifications available.</p>
+              )}
+              <Link
+                href="/employee/announcements"
+                className="employee-notification-view-all"
+                onClick={closeMenus}
+                role="menuitem"
+              >
+                View all
+                <Icon name="arrow" />
+              </Link>
             </div>
           ) : null}
         </div>
@@ -185,14 +215,14 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
             onClick={toggleProfileMenu}
             aria-label="Open employee profile menu"
             aria-controls="employee-profile-menu"
-            aria-expanded={profileMenuOpen}
+            aria-expanded={profileMenuIsOpen}
             aria-haspopup="menu"
           >
             <span className="employee-user-avatar"><Icon name="user" /></span>
             <span className="employee-user-name">John Benedict</span>
             <Icon name="chevron" />
           </button>
-          {profileMenuOpen ? (
+          {profileMenuIsOpen ? (
             <nav id="employee-profile-menu" className="employee-profile-menu" aria-label="Employee profile menu">
               <div className="employee-profile-menu-summary">
                 <strong>John Benedict</strong>
@@ -205,7 +235,7 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
               <button type="button" className="employee-profile-menu-item" onClick={openNotificationMenu}>
                 <Icon name="bell" />
                 <span>Notifications</span>
-                <strong className="employee-profile-menu-count">3</strong>
+                <strong className="employee-profile-menu-count">{notificationBadge}</strong>
               </button>
               <Link
                 href="/employee/my-attendance"
@@ -224,7 +254,6 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
           ) : null}
         </div>
       </div>
-      <span className="sr-only" aria-live="polite">{feedback}</span>
     </header>
   );
 }

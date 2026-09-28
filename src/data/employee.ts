@@ -83,3 +83,20 @@ export const announcements: readonly EmployeeAnnouncement[] = [
     postedAt: "2026-07-15",
   },
 ];
+
+export function getAnnouncementsNewestFirst(
+  source: readonly EmployeeAnnouncement[] = announcements,
+): EmployeeAnnouncement[] {
+  return [...source].sort(
+    (firstAnnouncement, secondAnnouncement) =>
+      new Date(secondAnnouncement.postedAt).getTime()
+      - new Date(firstAnnouncement.postedAt).getTime(),
+  );
+}
+
+export function getLatestAnnouncements(
+  limit: number,
+  source: readonly EmployeeAnnouncement[] = announcements,
+): EmployeeAnnouncement[] {
+  return getAnnouncementsNewestFirst(source).slice(0, Math.max(0, limit));
+}

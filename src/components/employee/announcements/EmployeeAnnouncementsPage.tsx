@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { announcements } from "@/data/employee";
 
 import { AnnouncementsExplorer } from "./AnnouncementsExplorer";
@@ -11,7 +13,9 @@ export function EmployeeAnnouncementsPage() {
         <p>Stay updated with important campus notices, payroll announcements, and employee reminders.</p>
       </header>
 
-      <AnnouncementsExplorer announcements={announcements} />
+      <Suspense fallback={null}>
+        <AnnouncementsExplorer announcements={announcements} />
+      </Suspense>
     </div>
   );
 }
