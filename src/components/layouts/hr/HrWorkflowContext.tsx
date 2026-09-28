@@ -62,7 +62,7 @@ function initialVerificationState() {
   ) as Record<string, HrVerificationStatus>;
 }
 
-function initialCorrectionRequests() {
+function initialCorrectionRequests(): HrCorrectionRequest[] {
   return hrCorrectionRequests.map((request) => ({
     ...request,
     history: [...request.history],
@@ -85,7 +85,9 @@ function formatDecisionTimestamp(value: Date) {
 
 export function HrWorkflowProvider({ children }: { children: ReactNode }) {
   const [verificationByRecordId, setVerificationByRecordId] = useState(initialVerificationState);
-  const [correctionRequests, setCorrectionRequests] = useState(initialCorrectionRequests);
+  const [correctionRequests, setCorrectionRequests] = useState<readonly HrCorrectionRequest[]>(
+    initialCorrectionRequests,
+  );
   const [auditEvents, setAuditEvents] = useState<readonly AttendanceAuditEvent[]>(hrAttendanceAuditEvents);
 
   const attendanceRecords = useMemo(() => {
