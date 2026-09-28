@@ -12,9 +12,13 @@ type EmployeeNavbarProps = {
 
 export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
   const [feedback, setFeedback] = useState("");
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const accountMenuRef = useRef<HTMLDivElement>(null);
-  const accountTriggerRef = useRef<HTMLButtonElement>(null);
+  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const notificationMenuRef = useRef<HTMLDivElement>(null);
+  const notificationTriggerRef = useRef<HTMLButtonElement>(null);
+  const notificationMenuOpenedFromProfileRef = useRef(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const pageTitle = pathname === "/employee/my-attendance"
     ? "My Attendance"
@@ -29,18 +33,32 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
             : "Employee Dashboard";
 
   useEffect(() => {
-    if (!accountMenuOpen) return;
+    if (!notificationMenuOpen && !profileMenuOpen) return;
 
     function closeOnOutsidePointer(event: PointerEvent) {
-      if (!accountMenuRef.current?.contains(event.target as Node)) {
-        setAccountMenuOpen(false);
+      const target = event.target as Node;
+      const clickedNotificationMenu = notificationMenuRef.current?.contains(target);
+      const clickedProfileMenu = profileMenuRef.current?.contains(target);
+
+      if (!clickedNotificationMenu && !clickedProfileMenu) {
+        setNotificationMenuOpen(false);
+        setProfileMenuOpen(false);
+        notificationMenuOpenedFromProfileRef.current = false;
       }
     }
 
     function closeOnEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        setAccountMenuOpen(false);
-        accountTriggerRef.current?.focus();
+        const focusTarget = notificationMenuOpenedFromProfileRef.current
+          ? profileTriggerRef.current
+          : notificationMenuOpen
+            ? notificationTriggerRef.current
+            : profileTriggerRef.current;
+
+        setNotificationMenuOpen(false);
+        setProfileMenuOpen(false);
+        notificationMenuOpenedFromProfileRef.current = false;
+        focusTarget?.focus();
       }
     }
 
@@ -51,12 +69,32 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
       document.removeEventListener("pointerdown", closeOnOutsidePointer);
       document.removeEventListener("keydown", closeOnEscape);
     };
-  }, [accountMenuOpen]);
+  }, [notificationMenuOpen, profileMenuOpen]);
 
   function notify(message: string) {
-    setAccountMenuOpen(false);
+    setNotificationMenuOpen(false);
+    setProfileMenuOpen(false);
+    notificationMenuOpenedFromProfileRef.current = false;
     setFeedback(message);
     window.setTimeout(() => setFeedback(""), 2200);
+  }
+
+  function toggleNotificationMenu() {
+    notificationMenuOpenedFromProfileRef.current = false;
+    setNotificationMenuOpen((open) => !open);
+    setProfileMenuOpen(false);
+  }
+
+  function toggleProfileMenu() {
+    notificationMenuOpenedFromProfileRef.current = false;
+    setProfileMenuOpen((open) => !open);
+    setNotificationMenuOpen(false);
+  }
+
+  function openNotificationMenu() {
+    notificationMenuOpenedFromProfileRef.current = true;
+    setProfileMenuOpen(false);
+    setNotificationMenuOpen(true);
   }
 
   return (
@@ -67,42 +105,85 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
       </div>
       <div className="employee-navbar-actions">
         <span className="employee-date"><Icon name="calendar" /> July 23, 2026 · Thursday</span>
-        <button type="button" className="employee-icon-button" onClick={() => notify("You have 3 notifications.")} aria-label="Notifications"><Icon name="bell" /><span>3</span></button>
-        <button type="button" className="employee-icon-button" onClick={() => notify("Help center is a prototype action.")} aria-label="Help"><Icon name="help" /></button>
-        <button type="button" className="employee-icon-button" onClick={() => notify("Theme preferences are not connected in the prototype.")} aria-label="Theme"><Icon name="sun" /></button>
-        <span className="employee-user-chip"><Icon name="user" /> John Benedict <Icon name="chevron" /></span>
-        <div className="employee-mobile-account" ref={accountMenuRef}>
+        <div className={`employee-notification-wrap ${notificationMenuOpen ? "is-open" : ""}`} ref={notificationMenuRef}>
           <button
             type="button"
-            ref={accountTriggerRef}
-            className="employee-mobile-account-button"
-            onClick={() => setAccountMenuOpen((open) => !open)}
-            aria-label="Open account menu"
-            aria-controls="employee-account-menu"
-            aria-expanded={accountMenuOpen}
+            ref={notificationTriggerRef}
+            className="employee-icon-button employee-notification-button"
+            onClick={toggleNotificationMenu}
+            aria-label="Open notifications"
+            aria-controls="employee-notification-menu"
+            aria-expanded={notificationMenuOpen}
+            aria-haspopup="menu"
           >
-            <Icon name="user" />
+            <Icon name="bell" />
+            <span>3</span>
           </button>
-          {accountMenuOpen ? (
-            <nav id="employee-account-menu" className="employee-account-menu" aria-label="Employee account menu">
-              <div className="employee-account-menu-summary">
+          {notificationMenuOpen ? (
+            <div id="employee-notification-menu" className="employee-notification-menu" role="menu" aria-label="Employee notifications">
+              <div className="employee-notification-menu-header">
+                <strong>Notifications</strong>
+                <span>3 unread</span>
+              </div>
+              <button type="button" className="employee-notification-item" onClick={() => notify("Attendance notification opened.")} role="menuitem">
+                <span className="employee-notification-dot" />
+                <span>
+                  <strong>Attendance recorded</strong>
+                  <small>Your latest attendance entry is ready to review.</small>
+                </span>
+              </button>
+              <button type="button" className="employee-notification-item" onClick={() => notify("Payslip notification opened.")} role="menuitem">
+                <span className="employee-notification-dot" />
+                <span>
+                  <strong>Payslip available</strong>
+                  <small>Your latest payslip is ready to view.</small>
+                </span>
+              </button>
+              <button type="button" className="employee-notification-item" onClick={() => notify("Schedule notification opened.")} role="menuitem">
+                <span className="employee-notification-dot" />
+                <span>
+                  <strong>Schedule reminder</strong>
+                  <small>Review your assigned attendance schedule.</small>
+                </span>
+              </button>
+            </div>
+          ) : null}
+        </div>
+        <div className="employee-profile-wrap" ref={profileMenuRef}>
+          <button
+            type="button"
+            ref={profileTriggerRef}
+            className="employee-user-chip"
+            onClick={toggleProfileMenu}
+            aria-label="Open employee profile menu"
+            aria-controls="employee-profile-menu"
+            aria-expanded={profileMenuOpen}
+            aria-haspopup="menu"
+          >
+            <span className="employee-user-avatar"><Icon name="user" /></span>
+            <span className="employee-user-name">John Benedict</span>
+            <Icon name="chevron" />
+          </button>
+          {profileMenuOpen ? (
+            <nav id="employee-profile-menu" className="employee-profile-menu" aria-label="Employee profile menu">
+              <div className="employee-profile-menu-summary">
                 <strong>John Benedict</strong>
                 <span>Employee account</span>
               </div>
-              <Link href="/employee/profile" className="employee-account-menu-item" onClick={() => setAccountMenuOpen(false)}>
+              <Link href="/employee/profile" className="employee-profile-menu-item" onClick={() => setProfileMenuOpen(false)}>
                 <Icon name="user" />
-                <span>My Profile</span>
+                <span>Profile</span>
               </Link>
-              <button type="button" className="employee-account-menu-item" onClick={() => notify("You have 3 notifications.")}>
+              <button type="button" className="employee-profile-menu-item" onClick={openNotificationMenu}>
                 <Icon name="bell" />
                 <span>Notifications</span>
-                <strong className="employee-account-menu-count">3</strong>
+                <strong className="employee-profile-menu-count">3</strong>
               </button>
-              <button type="button" className="employee-account-menu-item" onClick={() => notify("Account settings are not connected in the prototype.")}>
-                <Icon name="settings" />
-                <span>Settings</span>
+              <button type="button" className="employee-profile-menu-item" onClick={() => notify("Calendar view is not connected in the prototype.")}>
+                <Icon name="calendar" />
+                <span>Calendar</span>
               </button>
-              <Link href="/" className="employee-account-menu-item employee-account-menu-item-danger" onClick={() => setAccountMenuOpen(false)}>
+              <Link href="/" className="employee-profile-menu-item employee-profile-menu-item-danger" onClick={() => setProfileMenuOpen(false)}>
                 <Icon name="logout" />
                 <span>Log out</span>
               </Link>
