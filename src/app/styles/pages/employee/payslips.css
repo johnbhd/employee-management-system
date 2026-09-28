@@ -5,25 +5,6 @@
   margin: 0 auto;
 }
 
-.employee-payslips-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-}
-
-.employee-payslips-breadcrumb a {
-  color: var(--employee-blue);
-  font-weight: 700;
-}
-
-.employee-payslips-breadcrumb .ui-icon {
-  color: var(--text-faint);
-  font-size: 0.65rem;
-  transform: rotate(-90deg);
-}
-
 .employee-payslips-heading {
   display: grid;
   gap: 0.25rem;

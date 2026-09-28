@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import {
@@ -85,12 +84,6 @@ export function AttendanceQrPage() {
 
   return (
     <div className="attendance-qr-page">
-      <nav className="attendance-qr-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/employee/dashboard">Dashboard</Link>
-        <Icon name="chevron" />
-        <span aria-current="page">Show Attendance QR</span>
-      </nav>
-
       <p className="attendance-qr-page-subtitle">
         Present this QR code at an authorized campus attendance station.
       </p>

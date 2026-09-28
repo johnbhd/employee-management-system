@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Icon } from "@/components/ui/Icon";
 import { employeePayslipStats } from "@/data/employee-payslips";
 
@@ -8,12 +6,6 @@ import { PayslipsExplorer } from "./PayslipsExplorer";
 export function EmployeePayslipsPage() {
   return (
     <div className="employee-payslips-page">
-      <nav className="employee-payslips-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/employee/dashboard">Dashboard</Link>
-        <Icon name="chevron" />
-        <span aria-current="page">My Payslips</span>
-      </nav>
-
       <header className="employee-payslips-heading">
         <span className="employee-payslips-heading-label">Payroll records</span>
         <h2>My Payslip</h2>

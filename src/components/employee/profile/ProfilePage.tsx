@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { employeeAttendanceProfile } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
 
@@ -15,12 +13,6 @@ const profileDetails = [
 export function ProfilePage() {
   return (
     <div className="employee-profile-page">
-      <nav className="employee-profile-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/employee/dashboard">Dashboard</Link>
-        <Icon name="chevron" />
-        <span aria-current="page">My Profile</span>
-      </nav>
-
       <section className="employee-profile-overview" aria-labelledby="employee-profile-heading">
         <div className="employee-profile-avatar" aria-hidden="true">
           <Icon name="user" />

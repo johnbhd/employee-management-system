@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { Icon } from "@/components/ui/Icon";
 import { attendanceHistoryStats } from "@/data/attendance-history";
 
@@ -8,12 +6,6 @@ import { AttendanceHistoryExplorer } from "./AttendanceHistoryExplorer";
 export function AttendanceHistoryPage() {
   return (
     <div className="attendance-history-page">
-      <nav className="attendance-history-breadcrumb" aria-label="Breadcrumb">
-        <Link href="/employee/dashboard">Dashboard</Link>
-        <Icon name="chevron" />
-        <span aria-current="page">Attendance History</span>
-      </nav>
-
       <div className="attendance-history-heading">
         <span className="attendance-history-heading-label">My attendance</span>
         <p>Review your recorded attendance for the selected period.</p>

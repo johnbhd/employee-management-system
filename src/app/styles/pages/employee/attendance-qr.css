@@ -5,27 +5,8 @@
   margin: 0 auto;
 }
 
-.attendance-qr-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-}
-
-.attendance-qr-breadcrumb a {
-  color: var(--employee-blue);
-  font-weight: 700;
-}
-
-.attendance-qr-breadcrumb .ui-icon {
-  color: var(--text-faint);
-  font-size: 0.65rem;
-  transform: rotate(-90deg);
-}
-
 .attendance-qr-page-subtitle {
-  margin: -0.65rem 0 0;
+  margin: 0;
   color: var(--text-muted);
   font-size: 0.8rem;
 }
