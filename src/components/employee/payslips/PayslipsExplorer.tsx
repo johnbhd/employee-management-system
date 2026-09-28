@@ -8,8 +8,11 @@ import {
   employeePayslipRecordCount,
   employeePayslips,
   employeePayslipYears,
+  type EmployeePayslip,
   type EmployeePayslipStatus,
 } from "@/data/employee-payslips";
+
+import { PayslipDetailsModal } from "./PayslipDetailsModal";
 
 type StatusFilter = "all" | EmployeePayslipStatus;
 
@@ -25,6 +28,9 @@ export function PayslipsExplorer() {
   const [appliedStatus, setAppliedStatus] = useState<StatusFilter>("all");
   const [rowsPerPage, setRowsPerPage] = useState("5");
   const [feedback, setFeedback] = useState("");
+  const [selectedPayslip, setSelectedPayslip] = useState<EmployeePayslip | null>(
+    null,
+  );
 
   const filteredPayslips = useMemo(
     () => employeePayslips.filter((payslip) => {
@@ -53,6 +59,14 @@ export function PayslipsExplorer() {
 
   function notify(message: string) {
     setFeedback(message);
+  }
+
+  function handleViewPayslip(payslip: EmployeePayslip) {
+    setSelectedPayslip(payslip);
+  }
+
+  function handleClosePayslip() {
+    setSelectedPayslip(null);
   }
 
   return (
@@ -120,7 +134,11 @@ export function PayslipsExplorer() {
                   <td>{payslip.netPay}</td>
                   <td><StatusBadge tone={payslip.statusTone}>{payslip.statusLabel}</StatusBadge></td>
                   <td>
-                    <button type="button" className="employee-payslips-view-button" onClick={() => notify(`Viewing ${payslip.payrollPeriod} payslip is not connected in this prototype.`)}>
+                    <button
+                      type="button"
+                      className="employee-payslips-view-button"
+                      onClick={() => handleViewPayslip(payslip)}
+                    >
                       <Icon name="file" />
                       View Payslip
                     </button>
@@ -155,6 +173,11 @@ export function PayslipsExplorer() {
           <span className="employee-payslips-record-count">{filteredPayslips.length === 0 ? "0" : `1 – ${displayedCount}`} of {employeePayslipRecordCount} records</span>
         </div>
       </section>
+
+      <PayslipDetailsModal
+        payslip={selectedPayslip}
+        onClose={handleClosePayslip}
+      />
     </div>
   );
 }

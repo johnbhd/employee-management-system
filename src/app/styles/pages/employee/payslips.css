@@ -378,6 +378,305 @@
   font-size: 0.68rem;
 }
 
+.employee-payslip-modal-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 17, 41, 0.5);
+}
+
+.employee-payslip-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+}
+
+.employee-payslip-modal {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: min(100%, 52rem);
+  max-height: min(44rem, calc(100vh - 2rem));
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.8rem;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(10, 17, 41, 0.24);
+}
+
+.employee-payslip-modal-header,
+.employee-payslip-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+}
+
+.employee-payslip-modal-header {
+  border-bottom: 1px solid #edf0f4;
+}
+
+.employee-payslip-modal-heading {
+  min-width: 0;
+}
+
+.employee-payslip-modal-heading h2 {
+  margin: 0.2rem 0 0;
+  color: var(--employee-navy);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.employee-payslip-modal-heading p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-payslip-modal-header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.employee-payslip-modal-close {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.45rem;
+  background: #fff;
+  color: var(--text-muted);
+}
+
+.employee-payslip-modal-close:hover {
+  border-color: #b6bfd3;
+  background: #f8f9fc;
+  color: var(--employee-navy);
+}
+
+.employee-payslip-modal-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.25rem 1.35rem 1.35rem;
+}
+
+.employee-payslip-modal-section {
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--employee-line);
+  padding-bottom: 1.15rem;
+}
+
+.employee-payslip-modal-section-heading {
+  margin-bottom: 0.8rem;
+}
+
+.employee-payslip-modal-section-heading > span {
+  color: var(--employee-red);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.employee-payslip-modal-section-heading h3,
+.employee-payslip-modal-detail-section h3,
+.employee-payslip-modal-net-pay h3 {
+  margin: 0.2rem 0 0;
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.employee-payslip-modal-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.employee-payslip-modal-meta-grid dt {
+  color: var(--text-muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.employee-payslip-modal-meta-grid dd {
+  min-width: 0;
+  margin: 0.3rem 0 0;
+  color: var(--employee-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.employee-payslip-modal-financial-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid var(--employee-line);
+  border-bottom: 1px solid var(--employee-line);
+}
+
+.employee-payslip-modal-financial-item {
+  min-width: 0;
+  border-right: 1px solid var(--employee-line);
+  padding: 0.85rem 1rem;
+}
+
+.employee-payslip-modal-financial-item:first-child {
+  padding-left: 0;
+}
+
+.employee-payslip-modal-financial-item:last-child {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.employee-payslip-modal-financial-item span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.employee-payslip-modal-financial-item strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--employee-ink);
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.employee-payslip-modal-financial-item.is-emphasized strong {
+  color: var(--employee-green);
+  font-size: 1.08rem;
+}
+
+.employee-payslip-modal-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 1.2rem;
+}
+
+.employee-payslip-modal-detail-section {
+  min-width: 0;
+}
+
+.employee-payslip-modal-detail-section h3 {
+  margin-bottom: 0.65rem;
+  font-size: 0.9rem;
+}
+
+.employee-payslip-modal-line-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #edf0f4;
+  padding: 0.65rem 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-payslip-modal-line-item strong {
+  flex: 0 0 auto;
+  color: var(--employee-ink);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: right;
+}
+
+.employee-payslip-modal-line-item.is-total {
+  border-bottom: 0;
+  color: var(--employee-ink);
+  font-weight: 800;
+}
+
+.employee-payslip-modal-net-pay {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--employee-navy);
+  border-bottom: 1px solid var(--employee-line);
+  padding: 0.95rem 0;
+}
+
+.employee-payslip-modal-net-pay-label {
+  color: var(--employee-red);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.employee-payslip-modal-net-pay h3 {
+  margin-top: 0.15rem;
+  font-size: 1.05rem;
+}
+
+.employee-payslip-modal-net-pay > strong {
+  flex: 0 0 auto;
+  color: var(--employee-navy);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: right;
+}
+
+.employee-payslip-modal-boundary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+.employee-payslip-modal-boundary-note .ui-icon {
+  margin-top: 0.1rem;
+  color: var(--employee-blue);
+}
+
+.employee-payslip-modal-footer {
+  justify-content: flex-end;
+  border-top: 1px solid #edf0f4;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .employee-payslip-modal {
+    animation: employee-payslip-modal-in 150ms ease-out;
+  }
+}
+
+@keyframes employee-payslip-modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1100px) {
   .employee-payslips-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -434,6 +733,43 @@
     align-items: flex-start;
     flex-direction: column;
   }
+
+  .employee-payslip-modal-layer {
+    padding: 0.65rem;
+  }
+
+  .employee-payslip-modal {
+    max-height: calc(100vh - 1.3rem);
+  }
+
+  .employee-payslip-modal-header,
+  .employee-payslip-modal-footer {
+    padding: 0.9rem 1rem;
+  }
+
+  .employee-payslip-modal-body {
+    padding: 1rem;
+  }
+
+  .employee-payslip-modal-meta-grid,
+  .employee-payslip-modal-financial-summary,
+  .employee-payslip-modal-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-payslip-modal-financial-item {
+    border-right: 0;
+    border-bottom: 1px solid var(--employee-line);
+    padding: 0.75rem 0;
+  }
+
+  .employee-payslip-modal-financial-item:last-child {
+    border-bottom: 0;
+  }
+
+  .employee-payslip-modal-footer .employee-secondary-button {
+    width: 100%;
+  }
 }
 
 @media (max-width: 430px) {
@@ -443,5 +779,30 @@
 
   .employee-payslips-filters {
     padding: 0.8rem;
+  }
+
+  .employee-payslip-modal-header {
+    align-items: flex-start;
+  }
+
+  .employee-payslip-modal-header-actions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
+    gap: 0.45rem;
+  }
+
+  .employee-payslip-modal-heading h2 {
+    font-size: 1.1rem;
+  }
+
+  .employee-payslip-modal-net-pay {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+
+  .employee-payslip-modal-net-pay > strong {
+    font-size: 1.1rem;
+    text-align: left;
   }
 }
