@@ -1,6 +1,3 @@
-import { Icon } from "@/components/ui/Icon";
-import { employeePayslipStats } from "@/data/employee-payslips";
-
 import { PayslipsExplorer } from "./PayslipsExplorer";
 
 export function EmployeePayslipsPage() {
@@ -9,23 +6,8 @@ export function EmployeePayslipsPage() {
       <header className="employee-payslips-heading">
         <span className="employee-payslips-heading-label">Payroll records</span>
         <h2>My Payslip</h2>
-        <p>View and download your payroll records.</p>
+        <p>View payroll records received from the Existing Payroll System.</p>
       </header>
-
-      <section className="employee-payslips-stat-grid" aria-label="Payroll summary">
-        {employeePayslipStats.map((stat) => (
-          <article className="employee-payslips-stat-card" key={stat.label}>
-            <span className={`employee-payslips-stat-icon employee-payslips-stat-icon-${stat.tone}`} aria-hidden="true">
-              <Icon name={stat.icon} />
-            </span>
-            <div>
-              <p className="employee-payslips-stat-label">{stat.label}</p>
-              <p className={`employee-payslips-stat-value ${stat.label === "Latest Payslip" ? "is-date" : ""}`}>{stat.value}</p>
-              <p className="employee-payslips-stat-note">{stat.note}</p>
-            </div>
-          </article>
-        ))}
-      </section>
 
       <PayslipsExplorer />
     </div>

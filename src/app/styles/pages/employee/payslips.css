@@ -132,9 +132,9 @@
 
 .employee-payslips-filter-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.7rem;
-  max-width: 32rem;
+  max-width: 42rem;
 }
 
 .employee-payslips-field {
@@ -188,6 +188,43 @@
 .employee-payslips-field-input:focus-within {
   border-color: var(--employee-blue);
   box-shadow: 0 0 0 3px rgba(47, 78, 214, 0.12);
+}
+
+.employee-payslips-view-switch {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: stretch;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.45rem;
+  background: #fbfcfe;
+  overflow: hidden;
+}
+
+.employee-payslips-mode-button {
+  min-width: 5.8rem;
+  border: 0;
+  border-right: 1px solid var(--employee-line);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.5rem 0.7rem;
+}
+
+.employee-payslips-mode-button:last-child {
+  border-right: 0;
+}
+
+.employee-payslips-mode-button:hover,
+.employee-payslips-mode-button:focus-visible {
+  background: #f4f6ff;
+  color: var(--employee-blue);
+  outline: 0;
+}
+
+.employee-payslips-mode-button.is-active {
+  background: var(--employee-navy);
+  color: #fff;
 }
 
 .employee-payslips-filter-actions {
@@ -289,6 +326,22 @@
   font-weight: 700;
 }
 
+.employee-payslips-table-cell-note {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.employee-payslips-unavailable {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .employee-payslips-view-button {
   min-height: 2rem;
   border: 1px solid #c7d4f5;
@@ -343,6 +396,11 @@
   border-color: var(--employee-blue);
   background: var(--employee-blue);
   color: #fff;
+}
+
+.employee-payslips-page-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .employee-payslips-page-nav {
@@ -482,7 +540,7 @@
 
 .employee-payslip-modal-meta-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
   margin: 0;
 }
@@ -502,6 +560,13 @@
   font-size: 0.75rem;
   font-weight: 700;
   overflow-wrap: anywhere;
+}
+
+.employee-payslip-modal-info-note {
+  margin: 0.75rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  line-height: 1.5;
 }
 
 .employee-payslip-modal-financial-summary {
@@ -588,6 +653,63 @@
   font-weight: 800;
 }
 
+.employee-payslip-modal-cutoff-list {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.employee-payslip-modal-cutoff-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border-bottom: 1px solid #edf0f4;
+  padding: 0.55rem 0;
+}
+
+.employee-payslip-modal-cutoff-item > div {
+  min-width: 0;
+}
+
+.employee-payslip-modal-cutoff-item strong,
+.employee-payslip-modal-cutoff-item span {
+  display: block;
+}
+
+.employee-payslip-modal-cutoff-item strong {
+  color: var(--employee-ink);
+  font-size: 0.7rem;
+}
+
+.employee-payslip-modal-cutoff-item span {
+  margin-top: 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.62rem;
+}
+
+.employee-payslip-modal-cutoff-item button {
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  color: var(--employee-blue);
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.35rem;
+}
+
+.employee-payslip-modal-cutoff-item button:hover,
+.employee-payslip-modal-cutoff-item button:focus-visible {
+  color: var(--employee-navy);
+  text-decoration: underline;
+}
+
+.employee-payslip-modal-cutoff-item button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: none;
+}
+
 .employee-payslip-modal-net-pay {
   display: flex;
   align-items: end;
@@ -669,6 +791,12 @@
 
   .employee-payslips-stat-card:nth-child(n + 3) {
     border-top: 1px solid var(--employee-line);
+  }
+}
+
+@media (max-width: 800px) {
+  .employee-payslip-modal-meta-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
