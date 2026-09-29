@@ -54,7 +54,7 @@ export const userAccounts: readonly UserAccount[] = [
   },
   {
     accountId: "USR-002",
-    username: "employee1",
+    username: "aujsc.employee",
     role: "Employee",
     status: "Active",
     linkedEmployee: linkedHrpsEmployees[0],

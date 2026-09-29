@@ -78,7 +78,7 @@ export const userAccountsHrpsRecords = [
   },
   {
     id: "USR-002",
-    username: "employee1",
+    username: "aujsc.employee",
     employeeId: "AU-EMP-2026-001",
     employee: "John Benedict M. Villegas",
     role: "Employee",

@@ -29,7 +29,7 @@ const demoAccounts: Record<string, DemoAccount> = {
     role: "hr",
     redirectTo: "/hr/dashboard",
   },
-  employee1: {
+  "aujsc.employee": {
     password: "employee123",
     role: "employee",
     redirectTo: "/employee/dashboard",
