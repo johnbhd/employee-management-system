@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Accounting Staff Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6fa;
+    color: #1f2937;
+  }
+  svg { flex-shrink: 0; vertical-align: middle; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 14px 28px;
+    border-bottom: 1px solid #eef1f5;
+  }
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .menu-icon { color: #374151; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: #14204a; }
+  .topbar-sub { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+  .topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .progress-pill {
+    background: #eaf7ee;
+    color: #2ea86b;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  .top-icon-btn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+  }
+  .top-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .topbar-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eef1f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+  }
+  .topbar-user-name { font-size: 13.5px; font-weight: 700; color: #14204a; }
+  .topbar-user-role { font-size: 11px; color: #9ca3af; }
+
+  .page-header {
+    background: linear-gradient(135deg, #6b7280, #8f97a3 45%, #b9bfc8);
+    padding: 26px 28px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: #fff;
+  }
+  .page-header-tag {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #dbe3f5;
+  }
+  .page-header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-top: 4px;
+    color: #fff;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: #e5e9f0;
+    margin-top: 6px;
+  }
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-outline {
+    background: #fff;
+    border-color: #e2e5ea;
+    color: #374151;
+  }
+  .btn-primary {
+    background: #14204a;
+    color: #fff;
+  }
+
+  .content { padding: 22px 28px 30px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid #eef1f5;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-icon.blue { background: #e3edff; color: #3b6fe0; }
+  .stat-icon.green { background: #e2f7ec; color: #2ea86b; }
+  .stat-icon.orange { background: #fdf1de; color: #e0972f; }
+  .stat-icon.red { background: #fde7e7; color: #e35b5b; }
+  .stat-label { font-size: 12.5px; color: #6b7280; font-weight: 600; }
+  .stat-value { font-size: 19px; font-weight: 800; margin: 4px 0 2px; color: #111827; }
+  .stat-sub { font-size: 11.5px; color: #9ca3af; }
+
+  .notice {
+    background: #eef4fe;
+    border: 1px solid #d6e6fc;
+    border-radius: 10px;
+    padding: 13px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .notice .dot {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    background: #d6e6fc;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notice p { font-size: 13px; color: #33507a; line-height: 1.5; }
+  .notice strong { color: #1e3a5f; }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 18px;
+    margin-bottom: 18px;
+    align-items: start;
+  }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #eef1f5;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f2f4f7;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #14204a;
+  }
+  .panel-header svg { color: #2f5bd6; }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 640px; }
+  thead th {
+    text-align: left;
+    font-size: 11.5px;
+    color: #9ca3af;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-bottom: 1px solid #f2f4f7;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 14px 20px;
+    font-size: 13px;
+    color: #374151;
+    border-bottom: 1px solid #f6f7f9;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .pill.green { background: #e2f7ec; color: #1f9d55; }
+  .pill.blue { background: #e3edff; color: #3b6fe0; }
+  .view-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #dbe1ea;
+    color: #374151;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+
+  .health-list { padding: 6px 20px 16px; }
+  .health-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 0;
+    border-bottom: 1px solid #f6f7f9;
+    font-size: 13px;
+    color: #374151;
+  }
+  .health-row:last-child { border-bottom: none; }
+  .health-name { display: flex; align-items: center; gap: 8px; }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ea86b; }
+
+  .activity-list { padding: 6px 20px 18px; }
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f6f7f9;
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .activity-icon.green { background: #e2f7ec; color: #2ea86b; }
+  .activity-icon.blue { background: #e3edff; color: #3b6fe0; }
+  .activity-icon.red { background: #fde7e7; color: #e35b5b; }
+  .activity-text { font-size: 13px; color: #374151; }
+  .activity-time { font-size: 11.5px; color: #9ca3af; margin-bottom: 2px; }
+
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .topbar { padding: 12px 16px; }
+    .topbar-title { font-size: 14px; }
+    .topbar-sub { display: none; }
+    .topbar-right { gap: 8px; }
+    .progress-pill { display: none; }
+    .page-header { padding: 20px 16px; }
+    .page-header h1 { font-size: 22px; }
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1; justify-content: center; }
+    .content { padding: 16px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .panel-header { padding: 14px 16px; }
+    thead th, tbody td { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <div>
+      <div class="topbar-title">Accounting Staff Dashboard</div>
+      <div class="topbar-sub">Accounting integration workspace</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="progress-pill">5 / 6</div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="top-badge">3</span></div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <div class="topbar-user">
+      <div class="topbar-user-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div>
+        <div class="topbar-user-name">Accounting Staff ▾</div>
+        <div class="topbar-user-role">Accounting</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div>
+    <div class="page-header-tag">ACCOUNTING INTEGRATION</div>
+    <h1>Accounting Staff Dashboard</h1>
+    <p>Review approved payroll information and monitor transfers to the Existing Accounting System.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh data</button>
+    <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View approved payroll</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div>
+        <div class="stat-label">Latest Approved Payroll</div>
+        <div class="stat-value" style="font-size:16px;">Aug 16–31, 2026</div>
+        <div class="stat-sub">Latest payroll period</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><line x1="9" y1="3" x2="9" y2="21"/><path d="M9 8h7a3 3 0 0 1 0 6H9"/><line x1="6" y1="8" x2="13" y2="8"/><line x1="6" y1="14" x2="13" y2="14"/></svg></div>
+      <div>
+        <div class="stat-label">Approved Payroll Amount</div>
+        <div class="stat-value">₱482,650.00</div>
+        <div class="stat-sub">Ready for accounting transfer</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <div>
+        <div class="stat-label">Successful Transfers</div>
+        <div class="stat-value">24</div>
+        <div class="stat-sub">Completed transfers</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div>
+        <div class="stat-label">Pending Transfers</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">Awaiting synchronization</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+      <div>
+        <div class="stat-label">Failed Transfers</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">Needs attention</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+      <div>
+        <div class="stat-label">Last Synchronization</div>
+        <div class="stat-value">10:42 AM</div>
+        <div class="stat-sub">Today</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+    <p><strong>Prototype accounting view.</strong> Values are mock operational data for the current integration-first prototype. No live Accounting System connection is currently made.</p>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Approved Payroll Overview
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Payroll Period</th>
+              <th>Payroll Reference</th>
+              <th>Employees</th>
+              <th>Total Amount</th>
+              <th>Approval Status</th>
+              <th>Accounting Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Aug 16–31, 2026</td>
+              <td>PAY-2026-016</td>
+              <td>86 employees</td>
+              <td>₱482,650.00</td>
+              <td><span class="pill green">Approved</span></td>
+              <td><span class="pill blue">Ready for Transfer</span></td>
+              <td><button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View</button></td>
+            </tr>
+            <tr>
+              <td>Aug 1–15, 2026</td>
+              <td>PAY-2026-015</td>
+              <td>85 employees</td>
+              <td>₱476,820.00</td>
+              <td><span class="pill green">Approved</span></td>
+              <td><span class="pill green">Transferred</span></td>
+              <td><button class="view-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Accounting Integration Health
+      </div>
+      <div class="health-list">
+        <div class="health-row">
+          <div class="health-name">Existing Payroll System</div>
+          <span class="pill green"><span class="status-dot" style="margin-right:6px;"></span>Connected / Simulated</span>
+        </div>
+        <div class="health-row">
+          <div class="health-name">Accounting Integration Service</div>
+          <span class="pill green"><span class="status-dot" style="margin-right:6px;"></span>Operational</span>
+        </div>
+        <div class="health-row">
+          <div class="health-name">Existing Accounting System</div>
+          <span class="pill green"><span class="status-dot" style="margin-right:6px;"></span>Connected / Simulated</span>
+        </div>
+        <div class="health-row">
+          <div class="health-name">Last Sync</div>
+          <span class="pill blue">Today, 10:42 AM</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel activity-panel">
+    <div class="panel-header">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="17" height="17"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Recent Accounting Activity
+    </div>
+    <div class="activity-list">
+      <div class="activity-item">
+        <div class="activity-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div>
+          <div class="activity-time">10:42 AM</div>
+          <div class="activity-text">Payroll PAY-2026-015 transferred successfully</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+        <div>
+          <div class="activity-time">10:18 AM</div>
+          <div class="activity-text">Payroll PAY-2026-016 marked ready for transfer</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div>
+          <div class="activity-time">9:55 AM</div>
+          <div class="activity-text">Transfer ACC-TXN-1042 failed validation</div>
+        </div>
+      </div>
+      <div class="activity-item">
+        <div class="activity-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
+        <div>
+          <div class="activity-time">Yesterday</div>
+          <div class="activity-text">Accounting synchronization completed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
