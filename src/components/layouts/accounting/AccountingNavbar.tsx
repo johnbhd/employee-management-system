@@ -13,6 +13,19 @@ type AccountingNavbarProps = {
   onOpenSidebar: () => void;
 };
 
+function getAccountingPageTitle(pathname: string) {
+  switch (pathname) {
+    case "/accounting/dashboard":
+      return "Accounting Dashboard";
+    case "/accounting/integration-status":
+      return "Accounting Integration Status";
+    case "/accounting/transaction-history":
+      return "Transaction History";
+    default:
+      return "Accounting Operations";
+  }
+}
+
 export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
   const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [feedback, setFeedback] = useState("");
@@ -20,11 +33,7 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
   const profileRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const pageTitle = pathname === "/accounting/dashboard"
-    ? "Accounting Dashboard"
-    : pathname === "/accounting/integration-status"
-      ? "Accounting Integration Status"
-      : "Accounting Operations";
+  const pageTitle = getAccountingPageTitle(pathname);
 
   useEffect(() => {
     function updateCampusTime() {

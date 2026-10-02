@@ -47,6 +47,7 @@
 @import "./pages/admin/settings.css";
 @import "./pages/accounting/dashboard.css";
 @import "./pages/accounting/integration-status.css";
+@import "./pages/accounting/transaction-history.css";
 
 *,
 *::before,

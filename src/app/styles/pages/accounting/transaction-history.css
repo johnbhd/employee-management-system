@@ -1,0 +1,478 @@
+.accounting-transaction-history {
+  display: grid;
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-inline: auto;
+  gap: 1.25rem;
+}
+
+.accounting-transaction-history > * {
+  min-width: 0;
+}
+
+.accounting-transaction-history .page-header {
+  min-width: 0;
+}
+
+.accounting-transaction-history__header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.accounting-transaction-history__summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.accounting-transaction-history__card {
+  min-width: 0;
+}
+
+.accounting-transaction-history__description {
+  margin: 1rem 1.35rem 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.accounting-transaction-history__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.7rem;
+  margin: 1rem 1.35rem 0.8rem;
+}
+
+.accounting-transaction-history__search-field,
+.accounting-transaction-history__field {
+  display: grid;
+  min-width: 9.5rem;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.accounting-transaction-history__search-field {
+  flex: 1 1 15rem;
+}
+
+.accounting-transaction-history__field {
+  flex: 0 1 11rem;
+}
+
+.accounting-transaction-history__search-input,
+.accounting-transaction-history__field select {
+  min-height: 2.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.accounting-transaction-history__search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.accounting-transaction-history__search-input .ui-icon {
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.accounting-transaction-history__search-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.accounting-transaction-history__field select {
+  width: 100%;
+  padding: 0 0.65rem;
+}
+
+.accounting-transaction-history__filters > .button-secondary {
+  min-height: 2.55rem;
+  border-radius: 0.65rem;
+  white-space: nowrap;
+}
+
+.accounting-transaction-history__result-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin: 0 1.35rem 0.75rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+}
+
+.accounting-transaction-history__table-wrap {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 0 1.35rem;
+}
+
+.accounting-transaction-history__table {
+  min-width: 70rem;
+}
+
+.accounting-transaction-history__table td {
+  vertical-align: middle;
+}
+
+.accounting-transaction-history__reference {
+  color: var(--au-blue);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.accounting-transaction-history__details-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  white-space: nowrap;
+}
+
+.accounting-transaction-history__details-trigger .ui-icon {
+  font-size: 0.6rem;
+}
+
+.accounting-transaction-history__empty {
+  padding: 2rem 1rem !important;
+  text-align: center;
+}
+
+.accounting-transaction-history__empty strong,
+.accounting-transaction-history__empty span {
+  display: block;
+}
+
+.accounting-transaction-history__empty strong {
+  color: var(--au-navy);
+  font-size: 0.78rem;
+}
+
+.accounting-transaction-history__empty span {
+  margin-top: 0.3rem;
+  color: var(--text-faint);
+  font-size: 0.68rem;
+}
+
+.accounting-transaction-history__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0 1.35rem 1.35rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+}
+
+.accounting-transaction-history__pagination nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.accounting-transaction-history__page-button {
+  display: inline-flex;
+  min-width: 2rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.accounting-transaction-history__page-button:hover:not(:disabled),
+.accounting-transaction-history__page-button.is-active {
+  border-color: var(--au-blue);
+  background: var(--au-blue);
+  color: #fff;
+}
+
+.accounting-transaction-history__page-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.accounting-transaction-history__page-button .ui-icon {
+  font-size: 0.55rem;
+}
+
+.accounting-transaction-history__boundary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
+.accounting-transaction-history__boundary-note .ui-icon {
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  color: var(--au-blue);
+}
+
+.accounting-transaction-history__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 23, 63, 0.5);
+}
+
+.accounting-transaction-history__modal {
+  width: min(100%, 38rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgba(10, 23, 63, 0.25);
+}
+
+.accounting-transaction-history__modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.accounting-transaction-history__modal-header h2 {
+  margin: 0.3rem 0 0;
+  color: var(--au-navy);
+  font-size: 1.05rem;
+}
+
+.accounting-transaction-history__modal-close {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--text-muted);
+}
+
+.accounting-transaction-history__modal-close:hover {
+  background: var(--surface-muted);
+  color: var(--au-navy);
+}
+
+.accounting-transaction-history__modal-body {
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem 1.35rem 1.35rem;
+}
+
+.accounting-transaction-history__modal-status {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.accounting-transaction-history__modal-status p,
+.accounting-transaction-history__acknowledgement-detail,
+.accounting-transaction-history__error p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
+
+.accounting-transaction-history__modal-status p {
+  max-width: 30rem;
+}
+
+.accounting-transaction-history__modal-body section {
+  min-width: 0;
+}
+
+.accounting-transaction-history__modal-body h3 {
+  margin: 0 0 0.7rem;
+  color: var(--au-navy);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.accounting-transaction-history__details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.accounting-transaction-history__details-grid > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.3rem;
+  padding: 0.75rem;
+  border: 1px solid #edf1f6;
+  border-radius: 0.7rem;
+  background: var(--surface-muted);
+}
+
+.accounting-transaction-history__details-grid dt {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.accounting-transaction-history__details-grid dd {
+  min-width: 0;
+  margin: 0;
+  color: var(--text);
+  font-size: 0.74rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.accounting-transaction-history__acknowledgement-detail {
+  margin-top: 0.7rem;
+}
+
+.accounting-transaction-history__error {
+  padding: 0.85rem;
+  border: 1px solid #f2cfd2;
+  border-radius: 0.7rem;
+  background: #fff5f5;
+}
+
+.accounting-transaction-history__error h3 {
+  color: var(--danger);
+}
+
+.accounting-transaction-history__error p + p {
+  margin-top: 0.3rem;
+}
+
+@media (max-width: 1250px) {
+  .accounting-transaction-history__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .accounting-transaction-history .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .accounting-transaction-history__header-actions {
+    justify-content: flex-start;
+  }
+
+  .accounting-transaction-history__filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+  }
+
+  .accounting-transaction-history__search-field {
+    grid-column: 1 / -1;
+  }
+
+  .accounting-transaction-history__field {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .accounting-transaction-history__description,
+  .accounting-transaction-history__filters,
+  .accounting-transaction-history__result-meta {
+    margin-inline: 1rem;
+  }
+
+  .accounting-transaction-history__table-wrap {
+    padding-inline: 1rem;
+  }
+
+  .accounting-transaction-history__pagination {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .accounting-transaction-history__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .accounting-transaction-history__filters {
+    grid-template-columns: 1fr;
+  }
+
+  .accounting-transaction-history__search-field {
+    grid-column: auto;
+  }
+
+  .accounting-transaction-history__filters > .button-secondary {
+    justify-self: start;
+  }
+
+  .accounting-transaction-history__header-actions {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .accounting-transaction-history__header-actions .action-control,
+  .accounting-transaction-history__header-actions .button-primary {
+    width: 100%;
+  }
+
+  .accounting-transaction-history__modal-backdrop {
+    padding: 0.75rem;
+  }
+
+  .accounting-transaction-history__modal-header,
+  .accounting-transaction-history__modal-body {
+    padding-inline: 1rem;
+  }
+
+  .accounting-transaction-history__modal-status,
+  .accounting-transaction-history__details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .accounting-transaction-history__modal-status {
+    flex-direction: column;
+  }
+}

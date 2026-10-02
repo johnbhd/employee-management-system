@@ -40,7 +40,7 @@ const accountingNavigation: AccountingNavigationItem[] = [
     id: "transaction-history",
     label: "Transaction History",
     icon: "clock",
-    planned: true,
+    href: "/accounting/transaction-history",
   },
 ];
 
