@@ -20,7 +20,11 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
   const profileRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const pageTitle = pathname === "/accounting/dashboard" ? "Accounting Dashboard" : "Accounting Operations";
+  const pageTitle = pathname === "/accounting/dashboard"
+    ? "Accounting Dashboard"
+    : pathname === "/accounting/integration-status"
+      ? "Accounting Integration Status"
+      : "Accounting Operations";
 
   useEffect(() => {
     function updateCampusTime() {
@@ -90,6 +94,15 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
         </div>
 
         <div className="accounting-navbar-actions">
+          <span className="accounting-progress-badge">5 / 6</span>
+          <button
+            type="button"
+            className="accounting-icon-button accounting-search-button"
+            onClick={() => notify("Accounting search is not connected in the prototype.")}
+            aria-label="Search accounting workspace"
+          >
+            <Icon name="search" />
+          </button>
           {campusNow ? (
             <span className="accounting-date">
               <Icon name="calendar" />

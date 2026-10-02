@@ -194,6 +194,46 @@
   color: rgba(219, 234, 254, 0.66);
 }
 
+.accounting-sidebar-status {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1.35rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.accounting-sidebar-status > div {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #dbeafe;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.accounting-status-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 999px;
+  background: #d7a43a;
+}
+
+.accounting-sidebar-status strong {
+  color: #fff;
+  font-size: 0.74rem;
+}
+
+.accounting-sidebar-status p {
+  margin: 0;
+  color: rgba(219, 234, 254, 0.62);
+  font-size: 0.65rem;
+  line-height: 1.55;
+}
+
 .accounting-sidebar-footer {
   padding: 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);

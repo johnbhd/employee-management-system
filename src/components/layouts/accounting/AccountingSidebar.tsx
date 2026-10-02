@@ -34,7 +34,7 @@ const accountingNavigation: AccountingNavigationItem[] = [
     id: "integration-status",
     label: "Integration Status",
     icon: "accounting",
-    planned: true,
+    href: "/accounting/integration-status",
   },
   {
     id: "transaction-history",
@@ -135,6 +135,14 @@ export function AccountingSidebar({ isOpen, onClose }: AccountingSidebarProps) {
                 );
               })}
             </nav>
+            <div className="accounting-sidebar-status">
+              <div>
+                <span className="accounting-status-dot" aria-hidden="true" />
+                <span>Simulated status</span>
+              </div>
+              <strong>Accounting Integration</strong>
+              <p>Approved payroll transfers are monitored before synchronization with the Existing Accounting System.</p>
+            </div>
           </div>
 
           <div className="accounting-sidebar-footer">
