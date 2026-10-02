@@ -11,7 +11,10 @@ import type {
     SessionUser,
 } from "@/types/auth";
 
-import { requireCurrentUserContext } from "./current-user-context";
+import {
+    getCurrentUserContext,
+    requireCurrentUserContext,
+} from "./current-user-context";
 import { getOptionalSessionUser } from "./session";
 
 export class ApiAuthorizationError extends Error {
@@ -92,4 +95,28 @@ export async function requireApiRole(
     }
 
     return user;
+}
+
+export async function requireApiRoleContext(
+    requiredRole: ApplicationRole,
+): Promise<CurrentUserContext> {
+    const context = await getCurrentUserContext();
+
+    if (!context) {
+        throw new ApiAuthorizationError(
+            "UNAUTHENTICATED",
+            401,
+            "Authentication is required.",
+        );
+    }
+
+    if (context.user.role !== requiredRole) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "You do not have permission to access this resource.",
+        );
+    }
+
+    return context;
 }

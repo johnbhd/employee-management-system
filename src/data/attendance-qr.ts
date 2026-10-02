@@ -1,13 +1,9 @@
 import type { IconName } from "@/types/ui";
 
-export const employeeQrProfile = {
-  schedule: "7:30 AM – 5:00 PM",
-} as const;
-
 export const employeeQrSteps = [
   "Open your attendance QR code.",
   "Present it to the campus attendance scanner.",
-  "Wait for the Time-In or Time-Out confirmation.",
+  "The scanner verifies your identity; attendance recording is handled separately.",
 ] as const;
 
 export const employeeQrInfo = {
@@ -16,5 +12,5 @@ export const employeeQrInfo = {
   securityTitle: "Security Notice",
   securityIcon: "shield" as IconName,
   securityMessage:
-    "This QR code is personal, temporary, and valid only at authorized attendance stations. Do not share screenshots of your QR code.",
+    "This signed QR code is personal and valid only at authorized attendance stations. Do not share screenshots of your QR code.",
 } as const;

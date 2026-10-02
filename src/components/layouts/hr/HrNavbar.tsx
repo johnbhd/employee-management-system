@@ -25,7 +25,11 @@ export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
   const profileRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const pageTitle = pathname === "/hr/dashboard" ? "HR / Attendance Dashboard" : "Attendance Operations";
+  const pageTitle = pathname === "/hr/dashboard"
+    ? "HR / Attendance Dashboard"
+    : pathname === "/hr/scanner"
+      ? "QR Attendance Scanner"
+      : "Attendance Operations";
   const displayName = getAuthenticatedDisplayName(user, employee);
 
   useEffect(() => {

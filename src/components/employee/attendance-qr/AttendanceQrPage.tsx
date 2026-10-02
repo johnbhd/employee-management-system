@@ -1,119 +1,94 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   employeeQrInfo,
   employeeQrSteps,
 } from "@/data/attendance-qr";
 import { Icon } from "@/components/ui/Icon";
-import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
+import type { ApiErrorResponse } from "@/types/api/responses";
+import type { EmployeeQrSuccessResponse } from "@/types/attendance-qr";
 import type { EmployeeReference } from "@/types/employee";
 
 import { AttendanceQrCard } from "./AttendanceQrCard";
-import type {
-  DemoAttendanceState,
-  QrScanFeedbackState,
-} from "./attendance-qr-types";
 
-const SCAN_FEEDBACK_DURATION_MS = 2600;
+type AttendanceQrPageProps = {
+  employee: EmployeeReference | null;
+  initialQrError: string | null;
+  initialQrGeneratedAt: string | null;
+  initialQrValue: string | null;
+};
+
+type EmployeeQrApiResponse = EmployeeQrSuccessResponse | ApiErrorResponse;
 
 export function AttendanceQrPage({
   employee,
-}: {
-  employee: EmployeeReference | null;
-}) {
-  const [qrGeneratedAt, setQrGeneratedAt] = useState<Date | null>(null);
-  const [scanFeedback, setScanFeedback] = useState<QrScanFeedbackState | null>(null);
-  const scanFeedbackTimeoutRef = useRef<number | null>(null);
-  const {
-    demoAttendance,
-    recordQrScan,
-    resetDemoAttendance,
-  } = useEmployeeQrDemoAttendance(employee?.employeeId ?? null);
+  initialQrError,
+  initialQrGeneratedAt,
+  initialQrValue,
+}: AttendanceQrPageProps) {
+  const [qrError, setQrError] = useState(initialQrError);
+  const [qrGeneratedAt, setQrGeneratedAt] = useState(initialQrGeneratedAt);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrValue, setQrValue] = useState(initialQrValue);
 
-  const demoAttendanceState = getDemoAttendanceState(demoAttendance?.status);
+  async function refreshQr() {
+    setQrLoading(true);
+    setQrError(null);
 
-  useEffect(() => {
-    const qrInitializationTimer = window.setTimeout(() => {
-      setQrGeneratedAt(new Date());
-    }, 0);
+    try {
+      const response = await fetch(
+        "/api/v1/attendance/qr",
+        {
+          cache: "no-store",
+        },
+      );
+      const body = await response.json() as EmployeeQrApiResponse;
 
-    return () => {
-      window.clearTimeout(qrInitializationTimer);
-
-      if (scanFeedbackTimeoutRef.current !== null) {
-        window.clearTimeout(scanFeedbackTimeoutRef.current);
+      if (!response.ok || !body.success) {
+        throw new Error(
+          response.status === 403
+            ? "Your employee QR is currently unavailable. Please contact the system administrator."
+            : "Employee QR generation is temporarily unavailable.",
+        );
       }
-    };
-  }, []);
 
-  function showScanFeedback(nextFeedback: QrScanFeedbackState) {
-    if (scanFeedbackTimeoutRef.current !== null) {
-      window.clearTimeout(scanFeedbackTimeoutRef.current);
+      setQrValue(body.data.qrValue);
+      setQrGeneratedAt(body.data.generatedAt);
+    } catch (error) {
+      setQrError(
+        error instanceof Error
+          ? error.message
+          : "Employee QR generation is temporarily unavailable.",
+      );
+    } finally {
+      setQrLoading(false);
     }
-
-    setScanFeedback(nextFeedback);
-    scanFeedbackTimeoutRef.current = window.setTimeout(() => {
-      setScanFeedback(null);
-      scanFeedbackTimeoutRef.current = null;
-    }, SCAN_FEEDBACK_DURATION_MS);
-  }
-
-  // Temporary presentation behavior: the help question-mark icon simulates
-  // an authorized QR scan until a real attendance scanner is connected.
-  function handleDemoQrScan() {
-    const scanResult = recordQrScan(new Date());
-
-    if (scanResult.action === "time-in" || scanResult.action === "time-out") {
-      const scanTime = scanResult.action === "time-in"
-        ? scanResult.attendance.timeIn
-        : scanResult.attendance.timeOut;
-
-      showScanFeedback({
-        type: scanResult.action,
-        time: scanTime ?? "",
-      });
-      return;
-    }
-
-    if (scanResult.action === "completed") {
-      showScanFeedback({ type: "completed" });
-    }
-  }
-
-  function handleQrRefreshed() {
-    setQrGeneratedAt(new Date());
   }
 
   return (
     <div className="attendance-qr-page">
       <p className="attendance-qr-page-subtitle">
-        Present this QR code at an authorized campus attendance station.
+        Present this employee-specific QR code at an authorized campus scanner.
       </p>
 
       <section className="attendance-qr-layout" aria-label="Attendance QR">
         <AttendanceQrCard
           employee={employee}
-          demoAttendanceState={demoAttendanceState}
-          onQrRefreshed={handleQrRefreshed}
+          onQrRefreshed={refreshQr}
+          qrError={qrError}
           qrGeneratedAt={qrGeneratedAt}
-          scanFeedback={scanFeedback}
-          timeIn={demoAttendance?.timeIn ?? null}
-          timeOut={demoAttendance?.timeOut ?? null}
+          qrLoading={qrLoading}
+          qrValue={qrValue}
         />
 
         <aside className="attendance-qr-side" aria-label="Attendance QR guidance">
           <div className="attendance-qr-info-card">
             <div className="attendance-qr-info-heading">
-              <button
-                type="button"
-                className="attendance-qr-help-trigger"
-                onClick={handleDemoQrScan}
-                aria-label="Attendance recording information"
-              >
+              <span className="attendance-qr-help-icon" aria-hidden="true">
                 <Icon name={employeeQrInfo.icon} />
-              </button>
+              </span>
               <h2>{employeeQrInfo.title}</h2>
             </div>
             <ol className="attendance-qr-step-list">
@@ -130,14 +105,9 @@ export function AttendanceQrPage({
 
           <div className="attendance-qr-notice-card">
             <div className="attendance-qr-notice-heading">
-              <button
-                type="button"
-                className="attendance-qr-security-trigger"
-                onClick={resetDemoAttendance}
-                aria-label="Reset temporary attendance demo"
-              >
+              <span className="attendance-qr-security-icon" aria-hidden="true">
                 <Icon name={employeeQrInfo.securityIcon} />
-              </button>
+              </span>
               <h2>{employeeQrInfo.securityTitle}</h2>
             </div>
             <p>{employeeQrInfo.securityMessage}</p>
@@ -151,18 +121,4 @@ export function AttendanceQrPage({
       </p>
     </div>
   );
-}
-
-function getDemoAttendanceState(
-  status: "Present" | "Completed" | undefined,
-): DemoAttendanceState {
-  if (status === "Completed") {
-    return "completed";
-  }
-
-  if (status === "Present") {
-    return "timed-in";
-  }
-
-  return "not-timed-in";
 }

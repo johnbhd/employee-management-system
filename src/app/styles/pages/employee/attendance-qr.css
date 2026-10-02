@@ -92,6 +92,8 @@
 .attendance-qr-code-wrap {
   position: relative;
   display: flex;
+  min-height: 17rem;
+  align-items: center;
   justify-content: center;
   border: 1px dashed #cfd5e2;
   border-radius: 0.65rem;
@@ -106,6 +108,15 @@
   border: 0.45rem solid #fff;
   border-radius: 0.25rem;
   box-shadow: 0 0 0 1px #e1e5ed;
+}
+
+.attendance-qr-code-state {
+  max-width: 18rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .attendance-qr-scan-feedback {
@@ -193,6 +204,14 @@
   gap: 0.3rem;
 }
 
+.attendance-qr-identity-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--employee-blue);
+  font-weight: 700;
+}
+
 .attendance-qr-timer .ui-icon {
   margin-right: 0.1rem;
 }
@@ -249,6 +268,25 @@
   color: var(--employee-green);
 }
 
+.attendance-qr-pill-info {
+  background: #edf5ff;
+  color: var(--info);
+}
+
+.attendance-qr-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 1rem 0 0;
+  color: var(--danger);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+.attendance-qr-error .ui-icon {
+  margin-top: 0.1rem;
+}
+
 .attendance-qr-actions {
   display: flex;
   gap: 0.65rem;
@@ -281,6 +319,11 @@
 .attendance-qr-primary-button:hover {
   border-color: var(--employee-blue);
   background: var(--employee-blue);
+}
+
+.attendance-qr-primary-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .attendance-qr-secondary-button {
@@ -329,6 +372,22 @@
 
 .attendance-qr-info-heading .ui-icon {
   color: var(--employee-blue);
+}
+
+.attendance-qr-help-icon,
+.attendance-qr-security-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-top: 0.15rem;
+  line-height: 1;
+}
+
+.attendance-qr-help-icon {
+  color: var(--employee-blue);
+}
+
+.attendance-qr-security-icon {
+  color: var(--employee-red);
 }
 
 .attendance-qr-help-trigger {

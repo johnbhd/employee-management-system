@@ -15,7 +15,9 @@
     "@fortawesome/react-fontawesome": "^3.5.0",
     "firebase": "^12.19.0",
     "firebase-admin": "^14.5.0",
+    "html5-qrcode": "^2.3.8",
     "next": "16.3.5",
+    "qrcode": "^1.5.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "server-only": "^0.0.1"
@@ -24,6 +26,7 @@
     "@next/env": "16.3.5",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

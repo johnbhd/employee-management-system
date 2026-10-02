@@ -1,89 +1,57 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import QRCode from "qrcode";
+import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { employeeQrProfile } from "@/data/attendance-qr";
 import { formatCampusDateTime } from "@/lib/campus-time";
 import type { EmployeeReference } from "@/types/employee";
 
-import { QrScanFeedback } from "./QrScanFeedback";
-import type {
-  DemoAttendanceState,
-  QrScanFeedbackState,
-} from "./attendance-qr-types";
-
-const QR_SIZE = 29;
-const QR_EXPIRY_SECONDS = 42;
-const NOT_RECORDED_LABEL = "Not Recorded";
-
-type Matrix = boolean[][];
+const NOT_AVAILABLE_LABEL = "Unavailable";
 
 type AttendanceQrCardProps = {
   employee: EmployeeReference | null;
-  demoAttendanceState: DemoAttendanceState;
-  qrGeneratedAt: Date | null;
-  scanFeedback: QrScanFeedbackState | null;
-  timeIn: string | null;
-  timeOut: string | null;
-  onQrRefreshed: () => void;
+  onQrRefreshed: () => Promise<void>;
+  qrError: string | null;
+  qrGeneratedAt: string | null;
+  qrLoading: boolean;
+  qrValue: string | null;
 };
 
 export function AttendanceQrCard({
   employee,
-  demoAttendanceState,
-  qrGeneratedAt,
-  scanFeedback,
-  timeIn,
-  timeOut,
   onQrRefreshed,
+  qrError,
+  qrGeneratedAt,
+  qrLoading,
+  qrValue,
 }: AttendanceQrCardProps) {
-  const [remainingSeconds, setRemainingSeconds] = useState(QR_EXPIRY_SECONDS);
-  const [qrVersion, setQrVersion] = useState(0);
-  const [feedback, setFeedback] = useState("");
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setRemainingSeconds((seconds) => (seconds > 0 ? seconds - 1 : QR_EXPIRY_SECONDS));
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, []);
-
-  const qrMatrix = useMemo(() => createPrototypeQrMatrix(qrVersion + 1), [qrVersion]);
-
-  function refreshQr() {
-    setQrVersion((version) => version + 1);
-    setRemainingSeconds(QR_EXPIRY_SECONDS);
-    setFeedback("A new prototype QR code was generated.");
-    onQrRefreshed();
-  }
-
-  const attendanceStatus = [
+  const identityStatus = [
     {
-      label: "Current Status",
-      value: getDemoAttendanceStatusLabel(demoAttendanceState),
+      label: "QR Status",
+      value: qrValue ? "Ready to scan" : "Unavailable",
       isPill: true,
-      tone: demoAttendanceState === "not-timed-in" ? "muted" : "success",
+      tone: qrValue ? "success" : "muted",
     },
     {
-      label: "Schedule",
-      value: employeeQrProfile.schedule,
+      label: "Employee ID",
+      value: employee?.employeeId ?? NOT_AVAILABLE_LABEL,
       isPill: false,
       tone: "plain",
     },
     {
-      label: "Time-In",
-      value: timeIn ?? NOT_RECORDED_LABEL,
-      isPill: timeIn === null,
-      tone: timeIn === null ? "muted" : "success",
+      label: "Department",
+      value: employee?.department ?? NOT_AVAILABLE_LABEL,
+      isPill: false,
+      tone: "plain",
     },
     {
-      label: "Time-Out",
-      value: timeOut ?? NOT_RECORDED_LABEL,
-      isPill: timeOut === null,
-      tone: timeOut === null ? "muted" : "success",
+      label: "Attendance",
+      value: "Not recorded here",
+      isPill: false,
+      tone: "plain",
     },
   ] as const;
 
@@ -99,42 +67,38 @@ export function AttendanceQrCard({
             {employee?.displayName ?? "Employee information unavailable"}
           </h2>
           <p>
-            Employee ID: <strong>{employee?.employeeId ?? "Unavailable"}</strong>
+            Employee ID: <strong>{employee?.employeeId ?? NOT_AVAILABLE_LABEL}</strong>
           </p>
           <p>
-            Department: <strong>{employee?.department ?? "Unavailable"}</strong>
+            Department: <strong>{employee?.department ?? NOT_AVAILABLE_LABEL}</strong>
           </p>
         </div>
       </div>
 
       <div className="attendance-qr-divider" aria-hidden="true" />
 
-      <div className="attendance-qr-code-wrap">
-        <PrototypeQrCode version={qrVersion} matrix={qrMatrix} />
-        {scanFeedback ? <QrScanFeedback feedback={scanFeedback} /> : null}
+      <div className="attendance-qr-code-wrap" aria-busy={qrLoading}>
+        <EmployeeQrImage
+          employeeName={employee?.displayName ?? "Employee"}
+          key={qrValue ?? "employee-qr-unavailable"}
+          qrValue={qrValue}
+        />
       </div>
 
       <div className="attendance-qr-meta">
-        <span className="attendance-qr-timer">
-          <Icon name="clock" />
-          QR expires in{" "}
-          <strong
-            className="attendance-qr-expire-badge"
-            aria-live="polite"
-            aria-label={`QR expires in ${formatCountdown(remainingSeconds)}`}
-          >
-            {formatCountdown(remainingSeconds)}
-          </strong>
+        <span className="attendance-qr-identity-note">
+          <Icon name="lock" />
+          Signed employee identity QR
         </span>
         <span className="attendance-qr-datetime">
-          {qrGeneratedAt ? formatCampusDateTime(qrGeneratedAt) : "Generating QR timestamp…"}
+          {formatGeneratedAt(qrGeneratedAt)}
         </span>
       </div>
 
       <div className="attendance-qr-divider" aria-hidden="true" />
 
-      <div className="attendance-qr-status-row" aria-label="Attendance status">
-        {attendanceStatus.map((status) => (
+      <div className="attendance-qr-status-row" aria-label="Attendance QR status">
+        {identityStatus.map((status) => (
           <div key={status.label}>
             <span className="attendance-qr-label">{status.label}</span>
             {status.isPill ? (
@@ -148,10 +112,22 @@ export function AttendanceQrCard({
         ))}
       </div>
 
+      {qrError ? (
+        <p className="attendance-qr-error" role="alert">
+          <Icon name="warning" />
+          {qrError}
+        </p>
+      ) : null}
+
       <div className="attendance-qr-actions">
-        <button type="button" className="attendance-qr-primary-button" onClick={refreshQr}>
+        <button
+          type="button"
+          className="attendance-qr-primary-button"
+          disabled={qrLoading || !employee}
+          onClick={() => void onQrRefreshed()}
+        >
           <Icon name="refresh" />
-          Refresh QR
+          {qrLoading ? "Generating QR…" : "Refresh QR"}
         </button>
         <Link href="/employee/attendance-history" className="attendance-qr-secondary-button">
           <Icon name="clock" />
@@ -160,96 +136,105 @@ export function AttendanceQrCard({
         </Link>
       </div>
       <p className="attendance-qr-feedback" role="status" aria-live="polite">
-        {feedback}
+        Attendance is not recorded from this page. Present the QR to an authorized scanner.
       </p>
     </article>
   );
 }
 
-function getDemoAttendanceStatusLabel(state: DemoAttendanceState) {
-  if (state === "timed-in") {
-    return "Present";
+function EmployeeQrImage({
+  employeeName,
+  qrValue,
+}: {
+  employeeName: string;
+  qrValue: string | null;
+}) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [generationError, setGenerationError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!qrValue) {
+      return () => {
+        active = false;
+      };
+    }
+
+    void QRCode.toDataURL(
+      qrValue,
+      {
+        color: {
+          dark: "#101b3d",
+          light: "#ffffff",
+        },
+        errorCorrectionLevel: "M",
+        margin: 2,
+        width: 420,
+      },
+    )
+      .then((nextDataUrl) => {
+        if (active) {
+          setDataUrl(nextDataUrl);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setGenerationError(true);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [qrValue]);
+
+  if (!qrValue) {
+    return (
+      <p className="attendance-qr-code-state" role="status">
+        Employee QR is unavailable.
+      </p>
+    );
   }
 
-  if (state === "completed") {
-    return "Completed";
+  if (generationError) {
+    return (
+      <p className="attendance-qr-code-state" role="alert">
+        The QR image could not be generated. Please refresh the page.
+      </p>
+    );
   }
 
-  return "Not Yet Timed In";
-}
+  if (!dataUrl) {
+    return (
+      <p className="attendance-qr-code-state" role="status" aria-live="polite">
+        Preparing your employee QR…
+      </p>
+    );
+  }
 
-function PrototypeQrCode({ matrix, version }: { matrix: Matrix; version: number }) {
   return (
-    <svg
+    <Image
       className="attendance-qr-code"
-      viewBox={`0 0 ${QR_SIZE} ${QR_SIZE}`}
-      role="img"
-      aria-label={`Temporary attendance QR code, version ${version + 1}`}
-      shapeRendering="crispEdges"
-    >
-      <rect width={QR_SIZE} height={QR_SIZE} fill="#fff" />
-      {matrix.flatMap((row, y) =>
-        row.map((isDark, x) =>
-          isDark ? <rect key={`${x}-${y}`} x={x} y={y} width="1" height="1" fill="#12182b" /> : null,
-        ),
-      )}
-    </svg>
+      src={dataUrl}
+      alt={`Personal attendance QR code for ${employeeName}`}
+      height={420}
+      unoptimized
+      width={420}
+    />
   );
 }
 
-function formatCountdown(seconds: number) {
-  return `00:${String(seconds).padStart(2, "0")}`;
-}
-
-function createPrototypeQrMatrix(seed: number): Matrix {
-  const matrix = Array.from({ length: QR_SIZE }, () => Array(QR_SIZE).fill(false));
-  const reserved = Array.from({ length: QR_SIZE }, () => Array(QR_SIZE).fill(false));
-
-  addFinderPattern(matrix, reserved, 0, 0);
-  addFinderPattern(matrix, reserved, QR_SIZE - 7, 0);
-  addFinderPattern(matrix, reserved, 0, QR_SIZE - 7);
-
-  for (let index = 8; index < QR_SIZE - 8; index += 1) {
-    if (!reserved[6][index]) {
-      reserved[6][index] = true;
-      matrix[6][index] = index % 2 === 0;
-    }
-    if (!reserved[index][6]) {
-      reserved[index][6] = true;
-      matrix[index][6] = index % 2 === 0;
-    }
+function formatGeneratedAt(value: string | null) {
+  if (!value) {
+    return "QR timestamp unavailable";
   }
 
-  let value = Math.imul(seed + 1, 0x45d9f3b);
-  for (let y = 0; y < QR_SIZE; y += 1) {
-    for (let x = 0; x < QR_SIZE; x += 1) {
-      if (reserved[y][x]) {
-        continue;
-      }
+  const date = new Date(value);
 
-      value = Math.imul(value ^ (x + y * QR_SIZE + 1), 0x27d4eb2d);
-      value ^= value >>> 15;
-      matrix[y][x] = (value & 1) === 1;
-    }
+  if (Number.isNaN(date.getTime())) {
+    return "QR timestamp unavailable";
   }
 
-  return matrix;
-}
-
-function addFinderPattern(matrix: Matrix, reserved: boolean[][], startX: number, startY: number) {
-  for (let y = -1; y <= 7; y += 1) {
-    for (let x = -1; x <= 7; x += 1) {
-      const cellX = startX + x;
-      const cellY = startY + y;
-
-      if (cellX < 0 || cellY < 0 || cellX >= QR_SIZE || cellY >= QR_SIZE) {
-        continue;
-      }
-
-      reserved[cellY][cellX] = true;
-      matrix[cellY][cellX] =
-        x >= 0 && x <= 6 && y >= 0 && y <= 6 &&
-        (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4));
-    }
-  }
+  return `Generated ${formatCampusDateTime(date)}`;
 }

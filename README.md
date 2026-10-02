@@ -56,11 +56,11 @@ src/lib/firebase/server/ Firebase Admin boundary
 Firestore / Firebase Authentication / Firebase Storage
 ```
 
-The only API route currently implemented is the safe application-level
-health check at `GET /api/v1/health`. The API response types live under
-`src/types/api/`, and the browser-safe base client uses native `fetch` from
-`src/lib/api/client.ts`. Existing pages continue to use their deterministic
-mock data; no page has been migrated to a non-existent backend endpoint.
+The API boundary includes safe health checks, authenticated current-user
+context, and the employee QR identity/scanner endpoints. The API response
+types live under `src/types/api/`, and the browser-safe base client uses native
+`fetch` from `src/lib/api/client.ts`. Existing feature pages continue to use
+their deterministic mock data unless a task explicitly migrates them.
 
 Firebase foundation initialization is now available under
 `src/lib/firebase/client/` and `src/lib/firebase/server/`. The browser module
@@ -95,6 +95,14 @@ returns a safe `503` error response when server configuration is missing or
 Firestore cannot be reached. It never returns credentials, stack traces, or
 service-account details. The Firestore check reads the reserved
 `_system/health` document without creating or modifying it.
+
+The employee-specific QR identity flow uses a separate server-only HMAC secret.
+Set `QR_ATTENDANCE_SIGNING_SECRET` in `.env.local` to a unique random value;
+for example, generate one locally with `openssl rand -base64 32`. Never reuse
+the Firebase private key, expose the value with `NEXT_PUBLIC_`, or commit the
+real secret. Employees receive a QR from `/employee/attendance-qr`; authorized
+HR staff use `/hr/scanner`. The scanner validates the QR through the server and
+shows safe employee identity information without writing attendance records.
 
 ## Firebase Development Seeder
 

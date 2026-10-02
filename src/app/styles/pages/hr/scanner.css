@@ -1,0 +1,392 @@
+.attendance-scanner-page {
+  display: grid;
+  width: 100%;
+  max-width: 60rem;
+  min-width: 0;
+  gap: 1.25rem;
+  margin: 0 auto;
+}
+
+.attendance-scanner-intro {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.attendance-scanner-kicker {
+  color: var(--au-red);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.attendance-scanner-intro h1,
+.attendance-scanner-manual h2,
+.attendance-scanner-result h2,
+.attendance-scanner-result h3 {
+  margin: 0;
+  color: var(--au-navy);
+}
+
+.attendance-scanner-intro h1 {
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  letter-spacing: -0.04em;
+}
+
+.attendance-scanner-intro p,
+.attendance-scanner-manual p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  line-height: 1.55;
+}
+
+.attendance-scanner-panel {
+  display: grid;
+  min-width: 0;
+  gap: 1rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.attendance-scanner-camera-frame {
+  display: grid;
+  min-width: 0;
+  min-height: 20rem;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 0.85rem;
+  background: #09173f;
+}
+
+.attendance-scanner-camera-shell {
+  display: grid;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  gap: 0.9rem;
+}
+
+.attendance-scanner-camera-target {
+  display: grid;
+  width: min(100%, 34rem);
+  min-height: 20rem;
+  margin: 0 auto;
+  place-items: center;
+  overflow: hidden;
+}
+
+.attendance-scanner-camera-target video {
+  display: block;
+  width: 100% !important;
+  max-width: 34rem;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 0.7rem;
+}
+
+.attendance-scanner-camera-target img {
+  max-width: 100%;
+}
+
+.attendance-scanner-camera-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(90%, 26rem);
+  margin: 0;
+  transform: translate(-50%, -50%);
+  color: #dbeafe;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  pointer-events: none;
+  text-align: center;
+}
+
+.attendance-scanner-camera-select {
+  display: grid;
+  width: min(100%, 34rem);
+  gap: 0.35rem;
+  margin: 0 auto;
+  color: #dbeafe;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.attendance-scanner-camera-select select {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1px solid rgba(219, 234, 254, 0.3);
+  border-radius: 0.6rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 0.55rem 0.7rem;
+}
+
+.attendance-scanner-camera-select option {
+  color: var(--text);
+}
+
+.attendance-scanner-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.attendance-scanner-state-error,
+.attendance-scanner-state-invalid {
+  color: var(--danger);
+}
+
+.attendance-scanner-state-validating {
+  color: var(--au-blue);
+}
+
+.attendance-scanner-state-icon {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.attendance-scanner-state-error .attendance-scanner-state-icon,
+.attendance-scanner-state-invalid .attendance-scanner-state-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.attendance-scanner-primary-button,
+.attendance-scanner-secondary-button {
+  display: inline-flex;
+  min-height: 2.65rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: 0.65rem;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.attendance-scanner-primary-button {
+  border: 1px solid var(--au-navy);
+  background: var(--au-navy);
+  color: #fff;
+}
+
+.attendance-scanner-primary-button:hover {
+  border-color: var(--au-blue);
+  background: var(--au-blue);
+}
+
+.attendance-scanner-primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.attendance-scanner-secondary-button {
+  width: fit-content;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  color: var(--au-blue);
+}
+
+.attendance-scanner-secondary-button:hover {
+  border-color: var(--au-blue);
+  background: var(--info-soft);
+}
+
+.attendance-scanner-manual {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.25rem;
+  align-items: end;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+}
+
+.attendance-scanner-manual h2 {
+  margin-top: 0.25rem;
+  font-size: 1rem;
+}
+
+.attendance-scanner-manual-form {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.attendance-scanner-manual-form label {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.attendance-scanner-manual-form > div {
+  display: flex;
+  min-width: 0;
+  gap: 0.5rem;
+}
+
+.attendance-scanner-manual-form input {
+  min-width: 0;
+  flex: 1 1 auto;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--text);
+  padding: 0.65rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.attendance-scanner-result {
+  display: grid;
+  max-width: 42rem;
+  gap: 1.25rem;
+  margin: 0 auto;
+}
+
+.attendance-scanner-result-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.attendance-scanner-result-heading h2 {
+  margin-top: 0.2rem;
+  font-size: 1.25rem;
+}
+
+.attendance-scanner-success-icon,
+.attendance-scanner-avatar {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+}
+
+.attendance-scanner-success-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.attendance-scanner-employee {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+}
+
+.attendance-scanner-avatar {
+  width: 3.25rem;
+  height: 3.25rem;
+  background: var(--au-navy);
+  color: #fff;
+  font-size: 1.25rem;
+}
+
+.attendance-scanner-employee h3 {
+  font-size: 1.05rem;
+}
+
+.attendance-scanner-employee p {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+}
+
+.attendance-scanner-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.attendance-scanner-detail-grid > div {
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: #fff;
+}
+
+.attendance-scanner-detail-grid dt {
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.attendance-scanner-detail-grid dd {
+  margin: 0.35rem 0 0;
+  color: var(--au-navy);
+  font-size: 0.78rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.attendance-scanner-result-note {
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border-left: 3px solid var(--au-blue);
+  background: var(--info-soft);
+  color: var(--text-secondary, var(--text-muted));
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.attendance-scanner-result > .attendance-scanner-primary-button {
+  width: 100%;
+}
+
+@media (max-width: 700px) {
+  .attendance-scanner-camera-frame {
+    min-height: 16rem;
+  }
+
+  .attendance-scanner-camera-target {
+    min-height: 16rem;
+  }
+
+  .attendance-scanner-manual {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-scanner-manual-form > div {
+    flex-direction: column;
+  }
+
+  .attendance-scanner-manual-form .attendance-scanner-primary-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .attendance-scanner-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-scanner-panel {
+    padding: 0.85rem;
+  }
+}
