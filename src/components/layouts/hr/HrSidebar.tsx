@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 import type { IconName } from "@/types/ui";
@@ -31,13 +33,15 @@ const hrNavigation: HrNavigationItem[] = [
 
 type HrSidebarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function HrSidebar({ user, isOpen, onClose }: HrSidebarProps) {
+export function HrSidebar({ user, employee, isOpen, onClose }: HrSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -109,7 +113,7 @@ export function HrSidebar({ user, isOpen, onClose }: HrSidebarProps) {
             <div className="hr-sidebar-account">
               <span className="hr-account-avatar"><Icon name="user" /></span>
               <span>
-              <strong>{user.displayName}</strong>
+              <strong>{displayName}</strong>
                 <small>AU-JSC Operations Account</small>
               </span>
             </div>

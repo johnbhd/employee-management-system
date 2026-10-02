@@ -1,5 +1,8 @@
 import { EmployeeDashboardPage } from "@/components/employee/dashboard/EmployeeDashboardPage";
+import { requireCurrentUserContext } from "@/server/auth/current-user-context";
 
-export default function Page() {
-  return <EmployeeDashboardPage />;
+export default async function Page() {
+  const context = await requireCurrentUserContext();
+
+  return <EmployeeDashboardPage employee={context.employee} />;
 }

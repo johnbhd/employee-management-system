@@ -1,6 +1,11 @@
 import { PayslipsExplorer } from "./PayslipsExplorer";
+import type { EmployeeReference } from "@/types/employee";
 
-export function EmployeePayslipsPage() {
+export function EmployeePayslipsPage({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   return (
     <div className="employee-payslips-page">
       <header className="employee-payslips-heading">
@@ -9,7 +14,7 @@ export function EmployeePayslipsPage() {
         <p>View payroll records received from the Existing Payroll System.</p>
       </header>
 
-      <PayslipsExplorer />
+      <PayslipsExplorer employee={employee} />
     </div>
   );
 }

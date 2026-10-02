@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin/AdminLayout";
-import { requireRole } from "@/server/auth/guards";
+import { requireRoleContext } from "@/server/auth/guards";
 
 export default async function Layout({ children }: { children: ReactNode }) {
-  const user = await requireRole("admin");
+  const context = await requireRoleContext("admin");
 
-  return <AdminLayout user={user}>{children}</AdminLayout>;
+  return <AdminLayout context={context}>{children}</AdminLayout>;
 }

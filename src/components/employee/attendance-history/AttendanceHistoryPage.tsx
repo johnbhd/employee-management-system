@@ -1,9 +1,14 @@
 import { Icon } from "@/components/ui/Icon";
 import { attendanceHistoryStats } from "@/data/attendance-history";
+import type { EmployeeReference } from "@/types/employee";
 
 import { AttendanceHistoryExplorer } from "./AttendanceHistoryExplorer";
 
-export function AttendanceHistoryPage() {
+export function AttendanceHistoryPage({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   return (
     <div className="attendance-history-page">
       <div className="attendance-history-heading">
@@ -28,7 +33,7 @@ export function AttendanceHistoryPage() {
         ))}
       </section>
 
-      <AttendanceHistoryExplorer />
+      <AttendanceHistoryExplorer employee={employee} />
     </div>
   );
 }

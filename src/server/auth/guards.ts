@@ -6,8 +6,12 @@ import {
     getRoleHomePath,
     type ApplicationRole,
 } from "@/lib/auth/roles";
-import type { SessionUser } from "@/types/auth";
+import type {
+    CurrentUserContext,
+    SessionUser,
+} from "@/types/auth";
 
+import { requireCurrentUserContext } from "./current-user-context";
 import { getOptionalSessionUser } from "./session";
 
 export class ApiAuthorizationError extends Error {
@@ -46,6 +50,18 @@ export async function requireRole(
     }
 
     return user;
+}
+
+export async function requireRoleContext(
+    requiredRole: ApplicationRole,
+): Promise<CurrentUserContext> {
+    const context = await requireCurrentUserContext();
+
+    if (context.user.role !== requiredRole) {
+        redirect(getRoleHomePath(context.user.role));
+    }
+
+    return context;
 }
 
 export async function requireApiSessionUser(): Promise<SessionUser> {

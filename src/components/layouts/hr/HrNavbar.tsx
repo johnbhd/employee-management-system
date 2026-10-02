@@ -6,16 +6,19 @@ import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 
 type HrNavbarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   onOpenSidebar: () => void;
 };
 
-export function HrNavbar({ user, onOpenSidebar }: HrNavbarProps) {
+export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
   const [feedback, setFeedback] = useState("");
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
@@ -23,6 +26,7 @@ export function HrNavbar({ user, onOpenSidebar }: HrNavbarProps) {
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const pageTitle = pathname === "/hr/dashboard" ? "HR / Attendance Dashboard" : "Attendance Operations";
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -95,14 +99,14 @@ export function HrNavbar({ user, onOpenSidebar }: HrNavbarProps) {
             >
               <span className="hr-account-avatar"><Icon name="user" /></span>
               <span className="hr-profile-copy">
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>AU-JSC Operations</small>
               </span>
               <Icon name="chevron" />
             </button>
             {profileOpen ? (
               <nav id="hr-profile-menu" className="hr-profile-menu" aria-label="HR staff account menu">
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>Attendance operations access</small>
                 <button type="button" onClick={() => notify("HR settings are not connected in the prototype.")}>
                   <Icon name="settings" />

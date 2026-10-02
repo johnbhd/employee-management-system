@@ -7,12 +7,17 @@ import {
 } from "@/data/my-attendance";
 import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
 import type { EmployeeQrDemoAttendance } from "@/lib/employee/qr-demo-attendance";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "@/components/ui/Icon";
 
-export function MyAttendanceToday() {
+export function MyAttendanceToday({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const { demoAttendance } = useEmployeeQrDemoAttendance(
-    employeeAttendanceProfile.employeeId,
+    employee?.employeeId ?? null,
   );
   const displayedStats = getDisplayedStats(demoAttendance);
   const status = demoAttendance?.status ?? employeeAttendanceProfile.status;
@@ -21,6 +26,9 @@ export function MyAttendanceToday() {
       ? "Time-In and Time-Out recorded via QR"
       : "Time-In recorded via QR"
     : employeeAttendanceProfile.statusNote;
+  const employeeName = employee?.displayName ?? "Employee information unavailable";
+  const employeeId = employee?.employeeId ?? "Employee ID unavailable";
+  const department = employee?.department ?? "Employee details unavailable";
 
   return (
     <>
@@ -35,12 +43,12 @@ export function MyAttendanceToday() {
           <div className="my-attendance-employee-copy">
             <span className="my-attendance-kicker">Employee attendance</span>
             <h2 id="my-attendance-profile">
-              {employeeAttendanceProfile.name}
+              {employeeName}
             </h2>
             <p className="my-attendance-employee-meta">
-              <span>{employeeAttendanceProfile.employeeId}</span>
+              <span>{employeeId}</span>
               <span aria-hidden="true">·</span>
-              <span>{employeeAttendanceProfile.department}</span>
+              <span>{department}</span>
             </p>
           </div>
         </div>

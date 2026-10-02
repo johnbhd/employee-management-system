@@ -11,11 +11,16 @@ import {
   type EmployeeQrDemoScanResult,
 } from "@/lib/employee/qr-demo-attendance";
 
-export function useEmployeeQrDemoAttendance(employeeId: string) {
+export function useEmployeeQrDemoAttendance(employeeId: string | null) {
   const [demoAttendance, setDemoAttendance] =
     useState<EmployeeQrDemoAttendance | null>(null);
 
   const refreshDemoAttendance = useCallback(() => {
+    if (!employeeId) {
+      setDemoAttendance(null);
+      return;
+    }
+
     setDemoAttendance(readEmployeeQrDemoAttendance(employeeId));
   }, [employeeId]);
 
@@ -33,6 +38,10 @@ export function useEmployeeQrDemoAttendance(employeeId: string) {
 
   const recordQrScan = useCallback(
     (now?: Date): EmployeeQrDemoScanResult => {
+      if (!employeeId) {
+        return { action: "unavailable", attendance: null };
+      }
+
       const result = scanEmployeeQrDemoAttendance(employeeId, now);
 
       if (result.action !== "unavailable") {

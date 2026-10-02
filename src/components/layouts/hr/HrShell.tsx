@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
-import type { SessionUser } from "@/types/auth";
+import type { CurrentUserContext } from "@/types/auth";
 
 import { HrMain } from "./HrMain";
 import { HrNavbar } from "./HrNavbar";
@@ -12,10 +12,10 @@ import { HrWorkflowProvider } from "./HrWorkflowContext";
 
 type HrShellProps = {
   children: ReactNode;
-  user: SessionUser;
+  context: CurrentUserContext;
 };
 
-export function HrShell({ children, user }: HrShellProps) {
+export function HrShell({ children, context }: HrShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -33,13 +33,15 @@ export function HrShell({ children, user }: HrShellProps) {
     <HrWorkflowProvider>
       <div className="hr-shell">
         <HrSidebar
-          user={user}
+          user={context.user}
+          employee={context.employee}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
         <div className="hr-main-wrap">
           <HrNavbar
-            user={user}
+            user={context.user}
+            employee={context.employee}
             onOpenSidebar={() => setSidebarOpen(true)}
           />
           <HrMain>{children}</HrMain>

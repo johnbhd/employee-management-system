@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { employeeQrProfile } from "@/data/attendance-qr";
 import { formatCampusDateTime } from "@/lib/campus-time";
+import type { EmployeeReference } from "@/types/employee";
 
 import { QrScanFeedback } from "./QrScanFeedback";
 import type {
@@ -20,6 +21,7 @@ const NOT_RECORDED_LABEL = "Not Recorded";
 type Matrix = boolean[][];
 
 type AttendanceQrCardProps = {
+  employee: EmployeeReference | null;
   demoAttendanceState: DemoAttendanceState;
   qrGeneratedAt: Date | null;
   scanFeedback: QrScanFeedbackState | null;
@@ -29,6 +31,7 @@ type AttendanceQrCardProps = {
 };
 
 export function AttendanceQrCard({
+  employee,
   demoAttendanceState,
   qrGeneratedAt,
   scanFeedback,
@@ -92,12 +95,14 @@ export function AttendanceQrCard({
         </div>
         <div className="attendance-qr-employee-copy">
           <span className="attendance-qr-employee-kicker">Personal attendance QR</span>
-          <h2 id="attendance-qr-employee">{employeeQrProfile.name}</h2>
+          <h2 id="attendance-qr-employee">
+            {employee?.displayName ?? "Employee information unavailable"}
+          </h2>
           <p>
-            Employee ID: <strong>{employeeQrProfile.employeeId}</strong>
+            Employee ID: <strong>{employee?.employeeId ?? "Unavailable"}</strong>
           </p>
           <p>
-            Department: <strong>{employeeQrProfile.department}</strong>
+            Department: <strong>{employee?.department ?? "Unavailable"}</strong>
           </p>
         </div>
       </div>

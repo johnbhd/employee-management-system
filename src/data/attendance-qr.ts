@@ -1,9 +1,6 @@
 import type { IconName } from "@/types/ui";
 
 export const employeeQrProfile = {
-  name: "John Benedict M. Villegas",
-  employeeId: "AU-EMP-2026-001",
-  department: "Information Technology Department",
   schedule: "7:30 AM – 5:00 PM",
 } as const;
 

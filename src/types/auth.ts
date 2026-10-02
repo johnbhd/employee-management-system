@@ -5,6 +5,7 @@ import type {
 import type {
     ApiSuccessResponse,
 } from "@/types/api/responses";
+import type { EmployeeReference } from "@/types/employee";
 
 export type ApplicationUserStatus = "active" | "inactive" | "disabled";
 
@@ -26,3 +27,11 @@ export type AuthSessionData = {
 
 export type AuthSessionSuccessResponse =
     ApiSuccessResponse<AuthSessionData>;
+
+export type CurrentUserContext = {
+    user: SessionUser;
+    employee: EmployeeReference | null;
+};
+
+export type CurrentUserSuccessResponse =
+    ApiSuccessResponse<CurrentUserContext>;

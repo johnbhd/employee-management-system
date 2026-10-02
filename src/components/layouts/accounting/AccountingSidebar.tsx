@@ -6,7 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 import type { IconName } from "@/types/ui";
 
 import { Icon } from "../../ui/Icon";
@@ -48,13 +50,15 @@ const accountingNavigation: AccountingNavigationItem[] = [
 
 type AccountingSidebarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AccountingSidebar({ user, isOpen, onClose }: AccountingSidebarProps) {
+export function AccountingSidebar({ user, employee, isOpen, onClose }: AccountingSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -102,7 +106,7 @@ export function AccountingSidebar({ user, isOpen, onClose }: AccountingSidebarPr
           <div className="accounting-sidebar-scroll">
             <div className="accounting-workspace-label">
               <span>Accounting Operations</span>
-              <span className="accounting-role-pill">{user.displayName}</span>
+              <span className="accounting-role-pill">{displayName}</span>
             </div>
             <nav className="accounting-sidebar-nav" aria-label="Accounting portal navigation">
               {accountingNavigation.map((item) => {
@@ -156,7 +160,7 @@ export function AccountingSidebar({ user, isOpen, onClose }: AccountingSidebarPr
                 <Icon name="user" />
               </span>
               <span>
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>AU-JSC Accounting Account</small>
               </span>
             </div>

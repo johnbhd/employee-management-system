@@ -6,24 +6,28 @@ import { useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import { getRoleLabel } from "@/lib/auth/roles";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminNavbarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   searchOpen: boolean;
   onOpenSidebar: () => void;
   onOpenSearch: () => void;
   onCloseSearch: () => void;
 };
 
-export function AdminNavbar({ user, searchOpen, onOpenSidebar, onOpenSearch, onCloseSearch }: AdminNavbarProps) {
+export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenSearch, onCloseSearch }: AdminNavbarProps) {
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   useEffect(() => {
     if (searchOpen) {
@@ -77,12 +81,12 @@ export function AdminNavbar({ user, searchOpen, onOpenSidebar, onOpenSearch, onC
           <div className="profile-wrap">
             <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
               <span className="account-avatar"><Icon name="user" /></span>
-              <span className="profile-copy"><strong>{user.displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
+              <span className="profile-copy"><strong>{displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
               <Icon name="chevron" />
             </button>
             {profileOpen ? (
               <div className="profile-menu">
-                <strong>{user.displayName} account</strong>
+                <strong>{displayName} account</strong>
                 <small>AU-JSC integration access</small>
                 <button type="button" onClick={() => notify("Account settings are not connected in the prototype.")}><Icon name="settings" />Account settings</button>
                 <Link href="/" onClick={handleLogout}>

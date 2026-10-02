@@ -4,11 +4,11 @@ import { useEffect, useRef, useState } from "react";
 
 import {
   employeeQrInfo,
-  employeeQrProfile,
   employeeQrSteps,
 } from "@/data/attendance-qr";
 import { Icon } from "@/components/ui/Icon";
 import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
+import type { EmployeeReference } from "@/types/employee";
 
 import { AttendanceQrCard } from "./AttendanceQrCard";
 import type {
@@ -18,7 +18,11 @@ import type {
 
 const SCAN_FEEDBACK_DURATION_MS = 2600;
 
-export function AttendanceQrPage() {
+export function AttendanceQrPage({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const [qrGeneratedAt, setQrGeneratedAt] = useState<Date | null>(null);
   const [scanFeedback, setScanFeedback] = useState<QrScanFeedbackState | null>(null);
   const scanFeedbackTimeoutRef = useRef<number | null>(null);
@@ -26,7 +30,7 @@ export function AttendanceQrPage() {
     demoAttendance,
     recordQrScan,
     resetDemoAttendance,
-  } = useEmployeeQrDemoAttendance(employeeQrProfile.employeeId);
+  } = useEmployeeQrDemoAttendance(employee?.employeeId ?? null);
 
   const demoAttendanceState = getDemoAttendanceState(demoAttendance?.status);
 
@@ -90,6 +94,7 @@ export function AttendanceQrPage() {
 
       <section className="attendance-qr-layout" aria-label="Attendance QR">
         <AttendanceQrCard
+          employee={employee}
           demoAttendanceState={demoAttendanceState}
           onQrRefreshed={handleQrRefreshed}
           qrGeneratedAt={qrGeneratedAt}
@@ -141,7 +146,8 @@ export function AttendanceQrPage() {
       </section>
 
       <p className="sr-only">
-        QR attendance for {employeeQrProfile.name}, employee ID {employeeQrProfile.employeeId}.
+        QR attendance for {employee?.displayName ?? "Employee information unavailable"},
+        employee ID {employee?.employeeId ?? "unavailable"}.
       </p>
     </div>
   );

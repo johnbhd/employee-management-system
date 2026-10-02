@@ -6,8 +6,13 @@ import {
   formatCampusNavbarDate,
   formatCampusTime,
 } from "@/lib/campus-time";
+import type { EmployeeReference } from "@/types/employee";
 
-export function EmployeeDashboardWelcome() {
+export function EmployeeDashboardWelcome({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const [campusNow, setCampusNow] = useState<Date | null>(null);
 
   useEffect(() => {
@@ -32,10 +37,13 @@ export function EmployeeDashboardWelcome() {
     <section className="employee-welcome">
       <div>
         <p className="employee-welcome-kicker">{currentDateTime}</p>
-        <h2>Welcome back, John Benedict!</h2>
+        <h2>
+          Welcome back, {employee?.displayName ?? "Employee information unavailable"}!
+        </h2>
         <p>Here is your employee dashboard for today.</p>
         <p className="muted">
-          Employee ID: <strong>AU-EMP-2026-001</strong> · Information Technology
+          Employee ID: <strong>{employee?.employeeId ?? "Unavailable"}</strong>
+          {employee ? ` · ${employee.department}` : " · Employee details unavailable"}
         </p>
       </div>
     </section>

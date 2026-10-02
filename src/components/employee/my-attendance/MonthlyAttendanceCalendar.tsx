@@ -53,11 +53,15 @@ type CalendarDay = {
   key: string;
 };
 
-export function MonthlyAttendanceCalendar() {
+export function MonthlyAttendanceCalendar({
+  employeeId,
+}: {
+  employeeId: string | null;
+}) {
   const [campusDate, setCampusDate] = useState<CampusDateParts | null>(null);
   const [calendarView, setCalendarView] = useState<CalendarView | null>(null);
   const { demoAttendance } = useEmployeeQrDemoAttendance(
-    employeeAttendanceProfile.employeeId,
+    employeeId,
   );
 
   useEffect(() => {

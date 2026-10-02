@@ -13,6 +13,7 @@ import {
   type AttendanceTimeState,
 } from "@/data/attendance-history";
 import type { StatusTone } from "@/types/ui";
+import type { EmployeeReference } from "@/types/employee";
 
 type StatusFilter = "all" | AttendanceHistoryStatus;
 
@@ -31,7 +32,11 @@ const statusTones: Record<AttendanceHistoryStatus, StatusTone> = {
   overtime: "info",
 };
 
-export function AttendanceHistoryExplorer() {
+export function AttendanceHistoryExplorer({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const [draftStatus, setDraftStatus] = useState<StatusFilter>("all");
   const [draftDate, setDraftDate] = useState("");
   const [appliedStatus, setAppliedStatus] = useState<StatusFilter>("all");
@@ -219,6 +224,7 @@ export function AttendanceHistoryExplorer() {
       </div>
 
       <AttendanceHistoryDetails
+        employee={employee}
         record={selectedRecord}
         open={detailsOpen}
         onClose={() => setDetailsOpen(false)}
@@ -254,10 +260,12 @@ function TimeCell({ value, state }: { value: string; state: AttendanceTimeState 
 }
 
 function AttendanceHistoryDetails({
+  employee,
   record,
   open,
   onClose,
 }: {
+  employee: EmployeeReference | null;
   record?: AttendanceHistoryRecord;
   open: boolean;
   onClose: () => void;
@@ -302,17 +310,17 @@ function AttendanceHistoryDetails({
         </div>
         <div className="attendance-history-profile-row">
           <div className="attendance-history-avatar" aria-hidden="true">
-            JV
+            {getEmployeeInitials(employee?.displayName ?? "Employee information unavailable")}
           </div>
           <div>
             <p className="attendance-history-profile-name">
-              John Benedict M. Villegas
+              {employee?.displayName ?? "Employee information unavailable"}
             </p>
             <p className="attendance-history-profile-sub">
-              Employee ID: AU-EMP-2026-001
+              Employee ID: {employee?.employeeId ?? "Unavailable"}
             </p>
             <p className="attendance-history-profile-sub">
-              Department: Information Technology Department
+              Department: {employee?.department ?? "Unavailable"}
             </p>
           </div>
         </div>
@@ -349,6 +357,17 @@ function AttendanceHistoryDetails({
       </aside>
     </div>
   );
+}
+
+function getEmployeeInitials(displayName: string) {
+  const initials = displayName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((name) => name[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return initials || "—";
 }
 
 function DetailRow({

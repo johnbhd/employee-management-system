@@ -7,12 +7,15 @@ import type { MouseEvent } from "react";
 
 import { formatCampusNavbarDate } from "@/lib/campus-time";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 
 type AccountingNavbarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   onOpenSidebar: () => void;
 };
 
@@ -29,7 +32,7 @@ function getAccountingPageTitle(pathname: string) {
   }
 }
 
-export function AccountingNavbar({ user, onOpenSidebar }: AccountingNavbarProps) {
+export function AccountingNavbar({ user, employee, onOpenSidebar }: AccountingNavbarProps) {
   const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [feedback, setFeedback] = useState("");
   const router = useRouter();
@@ -38,6 +41,7 @@ export function AccountingNavbar({ user, onOpenSidebar }: AccountingNavbarProps)
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const pageTitle = getAccountingPageTitle(pathname);
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   useEffect(() => {
     function updateCampusTime() {
@@ -154,7 +158,7 @@ export function AccountingNavbar({ user, onOpenSidebar }: AccountingNavbarProps)
                 <Icon name="user" />
               </span>
               <span className="accounting-profile-copy">
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>AU-JSC Accounting</small>
               </span>
               <Icon name="chevron" />
@@ -165,7 +169,7 @@ export function AccountingNavbar({ user, onOpenSidebar }: AccountingNavbarProps)
                 className="accounting-profile-menu"
                 aria-label="Accounting Staff account menu"
               >
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>Accounting integration access</small>
                 <button type="button" onClick={() => notify("Accounting settings are not connected in the prototype.")}>
                   <Icon name="settings" />

@@ -16,6 +16,7 @@ import {
   type EmployeePayslipStatus,
   type EmployeePayslipStat,
 } from "@/data/employee-payslips";
+import type { EmployeeReference } from "@/types/employee";
 
 import {
   PayslipDetailsModal,
@@ -42,7 +43,11 @@ const monthlyStatusFilters: Array<{ value: StatusFilter; label: string }> = [
   { value: "in-progress", label: "In Progress" },
 ];
 
-export function PayslipsExplorer() {
+export function PayslipsExplorer({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const [viewMode, setViewMode] = useState<PayslipViewMode>("cutoff");
   const [draftYear, setDraftYear] = useState<string>(employeePayslipYears[0]);
   const [draftStatus, setDraftStatus] = useState<StatusFilter>("all");
@@ -392,6 +397,7 @@ export function PayslipsExplorer() {
       </section>
 
       <PayslipDetailsModal
+        employee={employee}
         record={selectedRecord}
         includedCutoffs={includedCutoffs}
         onClose={() => setSelectedRecord(null)}

@@ -9,16 +9,21 @@ import {
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
+import type { EmployeeReference } from "@/types/employee";
 
 import { EmployeeDashboardAttendanceCard } from "./EmployeeDashboardAttendanceCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
 
-export function EmployeeDashboardPage() {
+export function EmployeeDashboardPage({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   const latestAnnouncements = getLatestAnnouncements(3);
 
   return (
     <div className="employee-dashboard-page">
-      <EmployeeDashboardWelcome />
+      <EmployeeDashboardWelcome employee={employee} />
 
       <section className="employee-stats-grid" aria-label="Attendance summary">
         {employeeStats.map((stat) => (
@@ -26,7 +31,7 @@ export function EmployeeDashboardPage() {
         ))}
       </section>
 
-      <EmployeeDashboardAttendanceCard />
+      <EmployeeDashboardAttendanceCard employeeId={employee?.employeeId ?? null} />
 
       <section className="employee-panel">
         <div className="employee-panel-heading">

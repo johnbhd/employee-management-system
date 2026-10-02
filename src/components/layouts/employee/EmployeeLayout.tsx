@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 
-import type { SessionUser } from "@/types/auth";
+import type { CurrentUserContext } from "@/types/auth";
 
 import { EmployeeShell } from "./EmployeeShell";
 
 type EmployeeLayoutProps = {
   children: ReactNode;
-  user: SessionUser;
+  context: CurrentUserContext;
 };
 
-export function EmployeeLayout({ children, user }: EmployeeLayoutProps) {
-  return <EmployeeShell user={user}>{children}</EmployeeShell>;
+export function EmployeeLayout({ children, context }: EmployeeLayoutProps) {
+  return <EmployeeShell context={context}>{children}</EmployeeShell>;
 }

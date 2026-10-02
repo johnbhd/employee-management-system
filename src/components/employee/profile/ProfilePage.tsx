@@ -1,16 +1,39 @@
 import { employeeAttendanceProfile } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
+import { getRoleLabel } from "@/lib/auth/roles";
+import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
-const profileDetails = [
-  { label: "Employee ID", value: employeeAttendanceProfile.employeeId },
-  { label: "Department", value: employeeAttendanceProfile.department },
-  { label: "Work schedule", value: employeeAttendanceProfile.schedule },
-  { label: "Schedule type", value: employeeAttendanceProfile.scheduleType },
-  { label: "Today’s attendance", value: employeeAttendanceProfile.status },
-  { label: "Attendance note", value: employeeAttendanceProfile.statusNote },
-];
+function getEmploymentStatusLabel(employee: EmployeeReference | null) {
+  if (!employee) {
+    return "Employee information unavailable";
+  }
 
-export function ProfilePage() {
+  return employee.employmentStatus === "active" ? "Active" : "Inactive";
+}
+
+export function ProfilePage({
+  user,
+  employee,
+}: {
+  user: SessionUser;
+  employee: EmployeeReference | null;
+}) {
+  const employeeName = employee?.displayName ?? "Employee information unavailable";
+  const employeeId = employee?.employeeId ?? "Unavailable";
+  const department = employee?.department ?? "Employee information unavailable";
+  const position = employee?.position ?? "Not provided";
+  const profileDetails = [
+    { label: "Employee ID", value: employeeId },
+    { label: "Department", value: department },
+    { label: "Position", value: position },
+    { label: "Employment status", value: getEmploymentStatusLabel(employee) },
+    { label: "Work schedule", value: employeeAttendanceProfile.schedule },
+    { label: "Schedule type", value: employeeAttendanceProfile.scheduleType },
+    { label: "Today’s attendance", value: employeeAttendanceProfile.status },
+    { label: "Attendance note", value: employeeAttendanceProfile.statusNote },
+  ];
+
   return (
     <div className="employee-profile-page">
       <section className="employee-profile-overview" aria-labelledby="employee-profile-heading">
@@ -19,10 +42,30 @@ export function ProfilePage() {
         </div>
         <div className="employee-profile-overview-copy">
           <span className="employee-profile-kicker">Employee profile</span>
-          <h2 id="employee-profile-heading">{employeeAttendanceProfile.name}</h2>
-          <p>{employeeAttendanceProfile.employeeId} · {employeeAttendanceProfile.department}</p>
+          <h2 id="employee-profile-heading">{employeeName}</h2>
+          <p>{employeeId} · {department}</p>
         </div>
         <span className="employee-profile-status">Employee record</span>
+      </section>
+
+      <section className="employee-profile-details" aria-labelledby="employee-profile-account-heading">
+        <div className="employee-profile-section-heading">
+          <div>
+            <span className="employee-profile-kicker">Account information</span>
+            <h2 id="employee-profile-account-heading">Portal access</h2>
+          </div>
+          <p>Managed by the application account.</p>
+        </div>
+        <dl className="employee-profile-detail-grid">
+          <div>
+            <dt>Username</dt>
+            <dd>{user.username}</dd>
+          </div>
+          <div>
+            <dt>System role</dt>
+            <dd>{getRoleLabel(user.role)}</dd>
+          </div>
+        </dl>
       </section>
 
       <section className="employee-profile-details" aria-labelledby="employee-profile-details-heading">

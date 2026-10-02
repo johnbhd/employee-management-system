@@ -7,20 +7,24 @@ import type { MouseEvent } from "react";
 
 import { adminNavigation } from "@/data/admin";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import { getRoleLabel } from "@/lib/auth/roles";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminSidebarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const displayName = getAuthenticatedDisplayName(user, employee);
 
   function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
@@ -97,7 +101,7 @@ export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
             <div className="sidebar-account">
               <span className="account-avatar"><Icon name="user" /></span>
               <span>
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <small>AU-JSC Admin Account</small>
               </span>
               <Link href="/" aria-label="Log out" onClick={handleLogout}>

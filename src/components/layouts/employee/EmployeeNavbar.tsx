@@ -8,12 +8,15 @@ import type { MouseEvent } from "react";
 import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 import { Icon } from "../../ui/Icon";
 
 type EmployeeNavbarProps = {
   user: SessionUser;
+  employee: EmployeeReference | null;
   onOpenSidebar: () => void;
 };
 
@@ -42,7 +45,7 @@ const latestNotifications = getLatestAnnouncements(5);
 const notificationCount = announcements.length;
 const notificationBadge = notificationCount > 9 ? "9+" : String(notificationCount);
 
-export function EmployeeNavbar({ user, onOpenSidebar }: EmployeeNavbarProps) {
+export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [campusNow, setCampusNow] = useState<Date | null>(null);
@@ -55,6 +58,7 @@ export function EmployeeNavbar({ user, onOpenSidebar }: EmployeeNavbarProps) {
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
   const pageTitle = getEmployeePageTitle(pathname);
+  const displayName = getAuthenticatedDisplayName(user, employee);
   const notificationMenuIsOpen = notificationMenuOpen && menuPathname === pathname;
   const profileMenuIsOpen = profileMenuOpen && menuPathname === pathname;
 
@@ -230,13 +234,13 @@ export function EmployeeNavbar({ user, onOpenSidebar }: EmployeeNavbarProps) {
             aria-haspopup="menu"
           >
             <span className="employee-user-avatar"><Icon name="user" /></span>
-            <span className="employee-user-name">{user.displayName}</span>
+            <span className="employee-user-name">{displayName}</span>
             <Icon name="chevron" />
           </button>
           {profileMenuIsOpen ? (
             <nav id="employee-profile-menu" className="employee-profile-menu" aria-label="Employee profile menu">
               <div className="employee-profile-menu-summary">
-                <strong>{user.displayName}</strong>
+                <strong>{displayName}</strong>
                 <span>Employee account</span>
               </div>
               <Link href="/employee/profile" className="employee-profile-menu-item" onClick={() => setProfileMenuOpen(false)}>

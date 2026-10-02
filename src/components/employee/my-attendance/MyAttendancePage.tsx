@@ -3,15 +3,20 @@ import {
   employeeAttendanceReminders,
 } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
+import type { EmployeeReference } from "@/types/employee";
 
 import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
 import { MyAttendanceToday } from "./MyAttendanceToday";
 import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
-export function MyAttendancePage() {
+export function MyAttendancePage({
+  employee,
+}: {
+  employee: EmployeeReference | null;
+}) {
   return (
     <div className="my-attendance-page">
-      <MyAttendanceToday />
+      <MyAttendanceToday employee={employee} />
 
       <section
         className="my-attendance-quick-actions"
@@ -29,7 +34,7 @@ export function MyAttendancePage() {
         <MyAttendanceQuickActions />
       </section>
 
-      <MonthlyAttendanceCalendar />
+      <MonthlyAttendanceCalendar employeeId={employee?.employeeId ?? null} />
 
       <section
         className="my-attendance-notes"

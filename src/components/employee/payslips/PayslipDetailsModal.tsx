@@ -9,13 +9,14 @@ import type {
   EmployeeMonthlyPayslip,
   EmployeePayslip,
 } from "@/data/employee-payslips";
-import { employeeAttendanceProfile } from "@/data/my-attendance";
+import type { EmployeeReference } from "@/types/employee";
 
 export type PayslipDetailsRecord =
   | { kind: "cutoff"; payslip: EmployeePayslip }
   | { kind: "monthly"; summary: EmployeeMonthlyPayslip };
 
 type PayslipDetailsModalProps = {
+  employee: EmployeeReference | null;
   record: PayslipDetailsRecord | null;
   includedCutoffs: readonly EmployeePayslip[];
   onClose: () => void;
@@ -23,6 +24,7 @@ type PayslipDetailsModalProps = {
 };
 
 export function PayslipDetailsModal({
+  employee,
   record,
   includedCutoffs,
   onClose,
@@ -106,9 +108,15 @@ export function PayslipDetailsModal({
               title="Employee information"
             />
             <dl className="employee-payslip-modal-meta-grid">
-              <InfoItem label="Employee Name">{employeeAttendanceProfile.name}</InfoItem>
-              <InfoItem label="Employee ID">{employeeAttendanceProfile.employeeId}</InfoItem>
-              <InfoItem label="Department">{employeeAttendanceProfile.department}</InfoItem>
+              <InfoItem label="Employee Name">
+                {employee?.displayName ?? "Employee information unavailable"}
+              </InfoItem>
+              <InfoItem label="Employee ID">
+                {employee?.employeeId ?? "Unavailable"}
+              </InfoItem>
+              <InfoItem label="Department">
+                {employee?.department ?? "Unavailable"}
+              </InfoItem>
             </dl>
           </section>
 

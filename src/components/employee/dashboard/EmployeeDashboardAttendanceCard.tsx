@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 
-import { employeeAttendanceProfile } from "@/data/my-attendance";
 import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
-export function EmployeeDashboardAttendanceCard() {
+export function EmployeeDashboardAttendanceCard({
+  employeeId,
+}: {
+  employeeId: string | null;
+}) {
   const { demoAttendance } = useEmployeeQrDemoAttendance(
-    employeeAttendanceProfile.employeeId,
+    employeeId,
   );
   const hasDemoAttendance = demoAttendance !== null;
 
