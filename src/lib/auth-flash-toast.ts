@@ -1,4 +1,4 @@
-export type AuthRole = "employee" | "admin" | "hr";
+export type AuthRole = "employee" | "admin" | "hr" | "accounting";
 
 export type AuthFlashPayload =
   | {
@@ -17,7 +17,7 @@ export type AuthToastMessage = {
 
 export const AUTH_FLASH_STORAGE_KEY = "authFlashToast";
 
-const authRoles: AuthRole[] = ["admin", "employee", "hr"];
+const authRoles: AuthRole[] = ["admin", "employee", "hr", "accounting"];
 
 const loginToastMessages: Record<AuthRole, AuthToastMessage> = {
   admin: {
@@ -34,6 +34,11 @@ const loginToastMessages: Record<AuthRole, AuthToastMessage> = {
     type: "login-success",
     title: "Welcome back, HR / Attendance Staff.",
     description: "Attendance review and verification tools are ready.",
+  },
+  accounting: {
+    type: "login-success",
+    title: "Welcome back, Accounting Staff.",
+    description: "Your accounting integration workspace is ready.",
   },
 };
 

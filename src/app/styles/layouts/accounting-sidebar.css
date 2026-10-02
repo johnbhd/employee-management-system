@@ -1,0 +1,288 @@
+.accounting-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  visibility: hidden;
+  border: 0;
+  background: rgba(2, 6, 23, 0.62);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease;
+}
+
+.accounting-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 50;
+  width: 18rem;
+  max-width: 90vw;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--au-navy), var(--au-navy-deep));
+  color: #fff;
+  box-shadow: 14px 0 38px rgba(7, 20, 58, 0.16);
+}
+
+.accounting-sidebar-inner {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.accounting-sidebar-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 1.35rem 1.25rem 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.accounting-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.accounting-brand img {
+  flex: 0 0 auto;
+  object-fit: contain;
+}
+
+.accounting-brand strong,
+.accounting-brand small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accounting-brand strong {
+  color: #fff;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+}
+
+.accounting-brand small {
+  margin-top: 0.3rem;
+  color: rgba(219, 234, 254, 0.7);
+  font-size: 0.7rem;
+}
+
+.accounting-sidebar-close {
+  display: none;
+  min-width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  color: rgba(219, 234, 254, 0.75);
+}
+
+.accounting-sidebar-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.accounting-sidebar-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1rem;
+}
+
+.accounting-workspace-label {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0 0 0.8rem;
+  padding: 0 0.5rem;
+  color: rgba(219, 234, 254, 0.58);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.accounting-role-pill {
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 999px;
+  padding: 0.25rem 0.45rem;
+  color: rgba(219, 234, 254, 0.75);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accounting-sidebar-nav {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.accounting-nav-link {
+  display: flex;
+  min-height: 2.65rem;
+  align-items: center;
+  gap: 0.7rem;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  color: rgba(219, 234, 254, 0.76);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.accounting-nav-link > .ui-icon {
+  width: 1rem;
+  flex: 0 0 auto;
+  color: rgba(219, 234, 254, 0.66);
+  font-size: 1rem;
+}
+
+.accounting-nav-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.accounting-nav-copy > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accounting-nav-copy small {
+  color: rgba(219, 234, 254, 0.45);
+  font-size: 0.57rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.accounting-nav-link:hover,
+.accounting-nav-link.is-active {
+  background: #fff;
+  color: var(--au-navy);
+}
+
+.accounting-nav-link:hover > .ui-icon,
+.accounting-nav-link.is-active > .ui-icon {
+  color: var(--au-blue);
+}
+
+.accounting-nav-link.is-active {
+  box-shadow: inset 3px 0 var(--au-red);
+}
+
+.accounting-nav-placeholder {
+  cursor: default;
+  opacity: 0.52;
+}
+
+.accounting-nav-placeholder:hover {
+  background: transparent;
+  color: rgba(219, 234, 254, 0.76);
+}
+
+.accounting-nav-placeholder:hover > .ui-icon {
+  color: rgba(219, 234, 254, 0.66);
+}
+
+.accounting-sidebar-footer {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.accounting-sidebar-account {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.95rem 0.15rem 0;
+}
+
+.accounting-account-avatar {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.9rem;
+}
+
+.accounting-sidebar-account > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.2rem;
+}
+
+.accounting-sidebar-account strong,
+.accounting-sidebar-account small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accounting-sidebar-account strong {
+  color: #fff;
+  font-size: 0.72rem;
+}
+
+.accounting-sidebar-account small {
+  color: rgba(219, 234, 254, 0.58);
+  font-size: 0.64rem;
+}
+
+.accounting-sidebar-logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.7rem;
+  color: rgba(219, 234, 254, 0.78);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.accounting-sidebar-logout:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+@media (max-width: 1050px) {
+  .accounting-sidebar {
+    transform: translateX(-105%);
+    transition: transform 220ms ease;
+  }
+
+  .accounting-sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .accounting-sidebar-overlay {
+    display: block;
+  }
+
+  .accounting-sidebar-overlay.is-visible {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .accounting-sidebar-close {
+    display: grid;
+  }
+}

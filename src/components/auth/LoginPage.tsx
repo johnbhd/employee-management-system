@@ -13,7 +13,7 @@ import {
 type DemoAccount = {
   password: string;
   role: AuthRole;
-  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard";
+  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard" | "/accounting/dashboard";
 };
 
 type LoginErrorField = "username" | "password" | "credentials" | null;
@@ -33,6 +33,11 @@ const demoAccounts: Record<string, DemoAccount> = {
     password: "employee123",
     role: "employee",
     redirectTo: "/employee/dashboard",
+  },
+  "aujsc.accounting": {
+    password: "accounting123",
+    role: "accounting",
+    redirectTo: "/accounting/dashboard",
   },
 };
 

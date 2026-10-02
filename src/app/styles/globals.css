@@ -8,6 +8,9 @@
 @import "./layouts/employee.css";
 @import "./layouts/employee-sidebar.css";
 @import "./layouts/employee-navbar.css";
+@import "./layouts/accounting.css";
+@import "./layouts/accounting-sidebar.css";
+@import "./layouts/accounting-navbar.css";
 @import "./components/cards.css";
 @import "./components/tables.css";
 @import "./components/badges.css";
@@ -42,6 +45,7 @@
 @import "./pages/admin/roles-permissions.css";
 @import "./pages/admin/audit-logs.css";
 @import "./pages/admin/settings.css";
+@import "./pages/accounting/dashboard.css";
 
 *,
 *::before,
