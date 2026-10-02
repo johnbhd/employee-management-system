@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 import type { IconName } from "@/types/ui";
@@ -28,16 +30,19 @@ const hrNavigation: HrNavigationItem[] = [
 ];
 
 type HrSidebarProps = {
+  user: SessionUser;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function HrSidebar({ isOpen, onClose }: HrSidebarProps) {
+export function HrSidebar({ user, isOpen, onClose }: HrSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     onClose();
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -104,7 +109,7 @@ export function HrSidebar({ isOpen, onClose }: HrSidebarProps) {
             <div className="hr-sidebar-account">
               <span className="hr-account-avatar"><Icon name="user" /></span>
               <span>
-                <strong>HR / Attendance Staff</strong>
+              <strong>{user.displayName}</strong>
                 <small>AU-JSC Operations Account</small>
               </span>
             </div>

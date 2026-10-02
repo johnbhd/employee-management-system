@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 
 import { formatCampusNavbarDate } from "@/lib/campus-time";
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type AccountingNavbarProps = {
+  user: SessionUser;
   onOpenSidebar: () => void;
 };
 
@@ -26,9 +29,10 @@ function getAccountingPageTitle(pathname: string) {
   }
 }
 
-export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
+export function AccountingNavbar({ user, onOpenSidebar }: AccountingNavbarProps) {
   const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [feedback, setFeedback] = useState("");
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
@@ -79,9 +83,10 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
     window.setTimeout(() => setFeedback(""), 2200);
   }
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     setProfileOpen(false);
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -149,7 +154,7 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
                 <Icon name="user" />
               </span>
               <span className="accounting-profile-copy">
-                <strong>Accounting Staff</strong>
+                <strong>{user.displayName}</strong>
                 <small>AU-JSC Accounting</small>
               </span>
               <Icon name="chevron" />
@@ -160,7 +165,7 @@ export function AccountingNavbar({ onOpenSidebar }: AccountingNavbarProps) {
                 className="accounting-profile-menu"
                 aria-label="Accounting Staff account menu"
               >
-                <strong>Accounting Staff</strong>
+                <strong>{user.displayName}</strong>
                 <small>Accounting integration access</small>
                 <button type="button" onClick={() => notify("Accounting settings are not connected in the prototype.")}>
                   <Icon name="settings" />

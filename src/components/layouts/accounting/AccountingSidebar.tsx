@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 import type { IconName } from "@/types/ui";
 
 import { Icon } from "../../ui/Icon";
@@ -45,16 +47,19 @@ const accountingNavigation: AccountingNavigationItem[] = [
 ];
 
 type AccountingSidebarProps = {
+  user: SessionUser;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AccountingSidebar({ isOpen, onClose }: AccountingSidebarProps) {
+export function AccountingSidebar({ user, isOpen, onClose }: AccountingSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     onClose();
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -97,7 +102,7 @@ export function AccountingSidebar({ isOpen, onClose }: AccountingSidebarProps) {
           <div className="accounting-sidebar-scroll">
             <div className="accounting-workspace-label">
               <span>Accounting Operations</span>
-              <span className="accounting-role-pill">Accounting Staff</span>
+              <span className="accounting-role-pill">{user.displayName}</span>
             </div>
             <nav className="accounting-sidebar-nav" aria-label="Accounting portal navigation">
               {accountingNavigation.map((item) => {
@@ -151,7 +156,7 @@ export function AccountingSidebar({ isOpen, onClose }: AccountingSidebarProps) {
                 <Icon name="user" />
               </span>
               <span>
-                <strong>Accounting Staff</strong>
+                <strong>{user.displayName}</strong>
                 <small>AU-JSC Accounting Account</small>
               </span>
             </div>

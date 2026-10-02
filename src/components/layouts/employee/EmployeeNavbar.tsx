@@ -1,16 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 
 import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type EmployeeNavbarProps = {
+  user: SessionUser;
   onOpenSidebar: () => void;
 };
 
@@ -39,8 +42,9 @@ const latestNotifications = getLatestAnnouncements(5);
 const notificationCount = announcements.length;
 const notificationBadge = notificationCount > 9 ? "9+" : String(notificationCount);
 
-export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
+export function EmployeeNavbar({ user, onOpenSidebar }: EmployeeNavbarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [campusNow, setCampusNow] = useState<Date | null>(null);
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -131,9 +135,10 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
     setNotificationMenuOpen(true);
   }
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     setProfileMenuOpen(false);
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -225,13 +230,13 @@ export function EmployeeNavbar({ onOpenSidebar }: EmployeeNavbarProps) {
             aria-haspopup="menu"
           >
             <span className="employee-user-avatar"><Icon name="user" /></span>
-            <span className="employee-user-name">John Benedict</span>
+            <span className="employee-user-name">{user.displayName}</span>
             <Icon name="chevron" />
           </button>
           {profileMenuIsOpen ? (
             <nav id="employee-profile-menu" className="employee-profile-menu" aria-label="Employee profile menu">
               <div className="employee-profile-menu-summary">
-                <strong>John Benedict</strong>
+                <strong>{user.displayName}</strong>
                 <span>Employee account</span>
               </div>
               <Link href="/employee/profile" className="employee-profile-menu-item" onClick={() => setProfileMenuOpen(false)}>

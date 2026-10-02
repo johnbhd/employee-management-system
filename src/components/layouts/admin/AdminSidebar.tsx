@@ -2,24 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 
 import { adminNavigation } from "@/data/admin";
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getRoleLabel } from "@/lib/auth/roles";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminSidebarProps = {
+  user: SessionUser;
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ user, isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     onClose();
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -48,7 +54,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
           <div className="admin-sidebar-scroll">
             <div className="workspace-label">
               <span>Workspace</span>
-              <span className="role-pill">IT Administrator</span>
+              <span className="role-pill">{getRoleLabel(user.role)}</span>
             </div>
             <nav className="admin-sidebar-nav" aria-label="Primary navigation">
               {adminNavigation.map((item) => {
@@ -91,7 +97,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             <div className="sidebar-account">
               <span className="account-avatar"><Icon name="user" /></span>
               <span>
-                <strong>IT Administrator</strong>
+                <strong>{user.displayName}</strong>
                 <small>AU-JSC Admin Account</small>
               </span>
               <Link href="/" aria-label="Log out" onClick={handleLogout}>

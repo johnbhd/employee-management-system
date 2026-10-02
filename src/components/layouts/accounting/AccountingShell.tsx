@@ -3,15 +3,18 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+import type { SessionUser } from "@/types/auth";
+
 import { AccountingMain } from "./AccountingMain";
 import { AccountingNavbar } from "./AccountingNavbar";
 import { AccountingSidebar } from "./AccountingSidebar";
 
 type AccountingShellProps = {
   children: ReactNode;
+  user: SessionUser;
 };
 
-export function AccountingShell({ children }: AccountingShellProps) {
+export function AccountingShell({ children, user }: AccountingShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -27,9 +30,16 @@ export function AccountingShell({ children }: AccountingShellProps) {
 
   return (
     <div className="accounting-shell">
-      <AccountingSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AccountingSidebar
+        user={user}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       <div className="accounting-main-wrap">
-        <AccountingNavbar onOpenSidebar={() => setSidebarOpen(true)} />
+        <AccountingNavbar
+          user={user}
+          onOpenSidebar={() => setSidebarOpen(true)}
+        />
         <AccountingMain>{children}</AccountingMain>
       </div>
     </div>

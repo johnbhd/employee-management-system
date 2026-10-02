@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type HrNavbarProps = {
+  user: SessionUser;
   onOpenSidebar: () => void;
 };
 
-export function HrNavbar({ onOpenSidebar }: HrNavbarProps) {
+export function HrNavbar({ user, onOpenSidebar }: HrNavbarProps) {
   const [feedback, setFeedback] = useState("");
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const profileTriggerRef = useRef<HTMLButtonElement>(null);
@@ -51,9 +55,10 @@ export function HrNavbar({ onOpenSidebar }: HrNavbarProps) {
     window.setTimeout(() => setFeedback(""), 2200);
   }
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     setProfileOpen(false);
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -90,14 +95,14 @@ export function HrNavbar({ onOpenSidebar }: HrNavbarProps) {
             >
               <span className="hr-account-avatar"><Icon name="user" /></span>
               <span className="hr-profile-copy">
-                <strong>HR / Attendance Staff</strong>
+                <strong>{user.displayName}</strong>
                 <small>AU-JSC Operations</small>
               </span>
               <Icon name="chevron" />
             </button>
             {profileOpen ? (
               <nav id="hr-profile-menu" className="hr-profile-menu" aria-label="HR staff account menu">
-                <strong>HR / Attendance Staff</strong>
+                <strong>{user.displayName}</strong>
                 <small>Attendance operations access</small>
                 <button type="button" onClick={() => notify("HR settings are not connected in the prototype.")}>
                   <Icon name="settings" />

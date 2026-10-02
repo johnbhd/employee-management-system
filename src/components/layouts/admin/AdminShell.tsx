@@ -3,15 +3,18 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+import type { SessionUser } from "@/types/auth";
+
 import { AdminMain } from "./AdminMain";
 import { AdminNavbar } from "./AdminNavbar";
 import { AdminSidebar } from "./AdminSidebar";
 
 type AdminShellProps = {
   children: ReactNode;
+  user: SessionUser;
 };
 
-export function AdminShell({ children }: AdminShellProps) {
+export function AdminShell({ children, user }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -34,9 +37,14 @@ export function AdminShell({ children }: AdminShellProps) {
 
   return (
     <div className="admin-shell">
-      <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <AdminSidebar
+        user={user}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       <div className="admin-main-wrap">
         <AdminNavbar
+          user={user}
           searchOpen={searchOpen}
           onOpenSidebar={() => setSidebarOpen(true)}
           onCloseSearch={() => setSearchOpen(false)}

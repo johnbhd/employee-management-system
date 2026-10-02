@@ -2,20 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import { getRoleLabel } from "@/lib/auth/roles";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminNavbarProps = {
+  user: SessionUser;
   searchOpen: boolean;
   onOpenSidebar: () => void;
   onOpenSearch: () => void;
   onCloseSearch: () => void;
 };
 
-export function AdminNavbar({ searchOpen, onOpenSidebar, onOpenSearch, onCloseSearch }: AdminNavbarProps) {
+export function AdminNavbar({ user, searchOpen, onOpenSidebar, onOpenSearch, onCloseSearch }: AdminNavbarProps) {
   const searchRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
 
@@ -31,9 +37,10 @@ export function AdminNavbar({ searchOpen, onOpenSidebar, onOpenSearch, onCloseSe
     window.setTimeout(() => setFeedback(""), 2200);
   }
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     setProfileOpen(false);
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
@@ -70,12 +77,12 @@ export function AdminNavbar({ searchOpen, onOpenSidebar, onOpenSearch, onCloseSe
           <div className="profile-wrap">
             <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
               <span className="account-avatar"><Icon name="user" /></span>
-              <span className="profile-copy"><strong>Administrator</strong><small>IT Administrator</small></span>
+              <span className="profile-copy"><strong>{user.displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
               <Icon name="chevron" />
             </button>
             {profileOpen ? (
               <div className="profile-menu">
-                <strong>Administrator account</strong>
+                <strong>{user.displayName} account</strong>
                 <small>AU-JSC integration access</small>
                 <button type="button" onClick={() => notify("Account settings are not connected in the prototype.")}><Icon name="settings" />Account settings</button>
                 <Link href="/" onClick={handleLogout}>

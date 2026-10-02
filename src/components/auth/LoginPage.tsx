@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { prototypeAuthAccounts } from "@/data/prototype-auth";
+import {
+  FirebaseAuthClientError,
+  signInWithFirebaseSession,
+} from "@/lib/auth/client-session";
+import { normalizeAuthUsername } from "@/lib/auth/firebase-credential-adapter";
 import { setAuthFlashToast } from "@/lib/auth-flash-toast";
 
 type LoginErrorField = "username" | "password" | "credentials" | null;
@@ -38,9 +42,9 @@ export function LoginPage() {
     clearValidationError();
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const normalizedUsername = username.trim().toLowerCase();
+    const normalizedUsername = normalizeAuthUsername(username);
 
     if (!normalizedUsername) {
       setErrorMessage("Please enter your username.");
@@ -54,23 +58,45 @@ export function LoginPage() {
       return;
     }
 
-    const account = prototypeAuthAccounts.find(
-      (candidate) => candidate.username === normalizedUsername,
-    );
-
-    if (!account || account.password !== password) {
-      setErrorMessage("Invalid username or password.");
-      setErrorField("credentials");
-      return;
-    }
-
     setErrorMessage("");
     setErrorField(null);
     setIsSubmitting(true);
-    sessionStorage.setItem("prototypeRole", account.role);
-    sessionStorage.setItem("prototypeUsername", normalizedUsername);
-    setAuthFlashToast({ type: "login-success", role: account.role });
-    router.push(account.redirectTo);
+
+    try {
+      const session = await signInWithFirebaseSession(
+        normalizedUsername,
+        password,
+      );
+
+      setAuthFlashToast({
+        type: "login-success",
+        role: session.user.role,
+      });
+      router.replace(session.redirectTo);
+      router.refresh();
+    } catch (error) {
+      if (
+        error instanceof FirebaseAuthClientError &&
+        error.code === "ACCOUNT_UNAVAILABLE"
+      ) {
+        setErrorMessage(
+          "This account is currently unavailable. Please contact the system administrator.",
+        );
+      } else if (
+        error instanceof FirebaseAuthClientError &&
+        error.code === "AUTHENTICATION_UNAVAILABLE"
+      ) {
+        setErrorMessage(
+          "Authentication is temporarily unavailable. Please try again.",
+        );
+      } else {
+        setErrorMessage("Invalid username or password.");
+      }
+
+      setErrorField("credentials");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   function showFeedback(message: string) {

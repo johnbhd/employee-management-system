@@ -1,4 +1,9 @@
-export type AuthRole = "employee" | "admin" | "hr" | "accounting";
+import {
+  isApplicationRole,
+  type ApplicationRole,
+} from "@/lib/auth/roles";
+
+export type AuthRole = ApplicationRole;
 
 export type AuthFlashPayload =
   | {
@@ -16,8 +21,6 @@ export type AuthToastMessage = {
 };
 
 export const AUTH_FLASH_STORAGE_KEY = "authFlashToast";
-
-const authRoles: AuthRole[] = ["admin", "employee", "hr", "accounting"];
 
 const loginToastMessages: Record<AuthRole, AuthToastMessage> = {
   admin: {
@@ -45,7 +48,7 @@ const loginToastMessages: Record<AuthRole, AuthToastMessage> = {
 const logoutToastMessage: AuthToastMessage = {
   type: "logout-success",
   title: "Logged out successfully.",
-  description: "Your prototype session has been cleared.",
+  description: "Your secure session has been cleared.",
 };
 
 function getSessionStorage(): Storage | null {
@@ -65,7 +68,7 @@ function isAuthRole(value: unknown): value is AuthRole {
     return false;
   }
 
-  return authRoles.includes(value as AuthRole);
+  return isApplicationRole(value);
 }
 
 export function setAuthFlashToast(payload: AuthFlashPayload) {
@@ -119,19 +122,4 @@ export function consumeAuthFlashToast(): AuthToastMessage | null {
   }
 
   return null;
-}
-
-export function logoutFromPrototype() {
-  const storage = getSessionStorage();
-
-  if (storage) {
-    try {
-      storage.removeItem("prototypeRole");
-      storage.removeItem("prototypeUsername");
-    } catch {
-      // Continue to the flash message when storage is unavailable.
-    }
-  }
-
-  setAuthFlashToast({ type: "logout-success" });
 }

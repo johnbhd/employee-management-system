@@ -2,13 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import type { MouseEvent } from "react";
 
-import { logoutFromPrototype } from "@/lib/auth-flash-toast";
+import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
+import type { SessionUser } from "@/types/auth";
 
 import { Icon } from "../../ui/Icon";
 
 type EmployeeSidebarProps = {
+  user: SessionUser;
   isOpen: boolean;
   onClose: () => void;
 };
@@ -24,18 +27,23 @@ const employeeLinks = [
   { label: "Help and Support", icon: "help" as const, href: "/employee/help-support" },
 ];
 
-export function EmployeeSidebar({ isOpen, onClose }: EmployeeSidebarProps) {
+export function EmployeeSidebar({ user, isOpen, onClose }: EmployeeSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
-  function handleLogout() {
-    logoutFromPrototype();
+  function handleLogout(event: MouseEvent<HTMLAnchorElement>) {
+    event.preventDefault();
     onClose();
+    void logoutFromFirebaseSession().then(() => router.replace("/"));
   }
 
   return (
     <>
       <button type="button" className={`employee-sidebar-overlay ${isOpen ? "is-visible" : ""}`} onClick={onClose} aria-label="Close employee navigation" />
-      <aside className={`employee-sidebar ${isOpen ? "is-open" : ""}`} aria-label="Employee navigation">
+      <aside
+        className={`employee-sidebar ${isOpen ? "is-open" : ""}`}
+        aria-label={`${user.displayName} navigation`}
+      >
         <div className="employee-brand">
           <Image src="/images/new-au-logo.png" alt="Arellano University seal" width={44} height={44} />
           <span><strong>Arellano University</strong><small>Juan Sumulong Campus</small></span>

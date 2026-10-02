@@ -1,17 +1,21 @@
-export type PrototypeAuthRole = "admin" | "hr" | "employee" | "accounting";
+import {
+  type ApplicationRole,
+  type RoleHomePath,
+} from "../lib/auth/roles";
+
+export type PrototypeAuthRole = ApplicationRole;
 
 export type PrototypeAuthAccount = {
   username: string;
   password: string;
   role: PrototypeAuthRole;
   displayName: string;
-  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard" | "/accounting/dashboard";
+  redirectTo: RoleHomePath;
   employeeId: string | null;
-  authEmail: string;
 };
 
-// These credentials are prototype-only development data. They are used by the
-// current login simulation and are not production credentials.
+// These credentials are development seed data only. They are not production
+// credentials and are not used by runtime authentication.
 export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
   {
     username: "aujsc.admin",
@@ -20,7 +24,6 @@ export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
     displayName: "IT Administrator",
     redirectTo: "/admin/dashboard",
     employeeId: null,
-    authEmail: "aujsc.admin@auth.aujsc.local",
   },
   {
     username: "aujsc.hr",
@@ -29,7 +32,6 @@ export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
     displayName: "HR / Attendance Staff",
     redirectTo: "/hr/dashboard",
     employeeId: "AU-EMP-2026-014",
-    authEmail: "aujsc.hr@auth.aujsc.local",
   },
   {
     username: "aujsc.employee",
@@ -38,7 +40,6 @@ export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
     displayName: "Employee",
     redirectTo: "/employee/dashboard",
     employeeId: "AU-EMP-2026-001",
-    authEmail: "aujsc.employee@auth.aujsc.local",
   },
   {
     username: "aujsc.accounting",
@@ -47,6 +48,5 @@ export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
     displayName: "Accounting Staff",
     redirectTo: "/accounting/dashboard",
     employeeId: null,
-    authEmail: "aujsc.accounting@auth.aujsc.local",
   },
 ];
