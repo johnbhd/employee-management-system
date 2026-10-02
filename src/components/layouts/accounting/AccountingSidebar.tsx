@@ -73,8 +73,8 @@ export function AccountingSidebar({ isOpen, onClose }: AccountingSidebarProps) {
           <div className="accounting-sidebar-header">
             <Link href="/accounting/dashboard" className="accounting-brand" onClick={onClose}>
               <Image
-                src="/images/new-au-logo.png"
-                alt="Arellano University seal"
+                src="/images/aulogo.png"
+                alt="Arellano University logo"
                 width={44}
                 height={44}
                 priority

@@ -1,17 +1,26 @@
 .accounting-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
   display: none;
+  visibility: hidden;
+  border: 0;
+  background: rgba(2, 6, 23, 0.62);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, visibility 180ms ease;
 }
 
 .accounting-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
   z-index: 50;
-  display: flex;
-  width: 15.4rem;
-  flex-direction: column;
-  padding: 1.35rem 0.9rem;
-  background: linear-gradient(180deg, var(--employee-navy), #0a1129);
-  color: #d7dbec;
+  width: 18rem;
+  max-width: 90vw;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--au-navy), var(--au-navy-deep));
+  color: #fff;
+  box-shadow: 14px 0 38px rgba(7, 20, 58, 0.16);
 }
 
 .accounting-sidebar-inner {
@@ -25,9 +34,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 0.6rem;
-  padding: 0.35rem 0.5rem 1.35rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  gap: 0.8rem;
+  padding: 1.35rem 1.25rem 1.15rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .accounting-brand {
@@ -38,31 +47,28 @@
 }
 
 .accounting-brand img {
-  width: 2.7rem;
-  height: 2.7rem;
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: #fff;
   object-fit: contain;
-  padding: 0.2rem;
 }
 
 .accounting-brand strong,
 .accounting-brand small {
   display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .accounting-brand strong {
   color: #fff;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
 }
 
 .accounting-brand small {
-  margin-top: 0.18rem;
-  color: #8d95bd;
-  font-size: 0.65rem;
+  margin-top: 0.3rem;
+  color: rgba(219, 234, 254, 0.7);
+  font-size: 0.7rem;
 }
 
 .accounting-sidebar-close {
@@ -73,7 +79,7 @@
   border: 0;
   border-radius: 0.55rem;
   background: transparent;
-  color: #b9c1df;
+  color: rgba(219, 234, 254, 0.75);
 }
 
 .accounting-sidebar-close:hover {
@@ -85,15 +91,15 @@
   min-height: 0;
   flex: 1;
   overflow-y: auto;
-  padding: 1rem 0;
+  padding: 1.25rem 1rem;
 }
 
 .accounting-workspace-label {
   display: grid;
   gap: 0.45rem;
-  margin: 0 0 0.75rem;
-  padding: 0 0.75rem;
-  color: #8d95bd;
+  margin: 0 0 0.8rem;
+  padding: 0 0.5rem;
+  color: rgba(219, 234, 254, 0.58);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.15em;
@@ -107,7 +113,7 @@
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 999px;
   padding: 0.25rem 0.45rem;
-  color: #c4cae6;
+  color: rgba(219, 234, 254, 0.75);
   font-size: 0.52rem;
   letter-spacing: 0.08em;
   text-overflow: ellipsis;
@@ -116,27 +122,27 @@
 
 .accounting-sidebar-nav {
   display: grid;
-  gap: 0.2rem;
+  gap: 0.25rem;
 }
 
 .accounting-nav-link {
   display: flex;
-  min-height: 2.5rem;
+  min-height: 2.65rem;
   align-items: center;
-  gap: 0.75rem;
-  border-left: 2px solid transparent;
-  border-radius: 0;
-  padding: 0.6rem 0.75rem;
-  color: #c4cae6;
+  gap: 0.7rem;
+  border-radius: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  color: rgba(219, 234, 254, 0.76);
   font-size: 0.75rem;
-  font-weight: 600;
-  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+  font-weight: 700;
+  transition: background 160ms ease, color 160ms ease;
 }
 
 .accounting-nav-link > .ui-icon {
   width: 1rem;
   flex: 0 0 auto;
-  color: #b9c1df;
+  color: rgba(219, 234, 254, 0.66);
+  font-size: 1rem;
 }
 
 .accounting-nav-copy {
@@ -152,7 +158,7 @@
 }
 
 .accounting-nav-copy small {
-  color: #8d95bd;
+  color: rgba(219, 234, 254, 0.45);
   font-size: 0.57rem;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -161,14 +167,17 @@
 
 .accounting-nav-link:hover,
 .accounting-nav-link.is-active {
-  border-left-color: var(--employee-gold);
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
+  background: #fff;
+  color: var(--au-navy);
 }
 
 .accounting-nav-link:hover > .ui-icon,
 .accounting-nav-link.is-active > .ui-icon {
-  color: #fff;
+  color: var(--au-blue);
+}
+
+.accounting-nav-link.is-active {
+  box-shadow: inset 3px 0 var(--au-red);
 }
 
 .accounting-nav-placeholder {
@@ -177,31 +186,30 @@
 }
 
 .accounting-nav-placeholder:hover {
-  border-left-color: transparent;
   background: transparent;
-  color: #c4cae6;
+  color: rgba(219, 234, 254, 0.76);
 }
 
 .accounting-nav-placeholder:hover > .ui-icon {
-  color: #b9c1df;
+  color: rgba(219, 234, 254, 0.66);
 }
 
 .accounting-sidebar-status {
   display: grid;
   gap: 0.45rem;
-  margin: 1.25rem 0.75rem 0;
-  padding: 0.8rem;
+  margin-top: 1.35rem;
+  padding: 0.85rem;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0.65rem;
-  background: rgba(255, 255, 255, 0.04);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .accounting-sidebar-status > div {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  color: #c4cae6;
-  font-size: 0.61rem;
+  color: #dbeafe;
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -211,24 +219,24 @@
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 999px;
-  background: var(--employee-gold);
+  background: #d7a43a;
 }
 
 .accounting-sidebar-status strong {
   color: #fff;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
 }
 
 .accounting-sidebar-status p {
   margin: 0;
-  color: #8d95bd;
-  font-size: 0.64rem;
-  line-height: 1.5;
+  color: rgba(219, 234, 254, 0.62);
+  font-size: 0.65rem;
+  line-height: 1.55;
 }
 
 .accounting-sidebar-footer {
-  padding: 1rem 0 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .accounting-sidebar-account {
@@ -236,7 +244,7 @@
   min-width: 0;
   align-items: center;
   gap: 0.65rem;
-  padding: 0 0.5rem;
+  padding: 0.95rem 0.15rem 0;
 }
 
 .accounting-account-avatar {
@@ -270,7 +278,7 @@
 }
 
 .accounting-sidebar-account small {
-  color: #8d95bd;
+  color: rgba(219, 234, 254, 0.58);
   font-size: 0.64rem;
 }
 
@@ -278,18 +286,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  border: 1px solid rgba(200, 16, 46, 0.5);
-  border-radius: 0.45rem;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
   padding: 0.65rem;
-  color: #ff8f85;
-  font-size: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.7rem;
+  color: rgba(219, 234, 254, 0.78);
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
 .accounting-sidebar-logout:hover {
-  background: rgba(200, 16, 46, 0.12);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 @media (max-width: 1050px) {
@@ -303,18 +313,11 @@
   }
 
   .accounting-sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 40;
     display: block;
-    border: 0;
-    background: rgba(2, 6, 23, 0.62);
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 180ms ease;
   }
 
   .accounting-sidebar-overlay.is-visible {
+    visibility: visible;
     opacity: 1;
     pointer-events: auto;
   }

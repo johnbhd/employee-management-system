@@ -47,7 +47,6 @@
 @import "./pages/admin/settings.css";
 @import "./pages/accounting/dashboard.css";
 @import "./pages/accounting/integration-status.css";
-@import "./pages/accounting/shared.css";
 
 *,
 *::before,
