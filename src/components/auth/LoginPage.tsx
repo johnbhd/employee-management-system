@@ -5,41 +5,10 @@ import { useRouter } from "next/navigation";
 import { type ChangeEvent, type FormEvent, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import {
-  setAuthFlashToast,
-  type AuthRole,
-} from "@/lib/auth-flash-toast";
-
-type DemoAccount = {
-  password: string;
-  role: AuthRole;
-  redirectTo: "/employee/dashboard" | "/admin/dashboard" | "/hr/dashboard" | "/accounting/dashboard";
-};
+import { prototypeAuthAccounts } from "@/data/prototype-auth";
+import { setAuthFlashToast } from "@/lib/auth-flash-toast";
 
 type LoginErrorField = "username" | "password" | "credentials" | null;
-
-const demoAccounts: Record<string, DemoAccount> = {
-  "aujsc.admin": {
-    password: "admin123",
-    role: "admin",
-    redirectTo: "/admin/dashboard",
-  },
-  "aujsc.hr": {
-    password: "hr123",
-    role: "hr",
-    redirectTo: "/hr/dashboard",
-  },
-  "aujsc.employee": {
-    password: "employee123",
-    role: "employee",
-    redirectTo: "/employee/dashboard",
-  },
-  "aujsc.accounting": {
-    password: "accounting123",
-    role: "accounting",
-    redirectTo: "/accounting/dashboard",
-  },
-};
 
 export function LoginPage() {
   const router = useRouter();
@@ -85,7 +54,9 @@ export function LoginPage() {
       return;
     }
 
-    const account = demoAccounts[normalizedUsername];
+    const account = prototypeAuthAccounts.find(
+      (candidate) => candidate.username === normalizedUsername,
+    );
 
     if (!account || account.password !== password) {
       setErrorMessage("Invalid username or password.");

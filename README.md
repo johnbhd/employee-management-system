@@ -96,6 +96,44 @@ Firestore cannot be reached. It never returns credentials, stack traces, or
 service-account details. The Firestore check reads the reserved
 `_system/health` document without creating or modifying it.
 
+## Firebase Development Seeder
+
+The repository includes a development-only Firebase Admin seeder that prepares
+the current prototype account and HRPS employee reference data without changing
+the application login flow. It is the Firebase equivalent of a small,
+non-destructive `db:seed` command:
+
+```bash
+yarn firebase:seed --dry-run
+yarn firebase:seed employees --dry-run
+yarn firebase:seed users --dry-run
+```
+
+The default command runs `employees` before `users`. Selecting `users` also
+runs the employee seeder first because seeded users may reference an employee.
+The `employees` seeder writes deterministic `employees/{employeeId}` documents.
+The `users` seeder reconciles Firebase Auth users with stable development UIDs
+and writes matching `users/{uid}` documents. It never stores passwords in
+Firestore, deletes records, or resets a collection. Re-running a write command
+merges the same seed-owned fields instead of creating duplicates.
+
+Dry-run mode is offline: it validates the local seed data and prints a summary
+without connecting to or writing Firebase. A real write requires all of the
+following server-only policy values in `.env.local`:
+
+```text
+FIREBASE_SEED_ENABLED=true
+FIREBASE_SEED_ENVIRONMENT=development
+FIREBASE_SEED_PROJECT_ID=<the intended Firebase project ID>
+FIREBASE_SEED_CREDENTIAL_ROTATED=true
+```
+
+The final flag is an explicit safety gate because a previously exposed service
+account key must be revoked and replaced before any seed write is enabled. Do
+not set the write guard for production projects, and never commit `.env.local`
+or service-account credentials. The seeder only prepares Firebase data; the
+current prototype Login still does not read these Firebase users.
+
 Before supplying environment values, create or select the Firebase project,
 register the Web App, enable Cloud Firestore and the intended Authentication
 provider, and create server credentials as needed. Transfer those values into

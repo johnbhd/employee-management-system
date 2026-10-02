@@ -1,5 +1,7 @@
 import type { Metric, NavigationItem } from "@/types/ui";
 
+export { hrpsEmployees } from "@/data/hrps-employees";
+
 export const adminNavigation: NavigationItem[] = [
   { id: "dashboard", label: "Dashboard", href: "/admin/dashboard", icon: "dashboard" },
   { id: "integration-monitoring", label: "Integration Monitoring", href: "/admin/integration-monitoring", icon: "monitoring" },
@@ -62,13 +64,6 @@ export const activityEvents = [
   { time: "10:25 AM", source: "QR Attendance", destination: "Unified Attendance", operation: "Attendance Sync", records: "18", duration: "0.5s", status: "Success", tone: "success" },
   { time: "10:18 AM", source: "Integration Layer", destination: "Unified Attendance", operation: "Validation Queue", records: "3", duration: "—", status: "Pending", tone: "warning" },
   { time: "09:58 AM", source: "Bundy ETL", destination: "Integration Layer", operation: "Employee ID Match Review", records: "3", duration: "0.7s", status: "Warning", tone: "warning" },
-] as const;
-
-export const hrpsEmployees = [
-  { id: "AU-EMP-2026-001", employee: "John Benedict M. Villegas", department: "Information Technology", position: "Office Staff", employment: "Active", result: "Updated", time: "10:38 AM" },
-  { id: "AU-EMP-2026-014", employee: "Maria Santos", department: "Human Resources", position: "HR Staff", employment: "Active", result: "No Change", time: "10:38 AM" },
-  { id: "AU-EMP-2026-087", employee: "Robert Cruz", department: "Administration", position: "Office Support", employment: "Inactive", result: "Updated", time: "10:38 AM" },
-  { id: "AU-EMP-2026-233", employee: "Example Employee", department: "Office Support", position: "—", employment: "Active", result: "Needs Review", time: "10:38 AM" },
 ] as const;
 
 export const bundyLogs = [

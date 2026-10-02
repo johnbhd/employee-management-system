@@ -1,0 +1,38 @@
+export const hrpsEmployees = [
+  {
+    id: "AU-EMP-2026-001",
+    employee: "John Benedict M. Villegas",
+    department: "Information Technology",
+    position: "Office Staff",
+    employment: "Active",
+    result: "Updated",
+    time: "10:38 AM",
+  },
+  {
+    id: "AU-EMP-2026-014",
+    employee: "Maria Santos",
+    department: "Human Resources",
+    position: "HR Staff",
+    employment: "Active",
+    result: "No Change",
+    time: "10:38 AM",
+  },
+  {
+    id: "AU-EMP-2026-087",
+    employee: "Robert Cruz",
+    department: "Administration",
+    position: "Office Support",
+    employment: "Inactive",
+    result: "Updated",
+    time: "10:38 AM",
+  },
+  {
+    id: "AU-EMP-2026-233",
+    employee: "Example Employee",
+    department: "Office Support",
+    position: "—",
+    employment: "Active",
+    result: "Needs Review",
+    time: "10:38 AM",
+  },
+] as const;
