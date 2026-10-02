@@ -20,6 +20,7 @@ import type { AuthSessionSuccessResponse } from "@/types/auth";
 export type FirebaseAuthClientErrorCode =
     | "INVALID_CREDENTIALS"
     | "ACCOUNT_UNAVAILABLE"
+    | "AUTHENTICATION_CONFIGURATION"
     | "AUTHENTICATION_UNAVAILABLE";
 
 export class FirebaseAuthClientError extends Error {
@@ -52,6 +53,16 @@ function getFirebaseAuthError(error: unknown): FirebaseAuthClientError {
         return new FirebaseAuthClientError(
             "ACCOUNT_UNAVAILABLE",
             "This account is currently unavailable. Please contact the system administrator.",
+        );
+    }
+
+    if (
+        code === "auth/operation-not-allowed" ||
+        code === "auth/admin-restricted-operation"
+    ) {
+        return new FirebaseAuthClientError(
+            "AUTHENTICATION_CONFIGURATION",
+            "Username and password sign-in is not configured for this portal. Please contact the system administrator.",
         );
     }
 
@@ -115,17 +126,17 @@ export async function signInWithFirebaseSession(
         }
 
         if (error instanceof ApiClientError) {
-            if (error.code === "ACCOUNT_UNAVAILABLE") {
-                throw new FirebaseAuthClientError(
-                    "ACCOUNT_UNAVAILABLE",
-                    "This account is currently unavailable. Please contact the system administrator.",
-                );
-            }
-
-            if (error.code === "INVALID_ID_TOKEN") {
+            if (error.status === 401) {
                 throw new FirebaseAuthClientError(
                     "INVALID_CREDENTIALS",
                     "Invalid username or password.",
+                );
+            }
+
+            if (error.status === 403 || error.code === "ACCOUNT_UNAVAILABLE") {
+                throw new FirebaseAuthClientError(
+                    "ACCOUNT_UNAVAILABLE",
+                    "This account is currently unavailable. Please contact the system administrator.",
                 );
             }
         }

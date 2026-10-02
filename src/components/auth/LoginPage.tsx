@@ -84,6 +84,13 @@ export function LoginPage() {
         );
       } else if (
         error instanceof FirebaseAuthClientError &&
+        error.code === "AUTHENTICATION_CONFIGURATION"
+      ) {
+        setErrorMessage(
+          "Username and password sign-in is not configured for this portal. Please contact the system administrator.",
+        );
+      } else if (
+        error instanceof FirebaseAuthClientError &&
         error.code === "AUTHENTICATION_UNAVAILABLE"
       ) {
         setErrorMessage(
