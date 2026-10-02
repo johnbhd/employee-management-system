@@ -37,7 +37,7 @@ Open [http://localhost:3000](http://localhost:3000) in a browser.
 
 ## Full-Stack Architecture Preparation
 
-The current UI remains a frontend prototype, but the repository now has a
+The current UI remains a frontend prototype, and the repository now has a
 clear boundary for gradual full-stack development:
 
 ```text
@@ -62,12 +62,45 @@ health check at `GET /api/v1/health`. The API response types live under
 `src/lib/api/client.ts`. Existing pages continue to use their deterministic
 mock data; no page has been migrated to a non-existent backend endpoint.
 
-Firebase dependencies and initialization are intentionally not included yet.
-The `src/lib/firebase/client/` and `src/lib/firebase/server/` directories mark
-the future client/server boundary. Firebase Admin must remain server-only,
-and private server variables must never use the `NEXT_PUBLIC_` prefix. The
-root `.env.example` contains names only and separates client configuration
-from server credentials; real `.env` files remain ignored.
+Firebase foundation initialization is now available under
+`src/lib/firebase/client/` and `src/lib/firebase/server/`. The browser module
+provides lazy singleton accessors for the Firebase App, Auth, and Firestore
+services. The server module is protected by `server-only`, uses lazy singleton
+Firebase Admin initialization, and keeps Admin credentials out of browser
+code. Existing feature pages still use their deterministic mock data; no page
+has been migrated to a Firebase-backed endpoint.
+
+## Firebase Foundation Setup
+
+Copy the example environment file before running Firebase-dependent checks:
+
+```bash
+cp .env.example .env.local
+```
+
+Fill the `NEXT_PUBLIC_FIREBASE_*` values with the Firebase Web App
+configuration. These values are safe for browser configuration but still must
+be configured for the intended Firebase project. Fill `FIREBASE_PROJECT_ID`,
+`FIREBASE_CLIENT_EMAIL`, and `FIREBASE_PRIVATE_KEY` with server-only service
+account values. Never use the `NEXT_PUBLIC_` prefix for Admin credentials.
+
+When entering `FIREBASE_PRIVATE_KEY` as a single Vercel or local environment
+value, preserve escaped newline characters (`\\n`); the server initializer
+normalizes them before creating the Admin credential. Configure the same
+variables in Vercel under Project Settings → Environment Variables.
+
+The existing health contract remains available at `GET /api/v1/health`. The
+Firebase foundation check is available at `GET /api/v1/health/firebase` and
+returns a safe `503` error response when server configuration is missing or
+Firestore cannot be reached. It never returns credentials, stack traces, or
+service-account details. The Firestore check reads the reserved
+`_system/health` document without creating or modifying it.
+
+Before supplying environment values, create or select the Firebase project,
+register the Web App, enable Cloud Firestore and the intended Authentication
+provider, and create server credentials as needed. Transfer those values into
+`.env.local` or Vercel manually. Firebase Hosting, Cloud Functions, open
+Firestore rules, and feature-data migrations are outside this foundation task.
 
 Server responsibilities are separated into `auth`, `services`,
 `repositories`, `validators`, and external-system adapters under
