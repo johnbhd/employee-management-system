@@ -3,6 +3,19 @@ import {
   type PrototypeAuthRole,
 } from "../../../src/data/prototype-auth";
 
+const firebaseMinimumPasswordLength = 6;
+
+function getSeedPassword(password: string): string {
+  if (password.length >= firebaseMinimumPasswordLength) {
+    return password;
+  }
+
+  // Keep the prototype login credential unchanged. Firebase Email/Password
+  // Auth requires at least six characters, so short prototype credentials get
+  // a deterministic development-only suffix in the seed source.
+  return `${password}4`;
+}
+
 export type SeedUser = {
   uid: string;
   username: string;
@@ -17,7 +30,7 @@ export const userSeedData: readonly SeedUser[] = prototypeAuthAccounts.map(
   (account) => ({
     uid: `seed-aujsc-${account.role}`,
     username: account.username,
-    password: account.password,
+    password: getSeedPassword(account.password),
     role: account.role,
     displayName: account.displayName,
     authEmail: account.authEmail,

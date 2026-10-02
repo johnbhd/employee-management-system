@@ -140,6 +140,15 @@ function printResult(result: SeederResult): void {
 }
 
 function getSafeErrorMessage(error: unknown): string {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    typeof error.code === "string"
+  ) {
+    return `Firebase seeding failed (${error.code}).`;
+  }
+
   if (error instanceof Error && error.message.startsWith("Unknown Firebase")) {
     return error.message;
   }

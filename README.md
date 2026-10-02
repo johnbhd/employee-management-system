@@ -117,6 +117,11 @@ and writes matching `users/{uid}` documents. It never stores passwords in
 Firestore, deletes records, or resets a collection. Re-running a write command
 merges the same seed-owned fields instead of creating duplicates.
 
+The prototype login remains unchanged. If a prototype password is shorter than
+Firebase Email/Password Auth permits, the seed source uses a deterministic
+development-only compatible variant for Auth creation; that password is never
+stored in Firestore or printed by the seeder.
+
 Dry-run mode is offline: it validates the local seed data and prints a summary
 without connecting to or writing Firebase. A real write requires all of the
 following server-only policy values in `.env.local`:
