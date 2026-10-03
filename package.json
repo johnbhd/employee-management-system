@@ -9,6 +9,9 @@
     "lint": "eslint",
     "firebase:seed": "tsx scripts/firebase/seed.ts"
   },
+  "resolutions": {
+    "jwks-rsa/jose": "5.10.0"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
     "@fortawesome/free-solid-svg-icons": "^7.3.1",
