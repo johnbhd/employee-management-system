@@ -100,9 +100,10 @@ The employee-specific QR identity flow uses a separate server-only HMAC secret.
 Set `QR_ATTENDANCE_SIGNING_SECRET` in `.env.local` to a unique random value;
 for example, generate one locally with `openssl rand -base64 32`. Never reuse
 the Firebase private key, expose the value with `NEXT_PUBLIC_`, or commit the
-real secret. Employees receive a QR from `/employee/attendance-qr`; authorized
-HR staff use `/hr/scanner`. The scanner validates the QR through the server and
-shows safe employee identity information without writing attendance records.
+real secret. Employees receive a QR from `/employee/attendance-qr`; HR staff
+use `/hr/scanner`, and administrators use `/admin/scanner`. The scanner
+validates the QR through the server and shows safe employee identity
+information without writing attendance records.
 
 ## Firebase Development Seeder
 

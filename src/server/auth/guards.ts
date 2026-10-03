@@ -97,6 +97,22 @@ export async function requireApiRole(
     return user;
 }
 
+export async function requireApiRoles(
+    ...requiredRoles: ApplicationRole[]
+): Promise<SessionUser> {
+    const user = await requireApiSessionUser();
+
+    if (!requiredRoles.includes(user.role)) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "You do not have permission to access this resource.",
+        );
+    }
+
+    return user;
+}
+
 export async function requireApiRoleContext(
     requiredRole: ApplicationRole,
 ): Promise<CurrentUserContext> {

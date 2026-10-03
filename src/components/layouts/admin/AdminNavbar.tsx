@@ -75,9 +75,13 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
             <Icon name="bell" />
             <span>3</span>
           </button>
-          <button type="button" className="icon-button help-button" onClick={() => notify("Help center is a prototype action.")} aria-label="Open help">
-            <Icon name="help" />
-          </button>
+          <Link
+            href="/admin/scanner"
+            className="icon-button scanner-button"
+            aria-label="Open QR scanner"
+          >
+            <Icon name="qr" />
+          </Link>
           <div className="profile-wrap">
             <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
               <span className="account-avatar"><Icon name="user" /></span>

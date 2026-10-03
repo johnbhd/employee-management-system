@@ -8,7 +8,7 @@ import {
     AttendanceQrEmployeeUnavailableError,
     resolveEmployeeAttendanceQr,
 } from "@/server/attendance/qr/attendance-qr.service";
-import { requireApiRole, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiRoles, ApiAuthorizationError } from "@/server/auth/guards";
 import {
     FirebaseAdminConfigurationError,
     FirebaseAdminInitializationError,
@@ -44,7 +44,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 export async function POST(request: Request) {
     try {
-        await requireApiRole("hr");
+        await requireApiRoles("hr", "admin");
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {
             return getErrorResponse(error.code, error.message, error.status);
