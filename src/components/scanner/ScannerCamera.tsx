@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 import {
   Html5Qrcode,
+  Html5QrcodeScannerState,
   Html5QrcodeSupportedFormats,
   type CameraDevice,
 } from "html5-qrcode";
@@ -41,6 +42,42 @@ export function ScannerCamera({
         verbose: false,
       },
     );
+    let startPromise: Promise<unknown> | null = null;
+    let cleanupPromise: Promise<void> | null = null;
+
+    async function cleanupScanner() {
+      if (cleanupPromise) {
+        return cleanupPromise;
+      }
+
+      const pendingStart = startPromise;
+      cleanupPromise = (async () => {
+        if (pendingStart) {
+          await pendingStart.catch(() => undefined);
+        }
+
+        const state = scanner.getState();
+
+        if (
+          state === Html5QrcodeScannerState.SCANNING
+          || state === Html5QrcodeScannerState.PAUSED
+        ) {
+          try {
+            await scanner.stop();
+          } catch {
+            // The camera may have stopped during route transition.
+          }
+        }
+
+        try {
+          scanner.clear();
+        } catch {
+          // The scanner may not have created its target markup yet.
+        }
+      })();
+
+      return cleanupPromise;
+    }
 
     async function startScanner() {
       if (!enabled) {
@@ -71,21 +108,26 @@ export function ScannerCamera({
         selectedCameraIdRef.current = cameraId;
         setSelectedCameraId(cameraId);
 
-        await scanner.start(
-          cameraId,
-          {
-            aspectRatio: 1,
-            fps: 10,
-            qrbox: {
-              height: 250,
-              width: 250,
+        try {
+          startPromise = scanner.start(
+            cameraId,
+            {
+              aspectRatio: 1,
+              fps: 10,
+              qrbox: {
+                height: 250,
+                width: 250,
+              },
             },
-          },
-          (decodedText) => {
-            onDecoded(decodedText);
-          },
-          () => undefined,
-        );
+            (decodedText) => {
+              onDecoded(decodedText);
+            },
+            () => undefined,
+          );
+          await startPromise;
+        } finally {
+          startPromise = null;
+        }
 
         if (!disposed) {
           setCameraMessage("");
@@ -104,17 +146,7 @@ export function ScannerCamera({
 
     return () => {
       disposed = true;
-
-      void scanner
-        .stop()
-        .catch(() => undefined)
-        .then(() => {
-          try {
-            scanner.clear();
-          } catch {
-            // The scanner may not have created its target markup yet.
-          }
-        });
+      void cleanupScanner();
     };
   }, [
     cameraChangeKey,

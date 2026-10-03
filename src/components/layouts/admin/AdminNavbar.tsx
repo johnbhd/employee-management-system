@@ -76,7 +76,7 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
             <span>3</span>
           </button>
           <Link
-            href="/admin/scanner"
+            href="/scanner"
             className="icon-button scanner-button"
             aria-label="Open QR scanner"
           >

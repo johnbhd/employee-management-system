@@ -67,6 +67,18 @@ export async function requireRoleContext(
     return context;
 }
 
+export async function requireAnyRoleContext(
+    ...requiredRoles: ApplicationRole[]
+): Promise<CurrentUserContext> {
+    const context = await requireCurrentUserContext();
+
+    if (!requiredRoles.includes(context.user.role)) {
+        redirect(getRoleHomePath(context.user.role));
+    }
+
+    return context;
+}
+
 export async function requireApiSessionUser(): Promise<SessionUser> {
     const user = await getOptionalSessionUser();
 
