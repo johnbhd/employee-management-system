@@ -4,5 +4,9 @@ import { requireAnyRoleContext } from "@/server/auth/guards";
 export default async function Page() {
   await requireAnyRoleContext("admin", "hr");
 
-  return <ScannerPage />;
+  return (
+    <main className="scanner-route">
+      <ScannerPage />
+    </main>
+  );
 }
