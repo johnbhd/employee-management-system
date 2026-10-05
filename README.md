@@ -121,19 +121,19 @@ yarn firebase:seed users --dry-run
 The development seed also includes ten fictional rank-and-file Employee demo
 accounts for testing. Their usernames follow
 `aujsc.<department-slug>.<three-digit-id>`, and the visible demo password is
-the same as the three-digit Employee ID. For example:
+`aujsc.<three-digit-id>`. For example:
 
 ```text
-aujsc.registrar.001 / 001
-aujsc.admissions.002 / 002
-aujsc.library.003 / 003
-aujsc.cashier.004 / 004
-aujsc.records.005 / 005
-aujsc.guidance.006 / 006
-aujsc.studentaffairs.007 / 007
-aujsc.itoffice.008 / 008
-aujsc.adminoffice.009 / 009
-aujsc.facilities.010 / 010
+aujsc.registrar.001 / aujsc.001
+aujsc.admissions.002 / aujsc.002
+aujsc.library.003 / aujsc.003
+aujsc.cashier.004 / aujsc.004
+aujsc.records.005 / aujsc.005
+aujsc.guidance.006 / aujsc.006
+aujsc.studentaffairs.007 / aujsc.007
+aujsc.itoffice.008 / aujsc.008
+aujsc.adminoffice.009 / aujsc.009
+aujsc.facilities.010 / aujsc.010
 ```
 
 These accounts and credentials are fictional development/testing data only.
