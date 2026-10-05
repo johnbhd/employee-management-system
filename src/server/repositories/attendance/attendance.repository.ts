@@ -196,6 +196,36 @@ export async function getAttendanceByEmployeeAndDate(
     return record;
 }
 
+export async function listAttendanceByEmployee(
+    employeeId: string,
+): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const snapshots = await getFirebaseAdminDb()
+        .collection(attendanceCollection)
+        .where("employeeId", "==", employeeId)
+        .get();
+
+    return snapshots.docs
+        .map((snapshot) => {
+            const record = parseAttendanceRecord(snapshot.data());
+
+            if (!record || record.employeeId !== employeeId) {
+                throw new QrAttendanceDataError();
+            }
+
+            return {
+                id: snapshot.id,
+                record,
+            };
+        })
+        .sort((left, right) => {
+            const dateOrder = right.record.attendanceDate.localeCompare(
+                left.record.attendanceDate,
+            );
+
+            return dateOrder || right.id.localeCompare(left.id);
+        });
+}
+
 export async function recordQrAttendance(
     input: {
         employeeId: string;

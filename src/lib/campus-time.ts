@@ -30,9 +30,25 @@ const campusCalendarDateFormatter = new Intl.DateTimeFormat("en-US", {
 });
 
 const campusMonthYearFormatter = new Intl.DateTimeFormat("en-US", {
-  month: "long",
-  year: "numeric",
-  timeZone: CAMPUS_TIME_ZONE,
+    month: "long",
+    year: "numeric",
+    timeZone: CAMPUS_TIME_ZONE,
+});
+
+const campusDateKeyShortFormatter = new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+});
+
+const campusDateKeyLongFormatter = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
 });
 
 export type CampusDateParts = {
@@ -89,4 +105,26 @@ export function formatCampusDateKey(date: Date) {
 
 export function formatCampusMonthYear(date: Date) {
   return campusMonthYearFormatter.format(date);
+}
+
+export function formatCampusDateKeyLabel(
+    dateKey: string,
+    format: "short" | "long" = "short",
+) {
+    const [year, month, day] = dateKey.split("-").map(Number);
+    const date = new Date(Date.UTC(year, (month || 1) - 1, day || 1));
+
+    if (
+        !Number.isFinite(year)
+        || !Number.isFinite(month)
+        || !Number.isFinite(day)
+        || Number.isNaN(date.getTime())
+    ) {
+        return dateKey;
+    }
+
+    return (format === "long"
+        ? campusDateKeyLongFormatter
+        : campusDateKeyShortFormatter
+    ).format(date);
 }

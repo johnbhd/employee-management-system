@@ -123,6 +123,13 @@ service. The equivalent protected API is `GET
 /api/v1/attendance/me/today`; it derives the Employee ID from the HttpOnly
 session and does not accept an Employee ID from the browser.
 
+The Employee `/employee/attendance-history` page reads the same canonical
+Firestore attendance collection through the authenticated Employee context.
+The protected `GET /api/v1/attendance/me/history` endpoint returns only the
+linked Employee's daily records, newest first, with serialized date, Time In,
+Time Out, source, and status values. The page does not accept a browser-supplied
+Employee ID or use browser storage/mock rows as an authority.
+
 ## Firebase Development Seeder
 
 The repository includes a development-only Firebase Admin seeder that prepares

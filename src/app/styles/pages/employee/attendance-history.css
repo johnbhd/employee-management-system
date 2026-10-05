@@ -256,6 +256,11 @@
   font-size: 0.68rem;
 }
 
+.attendance-history-feedback.is-error {
+  color: var(--employee-red);
+  font-weight: 700;
+}
+
 .attendance-history-table-panel {
   overflow: hidden;
 }
@@ -267,7 +272,7 @@
 
 .attendance-history-table {
   width: 100%;
-  min-width: 60rem;
+  min-width: 66rem;
   border-collapse: collapse;
   text-align: left;
   font-size: 0.72rem;
@@ -330,6 +335,11 @@
 .attendance-history-time-late { color: var(--warning); }
 .attendance-history-time-none { color: var(--employee-red); }
 
+.attendance-history-source {
+  color: var(--employee-blue);
+  font-weight: 800;
+}
+
 .attendance-history-time-ok .ui-icon,
 .attendance-history-time-late .ui-icon {
   font-size: 0.68rem;
@@ -352,6 +362,11 @@
   padding: 2rem 1rem !important;
   color: var(--text-muted) !important;
   text-align: center;
+}
+
+.attendance-history-empty.is-error {
+  color: var(--employee-red) !important;
+  font-weight: 700;
 }
 
 .attendance-history-table-footer {
@@ -390,6 +405,17 @@
   border-color: var(--employee-blue);
   background: var(--employee-blue);
   color: #fff;
+}
+
+.attendance-history-page-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.attendance-history-page-button:disabled:hover {
+  border-color: var(--employee-line);
+  background: #fff;
+  color: var(--employee-ink);
 }
 
 .attendance-history-page-nav {

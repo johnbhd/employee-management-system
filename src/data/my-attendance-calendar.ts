@@ -1,8 +1,3 @@
-import {
-  attendanceHistoryRecords,
-  type AttendanceHistoryStatus,
-} from "@/data/attendance-history";
-
 export type CalendarAttendanceStatus =
   | "present"
   | "late"
@@ -29,19 +24,19 @@ const demoAttendanceByDate: Record<string, CalendarAttendanceStatus> = {
   "2026-09-17": "absent",
 };
 
-function mapHistoryStatus(
-  status: AttendanceHistoryStatus,
-): CalendarAttendanceStatus {
-  if (status === "late") {
-    return "late";
-  }
-
-  if (status === "absent") {
-    return "absent";
-  }
-
-  return "present";
-}
+const prototypeHistoryStatusByDate: Record<
+  string,
+  Exclude<CalendarAttendanceStatus, "no-record">
+> = {
+  "2026-07-16": "late",
+  "2026-07-17": "present",
+  "2026-07-18": "present",
+  "2026-07-19": "absent",
+  "2026-07-20": "present",
+  "2026-07-21": "absent",
+  "2026-07-22": "late",
+  "2026-07-23": "present",
+};
 
 export function getAttendanceCalendarStatus(
   year: number,
@@ -49,12 +44,10 @@ export function getAttendanceCalendarStatus(
   day: number,
 ): CalendarAttendanceStatus {
   const dateKey = formatCalendarDateKey(year, month, day);
-  const matchingHistoryRecord = attendanceHistoryRecords.find((record) => {
-    return record.id === dateKey;
-  });
+  const matchingHistoryStatus = prototypeHistoryStatusByDate[dateKey];
 
-  if (matchingHistoryRecord) {
-    return mapHistoryStatus(matchingHistoryRecord.status);
+  if (matchingHistoryStatus) {
+    return matchingHistoryStatus;
   }
 
   return demoAttendanceByDate[dateKey] ?? "no-record";
