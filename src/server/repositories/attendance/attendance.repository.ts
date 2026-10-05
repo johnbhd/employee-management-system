@@ -226,6 +226,35 @@ export async function listAttendanceByEmployee(
         });
 }
 
+export async function listAttendanceByDate(
+    attendanceDate: string,
+): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const snapshots = await getFirebaseAdminDb()
+        .collection(attendanceCollection)
+        .where("attendanceDate", "==", attendanceDate)
+        .get();
+
+    return snapshots.docs
+        .map((snapshot) => {
+            const record = parseAttendanceRecord(snapshot.data());
+
+            if (!record || record.attendanceDate !== attendanceDate) {
+                throw new QrAttendanceDataError();
+            }
+
+            return {
+                id: snapshot.id,
+                record,
+            };
+        })
+        .sort((left, right) => {
+            const timeOrder = right.record.timeIn.toMillis()
+                - left.record.timeIn.toMillis();
+
+            return timeOrder || right.id.localeCompare(left.id);
+        });
+}
+
 export async function recordQrAttendance(
     input: {
         employeeId: string;

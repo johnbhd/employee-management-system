@@ -1,62 +1,25 @@
-"use client";
-
-import { useMemo } from "react";
-
-import { ActionButton } from "@/components/ui/ActionButton";
-import {
-  hrDashboardDate,
-  hrRecentIssues,
-  type HrPendingAction,
-  type HrSummaryMetric,
-} from "@/data/hr";
-import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
+import { formatCampusDateKeyLabel } from "@/lib/campus-time";
+import type { HrDashboardSummary } from "@/types/hr-dashboard";
+import type { HrPendingAction, HrSummaryMetric } from "@/data/hr";
 
 import { HrAttendanceSummary } from "./HrAttendanceSummary";
+import { HrDashboardRefreshButton } from "./HrDashboardRefreshButton";
 import { HrPendingActions } from "./HrPendingActions";
 import { HrRecentIssues } from "./HrRecentIssues";
 import { HrTodayAttendance } from "./HrTodayAttendance";
 
-export function HrDashboardPage() {
-  const { attendanceRecords, correctionRequests } = useHrWorkflow();
-  const summaryMetrics = useMemo<HrSummaryMetric[]>(() => [
-    { label: "Present Today", value: String(attendanceRecords.filter((record) => record.status === "Present").length), note: "Employees recorded", icon: "check", tone: "success" },
-    { label: "Late Today", value: String(attendanceRecords.filter((record) => record.status === "Late").length), note: "Needs monitoring", icon: "clock", tone: "warning" },
-    { label: "Absent", value: String(attendanceRecords.filter((record) => record.status === "Absent").length), note: "Needs review", icon: "close", tone: "danger" },
-    { label: "Missing Time-Out", value: String(attendanceRecords.filter((record) => record.status === "Missing Time-Out").length), note: "Open attendance gaps", icon: "warning", tone: "warning" },
-    { label: "Pending Corrections", value: String(correctionRequests.filter((request) => !["Approved", "Rejected"].includes(request.status)).length), note: "Awaiting HR review", icon: "comment", tone: "info" },
-    { label: "Pending Verification", value: String(attendanceRecords.filter((record) => record.hrVerificationStatus !== "Verified").length), note: "Needs final HR review", icon: "activity", tone: "warning" },
-  ], [attendanceRecords, correctionRequests]);
-
-  const pendingActions = useMemo<HrPendingAction[]>(() => [
-    {
-      label: "Correction Requests",
-      count: String(correctionRequests.filter((request) => !["Approved", "Rejected"].includes(request.status)).length),
-      note: "Awaiting HR review",
-      icon: "comment",
-      tone: "info",
-    },
-    {
-      label: "Missing Time-Out",
-      count: String(attendanceRecords.filter((record) => record.status === "Missing Time-Out").length),
-      note: "Attendance gaps to resolve",
-      icon: "warning",
-      tone: "warning",
-    },
-    {
-      label: "Needs Correction",
-      count: String(attendanceRecords.filter((record) => record.hrVerificationStatus === "Needs Correction").length),
-      note: "Validation or correction issue",
-      icon: "activity",
-      tone: "danger",
-    },
-    {
-      label: "Pending Verification",
-      count: String(attendanceRecords.filter((record) => record.hrVerificationStatus === "Pending Review").length),
-      note: "Ready for final HR review",
-      icon: "check",
-      tone: "warning",
-    },
-  ], [attendanceRecords, correctionRequests]);
+export function HrDashboardPage({
+  dataLoadError,
+  summary,
+}: {
+  dataLoadError: boolean;
+  summary: HrDashboardSummary | null;
+}) {
+  const summaryMetrics = getSummaryMetrics(summary, dataLoadError);
+  const pendingActions = getPendingActions(summary, dataLoadError);
+  const dashboardDate = summary
+    ? formatCampusDateKeyLabel(summary.attendanceDate, "long")
+    : "Current attendance date unavailable";
 
   return (
     <div className="hr-dashboard-page">
@@ -65,25 +28,158 @@ export function HrDashboardPage() {
           <p className="hr-dashboard-eyebrow">Attendance operations</p>
           <h1>HR / Attendance Dashboard</h1>
           <p className="hr-dashboard-description">
-            Monitor employee attendance, exceptions, corrections, and attendance readiness.
+            Monitor the real current-day attendance summary and operational records.
           </p>
-          <p className="hr-dashboard-date">{hrDashboardDate}</p>
+          <p className="hr-dashboard-date">{dashboardDate}</p>
+          {dataLoadError ? (
+            <p className="hr-dashboard-data-error" role="alert">
+              Unable to load current attendance summary. Please try again.
+            </p>
+          ) : null}
         </div>
         <div className="hr-dashboard-actions">
-          <ActionButton icon="refresh" action="Attendance summary refreshed.">
-            Refresh data
-          </ActionButton>
+          <HrDashboardRefreshButton />
         </div>
       </header>
 
       <HrAttendanceSummary metrics={summaryMetrics} />
 
-      <HrTodayAttendance records={attendanceRecords.slice(0, 5)} />
+      <HrTodayAttendance
+        dataLoadError={dataLoadError}
+        records={summary?.attendanceRecords.slice(0, 5) ?? []}
+      />
 
       <div className="hr-dashboard-lower-grid">
         <HrPendingActions actions={pendingActions} />
-        <HrRecentIssues issues={hrRecentIssues} />
+        <HrRecentIssues
+          dataLoadError={dataLoadError}
+          issues={summary?.recentIssues ?? []}
+        />
       </div>
     </div>
   );
+}
+
+function getSummaryMetrics(
+  summary: HrDashboardSummary | null,
+  dataLoadError: boolean,
+): HrSummaryMetric[] {
+  if (dataLoadError || !summary) {
+    return [
+      {
+        label: "Active Employees",
+        value: "—",
+        note: "Unavailable",
+        icon: "users",
+        tone: "info",
+      },
+      {
+        label: "Timed In Today",
+        value: "—",
+        note: "Unavailable",
+        icon: "check",
+        tone: "success",
+      },
+      {
+        label: "Completed Today",
+        value: "—",
+        note: "Unavailable",
+        icon: "activity",
+        tone: "info",
+      },
+      {
+        label: "Awaiting Time-Out",
+        value: "—",
+        note: "Unavailable",
+        icon: "warning",
+        tone: "warning",
+      },
+      {
+        label: "Pending Corrections",
+        value: "—",
+        note: "Not connected",
+        icon: "comment",
+        tone: "info",
+      },
+      {
+        label: "Pending Verification",
+        value: "—",
+        note: "Not connected",
+        icon: "activity",
+        tone: "warning",
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "Active Employees",
+      value: String(summary.activeEmployees),
+      note: "Employee references",
+      icon: "users",
+      tone: "info",
+    },
+    {
+      label: "Timed In Today",
+      value: String(summary.timedInToday),
+      note: "Time-In recorded",
+      icon: "check",
+      tone: "success",
+    },
+    {
+      label: "Completed Today",
+      value: String(summary.completedToday),
+      note: "Time-Out recorded",
+      icon: "activity",
+      tone: "info",
+    },
+    {
+      label: "Awaiting Time-Out",
+      value: String(summary.awaitingTimeOut),
+      note: "Time-Out still pending",
+      icon: "warning",
+      tone: "warning",
+    },
+    {
+      label: "Pending Corrections",
+      value: "—",
+      note: "Not connected",
+      icon: "comment",
+      tone: "info",
+    },
+    {
+      label: "Pending Verification",
+      value: "—",
+      note: "Not connected",
+      icon: "activity",
+      tone: "warning",
+    },
+  ];
+}
+
+function getPendingActions(
+  summary: HrDashboardSummary | null,
+  dataLoadError: boolean,
+): HrPendingAction[] {
+  if (dataLoadError || !summary) {
+    return [
+      {
+        label: "Current Attendance",
+        count: "—",
+        note: "Unavailable",
+        icon: "warning",
+        tone: "warning",
+      },
+    ];
+  }
+
+  return [
+    {
+      label: "Awaiting Time-Out",
+      count: String(summary.awaitingTimeOut),
+      note: "Current-day records",
+      icon: "warning",
+      tone: "warning",
+    },
+  ];
 }

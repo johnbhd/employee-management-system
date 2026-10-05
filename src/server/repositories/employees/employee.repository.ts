@@ -87,3 +87,14 @@ export async function getEmployeeById(
 
     return parseEmployeeReference(employeeId, snapshot.data());
 }
+
+export async function listEmployees(): Promise<EmployeeReference[]> {
+    const snapshots = await getFirebaseAdminDb()
+        .collection(employeeCollection)
+        .get();
+
+    return snapshots.docs
+        .map((snapshot) => parseEmployeeReference(snapshot.id, snapshot.data()))
+        .filter((employee): employee is EmployeeReference => employee !== null)
+        .sort((left, right) => left.employeeId.localeCompare(right.employeeId));
+}

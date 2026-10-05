@@ -1,19 +1,22 @@
-import type { HrWorkflowAttendanceRecord } from "@/data/hr-workflow";
-
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { HrDashboardAttendanceItem } from "@/types/hr-dashboard";
 
 type HrTodayAttendanceProps = {
-  records: readonly HrWorkflowAttendanceRecord[];
+  records: readonly HrDashboardAttendanceItem[];
+  dataLoadError?: boolean;
 };
 
-export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
+export function HrTodayAttendance({
+  dataLoadError = false,
+  records,
+}: HrTodayAttendanceProps) {
   return (
     <section className="hr-dashboard-panel hr-attendance-panel" aria-labelledby="hr-today-attendance-heading">
       <div className="hr-panel-header">
         <div>
           <p className="hr-section-kicker">Operational records</p>
           <h2 id="hr-today-attendance-heading">Today&apos;s Attendance</h2>
-          <p className="hr-panel-description">Latest attendance records from the Bundy and QR source views.</p>
+          <p className="hr-panel-description">Latest attendance records for today&apos;s Asia/Manila business date.</p>
         </div>
       </div>
 
@@ -46,14 +49,18 @@ export function HrTodayAttendance({ records }: HrTodayAttendanceProps) {
                   <td>{record.source ?? "—"}</td>
                   <td><StatusBadge tone={record.statusTone}>{record.status}</StatusBadge></td>
                   <td><StatusBadge tone={record.validationTone}>{record.validationStatus}</StatusBadge></td>
-                  <td><StatusBadge tone={record.hrVerificationStatus === "Verified" ? "success" : record.hrVerificationStatus === "Needs Correction" ? "warning" : "info"}>{record.hrVerificationStatus}</StatusBadge></td>
+                  <td><StatusBadge tone="muted">{record.hrVerificationStatus}</StatusBadge></td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       ) : (
-        <p className="hr-empty-state">No attendance records available for today.</p>
+        <p className={`hr-empty-state${dataLoadError ? " is-error" : ""}`} role={dataLoadError ? "alert" : undefined}>
+          {dataLoadError
+            ? "Unable to load current attendance records. Please try again."
+            : "No attendance records available for today."}
+        </p>
       )}
     </section>
   );

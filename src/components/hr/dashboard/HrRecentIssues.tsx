@@ -1,12 +1,15 @@
-import type { HrAttendanceIssue } from "@/data/hr";
-
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { HrDashboardIssue } from "@/types/hr-dashboard";
 
 type HrRecentIssuesProps = {
-  issues: readonly HrAttendanceIssue[];
+  dataLoadError?: boolean;
+  issues: readonly HrDashboardIssue[];
 };
 
-export function HrRecentIssues({ issues }: HrRecentIssuesProps) {
+export function HrRecentIssues({
+  dataLoadError = false,
+  issues,
+}: HrRecentIssuesProps) {
   return (
     <section className="hr-dashboard-panel hr-issues-panel" aria-labelledby="hr-recent-issues-heading">
       <div className="hr-panel-header">
@@ -34,7 +37,11 @@ export function HrRecentIssues({ issues }: HrRecentIssuesProps) {
           ))}
         </div>
       ) : (
-        <p className="hr-empty-state">No recent attendance issues.</p>
+        <p className={`hr-empty-state${dataLoadError ? " is-error" : ""}`} role={dataLoadError ? "alert" : undefined}>
+          {dataLoadError
+            ? "Unable to load attendance issues. Please try again."
+            : "No current attendance issues."}
+        </p>
       )}
     </section>
   );

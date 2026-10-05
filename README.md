@@ -130,6 +130,14 @@ linked Employee's daily records, newest first, with serialized date, Time In,
 Time Out, source, and status values. The page does not accept a browser-supplied
 Employee ID or use browser storage/mock rows as an authority.
 
+The protected HR `/hr/dashboard` page now reads the active Employee reference
+count and current Asia/Manila attendance records through the server-side HR
+dashboard service. Its equivalent API is `GET /api/v1/hr/dashboard/summary`;
+it derives Timed In Today, Completed Today, Awaiting Time-Out, and recent
+awaiting-Time-Out items from the canonical attendance collection. Correction,
+verification, schedule, lateness, absence, and overtime values remain
+unavailable until their real data sources and policy rules are integrated.
+
 ## Firebase Development Seeder
 
 The repository includes a development-only Firebase Admin seeder that prepares
