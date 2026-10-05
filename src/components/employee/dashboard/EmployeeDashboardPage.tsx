@@ -14,10 +14,31 @@ import type { EmployeeReference } from "@/types/employee";
 import { EmployeeDashboardAttendanceCard } from "./EmployeeDashboardAttendanceCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
 
+export function EmployeeDashboardPageUnavailable() {
+  return (
+    <div className="employee-dashboard-page">
+      <section
+        className="employee-panel employee-dashboard-unavailable"
+        role="alert"
+        aria-labelledby="employee-dashboard-unavailable-heading"
+      >
+        <p className="employee-section-kicker">Employee profile</p>
+        <h2 id="employee-dashboard-unavailable-heading">
+          Employee information is currently unavailable.
+        </h2>
+        <p>
+          Please contact the system administrator to restore your employee
+          account reference.
+        </p>
+      </section>
+    </div>
+  );
+}
+
 export function EmployeeDashboardPage({
   employee,
 }: {
-  employee: EmployeeReference | null;
+  employee: EmployeeReference;
 }) {
   const latestAnnouncements = getLatestAnnouncements(3);
 
@@ -31,7 +52,7 @@ export function EmployeeDashboardPage({
         ))}
       </section>
 
-      <EmployeeDashboardAttendanceCard employeeId={employee?.employeeId ?? null} />
+      <EmployeeDashboardAttendanceCard employeeId={employee.employeeId} />
 
       <section className="employee-panel">
         <div className="employee-panel-heading">

@@ -11,7 +11,7 @@ import type { EmployeeReference } from "@/types/employee";
 export function EmployeeDashboardWelcome({
   employee,
 }: {
-  employee: EmployeeReference | null;
+  employee: EmployeeReference;
 }) {
   const [campusNow, setCampusNow] = useState<Date | null>(null);
 
@@ -38,12 +38,14 @@ export function EmployeeDashboardWelcome({
       <div>
         <p className="employee-welcome-kicker">{currentDateTime}</p>
         <h2>
-          Welcome back, {employee?.displayName ?? "Employee information unavailable"}!
+          Welcome back, {employee.displayName}!
         </h2>
         <p>Here is your employee dashboard for today.</p>
         <p className="muted">
-          Employee ID: <strong>{employee?.employeeId ?? "Unavailable"}</strong>
-          {employee ? ` · ${employee.department}` : " · Employee details unavailable"}
+          Position: <strong>{employee.position ?? "Not provided"}</strong>
+          <br />
+          Employee ID: <strong>{employee.employeeId}</strong>
+          {` · ${employee.department}`}
         </p>
       </div>
     </section>
