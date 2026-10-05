@@ -27,7 +27,7 @@ export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
   const pathname = usePathname();
   const pageTitle = pathname === "/hr/dashboard"
     ? "HR / Attendance Dashboard"
-    : pathname === "/hr/scanner"
+    : pathname === "/scanner"
       ? "QR Attendance Scanner"
       : "Attendance Operations";
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -89,7 +89,7 @@ export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
             <span>3</span>
           </button>
           <Link
-            href="/hr/scanner"
+            href="/scanner"
             className="hr-icon-button hr-scanner-button"
             aria-label="Open QR scanner"
           >

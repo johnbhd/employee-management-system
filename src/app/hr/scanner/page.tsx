@@ -1,5 +1,5 @@
-import { ScannerPage } from "@/components/scanner/ScannerPage";
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  return <ScannerPage />;
+  redirect("/scanner");
 }
