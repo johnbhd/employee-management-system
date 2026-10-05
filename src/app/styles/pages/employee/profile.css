@@ -81,8 +81,32 @@
   white-space: nowrap;
 }
 
+.employee-profile-status.is-inactive {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
 .employee-profile-details {
   overflow: hidden;
+}
+
+.employee-profile-unavailable {
+  padding: 1.35rem 1.5rem;
+}
+
+.employee-profile-unavailable h2 {
+  margin: 0.3rem 0 0;
+  color: var(--employee-ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.employee-profile-unavailable p {
+  margin: 0.7rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .employee-profile-section-heading {
@@ -142,6 +166,10 @@
 }
 
 @media (max-width: 620px) {
+  .employee-profile-unavailable {
+    padding: 1.15rem;
+  }
+
   .employee-profile-overview {
     align-items: flex-start;
     flex-wrap: wrap;
