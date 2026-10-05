@@ -118,6 +118,29 @@ yarn firebase:seed employees --dry-run
 yarn firebase:seed users --dry-run
 ```
 
+The development seed also includes ten fictional rank-and-file Employee demo
+accounts for testing. Their usernames follow
+`aujsc.<department-slug>.<three-digit-id>`, and the visible demo password is
+the same as the three-digit Employee ID. For example:
+
+```text
+aujsc.registrar.001 / 001
+aujsc.admissions.002 / 002
+aujsc.library.003 / 003
+aujsc.cashier.004 / 004
+aujsc.records.005 / 005
+aujsc.guidance.006 / 006
+aujsc.studentaffairs.007 / 007
+aujsc.itoffice.008 / 008
+aujsc.adminoffice.009 / 009
+aujsc.facilities.010 / 010
+```
+
+These accounts and credentials are fictional development/testing data only.
+Employee IDs remain strings so their leading zeros are preserved. The legacy
+`aujsc.employee` development account remains seed-compatible for existing local
+fixtures.
+
 The default command runs `employees` before `users`. Selecting `users` also
 runs the employee seeder first because seeded users may reference an employee.
 The `employees` seeder writes deterministic `employees/{employeeId}` documents.

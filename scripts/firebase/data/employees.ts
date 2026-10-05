@@ -1,5 +1,7 @@
 import { hrpsEmployees } from "../../../src/data/hrps-employees";
 
+import { demoEmployeeSeedAccounts } from "./demo-employees";
+
 export type SeedEmployee = {
   employeeId: string;
   displayName: string;
@@ -10,7 +12,7 @@ export type SeedEmployee = {
   dataSource: "development-seed";
 };
 
-export const employeeSeedData: readonly SeedEmployee[] = hrpsEmployees.map(
+const hrpsEmployeeSeedData: readonly SeedEmployee[] = hrpsEmployees.map(
   (employee) => ({
     employeeId: employee.id,
     displayName: employee.employee,
@@ -22,3 +24,19 @@ export const employeeSeedData: readonly SeedEmployee[] = hrpsEmployees.map(
     dataSource: "development-seed",
   }),
 );
+
+const demoEmployeeSeedData: readonly SeedEmployee[] =
+  demoEmployeeSeedAccounts.map((employee) => ({
+    employeeId: employee.employeeId,
+    displayName: employee.displayName,
+    department: employee.department,
+    position: employee.position,
+    employmentStatus: employee.employmentStatus,
+    sourceSystem: employee.sourceSystem,
+    dataSource: employee.dataSource,
+  }));
+
+export const employeeSeedData: readonly SeedEmployee[] = [
+  ...hrpsEmployeeSeedData,
+  ...demoEmployeeSeedData,
+];
