@@ -4,19 +4,31 @@ import {
 } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
 import type { EmployeeReference } from "@/types/employee";
+import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
 import { MyAttendanceToday } from "./MyAttendanceToday";
 import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
 export function MyAttendancePage({
+  attendanceLoadError,
   employee,
+  todayAttendance,
+  todayLabel,
 }: {
+  attendanceLoadError: boolean;
   employee: EmployeeReference | null;
+  todayAttendance: TodayAttendanceData;
+  todayLabel: string;
 }) {
   return (
     <div className="my-attendance-page">
-      <MyAttendanceToday employee={employee} />
+      <MyAttendanceToday
+        attendanceLoadError={attendanceLoadError}
+        employee={employee}
+        todayAttendance={todayAttendance}
+        todayLabel={todayLabel}
+      />
 
       <section
         className="my-attendance-quick-actions"
@@ -34,7 +46,10 @@ export function MyAttendancePage({
         <MyAttendanceQuickActions />
       </section>
 
-      <MonthlyAttendanceCalendar employeeId={employee?.employeeId ?? null} />
+      <MonthlyAttendanceCalendar
+        attendanceLoadError={attendanceLoadError}
+        todayAttendance={todayAttendance}
+      />
 
       <section
         className="my-attendance-notes"

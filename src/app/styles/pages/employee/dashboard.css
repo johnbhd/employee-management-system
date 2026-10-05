@@ -42,6 +42,22 @@
   font-size: 0.7rem;
 }
 
+.employee-dashboard-unavailable {
+  padding: 1.5rem 1.8rem;
+}
+
+.employee-dashboard-unavailable h2 {
+  margin: 0.3rem 0 0;
+  font-size: 1.15rem;
+}
+
+.employee-dashboard-unavailable p:last-child {
+  margin: 0.7rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
 .attendance-card {
   padding-bottom: 1.2rem;
 }
@@ -144,6 +160,12 @@
   border-top-color: #f0f1f5;
 }
 
+.employee-table-empty {
+  padding: 1.6rem 1rem !important;
+  color: var(--text-muted);
+  text-align: center;
+}
+
 .employee-bottom-grid {
   display: grid;
   grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
@@ -172,6 +194,12 @@
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.8rem;
   font-weight: 600;
+}
+
+.payroll-empty-state {
+  margin: 1.1rem 1.25rem 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
 }
 
 .payroll-meta {
@@ -233,6 +261,10 @@
 }
 
 @media (max-width: 560px) {
+  .employee-dashboard-unavailable {
+    padding: 1.2rem;
+  }
+
   .attendance-summary {
     grid-template-columns: 1fr;
   }

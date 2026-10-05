@@ -1,5 +1,6 @@
 import { loadEnvConfig } from "@next/env";
 
+import { demoEmployeeSeedAccounts } from "./data/demo-employees";
 import { employeeSeedData } from "./data/employees";
 import { userSeedData } from "./data/users";
 import { createSeedContext } from "./seed-context";
@@ -86,6 +87,38 @@ function validateSeedData(): void {
   const usernames = userSeedData.map((user) => user.username);
   const authEmails = userSeedData.map((user) => user.authEmail);
   const employeeIdSet = new Set(employeeIds);
+  const demoEmployeeIds = demoEmployeeSeedAccounts.map(
+    (employee) => employee.employeeId,
+  );
+
+  if (demoEmployeeSeedAccounts.length !== 10) {
+    throw new Error("Demo employee seed data must contain exactly 10 accounts.");
+  }
+
+  if (
+    new Set(demoEmployeeIds).size !== demoEmployeeIds.length
+    || demoEmployeeIds.some((employeeId) => !/^\d{3}$/.test(employeeId))
+  ) {
+    throw new Error(
+      "Demo employee IDs must be unique three-digit strings with leading zeros preserved.",
+    );
+  }
+
+  if (demoEmployeeIds.some((employeeId) => !employeeIdSet.has(employeeId))) {
+    throw new Error(
+      "Every demo employee account must reference a seeded employee document.",
+    );
+  }
+
+  if (
+    demoEmployeeSeedAccounts.some(
+      (employee) => employee.role !== "employee" || employee.employmentStatus !== "active",
+    )
+  ) {
+    throw new Error(
+      "Every demo employee account must use the active employee role and status.",
+    );
+  }
 
   if (new Set(employeeIds).size !== employeeIds.length) {
     throw new Error("Employee seed data contains duplicate employee IDs.");

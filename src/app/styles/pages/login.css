@@ -16,7 +16,8 @@
 .brand-side {
   display: flex;
   min-height: 100vh;
-  flex: 1;
+  min-width: 0;
+  flex: 1 1 50%;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -70,14 +71,16 @@
 
 .login-side {
   display: flex;
-  flex: 0 0 460px;
+  min-width: 0;
+  flex: 1 1 50%;
   align-items: center;
   justify-content: center;
   padding: 40px;
 }
 
 .login-page .container {
-  width: 380px;
+  width: 100%;
+  max-width: 380px;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 16px;
@@ -281,6 +284,7 @@
   }
 
   .login-side {
+    width: 100%;
     flex: none;
     background-color: transparent;
   }

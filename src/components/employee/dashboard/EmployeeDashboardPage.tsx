@@ -1,10 +1,7 @@
 import Link from "next/link";
 
-import {
-  attendanceHistory,
-  employeeStats,
-  getLatestAnnouncements,
-} from "@/data/employee";
+import { getLatestAnnouncements } from "@/data/employee";
+import { getEmployeeDashboardData } from "@/data/employee-dashboard";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
@@ -14,11 +11,33 @@ import type { EmployeeReference } from "@/types/employee";
 import { EmployeeDashboardAttendanceCard } from "./EmployeeDashboardAttendanceCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
 
+export function EmployeeDashboardPageUnavailable() {
+  return (
+    <div className="employee-dashboard-page">
+      <section
+        className="employee-panel employee-dashboard-unavailable"
+        role="alert"
+        aria-labelledby="employee-dashboard-unavailable-heading"
+      >
+        <p className="employee-section-kicker">Employee profile</p>
+        <h2 id="employee-dashboard-unavailable-heading">
+          Employee information is currently unavailable.
+        </h2>
+        <p>
+          Please contact the system administrator to restore your employee
+          account reference.
+        </p>
+      </section>
+    </div>
+  );
+}
+
 export function EmployeeDashboardPage({
   employee,
 }: {
-  employee: EmployeeReference | null;
+  employee: EmployeeReference;
 }) {
+  const dashboardData = getEmployeeDashboardData(employee.employeeId);
   const latestAnnouncements = getLatestAnnouncements(3);
 
   return (
@@ -26,12 +45,15 @@ export function EmployeeDashboardPage({
       <EmployeeDashboardWelcome employee={employee} />
 
       <section className="employee-stats-grid" aria-label="Attendance summary">
-        {employeeStats.map((stat) => (
+        {dashboardData.stats.map((stat) => (
           <SummaryCard key={stat.label} {...stat} />
         ))}
       </section>
 
-      <EmployeeDashboardAttendanceCard employeeId={employee?.employeeId ?? null} />
+      <EmployeeDashboardAttendanceCard
+        employeeId={employee.employeeId}
+        baselineAttendance={dashboardData.todayAttendance}
+      />
 
       <section className="employee-panel">
         <div className="employee-panel-heading">
@@ -48,12 +70,20 @@ export function EmployeeDashboardPage({
             <caption className="sr-only">Recent employee attendance history</caption>
             <thead><tr><th>Date</th><th>Time in</th><th>Time out</th><th>Hours</th><th>Status</th></tr></thead>
             <tbody>
-              {attendanceHistory.map((record) => (
-                <tr key={record.date}>
-                  <td>{record.date}</td><td>{record.timeIn}</td><td>{record.timeOut}</td><td>{record.hours}</td>
-                  <td><StatusBadge tone={record.tone}>{record.status}</StatusBadge></td>
+              {dashboardData.attendanceHistory.length > 0 ? (
+                dashboardData.attendanceHistory.map((record) => (
+                  <tr key={record.date}>
+                    <td>{record.date}</td><td>{record.timeIn}</td><td>{record.timeOut}</td><td>{record.hours}</td>
+                    <td><StatusBadge tone={record.tone}>{record.status}</StatusBadge></td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="employee-table-empty" colSpan={5}>
+                    No attendance records available.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -65,9 +95,15 @@ export function EmployeeDashboardPage({
             <div><p className="employee-section-kicker">Payroll</p><h2>Latest payslip</h2></div>
             <Icon name="payroll" />
           </div>
-          <p className="payroll-period">July 1–15, 2026</p>
-          <strong className="payroll-amount">₱24,850.00</strong>
-          <div className="payroll-meta"><span>Released July 18, 2026</span><StatusBadge tone="success">Available</StatusBadge></div>
+          {dashboardData.latestPayslip ? (
+            <>
+              <p className="payroll-period">{dashboardData.latestPayslip.period}</p>
+              <strong className="payroll-amount">{dashboardData.latestPayslip.amount}</strong>
+              <div className="payroll-meta"><span>{dashboardData.latestPayslip.releasedDate}</span><StatusBadge tone="success">Available</StatusBadge></div>
+            </>
+          ) : (
+            <p className="payroll-empty-state">No payslip available.</p>
+          )}
           <Link href="/employee/payslips" className="employee-secondary-button full-width"><Icon name="file" /> View payslip</Link>
         </section>
 

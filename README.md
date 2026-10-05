@@ -96,14 +96,47 @@ Firestore cannot be reached. It never returns credentials, stack traces, or
 service-account details. The Firestore check reads the reserved
 `_system/health` document without creating or modifying it.
 
-The employee-specific QR identity flow uses a separate server-only HMAC secret.
+The employee-specific QR attendance flow uses a separate server-only HMAC secret.
 Set `QR_ATTENDANCE_SIGNING_SECRET` in `.env.local` to a unique random value;
 for example, generate one locally with `openssl rand -base64 32`. Never reuse
 the Firebase private key, expose the value with `NEXT_PUBLIC_`, or commit the
-real secret. Employees receive a QR from `/employee/attendance-qr`; HR staff
-use `/hr/scanner`, and administrators use `/scanner`. The scanner
-validates the QR through the server and shows safe employee identity
-information without writing attendance records.
+real secret. Employees receive a QR from `/employee/attendance-qr`; authorized
+HR staff and administrators use the canonical `/scanner` route. The scanner
+validates the QR through the server, resolves the employee, and records the
+next valid daily attendance action through a Firebase Admin Firestore
+transaction. The first valid scan records Time In, the next allowed scan
+records Time Out, and later scans return the completed state without
+overwriting the record. The server stores attendance under the deterministic
+`attendance/{employeeId}_{attendanceDate}` document key using Asia/Manila for
+the business date.
+
+The deterministic local QR contract can be checked without Firebase writes:
+
+```bash
+yarn qr:verify
+yarn qr:attendance:verify
+```
+
+The Employee `/employee/my-attendance` page reads the authenticated Employee's
+current Asia/Manila attendance record through the server-side attendance
+service. The equivalent protected API is `GET
+/api/v1/attendance/me/today`; it derives the Employee ID from the HttpOnly
+session and does not accept an Employee ID from the browser.
+
+The Employee `/employee/attendance-history` page reads the same canonical
+Firestore attendance collection through the authenticated Employee context.
+The protected `GET /api/v1/attendance/me/history` endpoint returns only the
+linked Employee's daily records, newest first, with serialized date, Time In,
+Time Out, source, and status values. The page does not accept a browser-supplied
+Employee ID or use browser storage/mock rows as an authority.
+
+The protected HR `/hr/dashboard` page now reads the active Employee reference
+count and current Asia/Manila attendance records through the server-side HR
+dashboard service. Its equivalent API is `GET /api/v1/hr/dashboard/summary`;
+it derives Timed In Today, Completed Today, Awaiting Time-Out, and recent
+awaiting-Time-Out items from the canonical attendance collection. Correction,
+verification, schedule, lateness, absence, and overtime values remain
+unavailable until their real data sources and policy rules are integrated.
 
 ## Firebase Development Seeder
 
@@ -117,6 +150,29 @@ yarn firebase:seed --dry-run
 yarn firebase:seed employees --dry-run
 yarn firebase:seed users --dry-run
 ```
+
+The development seed also includes ten fictional rank-and-file Employee demo
+accounts for testing. Their usernames follow
+`aujsc.<department-slug>.<three-digit-id>`, and the visible demo password is
+`aujsc.<three-digit-id>`. For example:
+
+```text
+aujsc.registrar.001 / aujsc.001
+aujsc.admissions.002 / aujsc.002
+aujsc.library.003 / aujsc.003
+aujsc.cashier.004 / aujsc.004
+aujsc.records.005 / aujsc.005
+aujsc.guidance.006 / aujsc.006
+aujsc.studentaffairs.007 / aujsc.007
+aujsc.itoffice.008 / aujsc.008
+aujsc.adminoffice.009 / aujsc.009
+aujsc.facilities.010 / aujsc.010
+```
+
+These accounts and credentials are fictional development/testing data only.
+Employee IDs remain strings so their leading zeros are preserved. The legacy
+`aujsc.employee` development account remains seed-compatible for existing local
+fixtures.
 
 The default command runs `employees` before `users`. Selecting `users` also
 runs the employee seeder first because seeded users may reference an employee.

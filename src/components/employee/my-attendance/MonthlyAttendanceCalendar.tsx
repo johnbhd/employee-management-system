@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import {
@@ -8,13 +8,11 @@ import {
   getCalendarStatusFromLabel,
   type CalendarAttendanceStatus,
 } from "@/data/my-attendance-calendar";
-import { employeeAttendanceProfile } from "@/data/my-attendance";
-import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
 import {
   formatCampusMonthYear,
-  getCampusDateParts,
   type CampusDateParts,
 } from "@/lib/campus-time";
+import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const supportedCalendarYears = [2025, 2026] as const;
@@ -34,13 +32,14 @@ const monthOptions = [
 ] as const;
 
 const statusPresentation: Record<
-  CalendarAttendanceStatus,
-  { label: string; icon?: "check" | "clock" | "close" }
+  CalendarAttendanceStatus | "unavailable",
+  { label: string; icon?: "check" | "clock" | "close" | "warning" }
 > = {
   present: { label: "Present", icon: "check" },
   late: { label: "Late", icon: "clock" },
   absent: { label: "Absent", icon: "close" },
   "no-record": { label: "No Record" },
+  unavailable: { label: "Unavailable", icon: "warning" },
 };
 
 type CalendarView = {
@@ -54,75 +53,28 @@ type CalendarDay = {
 };
 
 export function MonthlyAttendanceCalendar({
-  employeeId,
+  attendanceLoadError,
+  todayAttendance,
 }: {
-  employeeId: string | null;
+  attendanceLoadError: boolean;
+  todayAttendance: TodayAttendanceData;
 }) {
-  const [campusDate, setCampusDate] = useState<CampusDateParts | null>(null);
-  const [calendarView, setCalendarView] = useState<CalendarView | null>(null);
-  const { demoAttendance } = useEmployeeQrDemoAttendance(
-    employeeId,
-  );
-
-  useEffect(() => {
-    const updateCampusDate = () => {
-      const nextCampusDate = getCampusDateParts(new Date());
-
-      setCampusDate(nextCampusDate);
-      setCalendarView((currentView) => {
-        if (currentView) {
-          return currentView;
-        }
-
-        return {
-          year: nextCampusDate.year,
-          month: nextCampusDate.month,
-        };
-      });
-    };
-
-    const initialUpdateId = window.setTimeout(updateCampusDate, 0);
-    const intervalId = window.setInterval(updateCampusDate, 60_000);
-
-    return () => {
-      window.clearTimeout(initialUpdateId);
-      window.clearInterval(intervalId);
-    };
-  }, []);
-
-  if (!campusDate || !calendarView) {
-    return (
-      <section
-        className="my-attendance-calendar-section"
-        aria-labelledby="my-attendance-calendar-title"
-        aria-busy="true"
-      >
-        <div className="my-attendance-section-heading">
-          <div>
-            <span className="my-attendance-kicker">Monthly overview</span>
-            <h2 id="my-attendance-calendar-title">Attendance Calendar</h2>
-          </div>
-          <span className="my-attendance-section-note">
-            Review your attendance for this month
-          </span>
-        </div>
-        <div className="my-attendance-calendar-surface my-attendance-calendar-loading">
-          Loading current month...
-        </div>
-      </section>
-    );
-  }
+  const campusDate = getCampusDateFromKey(todayAttendance.attendanceDate);
+  const [calendarView, setCalendarView] = useState<CalendarView>(() => ({
+    year: campusDate.year,
+    month: campusDate.month,
+  }));
 
   const calendarDays = buildCalendarDays(calendarView.year, calendarView.month);
   const monthDate = new Date(
     Date.UTC(calendarView.year, calendarView.month - 1, 1, 12),
   );
   const monthLabel = formatCampusMonthYear(monthDate);
-  const currentDayStatus = getCalendarStatusFromLabel(
-    demoAttendance?.status === "Completed"
-      ? "Present"
-      : demoAttendance?.status ?? employeeAttendanceProfile.status,
-  );
+  const currentDayStatus = attendanceLoadError
+    ? "unavailable" as const
+    : todayAttendance.attendance
+      ? getCalendarStatusFromLabel("Present")
+      : getCalendarStatusFromLabel("No Record");
   const yearOptions = getYearOptions(calendarView.year);
 
   function handlePreviousMonth() {
@@ -332,6 +284,16 @@ function getYearOptions(selectedYear: number) {
   );
 }
 
+function getCampusDateFromKey(dateKey: string): CampusDateParts {
+  const [year, month, day] = dateKey.split("-").map(Number);
+
+  return {
+    year,
+    month,
+    day,
+  };
+}
+
 function buildCalendarDays(year: number, month: number): CalendarDay[] {
   const firstWeekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay();
   const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
@@ -405,7 +367,7 @@ function CalendarDayCell({
   day: number;
   isToday: boolean;
   monthLabel: string;
-  status: CalendarAttendanceStatus | null;
+  status: CalendarAttendanceStatus | "unavailable" | null;
 }) {
   const statusDetails = status ? statusPresentation[status] : null;
   const statusLabel = statusDetails?.label ?? "Upcoming";

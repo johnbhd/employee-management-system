@@ -16,7 +16,10 @@ type ScannerState =
   | "initializing"
   | "scanning"
   | "validating"
-  | "success"
+  | "time_in_success"
+  | "time_out_success"
+  | "already_completed"
+  | "duplicate_scan"
   | "invalid"
   | "error";
 
@@ -63,8 +66,8 @@ export function ScannerPage() {
       }
 
       setResult(body.data);
-      setMessage("Employee identity verified.");
-      setScannerState("success");
+      setMessage(getAttendanceSuccessMessage(body.data.action));
+      setScannerState(getAttendanceSuccessState(body.data.action));
     } catch {
       setScannerState("error");
       setMessage("The scanner could not reach the validation service. Try again.");
@@ -158,7 +161,7 @@ export function ScannerPage() {
             <span className="attendance-scanner-kicker">Development fallback</span>
             <h2 id="scanner-manual-heading">Paste a QR value</h2>
             <p>
-              Use this only when camera access is unavailable. The value is still validated by the server.
+              Use this when camera access is unavailable. A valid value uses the same server flow and may record a development attendance action.
             </p>
           </div>
           <form className="attendance-scanner-manual-form" onSubmit={handleManualSubmit}>
@@ -176,7 +179,7 @@ export function ScannerPage() {
                 className="attendance-scanner-primary-button"
                 disabled={scannerState === "validating" || !manualQrValue.trim()}
               >
-                Validate QR
+                Submit QR scan
               </button>
             </div>
           </form>
@@ -208,8 +211,44 @@ function getScannerErrorMessage(status: number) {
   }
 
   if (status >= 500) {
-    return "Employee information is temporarily unavailable. Try again.";
+    return "The attendance service is temporarily unavailable. Try again.";
   }
 
-  return "Invalid or unrecognized employee QR.";
+  return "Invalid or unrecognized AU-JSC attendance QR.";
+}
+
+function getAttendanceSuccessState(
+  action: QrResolveData["action"],
+): ScannerState {
+  if (action === "time_in") {
+    return "time_in_success";
+  }
+
+  if (action === "time_out") {
+    return "time_out_success";
+  }
+
+  if (action === "duplicate_scan") {
+    return "duplicate_scan";
+  }
+
+  return "already_completed";
+}
+
+function getAttendanceSuccessMessage(
+  action: QrResolveData["action"],
+) {
+  if (action === "time_in") {
+    return "Time In recorded successfully.";
+  }
+
+  if (action === "time_out") {
+    return "Time Out recorded successfully.";
+  }
+
+  if (action === "duplicate_scan") {
+    return "This scan was received too soon after the previous scan.";
+  }
+
+  return "Attendance is already completed for today.";
 }

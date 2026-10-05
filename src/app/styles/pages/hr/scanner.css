@@ -360,6 +360,11 @@
   line-height: 1.5;
 }
 
+.attendance-scanner-result-note-warning {
+  border-left-color: var(--au-red);
+  background: var(--warning-soft, #fff7ed);
+}
+
 .attendance-scanner-result > .attendance-scanner-primary-button {
   width: 100%;
 }
