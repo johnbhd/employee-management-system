@@ -96,19 +96,25 @@ Firestore cannot be reached. It never returns credentials, stack traces, or
 service-account details. The Firestore check reads the reserved
 `_system/health` document without creating or modifying it.
 
-The employee-specific QR identity flow uses a separate server-only HMAC secret.
+The employee-specific QR attendance flow uses a separate server-only HMAC secret.
 Set `QR_ATTENDANCE_SIGNING_SECRET` in `.env.local` to a unique random value;
 for example, generate one locally with `openssl rand -base64 32`. Never reuse
 the Firebase private key, expose the value with `NEXT_PUBLIC_`, or commit the
 real secret. Employees receive a QR from `/employee/attendance-qr`; authorized
 HR staff and administrators use the canonical `/scanner` route. The scanner
-validates the QR through the server and shows safe employee identity
-information without writing attendance records.
+validates the QR through the server, resolves the employee, and records the
+next valid daily attendance action through a Firebase Admin Firestore
+transaction. The first valid scan records Time In, the next allowed scan
+records Time Out, and later scans return the completed state without
+overwriting the record. The server stores attendance under the deterministic
+`attendance/{employeeId}_{attendanceDate}` document key using Asia/Manila for
+the business date.
 
 The deterministic local QR contract can be checked without Firebase writes:
 
 ```bash
 yarn qr:verify
+yarn qr:attendance:verify
 ```
 
 ## Firebase Development Seeder

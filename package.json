@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",
+    "qr:attendance:verify": "tsx scripts/attendance/verify-qr-attendance.ts",
     "firebase:seed": "tsx scripts/firebase/seed.ts"
   },
   "resolutions": {

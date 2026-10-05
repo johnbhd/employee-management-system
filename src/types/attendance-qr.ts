@@ -14,10 +14,29 @@ export type QrResolveRequest = {
     qrValue: string;
 };
 
+export type QrAttendanceAction =
+    | "time_in"
+    | "time_out"
+    | "already_completed"
+    | "duplicate_scan";
+
+export type QrAttendanceStatus = "present" | "completed";
+
+export type QrAttendanceData = {
+    date: string;
+    timeIn: string;
+    timeOut: string | null;
+    timeInSource: "QR";
+    timeOutSource: "QR" | null;
+    status: QrAttendanceStatus;
+};
+
 export type QrResolveData = {
     employee: EmployeeReference;
     scannedAt: string;
     source: "QR";
+    attendance: QrAttendanceData;
+    action: QrAttendanceAction;
 };
 
 export type QrResolveSuccessResponse =

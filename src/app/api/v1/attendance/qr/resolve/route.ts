@@ -6,7 +6,7 @@ import {
 } from "@/server/attendance/qr/attendance-qr-token";
 import {
     AttendanceQrEmployeeUnavailableError,
-    resolveEmployeeAttendanceQr,
+    recordEmployeeQrAttendance,
 } from "@/server/attendance/qr/attendance-qr.service";
 import { requireApiRoles, ApiAuthorizationError } from "@/server/auth/guards";
 import {
@@ -14,6 +14,7 @@ import {
     FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
 import type { ApiErrorResponse } from "@/types/api/responses";
+import type { SessionUser } from "@/types/auth";
 import type {
     QrResolveRequest,
     QrResolveSuccessResponse,
@@ -43,8 +44,10 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export async function POST(request: Request) {
+    let scannerOperator: SessionUser;
+
     try {
-        await requireApiRoles("hr", "admin");
+        scannerOperator = await requireApiRoles("hr", "admin");
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {
             return getErrorResponse(error.code, error.message, error.status);
@@ -87,7 +90,10 @@ export async function POST(request: Request) {
     };
 
     try {
-        const data = await resolveEmployeeAttendanceQr(requestData.qrValue);
+        const data = await recordEmployeeQrAttendance(
+            requestData.qrValue,
+            scannerOperator,
+        );
         const response: QrResolveSuccessResponse = {
             success: true,
             data,

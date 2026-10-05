@@ -1,9 +1,12 @@
 "use client";
 
 import { Icon } from "@/components/ui/Icon";
-import { formatCampusDateTime } from "@/lib/campus-time";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { QrResolveData } from "@/types/attendance-qr";
+import { formatCampusDateTime, formatCampusTime } from "@/lib/campus-time";
+import type {
+  QrAttendanceAction,
+  QrResolveData,
+} from "@/types/attendance-qr";
 
 type ScannedEmployeeCardProps = {
   result: QrResolveData;
@@ -18,6 +21,17 @@ export function ScannedEmployeeCard({
     ? "success"
     : "warning";
   const scannedAt = new Date(result.scannedAt);
+  const timeIn = new Date(result.attendance.timeIn);
+  const timeOut = result.attendance.timeOut
+    ? new Date(result.attendance.timeOut)
+    : null;
+  const isDuplicate = result.action === "duplicate_scan";
+  const resultTitle = getResultTitle(result.action);
+  const resultKicker = result.action === "already_completed"
+    ? "Attendance status"
+    : isDuplicate
+      ? "Duplicate scan prevented"
+      : "Attendance recorded";
 
   return (
     <section className="attendance-scanner-result" aria-labelledby="scanner-result-heading">
@@ -26,8 +40,8 @@ export function ScannedEmployeeCard({
           <Icon name="check" />
         </span>
         <div>
-          <span className="attendance-scanner-kicker">Employee identified</span>
-          <h2 id="scanner-result-heading">Identity verified</h2>
+          <span className="attendance-scanner-kicker">{resultKicker}</span>
+          <h2 id="scanner-result-heading">{resultTitle}</h2>
         </div>
       </div>
 
@@ -59,6 +73,26 @@ export function ScannedEmployeeCard({
           </dd>
         </div>
         <div>
+          <dt>Attendance date</dt>
+          <dd>{result.attendance.date}</dd>
+        </div>
+        <div>
+          <dt>Time In</dt>
+          <dd>{formatAttendanceTime(timeIn)}</dd>
+        </div>
+        <div>
+          <dt>Time Out</dt>
+          <dd>{timeOut ? formatAttendanceTime(timeOut) : "Not recorded"}</dd>
+        </div>
+        <div>
+          <dt>Attendance status</dt>
+          <dd>
+            <StatusBadge tone={result.attendance.status === "completed" ? "success" : "info"}>
+              {result.attendance.status === "completed" ? "Completed" : "Present"}
+            </StatusBadge>
+          </dd>
+        </div>
+        <div>
           <dt>Scanned at</dt>
           <dd>
             {Number.isNaN(scannedAt.getTime())
@@ -72,8 +106,8 @@ export function ScannedEmployeeCard({
         </div>
       </dl>
 
-      <p className="attendance-scanner-result-note" role="status">
-        Identity was verified. Attendance has not been recorded by this scan.
+      <p className={`attendance-scanner-result-note${isDuplicate ? " attendance-scanner-result-note-warning" : ""}`} role="status">
+        {getResultNote(result.action)}
       </p>
 
       <button
@@ -86,4 +120,40 @@ export function ScannedEmployeeCard({
       </button>
     </section>
   );
+}
+
+function getResultTitle(action: QrAttendanceAction) {
+  if (action === "time_in") {
+    return "Time In Recorded";
+  }
+
+  if (action === "time_out") {
+    return "Time Out Recorded";
+  }
+
+  if (action === "duplicate_scan") {
+    return "Scan Already Processed";
+  }
+
+  return "Attendance Already Completed";
+}
+
+function getResultNote(action: QrAttendanceAction) {
+  if (action === "time_in") {
+    return "Time In was recorded in the employee's attendance record for today.";
+  }
+
+  if (action === "time_out") {
+    return "Time Out was recorded. The original Time In remains unchanged.";
+  }
+
+  if (action === "duplicate_scan") {
+    return "No new attendance action was created because this scan arrived too soon after the previous successful scan. Scan again after a few seconds if a Time Out is intended.";
+  }
+
+  return "This employee's attendance is already complete for today. No attendance values were changed.";
+}
+
+function formatAttendanceTime(value: Date) {
+  return Number.isNaN(value.getTime()) ? "Time unavailable" : formatCampusTime(value);
 }
