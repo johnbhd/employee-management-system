@@ -41,3 +41,11 @@ export type QrResolveData = {
 
 export type QrResolveSuccessResponse =
     ApiSuccessResponse<QrResolveData>;
+
+export type TodayAttendanceData = {
+    attendanceDate: string;
+    attendance: QrAttendanceData | null;
+};
+
+export type TodayAttendanceSuccessResponse =
+    ApiSuccessResponse<TodayAttendanceData>;

@@ -174,6 +174,28 @@ function getAttendanceDocumentId(
     return `${employeeId}_${attendanceDate}`;
 }
 
+export async function getAttendanceByEmployeeAndDate(
+    employeeId: string,
+    attendanceDate: string,
+): Promise<StoredQrAttendanceRecord | null> {
+    const snapshot = await getFirebaseAdminDb()
+        .collection(attendanceCollection)
+        .doc(getAttendanceDocumentId(employeeId, attendanceDate))
+        .get();
+
+    if (!snapshot.exists) {
+        return null;
+    }
+
+    const record = parseAttendanceRecord(snapshot.data());
+
+    if (!record) {
+        throw new QrAttendanceDataError();
+    }
+
+    return record;
+}
+
 export async function recordQrAttendance(
     input: {
         employeeId: string;

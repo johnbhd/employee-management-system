@@ -1,6 +1,7 @@
 import "server-only";
 
 import { formatCampusDateKey } from "@/lib/campus-time";
+import { serializeAttendanceRecord } from "@/server/attendance/attendance.service";
 import { getEmployeeById } from "@/server/repositories/employees/employee.repository";
 import { recordQrAttendance } from "@/server/repositories/attendance/attendance.repository";
 import type { SessionUser } from "@/types/auth";
@@ -58,15 +59,7 @@ export async function recordEmployeeQrAttendance(
 
     return {
         action: attendanceResult.action,
-        attendance: {
-            date: attendanceResult.record.attendanceDate,
-            status: attendanceResult.record.status,
-            timeIn: attendanceResult.record.timeIn.toDate().toISOString(),
-            timeInSource: attendanceResult.record.timeInSource,
-            timeOut: attendanceResult.record.timeOut?.toDate().toISOString()
-                ?? null,
-            timeOutSource: attendanceResult.record.timeOutSource,
-        },
+        attendance: serializeAttendanceRecord(attendanceResult.record),
         employee,
         scannedAt: scannedAt.toISOString(),
         source: "QR",

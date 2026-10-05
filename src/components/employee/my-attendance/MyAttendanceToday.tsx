@@ -1,34 +1,54 @@
 "use client";
 
+import { Icon } from "@/components/ui/Icon";
+import { formatCampusTime } from "@/lib/campus-time";
 import {
   employeeAttendanceProfile,
   employeeAttendanceStats,
   type EmployeeAttendanceStat,
 } from "@/data/my-attendance";
-import { useEmployeeQrDemoAttendance } from "@/hooks/useEmployeeQrDemoAttendance";
-import type { EmployeeQrDemoAttendance } from "@/lib/employee/qr-demo-attendance";
+import type { QrAttendanceData, TodayAttendanceData } from "@/types/attendance-qr";
 import type { EmployeeReference } from "@/types/employee";
 
-import { Icon } from "@/components/ui/Icon";
-
 export function MyAttendanceToday({
+  attendanceLoadError,
   employee,
+  todayAttendance,
+  todayLabel,
 }: {
+  attendanceLoadError: boolean;
   employee: EmployeeReference | null;
+  todayAttendance: TodayAttendanceData;
+  todayLabel: string;
 }) {
-  const { demoAttendance } = useEmployeeQrDemoAttendance(
-    employee?.employeeId ?? null,
+  const hasAttendance = todayAttendance.attendance !== null;
+  const isUnavailable = attendanceLoadError || employee === null;
+  const displayedStats = getDisplayedStats(
+    todayAttendance.attendance,
+    isUnavailable,
   );
-  const displayedStats = getDisplayedStats(demoAttendance);
-  const status = demoAttendance?.status ?? employeeAttendanceProfile.status;
-  const statusNote = demoAttendance
-    ? demoAttendance.status === "Completed"
-      ? "Time-In and Time-Out recorded via QR"
-      : "Time-In recorded via QR"
-    : employeeAttendanceProfile.statusNote;
+  const status = isUnavailable
+    ? "Unavailable"
+    : hasAttendance
+      ? todayAttendance.attendance?.status === "completed"
+        ? "Completed"
+        : "Present"
+      : "Not Yet Timed-In";
+  const statusNote = isUnavailable
+    ? "Unable to load today's attendance. Please try again."
+    : hasAttendance
+      ? todayAttendance.attendance?.status === "completed"
+        ? "Time-In and Time-Out recorded"
+        : "Time-In recorded; Time-Out is still pending"
+      : "No attendance recorded for today";
   const employeeName = employee?.displayName ?? "Employee information unavailable";
   const employeeId = employee?.employeeId ?? "Employee ID unavailable";
   const department = employee?.department ?? "Employee details unavailable";
+  const statusClass = isUnavailable
+    ? "is-error"
+    : hasAttendance
+      ? "is-present"
+      : "is-empty";
 
   return (
     <>
@@ -68,7 +88,7 @@ export function MyAttendanceToday({
           </div>
         </div>
 
-        <div className="my-attendance-status-box">
+        <div className={`my-attendance-status-box ${statusClass}`}>
           <span className="my-attendance-label">Current Status</span>
           <strong className="my-attendance-status-value">
             <span className="my-attendance-status-dot" aria-hidden="true" />
@@ -88,9 +108,15 @@ export function MyAttendanceToday({
             <h2 id="my-attendance-details-title">Attendance details</h2>
           </div>
           <span className="my-attendance-section-note">
-            Authorized attendance record
+            {todayLabel}
           </span>
         </div>
+
+        {attendanceLoadError ? (
+          <p className="my-attendance-data-error" role="alert">
+            Unable to load today&apos;s attendance. Please try again.
+          </p>
+        ) : null}
 
         <div className="my-attendance-details-grid">
           {displayedStats.map((stat) => (
@@ -109,36 +135,51 @@ export function MyAttendanceToday({
 }
 
 function getDisplayedStats(
-  demoAttendance: EmployeeQrDemoAttendance | null,
+  attendance: QrAttendanceData | null,
+  isUnavailable: boolean,
 ): EmployeeAttendanceStat[] {
-  if (!demoAttendance) {
-    return employeeAttendanceStats;
-  }
+  const timeIn = attendance
+    ? formatAttendanceTime(attendance.timeIn)
+    : "—";
+  const timeOut = attendance?.timeOut
+    ? formatAttendanceTime(attendance.timeOut)
+    : "—";
+  const source = getAttendanceSource(attendance, isUnavailable);
 
   return employeeAttendanceStats.map((stat) => {
     if (stat.label === "Time-In") {
       return {
         ...stat,
-        value: demoAttendance.timeIn,
-        note: "via QR",
+        value: timeIn,
+        note: isUnavailable
+          ? "Unavailable"
+          : attendance
+            ? `via ${attendance.timeInSource}`
+            : "Not yet timed-in",
       };
     }
 
     if (stat.label === "Time-Out") {
       return {
         ...stat,
-        value: demoAttendance.timeOut ?? "—",
-        note: demoAttendance.timeOut ? "via QR" : "Not yet timed out",
-        tone: demoAttendance.timeOut ? "success" : "muted",
+        value: timeOut,
+        note: isUnavailable
+          ? "Unavailable"
+          : attendance?.timeOut
+            ? `via ${attendance.timeOutSource ?? "attendance source"}`
+            : attendance
+              ? "Not yet timed out"
+              : "Not yet timed-in",
+        tone: attendance?.timeOut ? "success" : "muted",
       };
     }
 
     if (stat.label === "Attendance Source") {
       return {
         ...stat,
-        value: "QR",
-        note: "Time-in recorded via QR",
-        tone: "info",
+        value: source.value,
+        note: source.note,
+        tone: source.value === "—" ? "muted" : "info",
       };
     }
 
@@ -153,4 +194,48 @@ function getDisplayedStats(
 
     return stat;
   });
+}
+
+function getAttendanceSource(
+  attendance: QrAttendanceData | null,
+  isUnavailable: boolean,
+) {
+  if (isUnavailable) {
+    return {
+      value: "—",
+      note: "Unavailable",
+    };
+  }
+
+  if (!attendance) {
+    return {
+      value: "—",
+      note: "No attendance source",
+    };
+  }
+
+  if (
+    attendance.timeOutSource === null
+    || attendance.timeInSource === attendance.timeOutSource
+  ) {
+    return {
+      value: attendance.timeInSource,
+      note: attendance.timeOutSource
+        ? `Time-In and Time-Out via ${attendance.timeInSource}`
+        : `Time-In via ${attendance.timeInSource}`,
+    };
+  }
+
+  return {
+    value: "Mixed",
+    note: `Time-In: ${attendance.timeInSource}; Time-Out: ${attendance.timeOutSource}`,
+  };
+}
+
+function formatAttendanceTime(value: string) {
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime())
+    ? "Time unavailable"
+    : formatCampusTime(date);
 }

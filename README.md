@@ -117,6 +117,12 @@ yarn qr:verify
 yarn qr:attendance:verify
 ```
 
+The Employee `/employee/my-attendance` page reads the authenticated Employee's
+current Asia/Manila attendance record through the server-side attendance
+service. The equivalent protected API is `GET
+/api/v1/attendance/me/today`; it derives the Employee ID from the HttpOnly
+session and does not accept an Employee ID from the browser.
+
 ## Firebase Development Seeder
 
 The repository includes a development-only Firebase Admin seeder that prepares

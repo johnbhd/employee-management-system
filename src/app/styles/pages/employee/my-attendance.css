@@ -128,6 +128,14 @@
   padding: 0.35rem 0 0.35rem 1rem;
 }
 
+.my-attendance-status-box.is-empty {
+  border-left-color: var(--employee-blue);
+}
+
+.my-attendance-status-box.is-error {
+  border-left-color: var(--employee-red);
+}
+
 .my-attendance-status-value {
   display: flex;
   align-items: center;
@@ -136,6 +144,14 @@
   color: var(--employee-green);
   font-size: 1rem;
   font-weight: 800;
+}
+
+.my-attendance-status-box.is-empty .my-attendance-status-value {
+  color: var(--employee-blue);
+}
+
+.my-attendance-status-box.is-error .my-attendance-status-value {
+  color: var(--employee-red);
 }
 
 .my-attendance-status-dot {
@@ -173,6 +189,16 @@
   grid-template-columns: repeat(5, minmax(0, 1fr));
   margin-top: 1rem;
   border-top: 1px solid var(--employee-line);
+}
+
+.my-attendance-data-error {
+  margin: 1rem 0 0;
+  border-left: 2px solid var(--employee-red);
+  background: #fff5f5;
+  padding: 0.7rem 0.8rem;
+  color: var(--employee-red);
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 
 .my-attendance-detail {
@@ -559,6 +585,10 @@
 .my-attendance-calendar-day.has-no-record .my-attendance-calendar-status,
 .my-attendance-calendar-day.is-upcoming .my-attendance-calendar-status {
   color: #9aa1ae;
+}
+
+.my-attendance-calendar-day.has-unavailable .my-attendance-calendar-status {
+  color: var(--employee-red);
 }
 
 .my-attendance-calendar-status-mark {
