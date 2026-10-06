@@ -6,8 +6,7 @@
 }
 
 .my-attendance-overview,
-.my-attendance-details-section,
-.my-attendance-note-card {
+.my-attendance-details-section {
   border: 1px solid var(--employee-line);
   background: #fff;
 }
@@ -44,8 +43,7 @@
   font-size: 1.1rem;
 }
 
-.my-attendance-kicker,
-.my-attendance-note-kicker {
+.my-attendance-kicker {
   display: block;
   color: var(--employee-red);
   font-size: 0.62rem;
@@ -55,8 +53,7 @@
 }
 
 .my-attendance-employee h2,
-.my-attendance-section-heading h2,
-.my-attendance-note-heading h2 {
+.my-attendance-section-heading h2 {
   margin: 0;
   color: var(--employee-ink);
   font-family: Arial, Helvetica, sans-serif;
@@ -512,63 +509,6 @@
   justify-content: center;
 }
 
-.my-attendance-notes {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 1rem;
-  border-top: 1px solid var(--employee-line);
-  padding-top: 1.25rem;
-}
-
-.my-attendance-note-card {
-  min-width: 0;
-  border-radius: 0.65rem;
-  padding: 1rem 1.1rem;
-}
-
-.my-attendance-note-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  margin-bottom: 0.75rem;
-}
-
-.my-attendance-note-heading > .ui-icon {
-  margin-top: 0.15rem;
-  color: var(--employee-red);
-  font-size: 0.9rem;
-}
-
-.my-attendance-help-card .my-attendance-note-heading > .ui-icon {
-  color: var(--employee-blue);
-}
-
-.my-attendance-note-kicker {
-  color: var(--text-muted);
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
-}
-
-.my-attendance-note-heading h2 {
-  margin-top: 0.15rem;
-  font-size: 0.95rem;
-}
-
-.my-attendance-note-card ul {
-  margin: 0;
-  padding-left: 1.1rem;
-  color: var(--employee-ink);
-  font-size: 0.76rem;
-  line-height: 1.7;
-}
-
-.my-attendance-note-card p {
-  margin: 0;
-  color: var(--employee-ink);
-  font-size: 0.76rem;
-  line-height: 1.65;
-}
-
 @media (max-width: 1100px) {
   .my-attendance-overview {
     grid-template-columns: minmax(0, 1.25fr) minmax(12rem, 0.9fr);
@@ -601,10 +541,6 @@
 }
 
 @media (max-width: 760px) {
-  .my-attendance-notes {
-    grid-template-columns: 1fr;
-  }
-
   .my-attendance-calendar-toolbar {
     align-items: flex-start;
     flex-direction: column;
