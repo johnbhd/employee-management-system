@@ -35,6 +35,10 @@
   padding: 1.5rem 1.8rem;
 }
 
+.employee-welcome-copy {
+  max-width: 52rem;
+}
+
 .employee-welcome h2,
 .employee-panel h2,
 .attendance-card h2 {
@@ -45,7 +49,9 @@
 }
 
 .employee-welcome h2 {
+  margin-top: 0.55rem;
   font-size: 1.35rem;
+  line-height: 1.25;
 }
 
 .employee-welcome p {
@@ -53,13 +59,23 @@
   font-size: 0.8rem;
 }
 
+.employee-welcome-kicker {
+  line-height: 1.25;
+}
+
+.employee-welcome p.employee-welcome-message {
+  margin-top: 0.5rem;
+  line-height: 1.45;
+}
+
 .employee-welcome strong {
   color: var(--employee-navy);
 }
 
 .employee-welcome .muted {
-  margin-top: 0.7rem;
+  margin-top: 0.9rem;
   color: var(--text-muted);
+  line-height: 1.55;
 }
 
 .employee-welcome .link-text {
