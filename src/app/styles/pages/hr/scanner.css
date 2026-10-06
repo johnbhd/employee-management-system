@@ -6,7 +6,7 @@
 .attendance-scanner-page {
   display: grid;
   width: 100%;
-  max-width: 60rem;
+  max-width: 90rem;
   min-width: 0;
   gap: 1.25rem;
   margin: 0 auto;
@@ -57,10 +57,32 @@
   box-shadow: var(--shadow);
 }
 
+.attendance-scanner-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(17rem, 1fr);
+  min-width: 0;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.attendance-scanner-camera-column,
+.attendance-scanner-result-column {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+}
+
+.attendance-scanner-result-column {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+}
+
 .attendance-scanner-camera-frame {
   display: grid;
   min-width: 0;
-  min-height: 20rem;
+  min-height: 24rem;
   place-items: center;
   overflow: hidden;
   border-radius: 0.85rem;
@@ -77,8 +99,8 @@
 
 .attendance-scanner-camera-target {
   display: grid;
-  width: min(100%, 34rem);
-  min-height: 20rem;
+  width: min(100%, 42rem);
+  min-height: 24rem;
   margin: 0 auto;
   place-items: center;
   overflow: hidden;
@@ -87,7 +109,7 @@
 .attendance-scanner-camera-target video {
   display: block;
   width: 100% !important;
-  max-width: 34rem;
+  max-width: 42rem;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 0.7rem;
@@ -262,9 +284,62 @@
 
 .attendance-scanner-result {
   display: grid;
-  max-width: 42rem;
+  width: 100%;
+  max-width: none;
   gap: 1.25rem;
   margin: 0 auto;
+}
+
+.attendance-scanner-waiting-panel {
+  min-height: 100%;
+  align-content: center;
+  justify-items: center;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.attendance-scanner-waiting-panel h2 {
+  margin-top: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.attendance-scanner-waiting-panel p {
+  margin: 0;
+  color: var(--text-secondary, var(--text-muted));
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.attendance-scanner-waiting-panel > p {
+  max-width: 22rem;
+}
+
+.attendance-scanner-waiting-panel-attention {
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-panel-attention p {
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: var(--au-blue);
+  font-size: 1.35rem;
+}
+
+.attendance-scanner-waiting-panel-attention .attendance-scanner-waiting-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-help {
+  color: var(--text-muted) !important;
 }
 
 .attendance-scanner-result-heading {
@@ -388,6 +463,16 @@
 
   .attendance-scanner-manual-form .attendance-scanner-primary-button {
     width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .attendance-scanner-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-scanner-result-column {
+    min-height: 17rem;
   }
 }
 

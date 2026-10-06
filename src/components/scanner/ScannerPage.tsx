@@ -1,6 +1,12 @@
 "use client";
 
-import { FormEvent, useCallback, useRef, useState } from "react";
+import {
+  FormEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import type { ApiErrorResponse } from "@/types/api/responses";
@@ -29,10 +35,18 @@ export function ScannerPage() {
   const [cameraResetKey, setCameraResetKey] = useState(0);
   const [cameraRestartKey, setCameraRestartKey] = useState(0);
   const [manualQrValue, setManualQrValue] = useState("");
-  const [message, setMessage] = useState("Starting camera…");
+  const [message, setMessage] = useState("Starting camera...");
   const [result, setResult] = useState<QrResolveData | null>(null);
   const [scannerState, setScannerState] = useState<ScannerState>("initializing");
   const resolvingRef = useRef(false);
+
+  const resetScanner = useCallback(() => {
+    setManualQrValue("");
+    setMessage("Starting camera...");
+    setResult(null);
+    setScannerState("initializing");
+    setCameraResetKey((key) => key + 1);
+  }, []);
 
   const resolveQrValue = useCallback(async (qrValue: string) => {
     if (resolvingRef.current || !qrValue.trim()) {
@@ -40,7 +54,7 @@ export function ScannerPage() {
     }
 
     resolvingRef.current = true;
-    setMessage("Validating employee QR…");
+    setMessage("Validating employee QR...");
     setResult(null);
     setScannerState("validating");
 
@@ -90,21 +104,27 @@ export function ScannerPage() {
     void resolveQrValue(value);
   }, [resolveQrValue]);
 
+  useEffect(() => {
+    if (!result) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      resetScanner();
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [resetScanner, result]);
+
   function handleManualSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     void resolveQrValue(manualQrValue);
   }
 
-  function handleScanNext() {
-    setManualQrValue("");
-    setMessage("Starting camera…");
-    setResult(null);
-    setScannerState("initializing");
-    setCameraResetKey((key) => key + 1);
-  }
-
   function retryCamera() {
-    setMessage("Starting camera…");
+    setMessage("Starting camera...");
     setScannerState("initializing");
     setCameraRestartKey((key) => key + 1);
   }
@@ -120,10 +140,8 @@ export function ScannerPage() {
       </div>
 
       <section className="attendance-scanner-panel" aria-label="QR attendance scanner">
-        {result ? (
-          <ScannedEmployeeCard result={result} onScanNext={handleScanNext} />
-        ) : (
-          <>
+        <div className="attendance-scanner-workspace">
+          <div className="attendance-scanner-camera-column">
             <div className="attendance-scanner-camera-frame">
               <ScannerCamera
                 enabled={cameraEnabled}
@@ -134,7 +152,11 @@ export function ScannerPage() {
               />
             </div>
 
-            <div className={`attendance-scanner-state attendance-scanner-state-${scannerState}`} role="status" aria-live="polite">
+            <div
+              className={`attendance-scanner-state attendance-scanner-state-${scannerState}`}
+              role="status"
+              aria-live="polite"
+            >
               <span className="attendance-scanner-state-icon" aria-hidden="true">
                 <Icon name={scannerState === "error" || scannerState === "invalid" ? "warning" : "qr"} />
               </span>
@@ -151,8 +173,16 @@ export function ScannerPage() {
                 Try Camera Again
               </button>
             ) : null}
-          </>
-        )}
+          </div>
+
+          <div className="attendance-scanner-result-column">
+            {result ? (
+              <ScannedEmployeeCard result={result} onScanNext={resetScanner} />
+            ) : (
+              <ScannerWaitingPanel message={message} state={scannerState} />
+            )}
+          </div>
+        </div>
       </section>
 
       {!result ? (
@@ -186,6 +216,44 @@ export function ScannerPage() {
         </section>
       ) : null}
     </div>
+  );
+}
+
+function ScannerWaitingPanel({
+  message,
+  state,
+}: {
+  message: string;
+  state: ScannerState;
+}) {
+  const isAttentionState = state === "error" || state === "invalid";
+  const heading = state === "validating"
+    ? "Validating QR"
+    : isAttentionState
+      ? "Scanner needs attention"
+      : "Waiting for scan";
+
+  return (
+    <section
+      className={`attendance-scanner-result attendance-scanner-waiting-panel${isAttentionState ? " attendance-scanner-waiting-panel-attention" : ""}`}
+      aria-labelledby="scanner-waiting-heading"
+    >
+      <div className="attendance-scanner-waiting-icon" aria-hidden="true">
+        <Icon name={isAttentionState ? "warning" : "qr"} />
+      </div>
+      <div>
+        <span className="attendance-scanner-kicker">Employee result</span>
+        <h2 id="scanner-waiting-heading">{heading}</h2>
+      </div>
+      <p role="status" aria-live="polite">
+        {message}
+      </p>
+      {state === "initializing" || state === "scanning" ? (
+        <p className="attendance-scanner-waiting-help">
+          Scan an employee QR code to view verified information and attendance status.
+        </p>
+      ) : null}
+    </section>
   );
 }
 
