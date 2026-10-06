@@ -21,6 +21,12 @@ type ScannerOperator = Pick<
 
 export type QrAttendanceOperatorSnapshot = ScannerOperator;
 
+export type StoredAttendanceCorrectionMetadata = {
+    requestId: string;
+    correctedAt: Timestamp;
+    correctedBy: QrAttendanceOperatorSnapshot;
+};
+
 export type StoredQrAttendanceRecord = {
     employeeId: string;
     attendanceDate: string;
@@ -33,6 +39,7 @@ export type StoredQrAttendanceRecord = {
     timeOutOperator: QrAttendanceOperatorSnapshot | null;
     createdAt: Timestamp;
     updatedAt: Timestamp;
+    correction?: StoredAttendanceCorrectionMetadata;
 };
 
 export type QrAttendanceRepositoryResult = {
@@ -100,7 +107,33 @@ function parseOperator(value: unknown): QrAttendanceOperatorSnapshot | null {
     };
 }
 
-function parseAttendanceRecord(
+function parseCorrectionMetadata(
+    value: unknown,
+): StoredAttendanceCorrectionMetadata | undefined | null {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (!isRecord(value)) {
+        return null;
+    }
+
+    const requestId = getRequiredString(value, "requestId");
+    const correctedAt = getTimestamp(value.correctedAt);
+    const correctedBy = parseOperator(value.correctedBy);
+
+    if (!requestId || !correctedAt || !correctedBy) {
+        return null;
+    }
+
+    return {
+        requestId,
+        correctedAt,
+        correctedBy,
+    };
+}
+
+export function parseStoredQrAttendanceRecord(
     data: DocumentData | undefined,
 ): StoredQrAttendanceRecord | null {
     if (!data) {
@@ -126,6 +159,7 @@ function parseAttendanceRecord(
         : parseOperator(data.timeOutOperator);
     const createdAt = getTimestamp(data.createdAt);
     const updatedAt = getTimestamp(data.updatedAt);
+    const correction = parseCorrectionMetadata(data.correction);
 
     if (
         !employeeId
@@ -135,7 +169,9 @@ function parseAttendanceRecord(
             && data.timeOut !== undefined
             && !timeOut)
         || timeInSource !== "QR"
-        || (timeOut !== null && timeOutSource !== "QR")
+        || (timeOut !== null
+            && timeOutSource !== "QR"
+            && !correction)
         || (timeOut === null && timeOutSource !== null)
         || (status !== "present" && status !== "completed")
         || !timeInOperator
@@ -144,6 +180,7 @@ function parseAttendanceRecord(
             && !timeOutOperator)
         || !createdAt
         || !updatedAt
+        || correction === null
     ) {
         return null;
     }
@@ -160,6 +197,7 @@ function parseAttendanceRecord(
         timeOutOperator,
         createdAt,
         updatedAt,
+        ...(correction ? { correction } : {}),
     };
 }
 
@@ -174,11 +212,32 @@ function toOperatorSnapshot(
     };
 }
 
-function getAttendanceDocumentId(
+export function getAttendanceDocumentId(
     employeeId: string,
     attendanceDate: string,
 ) {
     return `${employeeId}_${attendanceDate}`;
+}
+
+export async function getAttendanceByRecordId(
+    attendanceRecordId: string,
+): Promise<StoredQrAttendanceRecord | null> {
+    const snapshot = await getFirebaseAdminDb()
+        .collection(attendanceCollection)
+        .doc(attendanceRecordId)
+        .get();
+
+    if (!snapshot.exists) {
+        return null;
+    }
+
+    const record = parseStoredQrAttendanceRecord(snapshot.data());
+
+    if (!record) {
+        throw new QrAttendanceDataError();
+    }
+
+    return record;
 }
 
 export async function getAttendanceByEmployeeAndDate(
@@ -194,7 +253,7 @@ export async function getAttendanceByEmployeeAndDate(
         return null;
     }
 
-    const record = parseAttendanceRecord(snapshot.data());
+    const record = parseStoredQrAttendanceRecord(snapshot.data());
 
     if (!record) {
         throw new QrAttendanceDataError();
@@ -213,7 +272,7 @@ export async function listAttendanceByEmployee(
 
     return snapshots.docs
         .map((snapshot) => {
-            const record = parseAttendanceRecord(snapshot.data());
+            const record = parseStoredQrAttendanceRecord(snapshot.data());
 
             if (!record || record.employeeId !== employeeId) {
                 throw new QrAttendanceDataError();
@@ -243,7 +302,7 @@ export async function listAttendanceByDate(
 
     return snapshots.docs
         .map((snapshot) => {
-            const record = parseAttendanceRecord(snapshot.data());
+            const record = parseStoredQrAttendanceRecord(snapshot.data());
 
             if (!record || record.attendanceDate !== attendanceDate) {
                 throw new QrAttendanceDataError();
@@ -276,7 +335,7 @@ export async function listAttendanceForMonitoring(
 
     return snapshots.docs
         .map((snapshot) => {
-            const record = parseAttendanceRecord(snapshot.data());
+            const record = parseStoredQrAttendanceRecord(snapshot.data());
 
             if (!record) {
                 throw new QrAttendanceDataError();
@@ -353,7 +412,7 @@ export async function recordQrAttendance(
             } satisfies QrAttendanceRepositoryResult;
         }
 
-        const currentRecord = parseAttendanceRecord(snapshot.data());
+        const currentRecord = parseStoredQrAttendanceRecord(snapshot.data());
 
         if (!currentRecord) {
             throw new QrAttendanceDataError();

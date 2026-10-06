@@ -116,7 +116,7 @@ export function CorrectionRequestFilters({
       </div>
 
       <div className="hr-correction-filter-footer">
-        <p>Attendance status and correction request status remain separate review contexts.</p>
+        <p>Decisions are server-authorized and update canonical attendance only after approval succeeds.</p>
         <button type="button" className="button-secondary" onClick={onReset}>
           <Icon name="refresh" />
           Reset filters

@@ -3,6 +3,7 @@ import { loadEnvConfig } from "@next/env";
 import { demoEmployeeSeedAccounts } from "./data/demo-employees";
 import { employeeSeedData } from "./data/employees";
 import { employeeScheduleSeedData } from "./data/employee-schedules";
+import { attendanceCorrectionSeedData } from "./data/attendance-corrections";
 import { payrollPayslipSeedData } from "./data/payslips";
 import { userSeedData } from "./data/users";
 import { createSeedContext } from "./seed-context";
@@ -13,6 +14,7 @@ import type {
 } from "./seed-types";
 import { seedEmployees } from "./seeders/employees.seeder";
 import { seedEmployeeSchedules } from "./seeders/employee-schedules.seeder";
+import { seedAttendanceCorrections } from "./seeders/attendance-corrections.seeder";
 import { seedPayslips } from "./seeders/payslips.seeder";
 import { seedUsers } from "./seeders/users.seeder";
 
@@ -23,6 +25,7 @@ const firebaseSeeders: Record<SeedName, FirebaseSeeder> = {
   schedules: seedEmployeeSchedules,
   users: seedUsers,
   payslips: seedPayslips,
+  corrections: seedAttendanceCorrections,
 };
 
 const allSeedNames: readonly SeedName[] = [
@@ -30,23 +33,25 @@ const allSeedNames: readonly SeedName[] = [
   "schedules",
   "users",
   "payslips",
+  "corrections",
 ];
 
 function printHelp(): void {
   console.log(`AU-JSC Firebase development seeder
 
 Usage:
-  yarn firebase:seed [employees|schedules|users|payslips] [--dry-run]
+  yarn firebase:seed [employees|schedules|users|payslips|corrections] [--dry-run]
 
 Commands:
   employees  Seed the HRPS employee reference documents.
   schedules  Seed Employee-linked HRPS reference schedule documents.
   users      Seed employees first, then Auth users and Firestore user documents.
   payslips   Seed employees, users, and development Payroll System snapshots.
+  corrections Seed development correction requests and supporting attendance records.
   --dry-run  Preview the deterministic records without connecting or writing.
   --help     Show this help message.
 
-With no command, employees, schedules, users, and payslips run in dependency order.`);
+With no command, employees, schedules, users, payslips, and corrections run in dependency order.`);
 }
 
 function isSeedName(value: string): value is SeedName {
@@ -81,7 +86,7 @@ function parseArgs(args: readonly string[]): {
 
     if (!isSeedName(argument)) {
       throw new Error(
-        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- schedules\n- users\n- payslips`,
+        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- schedules\n- users\n- payslips\n- corrections`,
       );
     }
 
@@ -104,6 +109,9 @@ function validateSeedData(): void {
     (schedule) => schedule.employeeId,
   );
   const payslipIds = payrollPayslipSeedData.map((payslip) => payslip.id);
+  const correctionIds = attendanceCorrectionSeedData.map(
+    (correction) => correction.requestId,
+  );
   const employeeIdSet = new Set(employeeIds);
   const demoEmployeeIds = demoEmployeeSeedAccounts.map(
     (employee) => employee.employeeId,
@@ -174,6 +182,36 @@ function validateSeedData(): void {
     throw new Error("Payslip seed data contains duplicate deterministic IDs.");
   }
 
+  if (new Set(correctionIds).size !== correctionIds.length) {
+    throw new Error("Correction seed data contains duplicate deterministic request IDs.");
+  }
+
+  if (
+    attendanceCorrectionSeedData.some(
+      (correction) =>
+        !employeeIdSet.has(correction.employeeId) ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(correction.attendanceDate),
+    )
+  ) {
+    throw new Error(
+      "Correction seed data must reference seeded employees and valid attendance dates.",
+    );
+  }
+
+  if (
+    attendanceCorrectionSeedData.some(
+      (correction) =>
+        (correction.issueType === "Missing Time-Out" &&
+          (!correction.requestedTimeOut || correction.timeOut !== null)) ||
+        (correction.issueType === "Incorrect Time-In" &&
+          (!correction.requestedTimeIn || correction.timeOut === null)),
+    )
+  ) {
+    throw new Error(
+      "Correction seed data must include the requested time field for its issue type.",
+    );
+  }
+
   if (
     payrollPayslipSeedData.some(
       (payslip) => !employeeIdSet.has(payslip.employeeId),
@@ -206,6 +244,10 @@ function getSeedNames(requestedName: SeedName | null): readonly SeedName[] {
 
   if (requestedName === "schedules") {
     return ["employees", "schedules"];
+  }
+
+  if (requestedName === "corrections") {
+    return ["employees", "users", "corrections"];
   }
 
   return [requestedName];

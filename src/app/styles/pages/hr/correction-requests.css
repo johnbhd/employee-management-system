@@ -10,7 +10,7 @@
 
 .hr-correction-summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -284,6 +284,20 @@
   text-align: center !important;
 }
 
+.hr-correction-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 3rem 1.25rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.hr-correction-empty-state p {
+  margin: 0;
+}
+
 .hr-correction-feedback {
   margin: 0;
   border: 1px solid #cde8d8;
@@ -293,6 +307,12 @@
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.75rem 0.9rem;
+}
+
+.hr-correction-feedback.is-error {
+  border-color: #f0c6c6;
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 
 .hr-correction-drawer-layer,
