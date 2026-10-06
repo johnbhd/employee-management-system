@@ -225,84 +225,6 @@
   overflow-wrap: anywhere;
 }
 
-.my-attendance-quick-actions {
-  display: grid;
-  gap: 0.95rem;
-}
-
-.my-attendance-action-list {
-  display: grid;
-  grid-template-columns: 1.1fr minmax(0, 1fr);
-  overflow: hidden;
-  border: 1px solid var(--employee-line);
-  border-radius: 0.65rem;
-  background: #fff;
-}
-
-.my-attendance-action {
-  display: flex;
-  min-width: 0;
-  min-height: 4.25rem;
-  align-items: center;
-  gap: 0.75rem;
-  border: 0;
-  border-right: 1px solid var(--employee-line);
-  padding: 0.8rem 1rem;
-  background: #fff;
-  color: var(--employee-blue);
-  text-align: left;
-  transition: background-color 150ms ease, color 150ms ease;
-}
-
-.my-attendance-action:last-child {
-  border-right: 0;
-}
-
-.my-attendance-action:hover {
-  background: #f4f6ff;
-}
-
-.my-attendance-action.is-primary {
-  background: var(--employee-navy);
-  color: #fff;
-}
-
-.my-attendance-action.is-primary:hover {
-  background: var(--employee-blue);
-}
-
-.my-attendance-action > .ui-icon {
-  width: 1.25rem;
-  flex: 0 0 auto;
-  font-size: 1rem;
-}
-
-.my-attendance-action > span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-}
-
-.my-attendance-action strong {
-  color: var(--employee-ink);
-  font-size: 0.8rem;
-}
-
-.my-attendance-action.is-primary strong {
-  color: #fff;
-}
-
-.my-attendance-action small {
-  margin-top: 0.15rem;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  line-height: 1.4;
-}
-
-.my-attendance-action.is-primary small {
-  color: rgba(255, 255, 255, 0.72);
-}
-
 .my-attendance-calendar-section {
   display: grid;
   gap: 0.95rem;
@@ -679,18 +601,8 @@
 }
 
 @media (max-width: 760px) {
-  .my-attendance-action-list,
   .my-attendance-notes {
     grid-template-columns: 1fr;
-  }
-
-  .my-attendance-action {
-    border-right: 0;
-    border-bottom: 1px solid var(--employee-line);
-  }
-
-  .my-attendance-action:last-child {
-    border-bottom: 0;
   }
 
   .my-attendance-calendar-toolbar {

@@ -8,7 +8,6 @@ import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
 import { MyAttendanceToday } from "./MyAttendanceToday";
-import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
 export function MyAttendancePage({
   attendanceLoadError,
@@ -29,22 +28,6 @@ export function MyAttendancePage({
         todayAttendance={todayAttendance}
         todayLabel={todayLabel}
       />
-
-      <section
-        className="my-attendance-quick-actions"
-        aria-labelledby="my-attendance-quick-actions-title"
-      >
-        <div className="my-attendance-section-heading">
-          <div>
-            <span className="my-attendance-kicker">Next steps</span>
-            <h2 id="my-attendance-quick-actions-title">Attendance actions</h2>
-          </div>
-          <span className="my-attendance-section-note">
-            Choose an action to continue
-          </span>
-        </div>
-        <MyAttendanceQuickActions />
-      </section>
 
       <MonthlyAttendanceCalendar
         attendanceLoadError={attendanceLoadError}
