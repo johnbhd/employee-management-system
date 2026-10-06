@@ -59,7 +59,7 @@
 .my-attendance-note-heading h2 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-weight: 600;
 }
 
@@ -365,7 +365,7 @@
 .my-attendance-calendar-month h3 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1rem;
   font-weight: 600;
 }

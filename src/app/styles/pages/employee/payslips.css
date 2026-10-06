@@ -21,7 +21,7 @@
 .employee-payslips-heading h2 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
 }
@@ -497,7 +497,7 @@
 .employee-payslip-modal-heading h2 {
   margin: 0.2rem 0 0;
   color: var(--employee-navy);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
 }
@@ -562,7 +562,7 @@
 .employee-payslip-modal-net-pay h3 {
   margin: 0.2rem 0 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.98rem;
   font-weight: 600;
 }

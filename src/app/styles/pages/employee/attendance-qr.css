@@ -66,7 +66,7 @@
 .attendance-qr-employee h2 {
   margin: 0.2rem 0 0.25rem;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -418,7 +418,7 @@
 .attendance-qr-notice-heading h2 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.98rem;
   font-weight: 600;
 }

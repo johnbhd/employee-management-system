@@ -24,7 +24,7 @@
 .employee-help-support-heading h2 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.35rem;
   font-weight: 600;
 }
