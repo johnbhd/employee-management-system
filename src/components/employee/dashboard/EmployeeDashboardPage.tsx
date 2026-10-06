@@ -2,11 +2,27 @@ import Link from "next/link";
 
 import { getLatestAnnouncements } from "@/data/employee";
 import { getEmployeeDashboardData } from "@/data/employee-dashboard";
+import { defaultAttendanceHistoryQuery } from "@/server/attendance/attendance-history-query";
+import {
+  getAttendanceHistoryForEmployee,
+  getTodayAttendanceForEmployee,
+} from "@/server/attendance/attendance.service";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
+import {
+  formatCampusDateKey,
+  formatCampusDateKeyLabel,
+} from "@/lib/campus-time";
+import {
+  formatAttendanceTime,
+  unavailableAttendanceValue,
+} from "@/lib/employee/today-attendance";
+import type { AttendanceHistoryRecordData } from "@/types/attendance-history";
 import type { EmployeeReference } from "@/types/employee";
+import type { StatusTone } from "@/types/ui";
+import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 import { EmployeeDashboardAttendanceCard } from "./EmployeeDashboardAttendanceCard";
 import { EmployeeDashboardWelcome } from "./EmployeeDashboardWelcome";
@@ -32,13 +48,43 @@ export function EmployeeDashboardPageUnavailable() {
   );
 }
 
-export function EmployeeDashboardPage({
+export async function EmployeeDashboardPage({
   employee,
 }: {
   employee: EmployeeReference;
 }) {
   const dashboardData = getEmployeeDashboardData(employee.employeeId);
   const latestAnnouncements = getLatestAnnouncements(3);
+  const now = new Date();
+  const fallbackTodayAttendance: TodayAttendanceData = {
+    attendance: null,
+    attendanceDate: formatCampusDateKey(now),
+  };
+  let todayAttendance = fallbackTodayAttendance;
+  let attendanceLoadError = false;
+  let attendanceHistory: DashboardAttendanceRecord[] = [];
+  let attendanceHistoryLoadError = false;
+
+  try {
+    todayAttendance = await getTodayAttendanceForEmployee(
+      employee.employeeId,
+      now,
+    );
+  } catch {
+    attendanceLoadError = true;
+  }
+
+  try {
+    const historyData = await getAttendanceHistoryForEmployee(
+      employee.employeeId,
+      defaultAttendanceHistoryQuery,
+    );
+    attendanceHistory = historyData.records
+      .slice(0, 5)
+      .map(toDashboardAttendanceRecord);
+  } catch {
+    attendanceHistoryLoadError = true;
+  }
 
   return (
     <div className="employee-dashboard-page">
@@ -51,8 +97,8 @@ export function EmployeeDashboardPage({
       </section>
 
       <EmployeeDashboardAttendanceCard
-        employeeId={employee.employeeId}
-        baselineAttendance={dashboardData.todayAttendance}
+        attendanceLoadError={attendanceLoadError}
+        todayAttendance={todayAttendance}
       />
 
       <section className="employee-panel">
@@ -70,8 +116,14 @@ export function EmployeeDashboardPage({
             <caption className="sr-only">Recent employee attendance history</caption>
             <thead><tr><th>Date</th><th>Time in</th><th>Time out</th><th>Hours</th><th>Status</th></tr></thead>
             <tbody>
-              {dashboardData.attendanceHistory.length > 0 ? (
-                dashboardData.attendanceHistory.map((record) => (
+              {attendanceHistoryLoadError ? (
+                <tr>
+                  <td className="employee-table-empty" colSpan={5}>
+                    Unable to load attendance history. Please try again.
+                  </td>
+                </tr>
+              ) : attendanceHistory.length > 0 ? (
+                attendanceHistory.map((record) => (
                   <tr key={record.date}>
                     <td>{record.date}</td><td>{record.timeIn}</td><td>{record.timeOut}</td><td>{record.hours}</td>
                     <td><StatusBadge tone={record.tone}>{record.status}</StatusBadge></td>
@@ -124,4 +176,26 @@ export function EmployeeDashboardPage({
       </div>
     </div>
   );
+}
+
+type DashboardAttendanceRecord = {
+  date: string;
+  timeIn: string;
+  timeOut: string;
+  hours: string;
+  status: string;
+  tone: StatusTone;
+};
+
+function toDashboardAttendanceRecord(
+  record: AttendanceHistoryRecordData,
+): DashboardAttendanceRecord {
+  return {
+    date: formatCampusDateKeyLabel(record.date),
+    timeIn: formatAttendanceTime(record.timeIn),
+    timeOut: formatAttendanceTime(record.timeOut),
+    hours: unavailableAttendanceValue,
+    status: record.status === "completed" ? "Completed" : "Present",
+    tone: record.status === "completed" ? "success" : "info",
+  };
 }

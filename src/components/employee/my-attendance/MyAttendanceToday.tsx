@@ -1,7 +1,9 @@
 "use client";
 
 import { Icon } from "@/components/ui/Icon";
-import { formatCampusTime } from "@/lib/campus-time";
+import {
+  getTodayAttendancePresentation,
+} from "@/lib/employee/today-attendance";
 import {
   employeeAttendanceProfile,
   employeeAttendanceStats,
@@ -21,32 +23,21 @@ export function MyAttendanceToday({
   todayAttendance: TodayAttendanceData;
   todayLabel: string;
 }) {
-  const hasAttendance = todayAttendance.attendance !== null;
   const isUnavailable = attendanceLoadError || employee === null;
+  const presentation = getTodayAttendancePresentation(
+    todayAttendance.attendance,
+    isUnavailable,
+  );
   const displayedStats = getDisplayedStats(
     todayAttendance.attendance,
     isUnavailable,
   );
-  const status = isUnavailable
-    ? "Unavailable"
-    : hasAttendance
-      ? todayAttendance.attendance?.status === "completed"
-        ? "Completed"
-        : "Present"
-      : "Not Yet Timed-In";
-  const statusNote = isUnavailable
-    ? "Unable to load today's attendance. Please try again."
-    : hasAttendance
-      ? todayAttendance.attendance?.status === "completed"
-        ? "Time-In and Time-Out recorded"
-        : "Time-In recorded; Time-Out is still pending"
-      : "No attendance recorded for today";
   const employeeName = employee?.displayName ?? "Employee information unavailable";
   const employeeId = employee?.employeeId ?? "Employee ID unavailable";
   const department = employee?.department ?? "Employee details unavailable";
   const statusClass = isUnavailable
     ? "is-error"
-    : hasAttendance
+    : todayAttendance.attendance
       ? "is-present"
       : "is-empty";
 
@@ -92,9 +83,11 @@ export function MyAttendanceToday({
           <span className="my-attendance-label">Current Status</span>
           <strong className="my-attendance-status-value">
             <span className="my-attendance-status-dot" aria-hidden="true" />
-            {status}
+            {presentation.status}
           </strong>
-          <span className="my-attendance-subtext">{statusNote}</span>
+          <span className="my-attendance-subtext">
+            {presentation.statusNote}
+          </span>
         </div>
       </section>
 
@@ -138,38 +131,25 @@ function getDisplayedStats(
   attendance: QrAttendanceData | null,
   isUnavailable: boolean,
 ): EmployeeAttendanceStat[] {
-  const timeIn = attendance
-    ? formatAttendanceTime(attendance.timeIn)
-    : "—";
-  const timeOut = attendance?.timeOut
-    ? formatAttendanceTime(attendance.timeOut)
-    : "—";
-  const source = getAttendanceSource(attendance, isUnavailable);
+  const presentation = getTodayAttendancePresentation(
+    attendance,
+    isUnavailable,
+  );
 
   return employeeAttendanceStats.map((stat) => {
     if (stat.label === "Time-In") {
       return {
         ...stat,
-        value: timeIn,
-        note: isUnavailable
-          ? "Unavailable"
-          : attendance
-            ? `via ${attendance.timeInSource}`
-            : "Not yet timed-in",
+        value: presentation.timeIn,
+        note: presentation.timeInNote,
       };
     }
 
     if (stat.label === "Time-Out") {
       return {
         ...stat,
-        value: timeOut,
-        note: isUnavailable
-          ? "Unavailable"
-          : attendance?.timeOut
-            ? `via ${attendance.timeOutSource ?? "attendance source"}`
-            : attendance
-              ? "Not yet timed out"
-              : "Not yet timed-in",
+        value: presentation.timeOut,
+        note: presentation.timeOutNote,
         tone: attendance?.timeOut ? "success" : "muted",
       };
     }
@@ -177,16 +157,16 @@ function getDisplayedStats(
     if (stat.label === "Attendance Source") {
       return {
         ...stat,
-        value: source.value,
-        note: source.note,
-        tone: source.value === "—" ? "muted" : "info",
+        value: presentation.sourceValue,
+        note: presentation.sourceNote,
+        tone: presentation.sourceValue === "\u2014" ? "muted" : "info",
       };
     }
 
     if (stat.label === "Late Minutes" || stat.label === "Undertime") {
       return {
         ...stat,
-        value: "—",
+        value: "\u2014",
         note: "Not available",
         tone: "muted",
       };
@@ -194,48 +174,4 @@ function getDisplayedStats(
 
     return stat;
   });
-}
-
-function getAttendanceSource(
-  attendance: QrAttendanceData | null,
-  isUnavailable: boolean,
-) {
-  if (isUnavailable) {
-    return {
-      value: "—",
-      note: "Unavailable",
-    };
-  }
-
-  if (!attendance) {
-    return {
-      value: "—",
-      note: "No attendance source",
-    };
-  }
-
-  if (
-    attendance.timeOutSource === null
-    || attendance.timeInSource === attendance.timeOutSource
-  ) {
-    return {
-      value: attendance.timeInSource,
-      note: attendance.timeOutSource
-        ? `Time-In and Time-Out via ${attendance.timeInSource}`
-        : `Time-In via ${attendance.timeInSource}`,
-    };
-  }
-
-  return {
-    value: "Mixed",
-    note: `Time-In: ${attendance.timeInSource}; Time-Out: ${attendance.timeOutSource}`,
-  };
-}
-
-function formatAttendanceTime(value: string) {
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime())
-    ? "Time unavailable"
-    : formatCampusTime(date);
 }
