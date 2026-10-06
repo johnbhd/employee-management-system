@@ -10,7 +10,7 @@
 
 .hr-directory-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -108,7 +108,7 @@
 
 .hr-directory-filter-grid {
   display: grid;
-  grid-template-columns: minmax(14rem, 2fr) repeat(5, minmax(8rem, 1fr));
+  grid-template-columns: minmax(14rem, 2fr) repeat(3, minmax(8rem, 1fr));
   gap: 0.75rem;
   padding: 1rem 1.25rem 0.9rem;
 }
@@ -205,7 +205,7 @@
 
 .hr-directory-table {
   width: 100%;
-  min-width: 74rem;
+  min-width: 52rem;
   border-collapse: collapse;
   font-size: 0.7rem;
 }
