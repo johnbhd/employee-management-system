@@ -19,7 +19,10 @@ import {
   formatAttendanceTime,
   unavailableAttendanceValue,
 } from "@/lib/employee/today-attendance";
-import type { AttendanceHistoryRecordData } from "@/types/attendance-history";
+import type {
+  AttendanceHistoryData,
+  AttendanceHistoryRecordData,
+} from "@/types/attendance-history";
 import type { EmployeeReference } from "@/types/employee";
 import type { StatusTone } from "@/types/ui";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
@@ -62,6 +65,7 @@ export async function EmployeeDashboardPage({
   };
   let todayAttendance = fallbackTodayAttendance;
   let attendanceLoadError = false;
+  let attendanceHistoryData: AttendanceHistoryData | null = null;
   let attendanceHistory: DashboardAttendanceRecord[] = [];
   let attendanceHistoryLoadError = false;
 
@@ -79,6 +83,7 @@ export async function EmployeeDashboardPage({
       employee.employeeId,
       defaultAttendanceHistoryQuery,
     );
+    attendanceHistoryData = historyData;
     attendanceHistory = historyData.records
       .slice(0, 5)
       .map(toDashboardAttendanceRecord);
@@ -86,12 +91,38 @@ export async function EmployeeDashboardPage({
     attendanceHistoryLoadError = true;
   }
 
+  const dashboardStats = dashboardData.stats.map((stat) => {
+    if (stat.label !== "Days Present") {
+      return stat;
+    }
+
+    if (attendanceHistoryData) {
+      return {
+        ...stat,
+        value: String(attendanceHistoryData.totalRecords),
+        note: attendanceHistoryData.totalRecords > 0
+          ? "All available records"
+          : "No records",
+      };
+    }
+
+    if (attendanceHistoryLoadError) {
+      return {
+        ...stat,
+        value: todayAttendance.attendance ? "1" : "—",
+        note: todayAttendance.attendance ? "Today's record" : "Unavailable",
+      };
+    }
+
+    return stat;
+  });
+
   return (
     <div className="employee-dashboard-page">
       <EmployeeDashboardWelcome employee={employee} />
 
       <section className="employee-stats-grid" aria-label="Attendance summary">
-        {dashboardData.stats.map((stat) => (
+        {dashboardStats.map((stat) => (
           <SummaryCard key={stat.label} {...stat} />
         ))}
       </section>
