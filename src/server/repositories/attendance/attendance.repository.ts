@@ -54,6 +54,13 @@ export type AttendanceMonitoringRepositoryFilters = {
     source?: "QR" | null;
 };
 
+export type AttendanceReportRepositoryFilters = {
+    attendanceDate?: string | null;
+    attendanceMonth?: string | null;
+    employeeId?: string | null;
+    status?: QrAttendanceStatus | null;
+};
+
 export class QrAttendanceDataError extends Error {
     readonly code = "QR_ATTENDANCE_DATA_INVALID";
 
@@ -219,6 +226,17 @@ export function getAttendanceDocumentId(
     return `${employeeId}_${attendanceDate}`;
 }
 
+function getNextMonthDateKey(month: string) {
+    const [year, monthNumber] = month.split("-").map(Number);
+    const date = new Date(Date.UTC(year, monthNumber, 1));
+
+    return [
+        date.getUTCFullYear(),
+        String(date.getUTCMonth() + 1).padStart(2, "0"),
+        String(date.getUTCDate()).padStart(2, "0"),
+    ].join("-");
+}
+
 export async function getAttendanceByRecordId(
     attendanceRecordId: string,
 ): Promise<StoredQrAttendanceRecord | null> {
@@ -368,6 +386,65 @@ export async function listAttendanceForMonitoring(
                 - left.record.timeIn.toMillis();
 
             return dateOrder || timeOrder || right.id.localeCompare(left.id);
+        });
+}
+
+export async function listAttendanceForReport(
+    filters: AttendanceReportRepositoryFilters = {},
+): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const collection = getFirebaseAdminDb().collection(attendanceCollection);
+    const snapshots = filters.attendanceDate
+        ? await collection
+            .where("attendanceDate", "==", filters.attendanceDate)
+            .get()
+        : filters.attendanceMonth
+            ? await collection
+                .where("attendanceDate", ">=", `${filters.attendanceMonth}-01`)
+                .where("attendanceDate", "<", getNextMonthDateKey(filters.attendanceMonth))
+                .get()
+            : filters.employeeId
+                ? await collection.where("employeeId", "==", filters.employeeId).get()
+                : await collection.get();
+
+    return snapshots.docs
+        .map((snapshot) => {
+            const record = parseStoredQrAttendanceRecord(snapshot.data());
+
+            if (!record) {
+                throw new QrAttendanceDataError();
+            }
+
+            return { id: snapshot.id, record };
+        })
+        .filter(({ record }) => {
+            if (filters.attendanceDate && record.attendanceDate !== filters.attendanceDate) {
+                return false;
+            }
+
+            if (
+                filters.attendanceMonth
+                && !record.attendanceDate.startsWith(`${filters.attendanceMonth}-`)
+            ) {
+                return false;
+            }
+
+            if (filters.employeeId && record.employeeId !== filters.employeeId) {
+                return false;
+            }
+
+            return !filters.status || record.status === filters.status;
+        })
+        .sort((left, right) => {
+            const dateOrder = right.record.attendanceDate.localeCompare(
+                left.record.attendanceDate,
+            );
+            const employeeOrder = left.record.employeeId.localeCompare(
+                right.record.employeeId,
+            );
+            const timeOrder = right.record.timeIn.toMillis()
+                - left.record.timeIn.toMillis();
+
+            return dateOrder || employeeOrder || timeOrder || right.id.localeCompare(left.id);
         });
 }
 

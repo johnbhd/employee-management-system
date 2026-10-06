@@ -194,7 +194,7 @@
 
 .hr-reports-summary {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
   padding: 0 1.25rem;
 }
@@ -269,7 +269,7 @@
 
 .hr-reports-table {
   width: 100%;
-  min-width: 68rem;
+  min-width: 56rem;
   border-collapse: collapse;
   font-size: 0.7rem;
 }

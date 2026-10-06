@@ -1,6 +1,21 @@
+import type { AttendanceReportsData } from "@/server/hr/attendance-reports.service";
+import type { AttendanceReportsQuery } from "@/server/hr/attendance-reports-query";
+
 import { AttendanceReportsExplorer } from "./AttendanceReportsExplorer";
 
-export function AttendanceReportsPage() {
+type AttendanceReportsPageProps = {
+  data: AttendanceReportsData;
+  query: AttendanceReportsQuery;
+  defaultDate: string;
+  loadError?: boolean;
+};
+
+export function AttendanceReportsPage({
+  data,
+  query,
+  defaultDate,
+  loadError = false,
+}: AttendanceReportsPageProps) {
   return (
     <div className="hr-dashboard-page hr-attendance-reports-page">
       <header className="hr-dashboard-header">
@@ -13,7 +28,12 @@ export function AttendanceReportsPage() {
         </div>
       </header>
 
-      <AttendanceReportsExplorer />
+      <AttendanceReportsExplorer
+        data={data}
+        query={query}
+        defaultDate={defaultDate}
+        loadError={loadError}
+      />
     </div>
   );
 }

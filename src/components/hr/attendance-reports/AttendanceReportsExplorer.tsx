@@ -1,24 +1,31 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
-import { AttendanceReportFilters } from "@/components/hr/attendance-reports/AttendanceReportFilters";
-import { AttendanceReportSelector } from "@/components/hr/attendance-reports/AttendanceReportSelector";
-import { AttendanceReportSummary } from "@/components/hr/attendance-reports/AttendanceReportSummary";
-import { AttendanceReportTable } from "@/components/hr/attendance-reports/AttendanceReportTable";
-import { AttendanceReportToolbar } from "@/components/hr/attendance-reports/AttendanceReportToolbar";
-import { AttendanceSourceBreakdown } from "@/components/hr/attendance-reports/AttendanceSourceBreakdown";
-import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
-import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
 import {
   attendanceReportTypes,
   buildMonthlyAttendanceRows,
-  buildSourceUsageSummary,
-  defaultAttendanceReportDate,
-  defaultAttendanceReportMonth,
+  type AttendanceReportCorrectionRecord,
   type AttendanceReportRecord,
   type AttendanceReportType,
 } from "@/data/hr-attendance-reports";
+import type { AttendanceReportsData } from "@/server/hr/attendance-reports.service";
+import type { AttendanceReportsQuery } from "@/server/hr/attendance-reports-query";
+
+import { AttendanceReportFilters } from "./AttendanceReportFilters";
+import { AttendanceReportSelector } from "./AttendanceReportSelector";
+import { AttendanceReportSummary } from "./AttendanceReportSummary";
+import { AttendanceReportTable } from "./AttendanceReportTable";
+import { AttendanceReportToolbar } from "./AttendanceReportToolbar";
+import { AttendanceSourceBreakdown } from "./AttendanceSourceBreakdown";
+
+type AttendanceReportsExplorerProps = {
+  data: AttendanceReportsData;
+  query: AttendanceReportsQuery;
+  defaultDate: string;
+  loadError?: boolean;
+};
 
 type FilterOption = {
   value: string;
@@ -29,8 +36,13 @@ function escapeCsv(value: string | number) {
   return `"${String(value).replaceAll('"', '""')}"`;
 }
 
-function createCsv(headers: readonly string[], rows: readonly (readonly (string | number)[])[]) {
-  return [headers, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n");
+function createCsv(
+  headers: readonly string[],
+  rows: readonly (readonly (string | number)[])[],
+) {
+  return [headers, ...rows]
+    .map((row) => row.map(escapeCsv).join(","))
+    .join("\n");
 }
 
 function formatDate(value: string) {
@@ -45,141 +57,230 @@ function formatDate(value: string) {
 }
 
 function formatPeriod(value: string) {
-  if (!value) return "All dates";
   if (value.length === 7) {
     const [year, month] = value.split("-").map(Number);
-    return new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }).format(new Date(Date.UTC(year, month - 1, 1)));
   }
+
   return formatDate(value);
 }
 
-function optionValues(values: readonly string[], allLabel: string): FilterOption[] {
-  return [{ value: "all", label: allLabel }, ...values.map((value) => ({ value, label: value }))];
+function getReportLabel(reportType: AttendanceReportType) {
+  return attendanceReportTypes.find((report) => report.id === reportType)?.label
+    ?? "Attendance report";
 }
 
-function getReportLabel(reportType: AttendanceReportType) {
-  return attendanceReportTypes.find((report) => report.id === reportType)?.label ?? "Attendance report";
+function optionValues(values: readonly string[], allLabel: string): FilterOption[] {
+  return [
+    { value: "", label: allLabel },
+    ...values.map((value) => ({ value, label: value })),
+  ];
 }
 
 function buildExportData(
   reportType: AttendanceReportType,
   records: readonly AttendanceReportRecord[],
   monthlyRows: ReturnType<typeof buildMonthlyAttendanceRows>,
-  correctionRequests: readonly HrCorrectionRequest[],
+  correctionRequests: readonly AttendanceReportCorrectionRecord[],
 ) {
   if (reportType === "monthly") {
     return createCsv(
-      ["Employee", "Employee ID", "Department", "Scheduled days", "Present", "Late", "Absent", "Undertime minutes", "Missing time-out"],
-      monthlyRows.map((row) => [row.employeeName, row.employeeId, row.department, row.scheduledDays, row.present, row.late, row.absent, row.undertimeMinutes, row.missingTimeOut]),
+      [
+        "Employee",
+        "Employee ID",
+        "Department",
+        "Attendance records",
+        "Completed",
+        "Awaiting time-out",
+        "QR records",
+      ],
+      monthlyRows.map((row) => [
+        row.employeeName,
+        row.employeeId,
+        row.department,
+        row.attendanceRecords,
+        row.completed,
+        row.awaitingTimeOut,
+        row.qrRecords,
+      ]),
     );
   }
 
   if (reportType === "correction-summary") {
     return createCsv(
-      ["Request", "Employee", "Employee ID", "Department", "Attendance date", "Issue", "Submitted", "Status", "Decision date"],
-      correctionRequests.map((request) => [request.id, request.employeeName, request.employeeId, request.department, request.attendanceDate, request.issueType, request.submittedDate, request.status, request.decisionAt ?? "Not decided"]),
+      [
+        "Request",
+        "Attendance record",
+        "Employee",
+        "Employee ID",
+        "Department",
+        "Attendance date",
+        "Issue",
+        "Submitted",
+        "Status",
+        "Decision date",
+      ],
+      correctionRequests.map((request) => [
+        request.id,
+        request.attendanceRecordId,
+        request.employeeName,
+        request.employeeId,
+        request.department,
+        request.attendanceDate,
+        request.issueType,
+        request.submittedAt,
+        request.status,
+        request.decisionAt ?? "Not decided",
+      ]),
     );
   }
 
   if (reportType === "source-usage") {
-    const summary = buildSourceUsageSummary(records);
     return createCsv(
       ["Source", "Records", "Share"],
-      [
-        ["Bundy", summary.bundy, summary.total ? `${Math.round((summary.bundy / summary.total) * 100)}%` : "0%"],
-        ["QR", summary.qr, summary.total ? `${Math.round((summary.qr / summary.total) * 100)}%` : "0%"],
-        ["No source", summary.noSource, summary.total ? `${Math.round((summary.noSource / summary.total) * 100)}%` : "0%"],
-      ],
+      [["QR", records.length, records.length ? "100%" : "0%"]],
     );
   }
 
   return createCsv(
-    ["Employee", "Employee ID", "Department", "Date", "Schedule", "Time in", "Time out", "Source", "Status", "Validation", "HR Verification", "Payroll Readiness", "Late minutes", "Undertime minutes"],
-    records.map((record) => [record.employeeName, record.employeeId, record.department, record.date, record.schedule, record.timeIn, record.timeOut, record.source ?? "No source", record.status, record.validationStatus, record.hrVerificationStatus ?? "Pending Review", record.payrollReadiness ?? "Not Ready", record.lateMinutes ?? 0, record.undertimeMinutes ?? 0]),
+    [
+      "Employee",
+      "Employee ID",
+      "Department",
+      "Date",
+      "Time in",
+      "Time out",
+      "Source",
+      "Status",
+    ],
+    records.map((record) => [
+      record.employeeName,
+      record.employeeId,
+      record.department,
+      record.date,
+      record.timeIn,
+      record.timeOut ?? "Not recorded",
+      record.source,
+      record.status,
+    ]),
   );
 }
 
-export function AttendanceReportsExplorer() {
-  const { attendanceRecords, correctionRequests } = useHrWorkflow();
-  const records = useMemo<AttendanceReportRecord[]>(() => attendanceRecords.map((record) => ({
-    ...record,
-    correctionRequestId: record.correctionStatus === "No Correction Request"
-      ? undefined
-      : correctionRequests.find((request) => request.attendanceRecordId === record.id)?.id,
-    correctionStatus: record.correctionStatus === "No Correction Request" ? undefined : record.correctionStatus,
-  })), [attendanceRecords, correctionRequests]);
-  const [reportType, setReportType] = useState<AttendanceReportType>("daily");
-  const [date, setDate] = useState(defaultAttendanceReportDate);
-  const [month, setMonth] = useState(defaultAttendanceReportMonth);
-  const [department, setDepartment] = useState("all");
-  const [employeeId, setEmployeeId] = useState("all");
-  const [source, setSource] = useState("all");
-  const [status, setStatus] = useState("all");
+function buildQueryString(values: AttendanceReportsQuery) {
+  const params = new URLSearchParams();
 
-  const departments = useMemo(() => Array.from(new Set(records.map((record) => record.department))).sort(), [records]);
-  const employees = useMemo(() => Array.from(new Map(records.map((record) => [record.employeeId, record.employeeName])).entries()).sort((first, second) => first[1].localeCompare(second[1])), [records]);
-  const employeeOptions = useMemo(() => [{ value: "all", label: "All employees" }, ...employees.map(([value, label]) => ({ value, label }))], [employees]);
-  const departmentOptions = useMemo(() => optionValues(departments, "All departments"), [departments]);
-  const sourceOptions = useMemo(() => optionValues(["Bundy", "QR", "none"], "All sources").map((option) => option.value === "none" ? { ...option, label: "No source" } : option), []);
-  const statusOptions = useMemo(() => optionValues(["Present", "Late", "Absent", "Missing Time-Out"], "All statuses"), []);
+  if (values.reportType !== "daily") params.set("report", values.reportType);
+  params.set("date", values.date);
+  if (values.reportType === "monthly") params.set("month", values.month);
+  if (values.employeeId) params.set("employeeId", values.employeeId);
+  if (values.department) params.set("department", values.department);
+  if (values.status) params.set("status", values.status);
+  if (values.source) params.set("source", values.source);
 
-  const filteredAttendanceRecords = useMemo(() => records.filter((record) => {
-    const periodMatches = reportType === "monthly" ? record.date.startsWith(month) : record.date === date;
-    const departmentMatches = department === "all" || record.department === department;
-    const employeeMatches = employeeId === "all" || record.employeeId === employeeId;
-    const sourceMatches = source === "all" || (source === "none" ? record.source === null : record.source === source);
-    const statusMatches = status === "all" || record.status === status;
-    const sourceFilterApplies = reportType !== "monthly" && reportType !== "source-usage" && reportType !== "correction-summary";
-    const statusFilterApplies = reportType === "daily";
+  return params.toString();
+}
 
-    return periodMatches && departmentMatches && employeeMatches && (sourceFilterApplies ? sourceMatches : true) && (statusFilterApplies ? statusMatches : true);
-  }), [date, department, employeeId, month, records, reportType, source, status]);
+export function AttendanceReportsExplorer({
+  data,
+  query,
+  defaultDate,
+  loadError = false,
+}: AttendanceReportsExplorerProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [reportType, setReportType] = useState(query.reportType);
+  const [date, setDate] = useState(query.date);
+  const [month, setMonth] = useState(query.month);
+  const [department, setDepartment] = useState(query.department ?? "");
+  const [employeeId, setEmployeeId] = useState(query.employeeId ?? "");
+  const [source, setSource] = useState(query.source ?? "");
+  const [status, setStatus] = useState(query.status ?? "");
 
-  const reportRecords = useMemo(() => {
-    if (reportType === "late") return filteredAttendanceRecords.filter((record) => record.status === "Late" || (record.lateMinutes ?? 0) > 0);
-    if (reportType === "undertime") return filteredAttendanceRecords.filter((record) => (record.undertimeMinutes ?? 0) > 0);
-    if (reportType === "missing-time-out") return filteredAttendanceRecords.filter((record) => record.status === "Missing Time-Out");
-    return filteredAttendanceRecords;
-  }, [filteredAttendanceRecords, reportType]);
-
-  const filteredCorrectionRequests = useMemo(() => correctionRequests.filter((request) => {
-    const periodMatches = request.attendanceDate === date;
-    const departmentMatches = department === "all" || request.department === department;
-    const employeeMatches = employeeId === "all" || request.employeeId === employeeId;
-
-    return (reportType === "monthly" ? request.attendanceDate.startsWith(month) : periodMatches) && departmentMatches && employeeMatches;
-  }), [correctionRequests, date, department, employeeId, month, reportType]);
-
-  const monthlyRows = useMemo(() => buildMonthlyAttendanceRows(filteredAttendanceRecords), [filteredAttendanceRecords]);
-  const sourceSummary = useMemo(() => buildSourceUsageSummary(filteredAttendanceRecords), [filteredAttendanceRecords]);
-  const hasRows = reportType === "source-usage" ? sourceSummary.total > 0 : reportType === "correction-summary" ? filteredCorrectionRequests.length > 0 : reportType === "monthly" ? monthlyRows.length > 0 : reportRecords.length > 0;
+  const departmentOptions = useMemo(
+    () => optionValues(data.departments, "All departments"),
+    [data.departments],
+  );
+  const employeeOptions = useMemo(() => [
+    { value: "", label: "All employees" },
+    ...data.employees.map((employee) => ({
+      value: employee.employeeId,
+      label: `${employee.displayName} (${employee.employeeId})`,
+    })),
+  ], [data.employees]);
+  const sourceOptions = useMemo(() => [
+    { value: "", label: "All sources" },
+    { value: "QR", label: "QR" },
+  ], []);
+  const statusOptions = useMemo(() => [
+    { value: "", label: "All statuses" },
+    { value: "present", label: "Present" },
+    { value: "completed", label: "Completed" },
+  ], []);
+  const hasRows = reportType === "monthly"
+    ? data.monthlyRows.length > 0
+    : reportType === "correction-summary"
+      ? data.correctionRequests.length > 0
+      : data.records.length > 0;
+  const exportCsv = useMemo(() => buildExportData(
+    reportType,
+    data.records,
+    data.monthlyRows,
+    data.correctionRequests,
+  ), [data.correctionRequests, data.monthlyRows, data.records, reportType]);
+  const exportHref = hasRows
+    ? `data:text/csv;charset=utf-8,${encodeURIComponent(exportCsv)}`
+    : undefined;
+  const selectedEmployee = employeeId
+    ? data.employees.find((employee) => employee.employeeId === employeeId)?.displayName
+    : undefined;
   const activeFilterCount = [
-    reportType === "monthly" ? month !== defaultAttendanceReportMonth : date !== defaultAttendanceReportDate,
-    department !== "all",
-    reportType !== "source-usage" && employeeId !== "all",
-    reportType !== "monthly" && reportType !== "source-usage" && reportType !== "correction-summary" && source !== "all",
-    reportType === "daily" && status !== "all",
+    reportType === "monthly" ? month !== defaultDate.slice(0, 7) : date !== defaultDate,
+    department,
+    employeeId,
+    source,
+    status,
   ].filter(Boolean).length;
 
-  const exportCsv = useMemo(() => buildExportData(reportType, reportRecords, monthlyRows, filteredCorrectionRequests), [filteredCorrectionRequests, monthlyRows, reportRecords, reportType]);
-  const exportHref = hasRows ? `data:text/csv;charset=utf-8,${encodeURIComponent(exportCsv)}` : undefined;
-  const reportLabel = getReportLabel(reportType);
-  const selectedEmployee = employeeId === "all" ? undefined : employees.find(([id]) => id === employeeId)?.[1];
-  const periodLabel = formatPeriod(reportType === "monthly" ? month : date);
-  const fileName = `attendance-${reportType}-${reportType === "monthly" ? month : date}.csv`;
+  function navigateToFilters(overrides: Partial<AttendanceReportsQuery> = {}) {
+    const nextQuery: AttendanceReportsQuery = {
+      ...query,
+      reportType,
+      date,
+      month,
+      department: department || null,
+      employeeId: employeeId || null,
+      source: source === "QR" ? "QR" : null,
+      status: status === "present" || status === "completed" ? status : null,
+      ...overrides,
+    };
+    const queryString = buildQueryString(nextQuery);
+
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  }
 
   function resetFilters() {
-    setDate(defaultAttendanceReportDate);
-    setMonth(defaultAttendanceReportMonth);
-    setDepartment("all");
-    setEmployeeId("all");
-    setSource("all");
-    setStatus("all");
+    router.push(pathname);
+  }
+
+  function handleReportChange(nextReportType: AttendanceReportType) {
+    setReportType(nextReportType);
+    setSource("");
+    setStatus("");
+    navigateToFilters({ reportType: nextReportType, status: null, source: null });
   }
 
   return (
     <div className="hr-reports-explorer">
-      <AttendanceReportSelector reportTypes={attendanceReportTypes} selectedReport={reportType} onSelectReport={setReportType} />
+      <AttendanceReportSelector
+        reportTypes={attendanceReportTypes}
+        selectedReport={reportType}
+        onSelectReport={handleReportChange}
+      />
       <AttendanceReportFilters
         reportType={reportType}
         date={date}
@@ -193,36 +294,79 @@ export function AttendanceReportsExplorer() {
         sources={sourceOptions}
         statuses={statusOptions}
         activeFilterCount={activeFilterCount}
-        onDateChange={setDate}
-        onMonthChange={setMonth}
-        onDepartmentChange={setDepartment}
-        onEmployeeChange={setEmployeeId}
-        onSourceChange={setSource}
-        onStatusChange={setStatus}
+        onDateChange={(value) => {
+          setDate(value);
+          navigateToFilters({ date: value });
+        }}
+        onMonthChange={(value) => {
+          setMonth(value);
+          navigateToFilters({ month: value });
+        }}
+        onDepartmentChange={(value) => {
+          setDepartment(value);
+          navigateToFilters({ department: value || null });
+        }}
+        onEmployeeChange={(value) => {
+          setEmployeeId(value);
+          navigateToFilters({ employeeId: value || null });
+        }}
+        onSourceChange={(value) => {
+          setSource(value);
+          navigateToFilters({ source: value === "QR" ? "QR" : null });
+        }}
+        onStatusChange={(value) => {
+          setStatus(value);
+          navigateToFilters({
+            status: value === "present" || value === "completed" ? value : null,
+          });
+        }}
         onReset={resetFilters}
       />
 
       <section className="hr-dashboard-panel hr-reports-result-panel">
         <AttendanceReportToolbar
-          reportLabel={reportLabel}
-          periodLabel={periodLabel}
-          departmentLabel={department === "all" ? "All departments" : department}
+          reportLabel={getReportLabel(reportType)}
+          periodLabel={formatPeriod(reportType === "monthly" ? month : date)}
+          departmentLabel={department || "All departments"}
           employeeLabel={selectedEmployee}
           exportHref={exportHref}
-          exportFileName={fileName}
+          exportFileName={`attendance-${reportType}-${reportType === "monthly" ? month : date}.csv`}
           hasRows={hasRows}
           onPrint={() => window.print()}
         />
-        <AttendanceReportSummary reportType={reportType} records={reportRecords} monthlyRows={monthlyRows} correctionRequests={filteredCorrectionRequests} />
 
-        {reportType === "source-usage" ? <AttendanceSourceBreakdown summary={sourceSummary} /> : null}
+        {!loadError ? (
+          <AttendanceReportSummary
+            reportType={reportType}
+            summary={data.summary}
+            monthlyRows={data.monthlyRows}
+            correctionRequests={data.correctionRequests}
+          />
+        ) : null}
+
+        {reportType === "source-usage" ? (
+          <AttendanceSourceBreakdown summary={data.sourceSummary} />
+        ) : null}
         {hasRows && reportType !== "source-usage" ? (
-          <AttendanceReportTable reportType={reportType} records={reportRecords} monthlyRows={monthlyRows} correctionRequests={filteredCorrectionRequests} />
+          <AttendanceReportTable
+            reportType={reportType}
+            records={data.records}
+            monthlyRows={data.monthlyRows}
+            correctionRequests={data.correctionRequests}
+          />
         ) : null}
         {!hasRows ? (
-          <div className="hr-reports-empty-state">
-            <strong>No report records match the selected filters.</strong>
-            <p>Try another period, department, or employee to view available HR records.</p>
+          <div className="hr-reports-empty-state" role={loadError ? "alert" : undefined}>
+            <strong>
+              {loadError
+                ? "Unable to load the attendance report."
+                : "No attendance records found for the selected report filters."}
+            </strong>
+            <p>
+              {loadError
+                ? "Please try again by refreshing the page."
+                : "Try another period, department, or employee to view available HR records."}
+            </p>
           </div>
         ) : null}
       </section>
