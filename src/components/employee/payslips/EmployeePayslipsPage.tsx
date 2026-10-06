@@ -15,7 +15,6 @@ export function EmployeePayslipsPage({
     <div className="employee-payslips-page">
       <header className="employee-payslips-heading">
         <span className="employee-payslips-heading-label">Payroll records</span>
-        <h2>My Payslip</h2>
         <p>View payroll records received from the Existing Payroll System.</p>
       </header>
 

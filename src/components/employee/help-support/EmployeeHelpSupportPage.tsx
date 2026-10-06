@@ -15,7 +15,6 @@ export function EmployeeHelpSupportPage() {
     <div className="employee-help-support-page">
       <header className="employee-help-support-heading">
         <span className="employee-help-support-heading-label">Employee support</span>
-        <h2>Help &amp; Support</h2>
         <p>
           Find answers to common questions and guidance for attendance, QR,
           corrections, payslips, and account access.

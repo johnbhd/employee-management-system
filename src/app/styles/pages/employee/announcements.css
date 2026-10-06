@@ -19,14 +19,6 @@
   text-transform: uppercase;
 }
 
-.employee-announcements-heading h1 {
-  margin: 0;
-  color: var(--employee-ink);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.35rem;
-  font-weight: 500;
-}
-
 .employee-announcements-heading p {
   max-width: 42rem;
   margin: 0;

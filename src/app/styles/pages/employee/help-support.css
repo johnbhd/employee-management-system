@@ -21,14 +21,6 @@
   text-transform: uppercase;
 }
 
-.employee-help-support-heading h2 {
-  margin: 0;
-  color: var(--employee-ink);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.35rem;
-  font-weight: 500;
-}
-
 .employee-help-support-heading p {
   max-width: 42rem;
   margin: 0;
