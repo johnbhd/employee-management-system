@@ -50,7 +50,7 @@ export function EmployeeSidebar({ user, employee, isOpen, onClose }: EmployeeSid
         aria-label={`${displayName} navigation`}
       >
         <div className="employee-brand">
-          <Image src="/images/new-au-logo.png" alt="Arellano University seal" width={44} height={44} />
+          <Image src="/images/aulogo.png" alt="Arellano University logo" width={48} height={48} priority />
           <span><strong>Arellano University</strong><small>Juan Sumulong Campus</small></span>
         </div>
         <nav className="employee-nav" aria-label="Employee portal navigation">

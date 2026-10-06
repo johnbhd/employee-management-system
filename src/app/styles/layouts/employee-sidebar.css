@@ -23,13 +23,10 @@
 }
 
 .employee-brand img {
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 3rem;
+  height: 3rem;
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: #fff;
   object-fit: contain;
-  padding: 0.2rem;
 }
 
 .employee-brand strong,
