@@ -32,6 +32,8 @@ function getEmployeePageTitle(pathname: string) {
       return "My Payslips";
     case "/employee/profile":
       return "My Profile";
+    case "/employee/settings":
+      return "Settings";
     case "/employee/announcements":
       return "Announcements";
     case "/employee/help-support":
@@ -246,6 +248,10 @@ export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbar
               <Link href="/employee/profile" className="employee-profile-menu-item" onClick={() => setProfileMenuOpen(false)}>
                 <Icon name="user" />
                 <span>Profile</span>
+              </Link>
+              <Link href="/employee/settings" className="employee-profile-menu-item" onClick={() => setProfileMenuOpen(false)}>
+                <Icon name="settings" />
+                <span>Settings</span>
               </Link>
               <button type="button" className="employee-profile-menu-item" onClick={openNotificationMenu}>
                 <Icon name="bell" />
