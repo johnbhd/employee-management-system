@@ -40,6 +40,13 @@ export type QrAttendanceRepositoryResult = {
     record: StoredQrAttendanceRecord;
 };
 
+export type AttendanceMonitoringRepositoryFilters = {
+    attendanceDate?: string | null;
+    employeeId?: string | null;
+    status?: QrAttendanceStatus | null;
+    source?: "QR" | null;
+};
+
 export class QrAttendanceDataError extends Error {
     readonly code = "QR_ATTENDANCE_DATA_INVALID";
 
@@ -252,6 +259,56 @@ export async function listAttendanceByDate(
                 - left.record.timeIn.toMillis();
 
             return timeOrder || right.id.localeCompare(left.id);
+        });
+}
+
+export async function listAttendanceForMonitoring(
+    filters: AttendanceMonitoringRepositoryFilters = {},
+): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const collection = getFirebaseAdminDb().collection(attendanceCollection);
+    const snapshots = filters.attendanceDate
+        ? await collection
+            .where("attendanceDate", "==", filters.attendanceDate)
+            .get()
+        : filters.employeeId
+            ? await collection.where("employeeId", "==", filters.employeeId).get()
+            : await collection.get();
+
+    return snapshots.docs
+        .map((snapshot) => {
+            const record = parseAttendanceRecord(snapshot.data());
+
+            if (!record) {
+                throw new QrAttendanceDataError();
+            }
+
+            return { id: snapshot.id, record };
+        })
+        .filter(({ record }) => {
+            if (filters.attendanceDate && record.attendanceDate !== filters.attendanceDate) {
+                return false;
+            }
+
+            if (filters.employeeId && record.employeeId !== filters.employeeId) {
+                return false;
+            }
+
+            if (filters.status && record.status !== filters.status) {
+                return false;
+            }
+
+            return !filters.source
+                || record.timeInSource === filters.source
+                || record.timeOutSource === filters.source;
+        })
+        .sort((left, right) => {
+            const dateOrder = right.record.attendanceDate.localeCompare(
+                left.record.attendanceDate,
+            );
+            const timeOrder = right.record.timeIn.toMillis()
+                - left.record.timeIn.toMillis();
+
+            return dateOrder || timeOrder || right.id.localeCompare(left.id);
         });
 }
 

@@ -10,7 +10,7 @@
 
 .hr-monitoring-summary {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -108,7 +108,7 @@
 
 .hr-monitoring-filter-grid {
   display: grid;
-  grid-template-columns: minmax(12rem, 2fr) repeat(7, minmax(8rem, 1fr));
+  grid-template-columns: minmax(12rem, 2fr) repeat(5, minmax(8rem, 1fr));
   gap: 0.75rem;
   padding: 1rem 1.25rem 0.9rem;
 }
@@ -213,7 +213,7 @@
 
 .hr-monitoring-table {
   width: 100%;
-  min-width: 78rem;
+  min-width: 58rem;
   border-collapse: collapse;
   font-size: 0.7rem;
 }
@@ -281,6 +281,49 @@
   padding: 2.25rem 1rem !important;
   color: var(--text-muted) !important;
   text-align: center !important;
+}
+
+.hr-monitoring-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #edf1f6;
+  padding: 0.85rem 1rem;
+}
+
+.hr-monitoring-page-size,
+.hr-monitoring-pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.hr-monitoring-page-size {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.hr-monitoring-page-size select {
+  min-height: 2rem;
+  border: 1px solid var(--border);
+  border-radius: 0.45rem;
+  background: #fbfcfe;
+  color: #334155;
+  font-size: 0.68rem;
+  padding: 0.35rem 0.45rem;
+}
+
+.hr-monitoring-pagination {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.hr-monitoring-page-button {
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
 }
 
 .hr-monitoring-drawer-layer {
@@ -510,7 +553,8 @@
   }
 
   .hr-monitoring-filter-heading,
-  .hr-monitoring-filter-footer {
+  .hr-monitoring-filter-footer,
+  .hr-monitoring-table-footer {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -525,6 +569,23 @@
 
   .hr-monitoring-reset-button {
     width: 100%;
+  }
+
+  .hr-monitoring-table-footer {
+    align-items: stretch;
+  }
+
+  .hr-monitoring-page-size,
+  .hr-monitoring-pagination {
+    justify-content: space-between;
+  }
+
+  .hr-monitoring-pagination {
+    width: 100%;
+  }
+
+  .hr-monitoring-page-button {
+    flex: 1 1 auto;
   }
 
   .hr-monitoring-result-count {
