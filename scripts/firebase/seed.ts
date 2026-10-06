@@ -2,6 +2,7 @@ import { loadEnvConfig } from "@next/env";
 
 import { demoEmployeeSeedAccounts } from "./data/demo-employees";
 import { employeeSeedData } from "./data/employees";
+import { employeeScheduleSeedData } from "./data/employee-schedules";
 import { payrollPayslipSeedData } from "./data/payslips";
 import { userSeedData } from "./data/users";
 import { createSeedContext } from "./seed-context";
@@ -11,6 +12,7 @@ import type {
   SeederResult,
 } from "./seed-types";
 import { seedEmployees } from "./seeders/employees.seeder";
+import { seedEmployeeSchedules } from "./seeders/employee-schedules.seeder";
 import { seedPayslips } from "./seeders/payslips.seeder";
 import { seedUsers } from "./seeders/users.seeder";
 
@@ -18,26 +20,33 @@ loadEnvConfig(process.cwd());
 
 const firebaseSeeders: Record<SeedName, FirebaseSeeder> = {
   employees: seedEmployees,
+  schedules: seedEmployeeSchedules,
   users: seedUsers,
   payslips: seedPayslips,
 };
 
-const allSeedNames: readonly SeedName[] = ["employees", "users", "payslips"];
+const allSeedNames: readonly SeedName[] = [
+  "employees",
+  "schedules",
+  "users",
+  "payslips",
+];
 
 function printHelp(): void {
   console.log(`AU-JSC Firebase development seeder
 
 Usage:
-  yarn firebase:seed [employees|users] [--dry-run]
+  yarn firebase:seed [employees|schedules|users|payslips] [--dry-run]
 
 Commands:
   employees  Seed the HRPS employee reference documents.
+  schedules  Seed Employee-linked HRPS reference schedule documents.
   users      Seed employees first, then Auth users and Firestore user documents.
   payslips   Seed employees, users, and development Payroll System snapshots.
   --dry-run  Preview the deterministic records without connecting or writing.
   --help     Show this help message.
 
-With no command, employees and users run in dependency order.`);
+With no command, employees, schedules, users, and payslips run in dependency order.`);
 }
 
 function isSeedName(value: string): value is SeedName {
@@ -72,7 +81,7 @@ function parseArgs(args: readonly string[]): {
 
     if (!isSeedName(argument)) {
       throw new Error(
-        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- users\n- payslips`,
+        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- schedules\n- users\n- payslips`,
       );
     }
 
@@ -90,6 +99,10 @@ function validateSeedData(): void {
   const userIds = userSeedData.map((user) => user.uid);
   const usernames = userSeedData.map((user) => user.username);
   const authEmails = userSeedData.map((user) => user.authEmail);
+  const scheduleIds = employeeScheduleSeedData.map((schedule) => schedule.scheduleId);
+  const scheduleEmployeeIds = employeeScheduleSeedData.map(
+    (schedule) => schedule.employeeId,
+  );
   const payslipIds = payrollPayslipSeedData.map((payslip) => payslip.id);
   const employeeIdSet = new Set(employeeIds);
   const demoEmployeeIds = demoEmployeeSeedAccounts.map(
@@ -127,6 +140,22 @@ function validateSeedData(): void {
 
   if (new Set(employeeIds).size !== employeeIds.length) {
     throw new Error("Employee seed data contains duplicate employee IDs.");
+  }
+
+  if (new Set(scheduleIds).size !== scheduleIds.length) {
+    throw new Error("Schedule seed data contains duplicate schedule IDs.");
+  }
+
+  if (new Set(scheduleEmployeeIds).size !== scheduleEmployeeIds.length) {
+    throw new Error("Schedule seed data contains duplicate employee IDs.");
+  }
+
+  if (scheduleEmployeeIds.some((employeeId) => !employeeIdSet.has(employeeId))) {
+    throw new Error("Schedule seed data references an unknown employee ID.");
+  }
+
+  if (demoEmployeeIds.some((employeeId) => !scheduleEmployeeIds.includes(employeeId))) {
+    throw new Error("Every demo employee account must reference a seeded schedule.");
   }
 
   if (new Set(userIds).size !== userIds.length) {
@@ -173,6 +202,10 @@ function getSeedNames(requestedName: SeedName | null): readonly SeedName[] {
 
   if (requestedName === "payslips") {
     return ["employees", "users", "payslips"];
+  }
+
+  if (requestedName === "schedules") {
+    return ["employees", "schedules"];
   }
 
   return [requestedName];

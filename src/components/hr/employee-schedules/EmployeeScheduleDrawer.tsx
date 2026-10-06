@@ -3,20 +3,20 @@
 import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { StatusBadge } from "@/components/ui/StatusBadge";
 
-import type { HrEmployeeScheduleRecord } from "@/data/hr-employee-schedules";
+import type { EmployeeScheduleItem } from "@/types/hr-employee-schedule";
+
+import {
+  formatList,
+  formatSchedule,
+  formatTimeRange,
+  getWeeklySchedule,
+} from "./schedule-display";
 
 type EmployeeScheduleDrawerProps = {
-  record: HrEmployeeScheduleRecord | null;
+  record: EmployeeScheduleItem | null;
   onClose: () => void;
 };
-
-function referenceStatusTone(status: HrEmployeeScheduleRecord["hrpsStatus"]) {
-  if (status === "Synchronized") return "success" as const;
-  if (status === "Needs Review") return "warning" as const;
-  return "danger" as const;
-}
 
 function DetailRow({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -29,6 +29,8 @@ function DetailRow({ label, value }: { label: string; value: ReactNode }) {
 
 export function EmployeeScheduleDrawer({ record, onClose }: EmployeeScheduleDrawerProps) {
   if (!record) return null;
+
+  const schedule = record.schedule;
 
   return (
     <div className="hr-schedules-drawer-layer">
@@ -48,8 +50,10 @@ export function EmployeeScheduleDrawer({ record, onClose }: EmployeeScheduleDraw
           <div>
             <p className="hr-section-kicker">Selected employee</p>
             <h2 id="hr-schedules-drawer-title">Employee schedule</h2>
-            <p className="hr-schedules-drawer-employee">{record.employeeName}</p>
-            <p className="hr-schedules-drawer-meta">{record.employeeId} · {record.department}</p>
+            <p className="hr-schedules-drawer-employee">{record.employee.displayName}</p>
+            <p className="hr-schedules-drawer-meta">
+              {record.employee.employeeId} · {record.employee.department}
+            </p>
           </div>
           <button
             type="button"
@@ -65,63 +69,59 @@ export function EmployeeScheduleDrawer({ record, onClose }: EmployeeScheduleDraw
         <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-reference-heading">
           <h3 id="hr-schedules-reference-heading">Employee reference</h3>
           <dl className="hr-schedules-detail-list">
-            <DetailRow label="Employee ID" value={record.employeeId} />
-            <DetailRow label="Name" value={record.employeeName} />
-            <DetailRow label="Department" value={record.department} />
-            <DetailRow label="Position" value={record.position} />
-            <DetailRow label="Employment status" value={record.employmentStatus} />
+            <DetailRow label="Employee ID" value={record.employee.employeeId} />
+            <DetailRow label="Name" value={record.employee.displayName} />
+            <DetailRow label="Department" value={record.employee.department} />
+            <DetailRow label="Position" value={record.employee.position ?? "—"} />
+            <DetailRow
+              label="Employment status"
+              value={record.employee.employmentStatus === "active" ? "Active" : "Inactive"}
+            />
           </dl>
         </section>
 
         <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-current-heading">
           <h3 id="hr-schedules-current-heading">Current work schedule</h3>
-          <dl className="hr-schedules-detail-list">
-            <DetailRow label="Schedule" value={record.schedule} />
-            <DetailRow label="Work days" value={record.workDays.join(" · ")} />
-            <DetailRow label="Rest days" value={record.restDayLabel} />
-            <DetailRow label="Work location" value={record.workLocation} />
-          </dl>
-        </section>
-
-        <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-week-heading">
-          <h3 id="hr-schedules-week-heading">Weekly schedule</h3>
-          <div className="hr-schedules-week-list">
-            {record.weeklySchedule.map((day) => (
-              <div className={`hr-schedules-week-row ${day.isWorkDay ? "" : "is-rest-day"}`} key={day.day}>
-                <strong>{day.shortDay}</strong>
-                <span>{day.isWorkDay ? `${day.startTime} – ${day.endTime}` : "Rest day"}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-exceptions-heading">
-          <h3 id="hr-schedules-exceptions-heading">Leave / holiday reference</h3>
-          {record.exceptions.length > 0 ? (
-            <div className="hr-schedules-exception-list">
-              {record.exceptions.map((exception) => (
-                <div className="hr-schedules-exception" key={`${exception.date}-${exception.type}`}>
-                  <strong>{exception.date}</strong>
-                  <span>{exception.type} · {exception.label}</span>
-                </div>
-              ))}
-            </div>
+          {schedule ? (
+            <dl className="hr-schedules-detail-list">
+              <DetailRow label="Schedule" value={formatSchedule(schedule)} />
+              <DetailRow label="Break" value={formatTimeRange(schedule.breakStart, schedule.breakEnd)} />
+              <DetailRow label="Shift" value={schedule.shiftLabel ?? "—"} />
+              <DetailRow label="Work days" value={formatList(schedule.workDays)} />
+              <DetailRow label="Rest days" value={formatList(schedule.restDays)} />
+              <DetailRow label="Work location" value={schedule.workLocation ?? "—"} />
+              <DetailRow label="Reference source" value="HRPS reference data" />
+            </dl>
           ) : (
-            <p className="hr-schedules-empty-detail">No leave or holiday reference is available for this schedule.</p>
+            <p className="hr-schedules-empty-detail">No schedule reference available.</p>
           )}
         </section>
 
-        <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-hrps-heading">
-          <h3 id="hr-schedules-hrps-heading">HRPS reference status</h3>
-          <dl className="hr-schedules-detail-list">
-            <DetailRow label="Reference status" value={<StatusBadge tone={referenceStatusTone(record.hrpsStatus)}>{record.hrpsStatus}</StatusBadge>} />
-            <DetailRow label="Employee ID match" value="Matched" />
-            {record.scheduleReviewReason ? <DetailRow label="Review note" value={record.scheduleReviewReason} /> : null}
-          </dl>
-        </section>
+        {schedule ? (
+          <section className="hr-schedules-detail-section" aria-labelledby="hr-schedules-week-heading">
+            <h3 id="hr-schedules-week-heading">Weekly schedule</h3>
+            <div className="hr-schedules-week-list">
+              {getWeeklySchedule(schedule).map((day) => (
+                <div
+                  className={`hr-schedules-week-row ${day.isWorkDay ? "" : "is-rest-day"}`}
+                  key={day.day}
+                >
+                  <strong>{day.shortDay}</strong>
+                  <span>
+                    {day.isWorkDay
+                      ? formatTimeRange(schedule.workStart, schedule.workEnd)
+                      : "Rest day"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <div className="hr-schedules-drawer-footer">
-          <button type="button" className="button-secondary" onClick={onClose}>Close</button>
+          <button type="button" className="button-secondary" onClick={onClose}>
+            Close
+          </button>
         </div>
       </aside>
     </div>
