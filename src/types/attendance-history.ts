@@ -5,6 +5,11 @@ export type AttendanceHistoryRecordData = QrAttendanceData & {
     id: string;
 };
 
+export type AttendanceCalendarRecord = Pick<
+    AttendanceHistoryRecordData,
+    "id" | "date" | "status"
+>;
+
 export type AttendanceHistoryData = {
     records: AttendanceHistoryRecordData[];
     page: number;

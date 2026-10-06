@@ -4,18 +4,13 @@ import { useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import {
-  getAttendanceCalendarStatus,
-  getCalendarStatusFromLabel,
-  type CalendarAttendanceStatus,
-} from "@/data/my-attendance-calendar";
-import {
   formatCampusMonthYear,
   type CampusDateParts,
 } from "@/lib/campus-time";
+import type { AttendanceCalendarRecord } from "@/types/attendance-history";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const supportedCalendarYears = [2025, 2026] as const;
 const monthOptions = [
   { value: 1, label: "January" },
   { value: 2, label: "February" },
@@ -31,13 +26,13 @@ const monthOptions = [
   { value: 12, label: "December" },
 ] as const;
 
+type CalendarAttendanceStatus = "present" | "no-record";
+
 const statusPresentation: Record<
   CalendarAttendanceStatus | "unavailable",
   { label: string; icon?: "check" | "clock" | "close" | "warning" }
 > = {
   present: { label: "Present", icon: "check" },
-  late: { label: "Late", icon: "clock" },
-  absent: { label: "Absent", icon: "close" },
   "no-record": { label: "No Record" },
   unavailable: { label: "Unavailable", icon: "warning" },
 };
@@ -54,9 +49,13 @@ type CalendarDay = {
 
 export function MonthlyAttendanceCalendar({
   attendanceLoadError,
+  calendarAttendance,
+  calendarLoadError,
   todayAttendance,
 }: {
   attendanceLoadError: boolean;
+  calendarAttendance: readonly AttendanceCalendarRecord[];
+  calendarLoadError: boolean;
   todayAttendance: TodayAttendanceData;
 }) {
   const campusDate = getCampusDateFromKey(todayAttendance.attendanceDate);
@@ -66,6 +65,9 @@ export function MonthlyAttendanceCalendar({
   }));
 
   const calendarDays = buildCalendarDays(calendarView.year, calendarView.month);
+  const attendanceStatusByDate = new Map(
+    calendarAttendance.map((record) => [record.date, getCalendarStatus(record)]),
+  );
   const monthDate = new Date(
     Date.UTC(calendarView.year, calendarView.month - 1, 1, 12),
   );
@@ -73,9 +75,13 @@ export function MonthlyAttendanceCalendar({
   const currentDayStatus = attendanceLoadError
     ? "unavailable" as const
     : todayAttendance.attendance
-      ? getCalendarStatusFromLabel("Present")
-      : getCalendarStatusFromLabel("No Record");
-  const yearOptions = getYearOptions(calendarView.year);
+      ? "present" as const
+      : "no-record" as const;
+  const yearOptions = getYearOptions(
+    calendarAttendance,
+    calendarView.year,
+    campusDate.year,
+  );
 
   function handlePreviousMonth() {
     moveCalendarView(-1);
@@ -136,6 +142,12 @@ export function MonthlyAttendanceCalendar({
           Review your attendance for the selected month
         </span>
       </div>
+
+      {calendarLoadError ? (
+        <p className="my-attendance-data-error" role="alert">
+          Unable to load your attendance calendar. Please try again.
+        </p>
+      ) : null}
 
       <div className="my-attendance-calendar-surface">
         <div className="my-attendance-calendar-toolbar">
@@ -212,8 +224,6 @@ export function MonthlyAttendanceCalendar({
             aria-label="Attendance status legend"
           >
             <LegendItem status="present" />
-            <LegendItem status="late" />
-            <LegendItem status="absent" />
             <LegendItem status="no-record" />
           </div>
         </div>
@@ -252,15 +262,18 @@ export function MonthlyAttendanceCalendar({
               calendarDay.day,
               campusDate,
             );
+            const dateKey = formatCalendarDateKey(
+              calendarView.year,
+              calendarView.month,
+              calendarDay.day,
+            );
             const status = isFuture
               ? null
               : isToday
                 ? currentDayStatus
-                : getAttendanceCalendarStatus(
-                    calendarView.year,
-                    calendarView.month,
-                    calendarDay.day,
-                  );
+                : calendarLoadError
+                  ? "unavailable" as const
+                  : attendanceStatusByDate.get(dateKey) ?? "no-record";
 
             return (
               <CalendarDayCell
@@ -278,10 +291,26 @@ export function MonthlyAttendanceCalendar({
   );
 }
 
-function getYearOptions(selectedYear: number) {
-  return Array.from(new Set([...supportedCalendarYears, selectedYear])).sort(
+function getYearOptions(
+  records: readonly AttendanceCalendarRecord[],
+  selectedYear: number,
+  referenceYear: number,
+) {
+  const recordYears = records
+    .map((record) => Number(record.date.slice(0, 4)))
+    .filter((year) => Number.isInteger(year));
+
+  return Array.from(new Set([referenceYear, selectedYear, ...recordYears])).sort(
     (firstYear, secondYear) => firstYear - secondYear,
   );
+}
+
+function getCalendarStatus(
+  record: AttendanceCalendarRecord,
+): CalendarAttendanceStatus {
+  return record.status === "present" || record.status === "completed"
+    ? "present"
+    : "no-record";
 }
 
 function getCampusDateFromKey(dateKey: string): CampusDateParts {

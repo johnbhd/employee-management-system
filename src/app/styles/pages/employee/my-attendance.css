@@ -374,14 +374,6 @@
   background: var(--employee-green);
 }
 
-.my-attendance-calendar-legend-item.is-late .my-attendance-calendar-legend-mark {
-  background: var(--employee-gold);
-}
-
-.my-attendance-calendar-legend-item.is-absent .my-attendance-calendar-legend-mark {
-  background: var(--employee-red);
-}
-
 .my-attendance-calendar-weekdays,
 .my-attendance-calendar-grid {
   display: grid;
@@ -484,14 +476,6 @@
 
 .my-attendance-calendar-day.has-present .my-attendance-calendar-status {
   color: var(--employee-green);
-}
-
-.my-attendance-calendar-day.has-late .my-attendance-calendar-status {
-  color: var(--employee-gold);
-}
-
-.my-attendance-calendar-day.has-absent .my-attendance-calendar-status {
-  color: var(--employee-red);
 }
 
 .my-attendance-calendar-day.has-no-record .my-attendance-calendar-status,
