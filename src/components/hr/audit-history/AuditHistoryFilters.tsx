@@ -1,5 +1,4 @@
 import { Icon } from "@/components/ui/Icon";
-import type { AttendanceAuditAction, AttendanceAuditActorRole, AttendanceAuditArea, AttendanceAuditOutcome } from "@/data/hr-attendance-audit";
 
 type FilterOption = {
   value: string;
@@ -24,10 +23,10 @@ type AuditHistoryFiltersProps = {
   onSearchChange: (value: string) => void;
   onFromDateChange: (value: string) => void;
   onToDateChange: (value: string) => void;
-  onActionChange: (value: AttendanceAuditAction | "all") => void;
-  onAreaChange: (value: AttendanceAuditArea | "all") => void;
-  onActorRoleChange: (value: AttendanceAuditActorRole | "all") => void;
-  onOutcomeChange: (value: AttendanceAuditOutcome | "all") => void;
+  onActionChange: (value: string) => void;
+  onAreaChange: (value: string) => void;
+  onActorRoleChange: (value: string) => void;
+  onOutcomeChange: (value: string) => void;
   onEmployeeChange: (value: string) => void;
   onReset: () => void;
 };
@@ -95,28 +94,28 @@ export function AuditHistoryFilters({
 
         <label className="hr-audit-field">
           <span>Action type</span>
-          <select value={action} onChange={(event) => onActionChange(event.target.value as AttendanceAuditAction | "all")}>
+          <select value={action} onChange={(event) => onActionChange(event.target.value)}>
             {actions.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
         </label>
 
         <label className="hr-audit-field">
           <span>Area</span>
-          <select value={area} onChange={(event) => onAreaChange(event.target.value as AttendanceAuditArea | "all")}>
+          <select value={area} onChange={(event) => onAreaChange(event.target.value)}>
             {areas.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
         </label>
 
         <label className="hr-audit-field">
           <span>Actor role</span>
-          <select value={actorRole} onChange={(event) => onActorRoleChange(event.target.value as AttendanceAuditActorRole | "all")}>
+          <select value={actorRole} onChange={(event) => onActorRoleChange(event.target.value)}>
             {actorRoles.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
         </label>
 
         <label className="hr-audit-field">
           <span>Outcome</span>
-          <select value={outcome} onChange={(event) => onOutcomeChange(event.target.value as AttendanceAuditOutcome | "all")}>
+          <select value={outcome} onChange={(event) => onOutcomeChange(event.target.value)}>
             {outcomes.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
           </select>
         </label>
@@ -130,7 +129,7 @@ export function AuditHistoryFilters({
       </div>
 
       <div className="hr-audit-filter-footer">
-        <p>Historical attendance workflow activity is read-only and derived from recorded correction history.</p>
+        <p>Historical activity is read-only and derived from persisted attendance and correction metadata.</p>
         <button type="button" className="button-secondary" onClick={onReset}>
           <Icon name="refresh" />
           Reset filters

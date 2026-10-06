@@ -1,9 +1,9 @@
 import { Icon } from "@/components/ui/Icon";
-import type { AttendanceAuditEvent } from "@/data/hr-attendance-audit";
+import type { HrAuditHistorySummary } from "@/types/hr-audit-history";
 import type { IconName, StatusTone } from "@/types/ui";
 
 type AuditHistorySummaryProps = {
-  events: readonly AttendanceAuditEvent[];
+  summary: HrAuditHistorySummary;
 };
 
 type SummaryMetric = {
@@ -13,38 +13,13 @@ type SummaryMetric = {
   tone: StatusTone;
 };
 
-export function AuditHistorySummary({ events }: AuditHistorySummaryProps) {
+export function AuditHistorySummary({ summary }: AuditHistorySummaryProps) {
   const metrics: SummaryMetric[] = [
-    {
-      label: "Total activities",
-      value: events.length,
-      icon: "audit",
-      tone: "info",
-    },
-    {
-      label: "Attendance verified",
-      value: events.filter((event) => event.action === "Attendance Verified").length,
-      icon: "check",
-      tone: "success",
-    },
-    {
-      label: "Corrections approved",
-      value: events.filter((event) => event.action === "Correction Approved").length,
-      icon: "check",
-      tone: "success",
-    },
-    {
-      label: "Corrections rejected",
-      value: events.filter((event) => event.action === "Correction Rejected").length,
-      icon: "close",
-      tone: "danger",
-    },
-    {
-      label: "Information requested",
-      value: events.filter((event) => event.action === "Information Requested").length,
-      icon: "help",
-      tone: "warning",
-    },
+    { label: "Total activities", value: summary.total, icon: "audit", tone: "info" },
+    { label: "Attendance actions", value: summary.attendance, icon: "check", tone: "success" },
+    { label: "QR actions", value: summary.qr, icon: "qr", tone: "info" },
+    { label: "Corrections approved", value: summary.approved, icon: "check", tone: "success" },
+    { label: "Corrections rejected", value: summary.rejected, icon: "close", tone: "danger" },
   ];
 
   return (

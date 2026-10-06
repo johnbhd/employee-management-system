@@ -1,6 +1,18 @@
 import { AuditHistoryExplorer } from "./AuditHistoryExplorer";
+import type { HrAuditHistoryData } from "@/server/hr/audit-history.service";
+import type { HrAuditHistoryQuery } from "@/types/hr-audit-history";
 
-export function AuditHistoryPage() {
+type AuditHistoryPageProps = {
+  data: HrAuditHistoryData;
+  query: HrAuditHistoryQuery;
+  loadError?: boolean;
+};
+
+export function AuditHistoryPage({
+  data,
+  query,
+  loadError = false,
+}: AuditHistoryPageProps) {
   return (
     <div className="hr-dashboard-page hr-audit-history-page">
       <header className="hr-dashboard-header">
@@ -13,7 +25,7 @@ export function AuditHistoryPage() {
         </div>
       </header>
 
-      <AuditHistoryExplorer />
+      <AuditHistoryExplorer data={data} query={query} loadError={loadError} />
     </div>
   );
 }

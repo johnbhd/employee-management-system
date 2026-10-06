@@ -1,70 +1,39 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { Icon } from "@/components/ui/Icon";
-import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
-import {
-  auditActionOptions,
-  auditActorRoleOptions,
-  auditAreaOptions,
-  auditOutcomeOptions,
-  type AttendanceAuditAction,
-  type AttendanceAuditActorRole,
-  type AttendanceAuditArea,
-  type AttendanceAuditEvent,
-  type AttendanceAuditOutcome,
-} from "@/data/hr-attendance-audit";
+import type { HrAuditHistoryData } from "@/server/hr/audit-history.service";
+import type { HrAuditHistoryQuery } from "@/types/hr-audit-history";
 
 import { AuditEventDrawer } from "./AuditEventDrawer";
 import { AuditHistoryFilters } from "./AuditHistoryFilters";
 import { AuditHistorySummary } from "./AuditHistorySummary";
 import { AuditHistoryTable } from "./AuditHistoryTable";
 
-const allValue = "all" as const;
-const pageSize = 10;
+const allValue = "all";
 
-function escapeCsv(value: string | number) {
-  return `"${String(value).replaceAll('"', '""')}"`;
-}
+type AuditHistoryExplorerProps = {
+  data: HrAuditHistoryData;
+  query: HrAuditHistoryQuery;
+  loadError?: boolean;
+};
 
-function createAuditCsv(events: readonly AttendanceAuditEvent[]) {
-  const headers = [
-    "Audit Event ID",
-    "Date / Time",
-    "Action",
-    "Actor",
-    "Actor Role",
-    "Employee ID",
-    "Employee Name",
-    "Attendance Record ID",
-    "Correction Request ID",
-    "Field Changed",
-    "Previous Value",
-    "New Value",
-    "Outcome",
-  ];
-  const rows = events.flatMap((event) => {
-    const changes = event.changes.length > 0 ? event.changes : [{ field: "—", previousValue: "—", newValue: "—" }];
+function buildQueryString(query: HrAuditHistoryQuery) {
+  const params = new URLSearchParams();
 
-    return changes.map((change) => [
-      event.id,
-      event.occurredAt,
-      event.action,
-      event.actor.name,
-      event.actor.role,
-      event.employee.employeeId,
-      event.employee.name,
-      event.attendanceRecordId,
-      event.correctionRequest?.id ?? "—",
-      change.field,
-      change.previousValue,
-      change.newValue,
-      event.outcome,
-    ]);
-  });
+  if (query.search) params.set("search", query.search);
+  if (query.fromDate) params.set("from", query.fromDate);
+  if (query.toDate) params.set("to", query.toDate);
+  if (query.action) params.set("action", query.action);
+  if (query.area) params.set("area", query.area);
+  if (query.actorRole) params.set("actorRole", query.actorRole);
+  if (query.outcome) params.set("outcome", query.outcome);
+  if (query.employeeId) params.set("employeeId", query.employeeId);
+  if (query.page > 1) params.set("page", String(query.page));
 
-  return [headers, ...rows].map((row) => row.map(escapeCsv).join(",")).join("\n");
+  return params.toString();
 }
 
 function exportRangeLabel(fromDate: string, toDate: string) {
@@ -74,76 +43,30 @@ function exportRangeLabel(fromDate: string, toDate: string) {
   return "all-records";
 }
 
-export function AuditHistoryExplorer() {
-  const { auditEvents: events } = useHrWorkflow();
-  const [search, setSearch] = useState("");
-  const [fromDate, setFromDate] = useState("");
-  const [toDate, setToDate] = useState("");
-  const [action, setAction] = useState<AttendanceAuditAction | "all">(allValue);
-  const [area, setArea] = useState<AttendanceAuditArea | "all">(allValue);
-  const [actorRole, setActorRole] = useState<AttendanceAuditActorRole | "all">(allValue);
-  const [outcome, setOutcome] = useState<AttendanceAuditOutcome | "all">(allValue);
-  const [employeeId, setEmployeeId] = useState<string>(allValue);
+export function AuditHistoryExplorer({
+  data,
+  query,
+  loadError = false,
+}: AuditHistoryExplorerProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [search, setSearch] = useState(query.search);
+  const [fromDate, setFromDate] = useState(query.fromDate ?? "");
+  const [toDate, setToDate] = useState(query.toDate ?? "");
+  const [action, setAction] = useState(query.action ?? allValue);
+  const [area, setArea] = useState(query.area ?? allValue);
+  const [actorRole, setActorRole] = useState(query.actorRole ?? allValue);
+  const [outcome, setOutcome] = useState(query.outcome ?? allValue);
+  const [employeeId, setEmployeeId] = useState(query.employeeId ?? allValue);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
 
-  const employees = useMemo(() => {
-    const employeeMap = new Map(events.map((event) => [event.employee.employeeId, event.employee.name]));
-
-    return [
-      { value: allValue, label: "All employees" },
-      ...Array.from(employeeMap.entries())
-        .sort((first, second) => first[1].localeCompare(second[1]))
-        .map(([value, label]) => ({ value, label: `${label} · ${value}` })),
-    ];
-  }, [events]);
-
-  const filteredEvents = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return events
-      .filter((event) => {
-        const searchableValues = [
-          event.id,
-          event.action,
-          event.area,
-          event.actor.name,
-          event.actor.role,
-          event.employee.name,
-          event.employee.employeeId,
-          event.attendanceRecordId,
-          event.correctionRequest?.id ?? "",
-          event.note ?? "",
-        ];
-        const matchesSearch = !normalizedSearch
-          || searchableValues.some((value) => value.toLowerCase().includes(normalizedSearch));
-        const matchesFromDate = !fromDate || event.occurredAtDate >= fromDate;
-        const matchesToDate = !toDate || event.occurredAtDate <= toDate;
-        const matchesAction = action === allValue || event.action === action;
-        const matchesArea = area === allValue || event.area === area;
-        const matchesActorRole = actorRole === allValue || event.actor.role === actorRole;
-        const matchesOutcome = outcome === allValue || event.outcome === outcome;
-        const matchesEmployee = employeeId === allValue || event.employee.employeeId === employeeId;
-
-        return matchesSearch
-          && matchesFromDate
-          && matchesToDate
-          && matchesAction
-          && matchesArea
-          && matchesActorRole
-          && matchesOutcome
-          && matchesEmployee;
-      })
-      .sort((first, second) => second.occurredAtTimestamp - first.occurredAtTimestamp);
-  }, [action, actorRole, area, employeeId, events, fromDate, outcome, search, toDate]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const pageStart = (currentPage - 1) * pageSize;
-  const visibleEvents = filteredEvents.slice(pageStart, pageStart + pageSize);
-  const selectedEvent = events.find((event) => event.id === selectedEventId) ?? null;
+  const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+  const currentPage = data.page;
+  const pageStart = data.total === 0 ? 0 : (currentPage - 1) * data.pageSize + 1;
+  const pageEnd = Math.min(currentPage * data.pageSize, data.total);
+  const selectedEvent = data.events.find((event) => event.id === selectedEventId) ?? null;
   const relatedEvents = selectedEvent
-    ? events
+    ? data.events
       .filter((event) => {
         if (selectedEvent.correctionRequest && event.correctionRequest) {
           return event.correctionRequest.id === selectedEvent.correctionRequest.id;
@@ -153,10 +76,21 @@ export function AuditHistoryExplorer() {
       })
       .sort((first, second) => first.occurredAtTimestamp - second.occurredAtTimestamp)
     : [];
-  const exportHref = filteredEvents.length > 0
-    ? `data:text/csv;charset=utf-8,${encodeURIComponent(createAuditCsv(filteredEvents))}`
+  const filterQuery: HrAuditHistoryQuery = {
+    ...query,
+    search,
+    fromDate: fromDate || null,
+    toDate: toDate || null,
+    action: action === allValue ? null : action as HrAuditHistoryQuery["action"],
+    area: area === allValue ? null : area as HrAuditHistoryQuery["area"],
+    actorRole: actorRole === allValue ? null : actorRole,
+    outcome: outcome === allValue ? null : outcome as HrAuditHistoryQuery["outcome"],
+    employeeId: employeeId === allValue ? null : employeeId,
+  };
+  const exportQuery = buildQueryString({ ...filterQuery, page: 1 });
+  const exportHref = data.total > 0
+    ? `/api/v1/hr/audit-history?format=csv${exportQuery ? `&${exportQuery}` : ""}`
     : undefined;
-  const exportFileName = `attendance-audit-history-${exportRangeLabel(fromDate, toDate)}.csv`;
   const activeFilterCount = [
     search.trim(),
     fromDate,
@@ -177,66 +111,27 @@ export function AuditHistoryExplorer() {
 
     document.addEventListener("keydown", closeOnEscape);
 
-    return () => {
-      document.removeEventListener("keydown", closeOnEscape);
-    };
+    return () => document.removeEventListener("keydown", closeOnEscape);
   }, [selectedEventId]);
 
+  function navigateToFilters(overrides: Partial<HrAuditHistoryQuery> = {}) {
+    const nextQuery: HrAuditHistoryQuery = {
+      ...filterQuery,
+      page: 1,
+      ...overrides,
+    };
+    const queryString = buildQueryString(nextQuery);
+
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  }
+
   function resetFilters() {
-    setSearch("");
-    setFromDate("");
-    setToDate("");
-    setAction(allValue);
-    setArea(allValue);
-    setActorRole(allValue);
-    setOutcome(allValue);
-    setEmployeeId(allValue);
-    setPage(1);
-  }
-
-  function updateSearch(value: string) {
-    setSearch(value);
-    setPage(1);
-  }
-
-  function updateFromDate(value: string) {
-    setFromDate(value);
-    setPage(1);
-  }
-
-  function updateToDate(value: string) {
-    setToDate(value);
-    setPage(1);
-  }
-
-  function updateAction(value: AttendanceAuditAction | "all") {
-    setAction(value);
-    setPage(1);
-  }
-
-  function updateArea(value: AttendanceAuditArea | "all") {
-    setArea(value);
-    setPage(1);
-  }
-
-  function updateActorRole(value: AttendanceAuditActorRole | "all") {
-    setActorRole(value);
-    setPage(1);
-  }
-
-  function updateOutcome(value: AttendanceAuditOutcome | "all") {
-    setOutcome(value);
-    setPage(1);
-  }
-
-  function updateEmployee(value: string) {
-    setEmployeeId(value);
-    setPage(1);
+    router.push(pathname);
   }
 
   return (
     <div className="hr-audit-explorer">
-      <AuditHistorySummary events={filteredEvents} />
+      {!loadError ? <AuditHistorySummary summary={data.summary} /> : null}
 
       <AuditHistoryFilters
         search={search}
@@ -247,20 +142,44 @@ export function AuditHistoryExplorer() {
         actorRole={actorRole}
         outcome={outcome}
         employeeId={employeeId}
-        actions={auditActionOptions}
-        areas={auditAreaOptions}
-        actorRoles={auditActorRoleOptions}
-        outcomes={auditOutcomeOptions}
-        employees={employees}
+        actions={data.actions}
+        areas={data.areas}
+        actorRoles={data.actorRoles}
+        outcomes={data.outcomes}
+        employees={data.employees}
         activeFilterCount={activeFilterCount}
-        onSearchChange={updateSearch}
-        onFromDateChange={updateFromDate}
-        onToDateChange={updateToDate}
-        onActionChange={updateAction}
-        onAreaChange={updateArea}
-        onActorRoleChange={updateActorRole}
-        onOutcomeChange={updateOutcome}
-        onEmployeeChange={updateEmployee}
+        onSearchChange={(value) => {
+          setSearch(value);
+          navigateToFilters({ search: value });
+        }}
+        onFromDateChange={(value) => {
+          setFromDate(value);
+          navigateToFilters({ fromDate: value || null });
+        }}
+        onToDateChange={(value) => {
+          setToDate(value);
+          navigateToFilters({ toDate: value || null });
+        }}
+        onActionChange={(value) => {
+          setAction(value);
+          navigateToFilters({ action: value === allValue ? null : value as HrAuditHistoryQuery["action"] });
+        }}
+        onAreaChange={(value) => {
+          setArea(value);
+          navigateToFilters({ area: value === allValue ? null : value as HrAuditHistoryQuery["area"] });
+        }}
+        onActorRoleChange={(value) => {
+          setActorRole(value);
+          navigateToFilters({ actorRole: value === allValue ? null : value });
+        }}
+        onOutcomeChange={(value) => {
+          setOutcome(value);
+          navigateToFilters({ outcome: value === allValue ? null : value as HrAuditHistoryQuery["outcome"] });
+        }}
+        onEmployeeChange={(value) => {
+          setEmployeeId(value);
+          navigateToFilters({ employeeId: value === allValue ? null : value });
+        }}
         onReset={resetFilters}
       />
 
@@ -273,10 +192,10 @@ export function AuditHistoryExplorer() {
           </div>
           <div className="hr-audit-result-actions">
             <span className="hr-audit-result-count" aria-live="polite">
-              Showing {filteredEvents.length === 0 ? 0 : pageStart + 1}–{Math.min(pageStart + pageSize, filteredEvents.length)} of {filteredEvents.length} events
+              Showing {pageStart}–{pageEnd} of {data.total} events
             </span>
             {exportHref ? (
-              <a className="button-secondary" href={exportHref} download={exportFileName}>
+              <a className="button-secondary" href={exportHref} download={`attendance-audit-history-${exportRangeLabel(fromDate, toDate)}.csv`}>
                 <Icon name="download" />
                 Export CSV
               </a>
@@ -284,15 +203,21 @@ export function AuditHistoryExplorer() {
           </div>
         </div>
 
-        <AuditHistoryTable events={visibleEvents} onSelectEvent={setSelectedEventId} />
+        <AuditHistoryTable
+          events={data.events}
+          onSelectEvent={setSelectedEventId}
+          emptyMessage={loadError
+            ? "Unable to load audit history. Please refresh the page and try again."
+            : "No audit events match the selected filters."}
+        />
 
-        {filteredEvents.length > 0 ? (
+        {data.total > 0 ? (
           <nav className="hr-audit-pagination" aria-label="Audit event pages">
-            <button type="button" className="button-secondary" onClick={() => setPage((current) => Math.max(1, current - 1))} disabled={currentPage === 1}>
+            <button type="button" className="button-secondary" onClick={() => navigateToFilters({ page: Math.max(1, currentPage - 1) })} disabled={currentPage === 1}>
               Previous
             </button>
             <span>Page {currentPage} of {totalPages}</span>
-            <button type="button" className="button-secondary" onClick={() => setPage((current) => Math.min(totalPages, current + 1))} disabled={currentPage === totalPages}>
+            <button type="button" className="button-secondary" onClick={() => navigateToFilters({ page: Math.min(totalPages, currentPage + 1) })} disabled={!data.hasNext || currentPage === totalPages}>
               Next
             </button>
           </nav>
