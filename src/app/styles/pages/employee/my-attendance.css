@@ -232,7 +232,7 @@
 
 .my-attendance-action-list {
   display: grid;
-  grid-template-columns: 1.1fr repeat(2, minmax(0, 1fr));
+  grid-template-columns: 1.1fr minmax(0, 1fr);
   overflow: hidden;
   border: 1px solid var(--employee-line);
   border-radius: 0.65rem;
@@ -301,13 +301,6 @@
 
 .my-attendance-action.is-primary small {
   color: rgba(255, 255, 255, 0.72);
-}
-
-.my-attendance-action-feedback {
-  min-height: 1.1rem;
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.72rem;
 }
 
 .my-attendance-calendar-section {
