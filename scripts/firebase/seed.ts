@@ -2,6 +2,7 @@ import { loadEnvConfig } from "@next/env";
 
 import { demoEmployeeSeedAccounts } from "./data/demo-employees";
 import { employeeSeedData } from "./data/employees";
+import { payrollPayslipSeedData } from "./data/payslips";
 import { userSeedData } from "./data/users";
 import { createSeedContext } from "./seed-context";
 import type {
@@ -10,6 +11,7 @@ import type {
   SeederResult,
 } from "./seed-types";
 import { seedEmployees } from "./seeders/employees.seeder";
+import { seedPayslips } from "./seeders/payslips.seeder";
 import { seedUsers } from "./seeders/users.seeder";
 
 loadEnvConfig(process.cwd());
@@ -17,9 +19,10 @@ loadEnvConfig(process.cwd());
 const firebaseSeeders: Record<SeedName, FirebaseSeeder> = {
   employees: seedEmployees,
   users: seedUsers,
+  payslips: seedPayslips,
 };
 
-const allSeedNames: readonly SeedName[] = ["employees", "users"];
+const allSeedNames: readonly SeedName[] = ["employees", "users", "payslips"];
 
 function printHelp(): void {
   console.log(`AU-JSC Firebase development seeder
@@ -30,6 +33,7 @@ Usage:
 Commands:
   employees  Seed the HRPS employee reference documents.
   users      Seed employees first, then Auth users and Firestore user documents.
+  payslips   Seed employees, users, and development Payroll System snapshots.
   --dry-run  Preview the deterministic records without connecting or writing.
   --help     Show this help message.
 
@@ -68,7 +72,7 @@ function parseArgs(args: readonly string[]): {
 
     if (!isSeedName(argument)) {
       throw new Error(
-        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- users`,
+        `Unknown Firebase seeder: ${argument}\n\nAvailable seeders:\n- employees\n- users\n- payslips`,
       );
     }
 
@@ -86,6 +90,7 @@ function validateSeedData(): void {
   const userIds = userSeedData.map((user) => user.uid);
   const usernames = userSeedData.map((user) => user.username);
   const authEmails = userSeedData.map((user) => user.authEmail);
+  const payslipIds = payrollPayslipSeedData.map((payslip) => payslip.id);
   const employeeIdSet = new Set(employeeIds);
   const demoEmployeeIds = demoEmployeeSeedAccounts.map(
     (employee) => employee.employeeId,
@@ -136,6 +141,18 @@ function validateSeedData(): void {
     throw new Error("User seed data contains duplicate Auth emails.");
   }
 
+  if (new Set(payslipIds).size !== payslipIds.length) {
+    throw new Error("Payslip seed data contains duplicate deterministic IDs.");
+  }
+
+  if (
+    payrollPayslipSeedData.some(
+      (payslip) => !employeeIdSet.has(payslip.employeeId),
+    )
+  ) {
+    throw new Error("Payslip seed data references an unknown employee ID.");
+  }
+
   for (const user of userSeedData) {
     if (user.employeeId && !employeeIdSet.has(user.employeeId)) {
       throw new Error(
@@ -152,6 +169,10 @@ function getSeedNames(requestedName: SeedName | null): readonly SeedName[] {
 
   if (requestedName === "users") {
     return ["employees", "users"];
+  }
+
+  if (requestedName === "payslips") {
+    return ["employees", "users", "payslips"];
   }
 
   return [requestedName];

@@ -4,19 +4,16 @@ import { useMemo, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import {
-  employeeMonthlyPayslips,
-  employeePayslipCutoffStats,
-  employeePayslips,
-  employeePayslipMonthlyStats,
-  employeePayslipYears,
-  type EmployeeMonthlyPayslip,
-  type EmployeeMonthlyPayslipStatus,
-  type EmployeePayslip,
-  type EmployeePayslipStatus,
-  type EmployeePayslipStat,
-} from "@/data/employee-payslips";
+import { formatPhilippinePeso } from "@/lib/format-currency";
 import type { EmployeeReference } from "@/types/employee";
+import type {
+  EmployeeMonthlyPayslip,
+  EmployeeMonthlyPayslipStatus,
+  EmployeePayslip,
+  EmployeePayslipHistoryData,
+  EmployeePayslipStat,
+  PayslipStatus,
+} from "@/types/payslip";
 
 import {
   PayslipDetailsModal,
@@ -24,7 +21,7 @@ import {
 } from "./PayslipDetailsModal";
 
 type PayslipViewMode = "cutoff" | "monthly";
-type StatusFilter = "all" | EmployeePayslipStatus | EmployeeMonthlyPayslipStatus;
+type StatusFilter = "all" | PayslipStatus | EmployeeMonthlyPayslipStatus;
 
 const viewModes: Array<{ value: PayslipViewMode; label: string }> = [
   { value: "cutoff", label: "Per Cutoff" },
@@ -45,13 +42,17 @@ const monthlyStatusFilters: Array<{ value: StatusFilter; label: string }> = [
 
 export function PayslipsExplorer({
   employee,
+  payslipData,
+  payslipLoadError,
 }: {
   employee: EmployeeReference | null;
+  payslipData: EmployeePayslipHistoryData;
+  payslipLoadError: boolean;
 }) {
   const [viewMode, setViewMode] = useState<PayslipViewMode>("cutoff");
-  const [draftYear, setDraftYear] = useState<string>(employeePayslipYears[0]);
+  const [draftYear, setDraftYear] = useState<string>(payslipData.years[0] ?? "");
   const [draftStatus, setDraftStatus] = useState<StatusFilter>("all");
-  const [appliedYear, setAppliedYear] = useState<string>(employeePayslipYears[0]);
+  const [appliedYear, setAppliedYear] = useState<string>(payslipData.years[0] ?? "");
   const [appliedStatus, setAppliedStatus] = useState<StatusFilter>("all");
   const [rowsPerPage, setRowsPerPage] = useState("5");
   const [currentPage, setCurrentPage] = useState(1);
@@ -61,21 +62,21 @@ export function PayslipsExplorer({
   );
 
   const filteredPayslips = useMemo(
-    () => employeePayslips.filter((payslip) => {
-      const matchesYear = payslip.payrollMonth.includes(appliedYear);
+    () => payslipData.payslips.filter((payslip) => {
+      const matchesYear = !appliedYear || payslip.payrollMonthKey.startsWith(appliedYear);
       const matchesStatus = appliedStatus === "all" || payslip.status === appliedStatus;
       return matchesYear && matchesStatus;
     }),
-    [appliedStatus, appliedYear],
+    [appliedStatus, appliedYear, payslipData.payslips],
   );
 
   const filteredMonthlyPayslips = useMemo(
-    () => employeeMonthlyPayslips.filter((summary) => {
-      const matchesYear = summary.monthKey.startsWith(appliedYear);
+    () => payslipData.monthlyPayslips.filter((summary) => {
+      const matchesYear = !appliedYear || summary.monthKey.startsWith(appliedYear);
       const matchesStatus = appliedStatus === "all" || summary.status === appliedStatus;
       return matchesYear && matchesStatus;
     }),
-    [appliedStatus, appliedYear],
+    [appliedStatus, appliedYear, payslipData.monthlyPayslips],
   );
 
   const activeRows = viewMode === "cutoff" ? filteredPayslips : filteredMonthlyPayslips;
@@ -90,11 +91,13 @@ export function PayslipsExplorer({
   const rangeStart = activeRows.length === 0 ? 0 : pageStartIndex + 1;
   const rangeEnd = Math.min(pageStartIndex + pageSize, activeRows.length);
   const statusFilters = viewMode === "cutoff" ? cutoffStatusFilters : monthlyStatusFilters;
-  const summaryStats = viewMode === "cutoff"
-    ? employeePayslipCutoffStats
-    : employeePayslipMonthlyStats;
+  const summaryStats = payslipLoadError
+    ? getUnavailableStats(viewMode)
+    : viewMode === "cutoff"
+      ? payslipData.cutoffStats
+      : payslipData.monthlyStats;
   const includedCutoffs = selectedRecord?.kind === "monthly"
-    ? employeePayslips.filter((payslip) => selectedRecord.summary.includedPayslipIds.includes(payslip.id))
+    ? payslipData.payslips.filter((payslip) => selectedRecord.summary.includedPayslipIds.includes(payslip.id))
     : [];
 
   function applyFilters() {
@@ -106,9 +109,9 @@ export function PayslipsExplorer({
   }
 
   function resetFilters() {
-    setDraftYear(employeePayslipYears[0]);
+    setDraftYear(payslipData.years[0] ?? "");
     setDraftStatus("all");
-    setAppliedYear(employeePayslipYears[0]);
+    setAppliedYear(payslipData.years[0] ?? "");
     setAppliedStatus("all");
     setCurrentPage(1);
     setSelectedRecord(null);
@@ -163,6 +166,14 @@ export function PayslipsExplorer({
     <div className="employee-payslips-workspace">
       <PayslipSummaryStats stats={summaryStats} />
 
+      {payslipLoadError ? (
+        <div className="employee-payslips-load-state employee-payslips-load-state-error" role="alert">
+          <strong>Unable to load your payslip history.</strong>
+          <span>Please try again.</span>
+          <a href="/employee/payslips">Try again</a>
+        </div>
+      ) : null}
+
       <section className="employee-payslips-filters" aria-label="Payslip filters">
         <div className="employee-payslips-filter-grid">
           <div className="employee-payslips-field employee-payslips-view-field">
@@ -195,7 +206,7 @@ export function PayslipsExplorer({
                 onChange={(event) => setDraftYear(event.target.value)}
                 aria-label="Filter payslips by year"
               >
-                {employeePayslipYears.map((year) => (
+                {payslipData.years.map((year) => (
                   <option value={year} key={year}>{year}</option>
                 ))}
               </select>
@@ -286,7 +297,11 @@ export function PayslipsExplorer({
                 ))}
                 {visiblePayslips.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="employee-payslips-empty">No payslips match the selected filters.</td>
+                    <td colSpan={7} className="employee-payslips-empty">
+                      {payslipData.payslips.length === 0
+                        ? "No payslip records are available yet."
+                        : "No payslips match the selected filters."}
+                    </td>
                   </tr>
                 ) : null}
               </tbody>
@@ -339,7 +354,9 @@ export function PayslipsExplorer({
                 {visibleMonthlyPayslips.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="employee-payslips-empty">
-                      No monthly payroll summaries match the selected filters.
+                      {payslipData.monthlyPayslips.length === 0
+                        ? "No payroll month records are available yet."
+                        : "No monthly payroll summaries match the selected filters."}
                     </td>
                   </tr>
                 ) : null}
@@ -437,6 +454,41 @@ function PayslipSummaryStats({ stats }: { stats: readonly EmployeePayslipStat[] 
   );
 }
 
-function displayAmount(value: string | null) {
-  return value ?? "—";
+function getUnavailableStats(
+  viewMode: PayslipViewMode,
+): readonly EmployeePayslipStat[] {
+  return [
+    {
+      label: "Total Earnings",
+      value: "—",
+      note: "Unavailable",
+      icon: "payroll",
+      tone: "blue",
+    },
+    {
+      label: "Total Deductions",
+      value: "—",
+      note: "Unavailable",
+      icon: "arrow",
+      tone: "red",
+    },
+    {
+      label: "Net Pay",
+      value: "—",
+      note: "Unavailable",
+      icon: "info",
+      tone: "green",
+    },
+    {
+      label: viewMode === "cutoff" ? "Latest Payslip" : "Payroll Month",
+      value: "—",
+      note: "Unavailable",
+      icon: "calendar",
+      tone: "purple",
+    },
+  ];
+}
+
+function displayAmount(value: number | null) {
+  return value === null ? "—" : formatPhilippinePeso(value);
 }

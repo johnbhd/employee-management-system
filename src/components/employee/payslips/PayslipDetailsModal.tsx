@@ -5,10 +5,11 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatPhilippinePeso } from "@/lib/format-currency";
 import type {
   EmployeeMonthlyPayslip,
   EmployeePayslip,
-} from "@/data/employee-payslips";
+} from "@/types/payslip";
 import type { EmployeeReference } from "@/types/employee";
 
 export type PayslipDetailsRecord =
@@ -272,9 +273,11 @@ function CutoffCompensationDetails({ payslip }: { payslip: EmployeePayslip }) {
         title="Compensation details"
       />
       <dl className="employee-payslip-modal-meta-grid">
-        <InfoItem label="Monthly Basic Salary">{payslip.monthlyBasicSalary}</InfoItem>
+        <InfoItem label="Monthly Basic Salary">{displayAmount(payslip.monthlyBasicSalary)}</InfoItem>
         <InfoItem label="Cutoff Basic Pay">{displayAmount(payslip.cutoffBasicPay)}</InfoItem>
-        <InfoItem label="Reference Daily Rate">{payslip.referenceDailyRate} / day</InfoItem>
+        <InfoItem label="Reference Daily Rate">
+          {displayAmount(payslip.referenceDailyRate)} / day
+        </InfoItem>
       </dl>
       <p className="employee-payslip-modal-info-note">Reference rate provided by payroll information.</p>
     </section>
@@ -293,8 +296,10 @@ function MonthlyCompensationDetails({ summary }: { summary: EmployeeMonthlyPaysl
         title="Compensation details"
       />
       <dl className="employee-payslip-modal-meta-grid">
-        <InfoItem label="Monthly Basic Salary">{summary.monthlyBasicSalary}</InfoItem>
-        <InfoItem label="Reference Daily Rate">{summary.referenceDailyRate} / day</InfoItem>
+        <InfoItem label="Monthly Basic Salary">{displayAmount(summary.monthlyBasicSalary)}</InfoItem>
+        <InfoItem label="Reference Daily Rate">
+          {displayAmount(summary.referenceDailyRate)} / day
+        </InfoItem>
         <InfoItem label="Released Cutoffs">
           {summary.releasedCutoffCount} of {summary.totalCutoffCount}
         </InfoItem>
@@ -333,7 +338,7 @@ function CutoffBreakdown({ payslip }: { payslip: EmployeePayslip }) {
           <ModalLineItem
             key={deduction.label}
             label={deduction.label}
-            value={deduction.amount}
+            value={displayAmount(deduction.amount)}
           />
         ))}
         <ModalLineItem
@@ -366,7 +371,10 @@ function MonthlyBreakdown({
           label="Released Cutoffs"
           value={`${summary.releasedCutoffCount} of ${summary.totalCutoffCount}`}
         />
-        <ModalLineItem label="Monthly Basic Salary" value={summary.monthlyBasicSalary} />
+        <ModalLineItem
+          label="Monthly Basic Salary"
+          value={displayAmount(summary.monthlyBasicSalary)}
+        />
         <ModalLineItem
           label={summary.status === "in-progress" ? "Released Net Pay" : "Net Pay"}
           value={displayAmount(summary.netPay)}
@@ -471,6 +479,6 @@ function ModalLineItem({
   );
 }
 
-function displayAmount(value: string | null) {
-  return value ?? "—";
+function displayAmount(value: number | null) {
+  return value === null ? "—" : formatPhilippinePeso(value);
 }

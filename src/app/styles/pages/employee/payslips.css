@@ -284,6 +284,35 @@
   font-size: 0.68rem;
 }
 
+.employee-payslips-load-state {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--employee-line);
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-payslips-load-state strong {
+  color: var(--employee-ink);
+}
+
+.employee-payslips-load-state a {
+  margin-left: auto;
+  color: var(--employee-blue);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.employee-payslips-load-state-error {
+  border-color: #f1c9c5;
+  background: #fff8f7;
+}
+
 .employee-payslips-table-panel {
   overflow: hidden;
 }
@@ -836,6 +865,15 @@
 
   .employee-payslips-filter-buttons .employee-payslips-button {
     flex: 1;
+  }
+
+  .employee-payslips-load-state {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .employee-payslips-load-state a {
+    margin-left: 0;
   }
 
   .employee-payslips-table-footer {
