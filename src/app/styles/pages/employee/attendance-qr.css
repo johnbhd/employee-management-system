@@ -12,16 +12,15 @@
 }
 
 .attendance-qr-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.8fr) minmax(17rem, 0.75fr);
+  display: flex;
+  justify-content: center;
   gap: 1.25rem;
   align-items: start;
 }
 
-.attendance-qr-card,
-.attendance-qr-info-card,
-.attendance-qr-notice-card {
+.attendance-qr-card {
   min-width: 0;
+  width: min(100%, 58rem);
   border: 1px solid var(--employee-line);
   border-radius: 0.75rem;
   background: #fff;
@@ -348,188 +347,6 @@
   color: var(--text-muted);
   font-size: 0.72rem;
   text-align: center;
-}
-
-.attendance-qr-side {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.attendance-qr-info-card,
-.attendance-qr-notice-card {
-  padding: 1.1rem 1.2rem;
-}
-
-.attendance-qr-info-heading,
-.attendance-qr-notice-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.625rem;
-  margin-bottom: 0.85rem;
-}
-
-.attendance-qr-info-heading .ui-icon {
-  color: var(--employee-blue);
-}
-
-.attendance-qr-help-icon,
-.attendance-qr-security-icon {
-  display: inline-flex;
-  flex: 0 0 auto;
-  margin-top: 0.15rem;
-  line-height: 1;
-}
-
-.attendance-qr-help-icon {
-  color: var(--employee-blue);
-}
-
-.attendance-qr-security-icon {
-  color: var(--employee-red);
-}
-
-.attendance-qr-help-trigger {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  flex: 0 0 auto;
-  margin: 0.15rem 0 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--employee-blue);
-  cursor: default;
-  font: inherit;
-  line-height: 1;
-  box-shadow: none;
-}
-
-.attendance-qr-help-trigger:hover,
-.attendance-qr-help-trigger:active {
-  background: transparent;
-  color: var(--employee-blue);
-  transform: none;
-  box-shadow: none;
-}
-
-.attendance-qr-info-heading h2,
-.attendance-qr-notice-heading h2 {
-  margin: 0;
-  color: var(--employee-ink);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 0.98rem;
-  font-weight: 500;
-}
-
-.attendance-qr-notice-card {
-  border-left: 3px solid var(--employee-red);
-  background: #fff8f8;
-}
-
-.attendance-qr-notice-heading .ui-icon {
-  margin-top: 0.15rem;
-  color: var(--employee-red);
-}
-
-.attendance-qr-security-trigger {
-  display: inline-flex;
-  min-width: 0;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  margin: 0.15rem 0 0;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--employee-red);
-  cursor: default;
-  line-height: 1;
-  box-shadow: none;
-}
-
-.attendance-qr-security-trigger:hover,
-.attendance-qr-security-trigger:active {
-  background: transparent;
-  color: var(--employee-red);
-  transform: none;
-  box-shadow: none;
-}
-
-.attendance-qr-security-trigger:focus-visible {
-  outline: 2px solid rgba(178, 41, 57, 0.35);
-  outline-offset: 2px;
-}
-
-.attendance-qr-notice-card p {
-  margin: 0;
-  color: #7a2331;
-  font-size: 0.74rem;
-  line-height: 1.55;
-}
-
-.attendance-qr-step-list {
-  position: relative;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.attendance-qr-step-list li {
-  position: relative;
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding-bottom: 0.9rem;
-}
-
-.attendance-qr-step-list li:last-child {
-  padding-bottom: 0;
-}
-
-.attendance-qr-step-list li:not(:last-child)::before {
-  position: absolute;
-  top: 1.5rem;
-  left: 0.65rem;
-  width: 1px;
-  height: calc(100% - 0.55rem);
-  background: var(--employee-line);
-  content: "";
-}
-
-.attendance-qr-step-number {
-  z-index: 1;
-  display: grid;
-  width: 1.4rem;
-  height: 1.4rem;
-  flex: 0 0 auto;
-  place-items: center;
-  border: 1px solid #cbd8f6;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--employee-blue);
-  font-size: 0.68rem;
-  font-weight: 500;
-}
-
-.attendance-qr-step-list p {
-  margin: 0.15rem 0 0;
-  color: var(--employee-ink);
-  font-size: 0.76rem;
-  line-height: 1.45;
-}
-
-@media (max-width: 1080px) {
-  .attendance-qr-layout {
-    grid-template-columns: minmax(0, 1.25fr) minmax(16rem, 0.85fr);
-  }
-}
-
-@media (max-width: 860px) {
-  .attendance-qr-layout {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 600px) {

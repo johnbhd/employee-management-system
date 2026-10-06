@@ -2,11 +2,6 @@
 
 import { useState } from "react";
 
-import {
-  employeeQrInfo,
-  employeeQrSteps,
-} from "@/data/attendance-qr";
-import { Icon } from "@/components/ui/Icon";
 import type { ApiErrorResponse } from "@/types/api/responses";
 import type { EmployeeQrSuccessResponse } from "@/types/attendance-qr";
 import type { EmployeeReference } from "@/types/employee";
@@ -82,37 +77,6 @@ export function AttendanceQrPage({
           qrLoading={qrLoading}
           qrValue={qrValue}
         />
-
-        <aside className="attendance-qr-side" aria-label="Attendance QR guidance">
-          <div className="attendance-qr-info-card">
-            <div className="attendance-qr-info-heading">
-              <span className="attendance-qr-help-icon" aria-hidden="true">
-                <Icon name={employeeQrInfo.icon} />
-              </span>
-              <h2>{employeeQrInfo.title}</h2>
-            </div>
-            <ol className="attendance-qr-step-list">
-              {employeeQrSteps.map((step, index) => (
-                <li key={step}>
-                  <span className="attendance-qr-step-number" aria-hidden="true">
-                    {index + 1}
-                  </span>
-                  <p>{step}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="attendance-qr-notice-card">
-            <div className="attendance-qr-notice-heading">
-              <span className="attendance-qr-security-icon" aria-hidden="true">
-                <Icon name={employeeQrInfo.securityIcon} />
-              </span>
-              <h2>{employeeQrInfo.securityTitle}</h2>
-            </div>
-            <p>{employeeQrInfo.securityMessage}</p>
-          </div>
-        </aside>
       </section>
 
       <p className="sr-only">
