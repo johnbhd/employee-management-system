@@ -40,7 +40,7 @@
   display: block;
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -77,7 +77,7 @@
   background: #e5f3e9;
   color: var(--employee-green);
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   white-space: nowrap;
 }
 
@@ -156,7 +156,7 @@
   margin: 0.3rem 0 0;
   color: var(--employee-ink);
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 

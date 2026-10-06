@@ -49,7 +49,7 @@
   display: block;
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -114,7 +114,7 @@
   margin: 0.15rem 0;
   color: var(--employee-ink);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .my-attendance-subtext {
@@ -143,7 +143,7 @@
   margin: 0.2rem 0;
   color: var(--employee-green);
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .my-attendance-status-box.is-empty .my-attendance-status-value {
@@ -221,7 +221,7 @@
   margin: 0.25rem 0 0.1rem;
   color: var(--employee-ink);
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -331,7 +331,7 @@
 .my-attendance-calendar-control > span {
   color: var(--text-muted);
   font-size: 0.54rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
@@ -459,13 +459,13 @@
 .my-attendance-calendar-day-number {
   color: var(--employee-ink);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .my-attendance-calendar-today {
   color: var(--employee-blue);
   font-size: 0.5rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.05em;
   line-height: 1.2;
   text-transform: uppercase;

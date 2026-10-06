@@ -75,7 +75,7 @@
   background: var(--employee-red);
   color: #fff;
   font-size: 0.52rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-notification-wrap,
@@ -276,7 +276,7 @@
   padding: 0.7rem 0.55rem 0.15rem;
   color: var(--employee-blue);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-notification-view-all:hover {

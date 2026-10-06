@@ -14,7 +14,7 @@
 .employee-announcements-heading-label {
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -74,7 +74,7 @@
   background: #fff;
   color: var(--text-muted);
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-announcement-filter:hover,
@@ -146,7 +146,7 @@
   background: transparent;
   color: var(--employee-blue);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-announcements-clear:hover {
@@ -194,7 +194,7 @@
   margin: 0.35rem 0 0;
   color: var(--employee-navy);
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-announcement-copy p {
@@ -221,7 +221,7 @@
   background: transparent;
   color: var(--employee-blue);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-announcement-detail-button:hover {

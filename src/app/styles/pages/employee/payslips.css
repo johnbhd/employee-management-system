@@ -13,7 +13,7 @@
 .employee-payslips-heading-label {
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -89,7 +89,7 @@
   margin-top: 0.15rem;
   color: var(--employee-ink);
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-payslips-stat-value.is-date {
@@ -146,7 +146,7 @@
 .employee-payslips-field > span:first-child {
   color: var(--text-muted);
   font-size: 0.64rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -207,7 +207,7 @@
   background: transparent;
   color: var(--text-muted);
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 0.5rem 0.7rem;
 }
 
@@ -250,7 +250,7 @@
   border-radius: 0.45rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.7rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.2;
 }
 
@@ -303,7 +303,7 @@
 .employee-payslips-load-state a {
   margin-left: auto;
   color: var(--employee-blue);
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 0.15em;
 }
@@ -336,7 +336,7 @@
   background: #fbfcfe;
   color: var(--text-muted);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -552,7 +552,7 @@
 .employee-payslip-modal-section-heading > span {
   color: var(--employee-red);
   font-size: 0.58rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -577,7 +577,7 @@
 .employee-payslip-modal-meta-grid dt {
   color: var(--text-muted);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -632,7 +632,7 @@
   color: var(--employee-ink);
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
   overflow-wrap: anywhere;
 }
 
@@ -672,14 +672,14 @@
   flex: 0 0 auto;
   color: var(--employee-ink);
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
   text-align: right;
 }
 
 .employee-payslip-modal-line-item.is-total {
   border-bottom: 0;
   color: var(--employee-ink);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .employee-payslip-modal-cutoff-list {
@@ -723,7 +723,7 @@
   color: var(--employee-blue);
   cursor: pointer;
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   padding: 0.35rem;
 }
 
@@ -752,7 +752,7 @@
 .employee-payslip-modal-net-pay-label {
   color: var(--employee-red);
   font-size: 0.58rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -767,7 +767,7 @@
   color: var(--employee-navy);
   font-size: 1.25rem;
   font-variant-numeric: tabular-nums;
-  font-weight: 800;
+  font-weight: 600;
   text-align: right;
 }
 

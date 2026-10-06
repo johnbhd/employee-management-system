@@ -58,7 +58,7 @@
   display: block;
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -172,7 +172,7 @@
 
 .attendance-qr-scan-feedback time {
   color: var(--employee-navy);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 @keyframes attendance-qr-feedback-in {
@@ -305,7 +305,7 @@
   border-radius: 0.5rem;
   padding: 0.6rem 0.75rem;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 600;
   text-align: center;
   transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
@@ -510,7 +510,7 @@
   background: #fff;
   color: var(--employee-blue);
   font-size: 0.68rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .attendance-qr-step-list p {
