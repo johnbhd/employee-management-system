@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 
-import { employeeAttendanceProfile } from "@/data/my-attendance";
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import {
@@ -34,23 +33,17 @@ export function EmployeeDashboardAttendanceCard({
         </StatusBadge>
       </div>
       <div className="attendance-summary">
-        <div className="attendance-summary-item attendance-summary-schedule">
-          <Icon name="calendar" />
-          <span>Today&apos;s schedule</span>
-          <strong>{employeeAttendanceProfile.schedule}</strong>
-          <small>{employeeAttendanceProfile.scheduleType}</small>
-        </div>
-        <div className="attendance-summary-item">
+        <div>
           <span>Time in</span>
           <strong>{presentation.timeIn}</strong>
           <small>{presentation.timeInNote}</small>
         </div>
-        <div className="attendance-summary-item">
+        <div>
           <span>Time out</span>
           <strong>{presentation.timeOut}</strong>
           <small>{presentation.timeOutNote}</small>
         </div>
-        <div className="attendance-summary-item">
+        <div>
           <span>Attendance source</span>
           <strong>{presentation.sourceValue}</strong>
           <small>{presentation.sourceNote}</small>

@@ -1,10 +1,16 @@
 import Link from "next/link";
 
+import { getLatestAnnouncements } from "@/data/employee";
+import { getEmployeeDashboardData } from "@/data/employee-dashboard";
+import { defaultAttendanceHistoryQuery } from "@/server/attendance/attendance-history-query";
+import {
+  getAttendanceHistoryForEmployee,
+  getTodayAttendanceForEmployee,
+} from "@/server/attendance/attendance.service";
+
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { SummaryCard } from "@/components/ui/SummaryCard";
-import { getLatestAnnouncements } from "@/data/employee";
-import { getEmployeeDashboardData } from "@/data/employee-dashboard";
 import {
   formatCampusDateKey,
   formatCampusDateKeyLabel,
@@ -13,13 +19,10 @@ import {
   formatAttendanceTime,
   unavailableAttendanceValue,
 } from "@/lib/employee/today-attendance";
-import { defaultAttendanceHistoryQuery } from "@/server/attendance/attendance-history-query";
-import {
-  getAttendanceHistoryForEmployee,
-  getTodayAttendanceForEmployee,
-} from "@/server/attendance/attendance.service";
-import type { AttendanceHistoryData } from "@/types/attendance-history";
-import type { AttendanceHistoryRecordData } from "@/types/attendance-history";
+import type {
+  AttendanceHistoryData,
+  AttendanceHistoryRecordData,
+} from "@/types/attendance-history";
 import type { EmployeeReference } from "@/types/employee";
 import type { StatusTone } from "@/types/ui";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
@@ -97,19 +100,16 @@ export async function EmployeeDashboardPage({
       return {
         ...stat,
         value: String(attendanceHistoryData.totalRecords),
-        note:
-          attendanceHistoryData.totalRecords > 0
-            ? "All available records"
-            : "No records",
+        note: attendanceHistoryData.totalRecords > 0
+          ? "All available records"
+          : "No records",
       };
     }
 
     if (attendanceHistoryLoadError) {
       return {
         ...stat,
-        value: todayAttendance.attendance
-          ? "1"
-          : unavailableAttendanceValue,
+        value: todayAttendance.attendance ? "1" : "—",
         note: todayAttendance.attendance ? "Today's record" : "Unavailable",
       };
     }
@@ -121,56 +121,31 @@ export async function EmployeeDashboardPage({
     <div className="employee-dashboard-page">
       <EmployeeDashboardWelcome employee={employee} />
 
+      <section className="employee-stats-grid" aria-label="Attendance summary">
+        {dashboardStats.map((stat) => (
+          <SummaryCard key={stat.label} {...stat} />
+        ))}
+      </section>
+
       <EmployeeDashboardAttendanceCard
         attendanceLoadError={attendanceLoadError}
         todayAttendance={todayAttendance}
       />
 
-      <section
-        className="employee-summary-panel"
-        aria-labelledby="employee-summary-heading"
-      >
-        <div className="employee-summary-heading">
-          <div>
-            <p className="employee-section-kicker">Attendance summary</p>
-            <h2 id="employee-summary-heading">Attendance overview</h2>
-          </div>
-          <span className="employee-summary-period">Available records</span>
-        </div>
-        <div className="employee-summary-grid">
-          {dashboardStats.map((stat) => (
-            <SummaryCard key={stat.label} {...stat} />
-          ))}
-        </div>
-      </section>
-
-      <section className="employee-panel employee-recent-panel">
+      <section className="employee-panel">
         <div className="employee-panel-heading">
           <div>
             <p className="employee-section-kicker">Recent records</p>
             <h2>Attendance history</h2>
           </div>
-          <Link
-            href="/employee/attendance-history"
-            className="employee-text-button"
-          >
+          <Link href="/employee/attendance-history" className="employee-text-button">
             View all <Icon name="arrow" />
           </Link>
         </div>
         <div className="table-wrap employee-table-wrap">
           <table className="data-table employee-data-table">
-            <caption className="sr-only">
-              Recent employee attendance history
-            </caption>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Time in</th>
-                <th>Time out</th>
-                <th>Hours</th>
-                <th>Status</th>
-              </tr>
-            </thead>
+            <caption className="sr-only">Recent employee attendance history</caption>
+            <thead><tr><th>Date</th><th>Time in</th><th>Time out</th><th>Hours</th><th>Status</th></tr></thead>
             <tbody>
               {attendanceHistoryLoadError ? (
                 <tr>
@@ -181,15 +156,8 @@ export async function EmployeeDashboardPage({
               ) : attendanceHistory.length > 0 ? (
                 attendanceHistory.map((record) => (
                   <tr key={record.date}>
-                    <td>{record.date}</td>
-                    <td>{record.timeIn}</td>
-                    <td>{record.timeOut}</td>
-                    <td>{record.hours}</td>
-                    <td>
-                      <StatusBadge tone={record.tone}>
-                        {record.status}
-                      </StatusBadge>
-                    </td>
+                    <td>{record.date}</td><td>{record.timeIn}</td><td>{record.timeOut}</td><td>{record.hours}</td>
+                    <td><StatusBadge tone={record.tone}>{record.status}</StatusBadge></td>
                   </tr>
                 ))
               ) : (
@@ -207,66 +175,31 @@ export async function EmployeeDashboardPage({
       <div className="employee-bottom-grid">
         <section className="employee-panel payroll-card">
           <div className="employee-panel-heading">
-            <div>
-              <p className="employee-section-kicker">Payroll</p>
-              <h2>Latest payslip</h2>
-            </div>
+            <div><p className="employee-section-kicker">Payroll</p><h2>Latest payslip</h2></div>
             <Icon name="payroll" />
           </div>
           {dashboardData.latestPayslip ? (
             <>
-              <p className="payroll-period">
-                {dashboardData.latestPayslip.period}
-              </p>
-              <strong className="payroll-amount">
-                {dashboardData.latestPayslip.amount}
-              </strong>
-              <div className="payroll-meta">
-                <span>{dashboardData.latestPayslip.releasedDate}</span>
-                <StatusBadge tone="success">Available</StatusBadge>
-              </div>
+              <p className="payroll-period">{dashboardData.latestPayslip.period}</p>
+              <strong className="payroll-amount">{dashboardData.latestPayslip.amount}</strong>
+              <div className="payroll-meta"><span>{dashboardData.latestPayslip.releasedDate}</span><StatusBadge tone="success">Available</StatusBadge></div>
             </>
           ) : (
             <p className="payroll-empty-state">No payslip available.</p>
           )}
-          <Link
-            href="/employee/payslips"
-            className="employee-secondary-button full-width"
-          >
-            <Icon name="file" />
-            View payslip
-          </Link>
+          <Link href="/employee/payslips" className="employee-secondary-button full-width"><Icon name="file" /> View payslip</Link>
         </section>
 
         <section className="employee-panel announcements-card">
           <div className="employee-panel-heading">
-            <div>
-              <p className="employee-section-kicker">Campus updates</p>
-              <h2>Announcements</h2>
-            </div>
-            <Link
-              href="/employee/announcements"
-              className="employee-text-button"
-            >
-              View all <Icon name="arrow" />
-            </Link>
+            <div><p className="employee-section-kicker">Campus updates</p><h2>Announcements</h2></div>
+            <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
           </div>
           <div className="announcement-list">
             {latestAnnouncements.map((announcement) => (
               <article className="announcement-item" key={announcement.id}>
-                <div className={`announcement-icon ${announcement.tone}`}>
-                  <Icon name="info" />
-                </div>
-                <div>
-                  <div className="announcement-meta">
-                    <StatusBadge tone={announcement.tone}>
-                      {announcement.category}
-                    </StatusBadge>
-                    <time>{announcement.date}</time>
-                  </div>
-                  <h3>{announcement.title}</h3>
-                  <p>{announcement.message}</p>
-                </div>
+                <div className={`announcement-icon ${announcement.tone}`}><Icon name="info" /></div>
+                <div><div className="announcement-meta"><StatusBadge tone={announcement.tone}>{announcement.category}</StatusBadge><time>{announcement.date}</time></div><h3>{announcement.title}</h3><p>{announcement.message}</p></div>
               </article>
             ))}
           </div>

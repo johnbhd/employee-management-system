@@ -29,9 +29,9 @@
   overflow: hidden;
   margin: 0;
   color: var(--employee-ink);
-  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.35rem;
+  font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
