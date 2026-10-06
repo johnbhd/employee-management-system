@@ -26,6 +26,7 @@ export function ScannedEmployeeCard({
     ? new Date(result.attendance.timeOut)
     : null;
   const isDuplicate = result.action === "duplicate_scan";
+  const resultTone = getResultTone(result.action);
   const resultTitle = getResultTitle(result.action);
   const resultKicker = result.action === "already_completed"
     ? "Attendance status"
@@ -34,14 +35,17 @@ export function ScannedEmployeeCard({
       : "Attendance recorded";
 
   return (
-    <section className="attendance-scanner-result" aria-labelledby="scanner-result-heading">
+    <section
+      className={`attendance-scanner-result attendance-scanner-result-${resultTone}`}
+      aria-labelledby="scanner-result-heading"
+    >
       <div className="attendance-scanner-result-heading">
-        <span className="attendance-scanner-success-icon" aria-hidden="true">
-          <Icon name="check" />
+        <span className="attendance-scanner-feedback-icon" aria-hidden="true">
+          <Icon name={getResultIcon(result.action)} />
         </span>
         <div>
           <span className="attendance-scanner-kicker">{resultKicker}</span>
-          <h2 id="scanner-result-heading">{resultTitle}</h2>
+          <h2 id="scanner-result-heading" aria-live="polite">{resultTitle}</h2>
         </div>
       </div>
 
@@ -136,6 +140,30 @@ function getResultTitle(action: QrAttendanceAction) {
   }
 
   return "Attendance Already Completed";
+}
+
+function getResultTone(action: QrAttendanceAction) {
+  if (action === "time_in" || action === "time_out") {
+    return "success";
+  }
+
+  if (action === "duplicate_scan") {
+    return "warning";
+  }
+
+  return "neutral";
+}
+
+function getResultIcon(action: QrAttendanceAction) {
+  if (action === "duplicate_scan") {
+    return "warning" as const;
+  }
+
+  if (action === "already_completed") {
+    return "info" as const;
+  }
+
+  return "check" as const;
 }
 
 function getResultNote(action: QrAttendanceAction) {
