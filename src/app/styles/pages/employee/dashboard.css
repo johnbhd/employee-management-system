@@ -24,7 +24,7 @@
 .employee-panel-heading h2 {
   margin: 0.25rem 0 0;
   color: var(--employee-navy);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 1.15rem;
   font-weight: 600;
 }
@@ -85,7 +85,7 @@
 
 .attendance-summary strong {
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 1.25rem;
   font-weight: 600;
 }
@@ -191,7 +191,7 @@
   display: block;
   margin: 0.35rem 1.25rem 0;
   color: var(--employee-navy);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 1.8rem;
   font-weight: 600;
 }
@@ -280,5 +280,285 @@
 
   .attendance-actions > button {
     flex: 1 1 100%;
+  }
+}
+
+/* Employee portal dashboard refresh */
+.employee-dashboard-page .employee-panel,
+.employee-dashboard-page .employee-summary-panel {
+  border-radius: 0.65rem;
+  box-shadow: 0 1px 2px rgba(26, 35, 70, 0.04);
+}
+
+.employee-dashboard-page .employee-panel-heading h2,
+.employee-dashboard-page .employee-summary-heading h2 {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.employee-dashboard-page .employee-section-kicker {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.employee-summary-panel {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--employee-line);
+  background: #fff;
+}
+
+.employee-summary-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.25rem 0.9rem;
+  border-bottom: 1px solid #edf0f4;
+}
+
+.employee-summary-heading h2 {
+  margin: 0.25rem 0 0;
+  color: var(--employee-navy);
+}
+
+.employee-summary-period {
+  padding-top: 0.15rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.employee-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.employee-summary-grid .metric-card {
+  min-height: 0;
+  align-items: center;
+  border: 0;
+  border-right: 1px solid #edf0f4;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  padding: 1rem 1.25rem;
+}
+
+.employee-summary-grid .metric-card:last-child {
+  border-right: 0;
+}
+
+.employee-summary-grid .metric-icon {
+  width: auto;
+  height: auto;
+  flex: 0 0 auto;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.employee-summary-grid .metric-content {
+  min-width: 0;
+}
+
+.employee-summary-grid .metric-label,
+.employee-summary-grid .metric-note {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+.employee-summary-grid .metric-label {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.employee-summary-grid .metric-value {
+  margin-top: 0.2rem;
+  color: var(--employee-ink);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.employee-summary-grid .metric-note {
+  color: var(--text-faint);
+  font-size: 0.66rem;
+}
+
+.employee-dashboard-page .attendance-card {
+  padding-bottom: 1.25rem;
+}
+
+.employee-dashboard-page .attendance-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0;
+  padding: 1.25rem 1.25rem 0;
+}
+
+.employee-dashboard-page .attendance-summary-item {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+  padding: 0.25rem 1rem;
+  border-radius: 0;
+  background: transparent;
+}
+
+.employee-dashboard-page .attendance-summary-item + .attendance-summary-item {
+  border-left: 1px solid #edf0f4;
+}
+
+.employee-dashboard-page .attendance-summary-item > span,
+.employee-dashboard-page .attendance-summary-item > small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.employee-dashboard-page .attendance-summary-item > strong {
+  overflow: hidden;
+  color: var(--employee-ink);
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.employee-dashboard-page .attendance-summary-schedule .ui-icon {
+  color: var(--employee-blue);
+  font-size: 0.9rem;
+}
+
+.employee-dashboard-page .attendance-summary-schedule > strong {
+  font-size: 0.95rem;
+}
+
+.employee-dashboard-page .attendance-actions {
+  padding: 1.25rem 1.25rem 0;
+}
+
+.employee-dashboard-page .employee-primary-button,
+.employee-dashboard-page .employee-secondary-button,
+.employee-dashboard-page .employee-text-button {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+}
+
+.employee-dashboard-page .employee-data-table th,
+.employee-dashboard-page .employee-data-table td {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-size: 0.78rem;
+}
+
+.employee-dashboard-page .employee-data-table th {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.employee-dashboard-page .employee-data-table td {
+  color: var(--employee-ink);
+}
+
+.employee-bottom-grid {
+  grid-template-columns: minmax(16rem, 0.75fr) minmax(0, 1.25fr);
+  gap: 1.5rem;
+}
+
+.employee-dashboard-page .payroll-amount {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-weight: 700;
+}
+
+.employee-dashboard-page .announcement-item h3 {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  font-weight: 700;
+}
+
+.employee-dashboard-page .announcement-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 0;
+  background: transparent;
+}
+
+@media (max-width: 1050px) {
+  .employee-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .employee-summary-grid .metric-card:nth-child(2) {
+    border-right: 0;
+  }
+
+  .employee-summary-grid .metric-card:nth-child(n + 3) {
+    border-top: 1px solid #edf0f4;
+  }
+
+  .employee-dashboard-page .attendance-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: 1rem;
+  }
+
+  .employee-dashboard-page .attendance-summary-item:nth-child(3) {
+    border-left: 0;
+  }
+
+  .employee-dashboard-page .attendance-summary-item:nth-child(n + 3) {
+    border-top: 1px solid #edf0f4;
+    padding-top: 1rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .employee-summary-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .employee-dashboard-page .attendance-summary-item {
+    padding-inline: 0.65rem;
+  }
+
+  .employee-dashboard-page .attendance-summary-item:nth-child(odd) {
+    padding-left: 0;
+  }
+
+  .employee-dashboard-page .attendance-summary-item:nth-child(even) {
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .employee-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-summary-grid .metric-card,
+  .employee-summary-grid .metric-card:nth-child(2) {
+    border-right: 0;
+    border-top: 1px solid #edf0f4;
+  }
+
+  .employee-summary-grid .metric-card:first-child {
+    border-top: 0;
+  }
+
+  .employee-dashboard-page .attendance-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-dashboard-page .attendance-summary-item,
+  .employee-dashboard-page .attendance-summary-item:nth-child(n + 3) {
+    border-left: 0;
+    border-top: 1px solid #edf0f4;
+    padding: 0.9rem 0;
+  }
+
+  .employee-dashboard-page .attendance-summary-item:first-child {
+    border-top: 0;
   }
 }

@@ -7,7 +7,7 @@
   inset: 0 auto 0 0;
   z-index: 50;
   display: flex;
-  width: 15.4rem;
+  width: var(--employee-sidebar-width, 15.75rem);
   flex-direction: column;
   padding: 1.35rem 0.9rem;
   background: linear-gradient(180deg, var(--employee-navy), #0a1129);
@@ -39,7 +39,7 @@
 
 .employee-brand strong {
   color: #fff;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
   font-weight: 600;
 }
