@@ -31,7 +31,7 @@
   color: var(--employee-ink);
   font-family: Arial, Helvetica, sans-serif;
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -75,7 +75,7 @@
   background: var(--employee-red);
   color: #fff;
   font-size: 0.52rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-notification-wrap,
@@ -276,7 +276,7 @@
   padding: 0.7rem 0.55rem 0.15rem;
   color: var(--employee-blue);
   font-size: 0.68rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-notification-view-all:hover {

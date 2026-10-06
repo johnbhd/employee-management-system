@@ -41,7 +41,7 @@
   color: #fff;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-brand small {
@@ -67,7 +67,7 @@
   padding: 0.6rem 0.75rem;
   color: #c4cae6;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-nav-link:hover,
