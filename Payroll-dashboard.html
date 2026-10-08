@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Dashboard — AU Payroll Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="payroll.css">
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <div class="workspace-row">
+          <span class="workspace-label">Payroll Operations</span>
+          <span class="workspace-badge">Payroll Staff</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="payroll-dashboard.html" class="nav-item active"><i class="fa-solid fa-table-cells-large"></i>Dashboard</a>
+          <a href="payroll-verified-attendance.html" class="nav-item"><i class="fa-solid fa-user-group"></i>Verified Attendance</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-folder"></i>Payroll Batches</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-right-left"></i>Payroll Handoff</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-file-lines"></i>Payroll Results</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-file-lines"></i>Payroll History</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-block">
+            <div class="avatar-circle small"><i class="fa-solid fa-user"></i></div>
+            <div>
+              <strong>Maria Santos</strong>
+              <span>AU-JSC Payroll Account</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="login.html" class="logout-full"><i class="fa-solid fa-power-off"></i> Log out</a>
+      </aside>
+
+      <!-- Main -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1>Payroll Dashboard</h1>
+            <span class="topbar-sub">Payroll operations workspace</span>
+          </div>
+          <div class="topbar-right">
+            <span class="date"><i class="fa-regular fa-calendar"></i> September 16, 2026 &middot; Wednesday</span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-solid fa-table-cells-large"></i></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="user-chip">
+              <span>
+                <strong>Maria Santos</strong>
+                <small>AU-JSC Payroll Operations</small>
+              </span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+          </div>
+        </header>
+
+        <div class="page-head">
+          <div>
+            <span class="eyebrow">Payroll Operations</span>
+            <h2>Payroll Dashboard</h2>
+            <p class="page-sub">Monitor verified attendance, payroll handoff readiness, transfer progress, and payroll integration activity.</p>
+            <p class="mini-date">Wednesday, September 16, 2026</p>
+          </div>
+          <button class="btn-white" id="refreshBtn"><i class="fa-solid fa-rotate" id="refreshIcon"></i> Refresh data</button>
+        </div>
+
+        <!-- 6 summary cards -->
+        <section class="dash-stats-grid">
+          <div class="dash-stat green">
+            <i class="fa-solid fa-check stat-icon green"></i>
+            <div>
+              <span class="d-label">Verified Attendance</span>
+              <span class="d-value">124</span>
+              <span class="d-sub">Ready employee records</span>
+            </div>
+          </div>
+          <div class="dash-stat blue">
+            <i class="fa-solid fa-user-group stat-icon blue"></i>
+            <div>
+              <span class="d-label">Ready for Handoff</span>
+              <span class="d-value">96</span>
+              <span class="d-sub">Included in payroll prep</span>
+            </div>
+          </div>
+          <div class="dash-stat amber">
+            <i class="fa-regular fa-clock stat-icon amber"></i>
+            <div>
+              <span class="d-label">Pending / Blocked</span>
+              <span class="d-value">18</span>
+              <span class="d-sub">Awaiting review or completion</span>
+            </div>
+          </div>
+          <div class="dash-stat green">
+            <i class="fa-solid fa-paper-plane stat-icon green"></i>
+            <div>
+              <span class="d-label">Transferred</span>
+              <span class="d-value">5</span>
+              <span class="d-sub">Batches sent to Payroll</span>
+            </div>
+          </div>
+          <div class="dash-stat red">
+            <i class="fa-solid fa-triangle-exclamation stat-icon red"></i>
+            <div>
+              <span class="d-label">Transfer Issues</span>
+              <span class="d-value">2</span>
+              <span class="d-sub">Requires follow-up</span>
+            </div>
+          </div>
+          <div class="dash-stat gray">
+            <i class="fa-regular fa-calendar stat-icon gray"></i>
+            <div>
+              <span class="d-label">Current Payroll Period</span>
+              <span class="d-value small">Sep 1 &ndash; 15, 2026</span>
+              <span class="d-sub">Active payroll coverage</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Payroll Readiness -->
+        <section class="panel">
+          <div class="panel-head">
+            <span class="eyebrow">Payroll Readiness</span>
+            <h3>Verified Attendance Ready for Payroll</h3>
+            <p class="panel-desc">Latest verified attendance records prepared for payroll processing and handoff.</p>
+          </div>
+
+          <div class="table-scroll">
+            <table class="verif-table">
+              <thead>
+                <tr>
+                  <th>Employee</th>
+                  <th>Department</th>
+                  <th>Payroll Period</th>
+                  <th>Attendance Status</th>
+                  <th>Verification</th>
+                  <th>Payroll Readiness</th>
+                  <th>Batch Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <span class="emp-name">John Benedict M. Villegas</span><br>
+                    <span class="emp-sub">AU-EMP-2026-0418</span>
+                  </td>
+                  <td>Information Technology</td>
+                  <td>Sep 1 &ndash; 15, 2026</td>
+                  <td><span class="tag dot-green">Complete</span></td>
+                  <td><span class="tag dot-green">Verified</span></td>
+                  <td><span class="tag dot-green">Ready</span></td>
+                  <td><span class="tag dot-green">Included in Batch</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="emp-name">Maria Santos</span><br>
+                    <span class="emp-sub">AU-EMP-2026-0194</span>
+                  </td>
+                  <td>Operations</td>
+                  <td>Sep 1 &ndash; 15, 2026</td>
+                  <td><span class="tag dot-green">Complete</span></td>
+                  <td><span class="tag dot-green">Verified</span></td>
+                  <td><span class="tag dot-green">Ready</span></td>
+                  <td><span class="tag dot-blue">Ready for Batch</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="emp-name">Robert Cruz</span><br>
+                    <span class="emp-sub">AU-EMP-2026-0332</span>
+                  </td>
+                  <td>Facilities</td>
+                  <td>Sep 1 &ndash; 15, 2026</td>
+                  <td><span class="tag dot-amber">Missing Time-Out</span></td>
+                  <td><span class="tag dot-amber">Needs Review</span></td>
+                  <td><span class="tag dot-red">Blocked</span></td>
+                  <td><span class="tag dot-red">Not Included</span></td>
+                </tr>
+                <tr>
+                  <td>
+                    <span class="emp-name">Ana Reyes</span><br>
+                    <span class="emp-sub">AU-EMP-2026-0271</span>
+                  </td>
+                  <td>Registrar</td>
+                  <td>Sep 1 &ndash; 15, 2026</td>
+                  <td><span class="tag dot-green">Complete</span></td>
+                  <td><span class="tag dot-green">Verified</span></td>
+                  <td><span class="tag dot-green">Ready</span></td>
+                  <td><span class="tag dot-blue">Transferred</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Batch Activity + Payroll Alerts -->
+        <section class="two-col-row">
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="eyebrow">Batch Activity</span>
+              <h3>Recent Payroll Batches</h3>
+              <p class="panel-desc">Latest payroll batches and their transfer status.</p>
+            </div>
+
+            <div class="table-scroll">
+              <table class="verif-table">
+                <thead>
+                  <tr>
+                    <th>Batch ID</th>
+                    <th>Payroll Period</th>
+                    <th>Employees</th>
+                    <th>Created By</th>
+                    <th>Transfer Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="emp-name">PAY-2026-0915-A</td>
+                    <td>Sep 1 &ndash; 15, 2026</td>
+                    <td>48</td>
+                    <td>Maria Santos</td>
+                    <td><span class="tag dot-green">Transferred</span></td>
+                    <td><button class="btn-tiny outline batch-view-btn" data-batch="PAY-2026-0915-A" data-period="Sep 1 – 15, 2026" data-employees="48" data-creator="Maria Santos" data-status="Transferred" data-status-class="dot-green">View</button></td>
+                  </tr>
+                  <tr>
+                    <td class="emp-name">PAY-2026-0915-B</td>
+                    <td>Sep 1 &ndash; 15, 2026</td>
+                    <td>31</td>
+                    <td>Maria Santos</td>
+                    <td><span class="tag dot-blue">Ready</span></td>
+                    <td><button class="btn-tiny outline batch-view-btn" data-batch="PAY-2026-0915-B" data-period="Sep 1 – 15, 2026" data-employees="31" data-creator="Maria Santos" data-status="Ready" data-status-class="dot-blue">View</button></td>
+                  </tr>
+                  <tr>
+                    <td class="emp-name">PAY-2026-0915-C</td>
+                    <td>Sep 1 &ndash; 15, 2026</td>
+                    <td>17</td>
+                    <td>Maria Santos</td>
+                    <td><span class="tag dot-red">Blocked</span></td>
+                    <td><button class="btn-tiny outline batch-view-btn" data-batch="PAY-2026-0915-C" data-period="Sep 1 – 15, 2026" data-employees="17" data-creator="Maria Santos" data-status="Blocked" data-status-class="dot-red">View</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">
+              <span class="eyebrow">Payroll Alerts</span>
+              <h3>Transfer Issues &amp; Follow-up</h3>
+              <p class="panel-desc">Items that require attention before or after payroll handoff.</p>
+            </div>
+
+            <div class="alert-item">
+              <i class="fa-solid fa-triangle-exclamation alert-icon amber"></i>
+              <p>3 employees cannot be included because attendance is not yet verified.</p>
+              <span class="tag dot-amber">Needs HR Review</span>
+            </div>
+            <div class="alert-item">
+              <i class="fa-solid fa-circle-exclamation alert-icon red"></i>
+              <p>Batch PAY-2026-0915-C has 2 blocked records due to incomplete attendance.</p>
+              <span class="tag dot-red">Blocked</span>
+            </div>
+            <div class="alert-item">
+              <i class="fa-solid fa-circle-check alert-icon green"></i>
+              <p>Last payroll handoff completed successfully at 2:30 PM.</p>
+              <span class="tag dot-green">Transferred</span>
+            </div>
+            <div class="alert-item">
+              <i class="fa-regular fa-clock alert-icon amber"></i>
+              <p>One batch requires correction before resubmission.</p>
+              <span class="tag dot-amber">Attention Needed</span>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- Bottom action buttons -->
+        <div class="bottom-actions">
+          <a href="payroll-verified-attendance.html" class="btn-navy-solid"><i class="fa-solid fa-list-check"></i> View Verified Attendance</a>
+          <a href="#" class="btn-white"><i class="fa-solid fa-layer-group"></i> Prepare Batch</a>
+          <a href="#" class="btn-white"><i class="fa-solid fa-right-left"></i> View Transfer Status</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Batch details modal (fallback until dedicated batch pages exist) -->
+    <div class="modal-overlay" id="batchModal">
+      <div class="modal-box">
+        <button class="modal-close" id="batchModalClose">&times;</button>
+        <h3 id="bmBatchId"></h3>
+        <p class="modal-sub">Batch details</p>
+        <div class="modal-row"><span>Payroll Period</span><span id="bmPeriod"></span></div>
+        <div class="modal-row"><span>Employees</span><span id="bmEmployees"></span></div>
+        <div class="modal-row"><span>Created By</span><span id="bmCreator"></span></div>
+        <div class="modal-row"><span>Transfer Status</span><span id="bmStatus"></span></div>
+      </div>
+    </div>
+
+    <script>
+      // ---------- Refresh data (subtle interaction, no full reload) ----------
+      document.getElementById('refreshBtn').addEventListener('click', function () {
+        const icon = document.getElementById('refreshIcon');
+        icon.classList.add('fa-spin');
+        setTimeout(() => icon.classList.remove('fa-spin'), 700);
+      });
+
+      // ---------- Batch "View" buttons -> modal fallback ----------
+      const batchModal = document.getElementById('batchModal');
+
+      document.querySelectorAll('.batch-view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('bmBatchId').textContent = btn.dataset.batch;
+          document.getElementById('bmPeriod').textContent = btn.dataset.period;
+          document.getElementById('bmEmployees').textContent = btn.dataset.employees;
+          document.getElementById('bmCreator').textContent = btn.dataset.creator;
+          document.getElementById('bmStatus').innerHTML =
+            `<span class="tag ${btn.dataset.statusClass}">${btn.dataset.status}</span>`;
+          batchModal.classList.add('open');
+        });
+      });
+
+      document.getElementById('batchModalClose').addEventListener('click', () => batchModal.classList.remove('open'));
+      batchModal.addEventListener('click', (ev) => { if (ev.target === batchModal) batchModal.classList.remove('open'); });
+    </script>
+  </body>
+</html>
