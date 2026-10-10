@@ -26,6 +26,7 @@ const employeeLinks = [
   { label: "Attendance History", icon: "clock" as const, href: "/employee/attendance-history" },
   { label: "My Payslips", icon: "payroll" as const, href: "/employee/payslips" },
   { label: "My Profile", icon: "user" as const, href: "/employee/profile" },
+  { label: "Settings", icon: "settings" as const, href: "/employee/settings" },
   { label: "Announcements", icon: "activity" as const, href: "/employee/announcements" },
   { label: "Help and Support", icon: "help" as const, href: "/employee/help-support" },
 ];
@@ -49,7 +50,7 @@ export function EmployeeSidebar({ user, employee, isOpen, onClose }: EmployeeSid
         aria-label={`${displayName} navigation`}
       >
         <div className="employee-brand">
-          <Image src="/images/new-au-logo.png" alt="Arellano University seal" width={44} height={44} />
+          <Image src="/images/aulogo.png" alt="Arellano University logo" width={48} height={48} priority />
           <span><strong>Arellano University</strong><small>Juan Sumulong Campus</small></span>
         </div>
         <nav className="employee-nav" aria-label="Employee portal navigation">

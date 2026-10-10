@@ -1,8 +1,16 @@
-import { hrEmployeeSchedules } from "@/data/hr-employee-schedules";
+import type { EmployeeScheduleItem } from "@/types/hr-employee-schedule";
 
 import { EmployeeSchedulesExplorer } from "./EmployeeSchedulesExplorer";
 
-export function EmployeeSchedulesPage() {
+type EmployeeSchedulesPageProps = {
+  records: readonly EmployeeScheduleItem[];
+  loadError?: boolean;
+};
+
+export function EmployeeSchedulesPage({
+  records,
+  loadError = false,
+}: EmployeeSchedulesPageProps) {
   return (
     <div className="hr-dashboard-page hr-employee-schedules-page">
       <header className="hr-dashboard-header">
@@ -10,12 +18,12 @@ export function EmployeeSchedulesPage() {
           <p className="hr-dashboard-eyebrow">Attendance operations</p>
           <h1>Employee Schedules</h1>
           <p className="hr-dashboard-description">
-            View HRPS-referenced employee work schedules used for attendance validation and processing.
+            View read-only HRPS reference schedules used by attendance operations.
           </p>
         </div>
       </header>
 
-      <EmployeeSchedulesExplorer records={hrEmployeeSchedules} />
+      <EmployeeSchedulesExplorer records={records} loadError={loadError} />
     </div>
   );
 }

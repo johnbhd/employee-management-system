@@ -1,7 +1,7 @@
-import type { AttendanceAuditEvent } from "@/data/hr-attendance-audit";
+import type { HrAuditHistoryItem } from "@/types/hr-audit-history";
 
 type AuditEventTimelineProps = {
-  events: readonly AttendanceAuditEvent[];
+  events: readonly HrAuditHistoryItem[];
 };
 
 export function AuditEventTimeline({ events }: AuditEventTimelineProps) {
@@ -12,9 +12,9 @@ export function AuditEventTimeline({ events }: AuditEventTimelineProps) {
           <span className="hr-audit-timeline-marker" aria-hidden="true" />
           <div>
             <strong>{event.action}</strong>
-            <span>{event.actor.name} · {event.actor.role}</span>
+            <span>{event.actor.displayName ?? "Unknown / unavailable"} · {event.actor.role ?? "Role unavailable"}</span>
             <small>{event.occurredAt}</small>
-            {event.note && event.action !== "Correction Submitted" ? <p>{event.note}</p> : null}
+            {event.note ? <p>{event.note}</p> : null}
           </div>
         </li>
       ))}

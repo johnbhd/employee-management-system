@@ -1,7 +1,7 @@
-import type { HrCorrectionHistoryItem } from "@/data/hr-correction-requests";
+import type { AttendanceCorrectionHistoryItem } from "@/types/attendance-correction";
 
 type CorrectionHistoryProps = {
-  history: readonly HrCorrectionHistoryItem[];
+  history: readonly AttendanceCorrectionHistoryItem[];
 };
 
 export function CorrectionHistory({ history }: CorrectionHistoryProps) {

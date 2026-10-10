@@ -10,20 +10,14 @@ type EmployeeScheduleFiltersProps = {
   department: string;
   schedule: string;
   workLocation: string;
-  dayStatus: string;
-  hrpsStatus: string;
   departments: readonly FilterOption[];
   schedules: readonly FilterOption[];
   workLocations: readonly FilterOption[];
-  dayStatuses: readonly FilterOption[];
-  hrpsStatuses: readonly FilterOption[];
   activeFilterCount: number;
   onSearchChange: (value: string) => void;
   onDepartmentChange: (value: string) => void;
   onScheduleChange: (value: string) => void;
   onWorkLocationChange: (value: string) => void;
-  onDayStatusChange: (value: string) => void;
-  onHrpsStatusChange: (value: string) => void;
   onReset: () => void;
 };
 
@@ -32,20 +26,14 @@ export function EmployeeScheduleFilters({
   department,
   schedule,
   workLocation,
-  dayStatus,
-  hrpsStatus,
   departments,
   schedules,
   workLocations,
-  dayStatuses,
-  hrpsStatuses,
   activeFilterCount,
   onSearchChange,
   onDepartmentChange,
   onScheduleChange,
   onWorkLocationChange,
-  onDayStatusChange,
-  onHrpsStatusChange,
   onReset,
 }: EmployeeScheduleFiltersProps) {
   return (
@@ -78,41 +66,42 @@ export function EmployeeScheduleFilters({
         <label className="hr-schedules-field">
           <span>Department</span>
           <select value={department} onChange={(event) => onDepartmentChange(event.target.value)}>
-            {departments.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
+            {departments.map((option) => (
+              <option value={option.value} key={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
 
         <label className="hr-schedules-field">
           <span>Work schedule</span>
           <select value={schedule} onChange={(event) => onScheduleChange(event.target.value)}>
-            {schedules.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
+            {schedules.map((option) => (
+              <option value={option.value} key={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
 
         <label className="hr-schedules-field">
           <span>Work location</span>
-          <select value={workLocation} onChange={(event) => onWorkLocationChange(event.target.value)}>
-            {workLocations.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
-          </select>
-        </label>
-
-        <label className="hr-schedules-field">
-          <span>Day status</span>
-          <select value={dayStatus} onChange={(event) => onDayStatusChange(event.target.value)}>
-            {dayStatuses.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
-          </select>
-        </label>
-
-        <label className="hr-schedules-field">
-          <span>HRPS reference status</span>
-          <select value={hrpsStatus} onChange={(event) => onHrpsStatusChange(event.target.value)}>
-            {hrpsStatuses.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
+          <select
+            value={workLocation}
+            onChange={(event) => onWorkLocationChange(event.target.value)}
+          >
+            {workLocations.map((option) => (
+              <option value={option.value} key={option.value}>
+                {option.label}
+              </option>
+            ))}
           </select>
         </label>
       </div>
 
       <div className="hr-schedules-filter-footer">
-        <p>Schedules remain read-only references for attendance validation.</p>
+        <p>Schedule information is read-only HRPS reference data. Official changes must be made in HRPS.</p>
         <button type="button" className="button-secondary" onClick={onReset}>
           <Icon name="refresh" />
           Reset filters

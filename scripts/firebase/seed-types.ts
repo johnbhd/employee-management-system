@@ -1,7 +1,12 @@
 import type { Auth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 
-export type SeedName = "employees" | "users";
+export type SeedName =
+  | "employees"
+  | "schedules"
+  | "users"
+  | "payslips"
+  | "corrections";
 
 export type SeedRecordStatus =
   | "created"

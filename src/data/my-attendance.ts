@@ -52,12 +52,3 @@ export const employeeAttendanceStats: EmployeeAttendanceStat[] = [
     tone: "warning",
   },
 ];
-
-export const employeeAttendanceReminders = [
-  "Always record your Time-Out before leaving the campus.",
-  "Make sure to use the official Bundy Clock or authorized QR stations.",
-  "For any attendance issues, request a correction with proper justification.",
-] as const;
-
-export const employeeAttendanceHelp =
-  "For attendance-related concerns, please contact the HR Office or your department head.";

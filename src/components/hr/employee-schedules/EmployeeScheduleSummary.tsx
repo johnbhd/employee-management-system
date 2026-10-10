@@ -1,10 +1,10 @@
 import { Icon } from "@/components/ui/Icon";
 import type { IconName, StatusTone } from "@/types/ui";
 
-import type { HrEmployeeScheduleRecord } from "@/data/hr-employee-schedules";
+import type { EmployeeScheduleItem } from "@/types/hr-employee-schedule";
 
 type EmployeeScheduleSummaryProps = {
-  records: readonly HrEmployeeScheduleRecord[];
+  records: readonly EmployeeScheduleItem[];
 };
 
 type SummaryMetric = {
@@ -18,40 +18,37 @@ export function EmployeeScheduleSummary({ records }: EmployeeScheduleSummaryProp
   const metrics: SummaryMetric[] = [
     {
       label: "Employees with schedule",
-      value: records.filter((record) => Boolean(record.startTime && record.endTime)).length,
+      value: records.filter((record) => record.schedule !== null).length,
       icon: "calendar",
       tone: "info",
     },
     {
-      label: "Active today",
-      value: records.filter((record) => record.employmentStatus === "Active" && record.todayStatus === "Working Day").length,
+      label: "No schedule reference",
+      value: records.filter((record) => record.schedule === null).length,
+      icon: "warning",
+      tone: "warning",
+    },
+    {
+      label: "Active employees",
+      value: records.filter((record) => record.employee.employmentStatus === "active").length,
       icon: "check",
       tone: "success",
     },
     {
-      label: "Rest day today",
-      value: records.filter((record) => record.todayStatus === "Rest Day").length,
-      icon: "sun",
+      label: "Departments",
+      value: new Set(records.map((record) => record.employee.department)).size,
+      icon: "users",
       tone: "muted",
-    },
-    {
-      label: "Leave / holiday",
-      value: records.filter((record) => record.todayStatus === "Leave" || record.todayStatus === "Holiday").length,
-      icon: "calendar",
-      tone: "warning",
-    },
-    {
-      label: "Schedule review",
-      value: records.filter((record) => record.hrpsStatus === "Needs Review").length,
-      icon: "warning",
-      tone: "danger",
     },
   ];
 
   return (
     <section className="hr-schedules-summary" aria-label="Employee schedule summary">
       {metrics.map((metric) => (
-        <article className={`hr-schedules-summary-card hr-schedules-summary-card-${metric.tone}`} key={metric.label}>
+        <article
+          className={`hr-schedules-summary-card hr-schedules-summary-card-${metric.tone}`}
+          key={metric.label}
+        >
           <div className="hr-schedules-summary-icon" aria-hidden="true">
             <Icon name={metric.icon} />
           </div>

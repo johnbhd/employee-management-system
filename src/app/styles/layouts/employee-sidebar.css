@@ -23,13 +23,10 @@
 }
 
 .employee-brand img {
-  width: 2.7rem;
-  height: 2.7rem;
+  width: 3rem;
+  height: 3rem;
   flex: 0 0 auto;
-  border-radius: 999px;
-  background: #fff;
   object-fit: contain;
-  padding: 0.2rem;
 }
 
 .employee-brand strong,
@@ -39,9 +36,9 @@
 
 .employee-brand strong {
   color: #fff;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-brand small {
@@ -67,7 +64,7 @@
   padding: 0.6rem 0.75rem;
   color: #c4cae6;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-nav-link:hover,

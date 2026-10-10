@@ -14,6 +14,7 @@ import type {
     TodayAttendanceData,
 } from "@/types/attendance-qr";
 import type {
+    AttendanceCalendarRecord,
     AttendanceHistoryData,
     AttendanceHistoryRecordData,
     AttendanceHistoryQuery,
@@ -91,4 +92,16 @@ export async function getAttendanceHistoryForEmployee(
         oldestDate: serializedRecords.at(-1)?.date ?? null,
         newestDate: serializedRecords[0]?.date ?? null,
     };
+}
+
+export async function getAttendanceCalendarForEmployee(
+    employeeId: string,
+): Promise<AttendanceCalendarRecord[]> {
+    const records = await listAttendanceByEmployee(employeeId);
+
+    return records.map(({ id, record }) => ({
+        id,
+        date: record.attendanceDate,
+        status: record.status,
+    }));
 }

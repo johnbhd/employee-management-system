@@ -9,7 +9,6 @@ export function EmployeeAnnouncementsPage() {
     <div className="employee-announcements-page">
       <header className="employee-announcements-heading">
         <span className="employee-announcements-heading-label">Campus updates</span>
-        <h1>Announcements</h1>
         <p>Stay updated with important campus notices, payroll announcements, and employee reminders.</p>
       </header>
 

@@ -30,22 +30,22 @@ export function EmployeeDashboardWelcome({
   }, []);
 
   const currentDateTime = campusNow
-    ? `${formatCampusNavbarDate(campusNow)} · ${formatCampusTime(campusNow)}`
+    ? `${formatCampusNavbarDate(campusNow)} \u00b7 ${formatCampusTime(campusNow)}`
     : "Loading date and time";
 
   return (
     <section className="employee-welcome">
-      <div>
+      <div className="employee-welcome-copy">
         <p className="employee-welcome-kicker">{currentDateTime}</p>
-        <h2>
-          Welcome back, {employee.displayName}!
-        </h2>
-        <p>Here is your employee dashboard for today.</p>
+        <h2>Welcome back, {employee.displayName}!</h2>
+        <p className="employee-welcome-message">
+          Here is your employee dashboard for today.
+        </p>
         <p className="muted">
           Position: <strong>{employee.position ?? "Not provided"}</strong>
           <br />
           Employee ID: <strong>{employee.employeeId}</strong>
-          {` · ${employee.department}`}
+          {` \u00b7 ${employee.department}`}
         </p>
       </div>
     </section>

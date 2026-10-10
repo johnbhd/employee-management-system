@@ -18,8 +18,6 @@ type AttendanceReportSelectorProps = {
 const reportIcons: Record<AttendanceReportType, IconName> = {
   daily: "calendar",
   monthly: "calendar",
-  late: "clock",
-  undertime: "clock",
   "missing-time-out": "warning",
   "source-usage": "unified",
   "correction-summary": "comment",

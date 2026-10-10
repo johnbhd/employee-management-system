@@ -6,7 +6,7 @@
 .attendance-scanner-page {
   display: grid;
   width: 100%;
-  max-width: 60rem;
+  max-width: 90rem;
   min-width: 0;
   gap: 1.25rem;
   margin: 0 auto;
@@ -57,10 +57,32 @@
   box-shadow: var(--shadow);
 }
 
+.attendance-scanner-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(17rem, 1fr);
+  min-width: 0;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.attendance-scanner-camera-column,
+.attendance-scanner-result-column {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+}
+
+.attendance-scanner-result-column {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+}
+
 .attendance-scanner-camera-frame {
   display: grid;
   min-width: 0;
-  min-height: 20rem;
+  min-height: 24rem;
   place-items: center;
   overflow: hidden;
   border-radius: 0.85rem;
@@ -77,8 +99,8 @@
 
 .attendance-scanner-camera-target {
   display: grid;
-  width: min(100%, 34rem);
-  min-height: 20rem;
+  width: min(100%, 42rem);
+  min-height: 24rem;
   margin: 0 auto;
   place-items: center;
   overflow: hidden;
@@ -87,7 +109,7 @@
 .attendance-scanner-camera-target video {
   display: block;
   width: 100% !important;
-  max-width: 34rem;
+  max-width: 42rem;
   aspect-ratio: 1;
   object-fit: cover;
   border-radius: 0.7rem;
@@ -262,9 +284,62 @@
 
 .attendance-scanner-result {
   display: grid;
-  max-width: 42rem;
+  width: 100%;
+  max-width: none;
   gap: 1.25rem;
   margin: 0 auto;
+}
+
+.attendance-scanner-waiting-panel {
+  min-height: 100%;
+  align-content: center;
+  justify-items: center;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.attendance-scanner-waiting-panel h2 {
+  margin-top: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.attendance-scanner-waiting-panel p {
+  margin: 0;
+  color: var(--text-secondary, var(--text-muted));
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.attendance-scanner-waiting-panel > p {
+  max-width: 22rem;
+}
+
+.attendance-scanner-waiting-panel-attention {
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-panel-attention p {
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: var(--au-blue);
+  font-size: 1.35rem;
+}
+
+.attendance-scanner-waiting-panel-attention .attendance-scanner-waiting-icon {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.attendance-scanner-waiting-help {
+  color: var(--text-muted) !important;
 }
 
 .attendance-scanner-result-heading {
@@ -278,7 +353,7 @@
   font-size: 1.25rem;
 }
 
-.attendance-scanner-success-icon,
+.attendance-scanner-feedback-icon,
 .attendance-scanner-avatar {
   display: grid;
   flex: 0 0 auto;
@@ -286,11 +361,58 @@
   border-radius: 999px;
 }
 
-.attendance-scanner-success-icon {
+.attendance-scanner-feedback-icon {
   width: 2.75rem;
   height: 2.75rem;
+}
+
+.attendance-scanner-result-success {
+  animation: attendance-scanner-result-enter 220ms ease-out both;
+}
+
+.attendance-scanner-result-success .attendance-scanner-feedback-icon {
   background: var(--success-soft);
   color: var(--success);
+  animation: attendance-scanner-success-pop 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.attendance-scanner-result-neutral .attendance-scanner-feedback-icon {
+  background: var(--info-soft);
+  color: var(--au-blue);
+}
+
+.attendance-scanner-result-warning .attendance-scanner-feedback-icon {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+@keyframes attendance-scanner-result-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.35rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes attendance-scanner-success-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.78);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.06);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .attendance-scanner-employee {
@@ -369,6 +491,13 @@
   width: 100%;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .attendance-scanner-result-success,
+  .attendance-scanner-result-success .attendance-scanner-feedback-icon {
+    animation: none;
+  }
+}
+
 @media (max-width: 700px) {
   .attendance-scanner-camera-frame {
     min-height: 16rem;
@@ -388,6 +517,16 @@
 
   .attendance-scanner-manual-form .attendance-scanner-primary-button {
     width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .attendance-scanner-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-scanner-result-column {
+    min-height: 17rem;
   }
 }
 

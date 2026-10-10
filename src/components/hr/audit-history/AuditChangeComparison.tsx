@@ -1,7 +1,7 @@
-import type { AttendanceAuditChange } from "@/data/hr-attendance-audit";
+import type { HrAuditHistoryChange } from "@/types/hr-audit-history";
 
 type AuditChangeComparisonProps = {
-  changes: readonly AttendanceAuditChange[];
+  changes: readonly HrAuditHistoryChange[];
 };
 
 export function AuditChangeComparison({ changes }: AuditChangeComparisonProps) {

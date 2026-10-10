@@ -35,17 +35,23 @@
   padding: 1.5rem 1.8rem;
 }
 
+.employee-welcome-copy {
+  max-width: 52rem;
+}
+
 .employee-welcome h2,
 .employee-panel h2,
 .attendance-card h2 {
   margin: 0;
   color: var(--employee-navy);
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 600;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
 }
 
 .employee-welcome h2 {
+  margin-top: 0.55rem;
   font-size: 1.35rem;
+  line-height: 1.25;
 }
 
 .employee-welcome p {
@@ -53,13 +59,23 @@
   font-size: 0.8rem;
 }
 
+.employee-welcome-kicker {
+  line-height: 1.25;
+}
+
+.employee-welcome p.employee-welcome-message {
+  margin-top: 0.5rem;
+  line-height: 1.45;
+}
+
 .employee-welcome strong {
   color: var(--employee-navy);
 }
 
 .employee-welcome .muted {
-  margin-top: 0.7rem;
+  margin-top: 0.9rem;
   color: var(--text-muted);
+  line-height: 1.55;
 }
 
 .employee-welcome .link-text {
@@ -112,9 +128,9 @@
 .employee-stat-value {
   margin-top: 0.15rem;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.35rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .employee-stat-value span {

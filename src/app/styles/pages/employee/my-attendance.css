@@ -6,8 +6,7 @@
 }
 
 .my-attendance-overview,
-.my-attendance-details-section,
-.my-attendance-note-card {
+.my-attendance-details-section {
   border: 1px solid var(--employee-line);
   background: #fff;
 }
@@ -44,23 +43,21 @@
   font-size: 1.1rem;
 }
 
-.my-attendance-kicker,
-.my-attendance-note-kicker {
+.my-attendance-kicker {
   display: block;
   color: var(--employee-red);
   font-size: 0.62rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .my-attendance-employee h2,
-.my-attendance-section-heading h2,
-.my-attendance-note-heading h2 {
+.my-attendance-section-heading h2 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 600;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
 }
 
 .my-attendance-employee h2 {
@@ -114,7 +111,7 @@
   margin: 0.15rem 0;
   color: var(--employee-ink);
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .my-attendance-subtext {
@@ -143,7 +140,7 @@
   margin: 0.2rem 0;
   color: var(--employee-green);
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .my-attendance-status-box.is-empty .my-attendance-status-value {
@@ -221,93 +218,8 @@
   margin: 0.25rem 0 0.1rem;
   color: var(--employee-ink);
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 500;
   overflow-wrap: anywhere;
-}
-
-.my-attendance-quick-actions {
-  display: grid;
-  gap: 0.95rem;
-}
-
-.my-attendance-action-list {
-  display: grid;
-  grid-template-columns: 1.1fr repeat(2, minmax(0, 1fr));
-  overflow: hidden;
-  border: 1px solid var(--employee-line);
-  border-radius: 0.65rem;
-  background: #fff;
-}
-
-.my-attendance-action {
-  display: flex;
-  min-width: 0;
-  min-height: 4.25rem;
-  align-items: center;
-  gap: 0.75rem;
-  border: 0;
-  border-right: 1px solid var(--employee-line);
-  padding: 0.8rem 1rem;
-  background: #fff;
-  color: var(--employee-blue);
-  text-align: left;
-  transition: background-color 150ms ease, color 150ms ease;
-}
-
-.my-attendance-action:last-child {
-  border-right: 0;
-}
-
-.my-attendance-action:hover {
-  background: #f4f6ff;
-}
-
-.my-attendance-action.is-primary {
-  background: var(--employee-navy);
-  color: #fff;
-}
-
-.my-attendance-action.is-primary:hover {
-  background: var(--employee-blue);
-}
-
-.my-attendance-action > .ui-icon {
-  width: 1.25rem;
-  flex: 0 0 auto;
-  font-size: 1rem;
-}
-
-.my-attendance-action > span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-}
-
-.my-attendance-action strong {
-  color: var(--employee-ink);
-  font-size: 0.8rem;
-}
-
-.my-attendance-action.is-primary strong {
-  color: #fff;
-}
-
-.my-attendance-action small {
-  margin-top: 0.15rem;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  line-height: 1.4;
-}
-
-.my-attendance-action.is-primary small {
-  color: rgba(255, 255, 255, 0.72);
-}
-
-.my-attendance-action-feedback {
-  min-height: 1.1rem;
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 0.72rem;
 }
 
 .my-attendance-calendar-section {
@@ -365,9 +277,9 @@
 .my-attendance-calendar-month h3 {
   margin: 0;
   color: var(--employee-ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .my-attendance-calendar-navigation,
@@ -416,7 +328,7 @@
 .my-attendance-calendar-control > span {
   color: var(--text-muted);
   font-size: 0.54rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
@@ -460,14 +372,6 @@
 
 .my-attendance-calendar-legend-item.is-present .my-attendance-calendar-legend-mark {
   background: var(--employee-green);
-}
-
-.my-attendance-calendar-legend-item.is-late .my-attendance-calendar-legend-mark {
-  background: var(--employee-gold);
-}
-
-.my-attendance-calendar-legend-item.is-absent .my-attendance-calendar-legend-mark {
-  background: var(--employee-red);
 }
 
 .my-attendance-calendar-weekdays,
@@ -544,13 +448,13 @@
 .my-attendance-calendar-day-number {
   color: var(--employee-ink);
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .my-attendance-calendar-today {
   color: var(--employee-blue);
   font-size: 0.5rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: 0.05em;
   line-height: 1.2;
   text-transform: uppercase;
@@ -574,14 +478,6 @@
   color: var(--employee-green);
 }
 
-.my-attendance-calendar-day.has-late .my-attendance-calendar-status {
-  color: var(--employee-gold);
-}
-
-.my-attendance-calendar-day.has-absent .my-attendance-calendar-status {
-  color: var(--employee-red);
-}
-
 .my-attendance-calendar-day.has-no-record .my-attendance-calendar-status,
 .my-attendance-calendar-day.is-upcoming .my-attendance-calendar-status {
   color: #9aa1ae;
@@ -595,63 +491,6 @@
   display: inline-flex;
   width: 0.75rem;
   justify-content: center;
-}
-
-.my-attendance-notes {
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 1rem;
-  border-top: 1px solid var(--employee-line);
-  padding-top: 1.25rem;
-}
-
-.my-attendance-note-card {
-  min-width: 0;
-  border-radius: 0.65rem;
-  padding: 1rem 1.1rem;
-}
-
-.my-attendance-note-heading {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  margin-bottom: 0.75rem;
-}
-
-.my-attendance-note-heading > .ui-icon {
-  margin-top: 0.15rem;
-  color: var(--employee-red);
-  font-size: 0.9rem;
-}
-
-.my-attendance-help-card .my-attendance-note-heading > .ui-icon {
-  color: var(--employee-blue);
-}
-
-.my-attendance-note-kicker {
-  color: var(--text-muted);
-  font-size: 0.58rem;
-  letter-spacing: 0.06em;
-}
-
-.my-attendance-note-heading h2 {
-  margin-top: 0.15rem;
-  font-size: 0.95rem;
-}
-
-.my-attendance-note-card ul {
-  margin: 0;
-  padding-left: 1.1rem;
-  color: var(--employee-ink);
-  font-size: 0.76rem;
-  line-height: 1.7;
-}
-
-.my-attendance-note-card p {
-  margin: 0;
-  color: var(--employee-ink);
-  font-size: 0.76rem;
-  line-height: 1.65;
 }
 
 @media (max-width: 1100px) {
@@ -686,20 +525,6 @@
 }
 
 @media (max-width: 760px) {
-  .my-attendance-action-list,
-  .my-attendance-notes {
-    grid-template-columns: 1fr;
-  }
-
-  .my-attendance-action {
-    border-right: 0;
-    border-bottom: 1px solid var(--employee-line);
-  }
-
-  .my-attendance-action:last-child {
-    border-bottom: 0;
-  }
-
   .my-attendance-calendar-toolbar {
     align-items: flex-start;
     flex-direction: column;

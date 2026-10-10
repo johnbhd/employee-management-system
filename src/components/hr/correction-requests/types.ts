@@ -1,1 +1,1 @@
-export type CorrectionDecisionType = "approve" | "reject" | "information";
+export type CorrectionDecisionType = "approve" | "reject";

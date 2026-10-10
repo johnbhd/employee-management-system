@@ -1,7 +1,7 @@
-import type { HrCorrectionEvidence } from "@/data/hr-correction-requests";
+import type { AttendanceCorrectionEvidence } from "@/types/attendance-correction";
 
 type CorrectionEvidenceProps = {
-  evidence: readonly HrCorrectionEvidence[];
+  evidence: readonly AttendanceCorrectionEvidence[];
 };
 
 export function CorrectionEvidence({ evidence }: CorrectionEvidenceProps) {

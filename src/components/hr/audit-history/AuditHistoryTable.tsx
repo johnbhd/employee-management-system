@@ -1,32 +1,35 @@
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { AttendanceAuditAction, AttendanceAuditEvent } from "@/data/hr-attendance-audit";
+import type { HrAuditHistoryItem } from "@/types/hr-audit-history";
 
 type AuditHistoryTableProps = {
-  events: readonly AttendanceAuditEvent[];
+  events: readonly HrAuditHistoryItem[];
   onSelectEvent: (eventId: string) => void;
+  emptyMessage?: string;
 };
 
-function actionTone(action: AttendanceAuditAction) {
-  if (action === "Correction Approved") return "success" as const;
-  if (action === "Correction Rejected") return "danger" as const;
-  if (action === "Information Requested") return "warning" as const;
-  if (action === "Correction Reviewed") return "info" as const;
-  if (action === "Attendance Verified") return "success" as const;
+function actionTone(event: HrAuditHistoryItem) {
+  if (event.outcome === "Approved" || event.outcome === "Recorded") return "success" as const;
+  if (event.outcome === "Rejected") return "danger" as const;
+  if (event.outcome === "Submitted") return "info" as const;
   return "muted" as const;
 }
 
-function changeSummary(event: AttendanceAuditEvent) {
+function changeSummary(event: HrAuditHistoryItem) {
   if (event.changes.length > 0) {
     return event.changes
-      .map((change) => `${change.field}: ${change.previousValue} → ${change.newValue}`)
+      .map((change) => `${change.field}: ${change.previousValue ?? "—"} -> ${change.newValue ?? "—"}`)
       .join(" · ");
   }
 
   return event.note ?? "Workflow activity recorded";
 }
 
-export function AuditHistoryTable({ events, onSelectEvent }: AuditHistoryTableProps) {
+export function AuditHistoryTable({
+  events,
+  onSelectEvent,
+  emptyMessage = "No audit events match the selected filters.",
+}: AuditHistoryTableProps) {
   return (
     <div className="hr-audit-table-scroll">
       <table className="hr-audit-table">
@@ -47,25 +50,26 @@ export function AuditHistoryTable({ events, onSelectEvent }: AuditHistoryTablePr
           {events.map((event) => (
             <tr key={event.id}>
               <td>
-                <strong className="hr-audit-date">{event.occurredAt.split(" · ")[0]}</strong>
-                <span className="hr-audit-cell-meta">{event.occurredAt.split(" · ")[1]}</span>
+                <strong className="hr-audit-date">{event.occurredAt}</strong>
               </td>
               <td>
-                <StatusBadge tone={actionTone(event.action)}>{event.action}</StatusBadge>
+                <StatusBadge tone={actionTone(event)}>{event.action}</StatusBadge>
               </td>
               <td>
-                <strong>{event.employee.name}</strong>
-                <span className="hr-audit-cell-meta">{event.employee.employeeId} · {event.employee.department}</span>
+                <strong>{event.employee?.displayName ?? "Unknown / unavailable"}</strong>
+                {event.employee ? (
+                  <span className="hr-audit-cell-meta">{event.employee.employeeId} · {event.employee.department}</span>
+                ) : null}
               </td>
               <td>
-                <strong>{event.actor.name}</strong>
-                <span className="hr-audit-cell-meta">{event.actor.role}</span>
+                <strong>{event.actor.displayName ?? "Unknown / unavailable"}</strong>
+                {event.actor.role ? <span className="hr-audit-cell-meta">{event.actor.role}</span> : null}
               </td>
               <td>{event.area}</td>
               <td className="hr-audit-change-cell">{changeSummary(event)}</td>
               <td>
                 <strong className="hr-audit-reference">{event.correctionRequest?.id ?? "Attendance record"}</strong>
-                <span className="hr-audit-cell-meta">{event.attendanceRecordId}</span>
+                {event.attendanceRecordId ? <span className="hr-audit-cell-meta">{event.attendanceRecordId}</span> : null}
               </td>
               <td>
                 <button type="button" className="button-secondary hr-audit-view-button" onClick={() => onSelectEvent(event.id)}>
@@ -77,7 +81,7 @@ export function AuditHistoryTable({ events, onSelectEvent }: AuditHistoryTablePr
           ))}
           {events.length === 0 ? (
             <tr>
-              <td colSpan={8} className="hr-audit-empty-row">No audit events match the selected filters.</td>
+              <td colSpan={8} className="hr-audit-empty-row">{emptyMessage}</td>
             </tr>
           ) : null}
         </tbody>

@@ -1,42 +1,34 @@
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
+import type { AttendanceCorrectionRecord } from "@/types/attendance-correction";
 
 type CorrectionRequestsTableProps = {
-  requests: readonly HrCorrectionRequest[];
+  requests: readonly AttendanceCorrectionRecord[];
   onSelectRequest: (requestId: string) => void;
 };
 
-function formatDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
-
-function requestedChange(request: HrCorrectionRequest) {
+function requestedChange(request: AttendanceCorrectionRecord) {
   const changes: string[] = [];
 
-  if (request.requestedValues.timeIn) {
-    changes.push(`Time In: ${request.currentValues.timeIn ?? "—"} → ${request.requestedValues.timeIn}`);
+  if (request.requestedChanges.timeIn) {
+    changes.push(
+      `Time In: ${request.currentAttendance?.timeIn ?? "—"} → ${request.requestedChanges.timeIn}`,
+    );
   }
 
-  if (request.requestedValues.timeOut) {
-    changes.push(`Time Out: ${request.currentValues.timeOut ?? "—"} → ${request.requestedValues.timeOut}`);
-  }
-
-  if (request.requestedValues.source) {
-    changes.push(`Source: ${request.currentValues.source ?? "—"} → ${request.requestedValues.source}`);
+  if (request.requestedChanges.timeOut) {
+    changes.push(
+      `Time Out: ${request.currentAttendance?.timeOut ?? "—"} → ${request.requestedChanges.timeOut}`,
+    );
   }
 
   return changes.length > 0 ? changes.join(" · ") : "Review requested correction";
 }
 
-export function CorrectionRequestsTable({ requests, onSelectRequest }: CorrectionRequestsTableProps) {
+export function CorrectionRequestsTable({
+  requests,
+  onSelectRequest,
+}: CorrectionRequestsTableProps) {
   return (
     <div className="hr-correction-table-scroll">
       <table className="hr-correction-table">
@@ -61,15 +53,19 @@ export function CorrectionRequestsTable({ requests, onSelectRequest }: Correctio
                 <span className="hr-correction-request-meta">Attendance correction</span>
               </td>
               <td>
-                <strong className="hr-correction-employee-name">{request.employeeName}</strong>
-                <span className="hr-correction-employee-meta">{request.employeeId} · {request.department}</span>
+                <strong className="hr-correction-employee-name">
+                  {request.employee?.displayName ?? "Employee reference unavailable"}
+                </strong>
+                <span className="hr-correction-employee-meta">
+                  {request.employeeId} · {request.employee?.department ?? "Unavailable"}
+                </span>
               </td>
-              <td>{formatDate(request.attendanceDate)}</td>
+              <td>{request.attendanceDateLabel}</td>
               <td>{request.issueType}</td>
               <td className="hr-correction-change-cell">{requestedChange(request)}</td>
               <td>{request.submittedAt}</td>
               <td>
-                <StatusBadge tone={request.statusTone}>{request.status}</StatusBadge>
+                <StatusBadge tone={request.statusTone}>{request.statusLabel}</StatusBadge>
               </td>
               <td>
                 <button

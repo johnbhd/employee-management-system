@@ -121,7 +121,7 @@ export function AttendanceReportFilters({
       </div>
 
       <div className="hr-reports-filter-footer">
-        <p>Report values are summarized from the attendance and correction records available to HR.</p>
+          <p>Report values are summarized from canonical attendance records available to HR.</p>
         <button type="button" className="button-secondary" onClick={onReset}>
           <Icon name="refresh" />
           Reset filters

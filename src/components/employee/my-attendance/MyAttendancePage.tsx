@@ -1,22 +1,21 @@
-import {
-  employeeAttendanceHelp,
-  employeeAttendanceReminders,
-} from "@/data/my-attendance";
-import { Icon } from "@/components/ui/Icon";
+import type { AttendanceCalendarRecord } from "@/types/attendance-history";
 import type { EmployeeReference } from "@/types/employee";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 import { MonthlyAttendanceCalendar } from "./MonthlyAttendanceCalendar";
 import { MyAttendanceToday } from "./MyAttendanceToday";
-import { MyAttendanceQuickActions } from "./MyAttendanceQuickActions";
 
 export function MyAttendancePage({
   attendanceLoadError,
+  calendarAttendance,
+  calendarLoadError,
   employee,
   todayAttendance,
   todayLabel,
 }: {
   attendanceLoadError: boolean;
+  calendarAttendance: readonly AttendanceCalendarRecord[];
+  calendarLoadError: boolean;
   employee: EmployeeReference | null;
   todayAttendance: TodayAttendanceData;
   todayLabel: string;
@@ -30,63 +29,12 @@ export function MyAttendancePage({
         todayLabel={todayLabel}
       />
 
-      <section
-        className="my-attendance-quick-actions"
-        aria-labelledby="my-attendance-quick-actions-title"
-      >
-        <div className="my-attendance-section-heading">
-          <div>
-            <span className="my-attendance-kicker">Next steps</span>
-            <h2 id="my-attendance-quick-actions-title">Attendance actions</h2>
-          </div>
-          <span className="my-attendance-section-note">
-            Choose an action to continue
-          </span>
-        </div>
-        <MyAttendanceQuickActions />
-      </section>
-
       <MonthlyAttendanceCalendar
         attendanceLoadError={attendanceLoadError}
+        calendarAttendance={calendarAttendance}
+        calendarLoadError={calendarLoadError}
         todayAttendance={todayAttendance}
       />
-
-      <section
-        className="my-attendance-notes"
-        aria-label="Attendance reminders and help"
-      >
-        <article
-          className="my-attendance-note-card my-attendance-reminder-card"
-          aria-labelledby="my-attendance-reminders-title"
-        >
-          <div className="my-attendance-note-heading">
-            <Icon name="activity" />
-            <div>
-              <span className="my-attendance-note-kicker">Keep in mind</span>
-              <h2 id="my-attendance-reminders-title">Important reminders</h2>
-            </div>
-          </div>
-          <ul>
-            {employeeAttendanceReminders.map((reminder) => (
-              <li key={reminder}>{reminder}</li>
-            ))}
-          </ul>
-        </article>
-
-        <article
-          className="my-attendance-note-card my-attendance-help-card"
-          aria-labelledby="my-attendance-help-title"
-        >
-          <div className="my-attendance-note-heading">
-            <Icon name="help" />
-            <div>
-              <span className="my-attendance-note-kicker">Support</span>
-              <h2 id="my-attendance-help-title">Need help?</h2>
-            </div>
-          </div>
-          <p>{employeeAttendanceHelp}</p>
-        </article>
-      </section>
     </div>
   );
 }

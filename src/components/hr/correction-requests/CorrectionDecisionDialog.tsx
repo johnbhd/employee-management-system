@@ -1,12 +1,14 @@
 import { Icon } from "@/components/ui/Icon";
-import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
-
-import type { CorrectionDecisionType } from "./types";
+import type {
+  AttendanceCorrectionDecision,
+  AttendanceCorrectionRecord,
+} from "@/types/attendance-correction";
 
 type CorrectionDecisionDialogProps = {
-  request: HrCorrectionRequest | null;
-  decision: CorrectionDecisionType | null;
+  request: AttendanceCorrectionRecord | null;
+  decision: AttendanceCorrectionDecision | null;
   note: string;
+  isSubmitting: boolean;
   onNoteChange: (value: string) => void;
   onClose: () => void;
   onConfirm: () => void;
@@ -14,49 +16,32 @@ type CorrectionDecisionDialogProps = {
 
 const decisionCopy = {
   approve: {
-    title: "Approve Correction Request?",
-    description: "Confirm that the requested attendance correction can be approved for HR review processing.",
+    title: "Approve Attendance Correction?",
+    description: "The persisted employee request will update the canonical attendance record. The original attendance will remain preserved in correction history.",
     confirm: "Approve Request",
+    processing: "Approving...",
     className: "hr-correction-dialog-approve",
-    noteLabel: "Decision note (optional)",
+    noteLabel: "Review note (optional)",
     placeholder: "Add a short review note if needed.",
     required: false,
   },
   reject: {
-    title: "Reject Correction Request",
-    description: "Record why this attendance correction cannot be approved.",
+    title: "Reject Attendance Correction?",
+    description: "The correction request will be marked rejected. The canonical attendance record will remain unchanged.",
     confirm: "Reject Request",
+    processing: "Rejecting...",
     className: "hr-correction-dialog-reject",
     noteLabel: "Rejection reason",
     placeholder: "Explain why the requested correction is being rejected.",
     required: true,
   },
-  information: {
-    title: "Request More Information",
-    description: "Tell the employee what information is required before this request can be reviewed again.",
-    confirm: "Send Request",
-    className: "hr-correction-dialog-information",
-    noteLabel: "Information needed",
-    placeholder: "Please provide supporting documentation or clarify the requested attendance value.",
-    required: true,
-  },
 } as const;
-
-function formatDate(value: string) {
-  const [year, month, day] = value.split("-").map(Number);
-
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(Date.UTC(year, month - 1, day)));
-}
 
 export function CorrectionDecisionDialog({
   request,
   decision,
   note,
+  isSubmitting,
   onNoteChange,
   onClose,
   onConfirm,
@@ -64,11 +49,17 @@ export function CorrectionDecisionDialog({
   if (!request || !decision) return null;
 
   const copy = decisionCopy[decision];
-  const isConfirmDisabled = copy.required && note.trim().length === 0;
+  const isConfirmDisabled = isSubmitting || (copy.required && note.trim().length === 0);
 
   return (
     <div className="hr-correction-dialog-layer">
-      <button type="button" className="hr-correction-dialog-backdrop" onClick={onClose} aria-label="Close decision dialog" />
+      <button
+        type="button"
+        className="hr-correction-dialog-backdrop"
+        onClick={onClose}
+        aria-label="Close decision dialog"
+        disabled={isSubmitting}
+      />
       <section
         className="hr-correction-dialog"
         role="dialog"
@@ -81,7 +72,13 @@ export function CorrectionDecisionDialog({
             <p className="hr-section-kicker">Review decision</p>
             <h2 id="hr-correction-dialog-title">{copy.title}</h2>
           </div>
-          <button type="button" className="hr-correction-close-button" onClick={onClose} aria-label="Close decision dialog">
+          <button
+            type="button"
+            className="hr-correction-close-button"
+            onClick={onClose}
+            aria-label="Close decision dialog"
+            disabled={isSubmitting}
+          >
             <Icon name="close" />
           </button>
         </div>
@@ -93,11 +90,11 @@ export function CorrectionDecisionDialog({
         <dl className="hr-correction-dialog-summary">
           <div>
             <dt>Employee</dt>
-            <dd>{request.employeeName}</dd>
+            <dd>{request.employee?.displayName ?? request.employeeId}</dd>
           </div>
           <div>
             <dt>Attendance date</dt>
-            <dd>{formatDate(request.attendanceDate)}</dd>
+            <dd>{request.attendanceDateLabel}</dd>
           </div>
           <div>
             <dt>Requested change</dt>
@@ -113,18 +110,22 @@ export function CorrectionDecisionDialog({
             placeholder={copy.placeholder}
             required={copy.required}
             rows={4}
+            maxLength={1000}
+            disabled={isSubmitting}
           />
         </label>
 
         <div className="hr-correction-dialog-footer">
-          <button type="button" className="button-secondary" onClick={onClose}>Cancel</button>
+          <button type="button" className="button-secondary" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </button>
           <button
             type="button"
             className={`hr-correction-dialog-confirm ${copy.className}`}
             onClick={onConfirm}
             disabled={isConfirmDisabled}
           >
-            {copy.confirm}
+            {isSubmitting ? copy.processing : copy.confirm}
           </button>
         </div>
       </section>

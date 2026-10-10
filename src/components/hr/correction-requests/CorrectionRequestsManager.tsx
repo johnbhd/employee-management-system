@@ -1,25 +1,27 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { useHrWorkflow } from "@/components/layouts/hr/HrWorkflowContext";
-import type { HrCorrectionRequest, HrCorrectionRequestStatus } from "@/data/hr-correction-requests";
+import { apiRequest } from "@/lib/api/client";
+import type {
+  AttendanceCorrectionData,
+  AttendanceCorrectionDecision,
+} from "@/types/attendance-correction";
 
+import { CorrectionDecisionDialog } from "./CorrectionDecisionDialog";
 import { CorrectionRequestDrawer } from "./CorrectionRequestDrawer";
 import { CorrectionRequestFilters } from "./CorrectionRequestFilters";
 import { CorrectionRequestSummary } from "./CorrectionRequestSummary";
-import { CorrectionDecisionDialog } from "./CorrectionDecisionDialog";
 import { CorrectionRequestsTable } from "./CorrectionRequestsTable";
-import type { CorrectionDecisionType } from "./types";
 
 const allValue = "all";
+
 const statusOptions = [
   { value: allValue, label: "All statuses" },
-  { value: "Submitted", label: "Submitted" },
-  { value: "Under Review", label: "Under Review" },
-  { value: "Needs Additional Information", label: "Needs Additional Information" },
-  { value: "Approved", label: "Approved" },
-  { value: "Rejected", label: "Rejected" },
+  { value: "pending", label: "Pending" },
+  { value: "approved", label: "Approved" },
+  { value: "rejected", label: "Rejected" },
 ];
 
 const issueTypeOptions = [
@@ -27,21 +29,28 @@ const issueTypeOptions = [
   { value: "Missing Time-In", label: "Missing Time-In" },
   { value: "Missing Time-Out", label: "Missing Time-Out" },
   { value: "Incorrect Time-In", label: "Incorrect Time-In" },
-  { value: "Attendance Source Conflict", label: "Attendance Source Conflict" },
+  { value: "Incorrect Time-Out", label: "Incorrect Time-Out" },
+  { value: "Time In and Time Out Correction", label: "Time In and Time Out" },
 ];
 
-const decisionConfig: Record<CorrectionDecisionType, { status: HrCorrectionRequestStatus; tone: HrCorrectionRequest["statusTone"]; action: string }> = {
-  approve: { status: "Approved", tone: "success", action: "Correction approved" },
-  reject: { status: "Rejected", tone: "danger", action: "Correction rejected" },
-  information: {
-    status: "Needs Additional Information",
-    tone: "warning",
-    action: "Additional information requested",
-  },
+type CorrectionRequestsManagerProps = {
+  data: AttendanceCorrectionData;
+  loadError: boolean;
 };
 
-export function CorrectionRequestsManager() {
-  const { correctionRequests, attendanceRecords, updateCorrectionRequest } = useHrWorkflow();
+type DecisionResponse = {
+  success: true;
+  data: {
+    requestId: string;
+    decision: AttendanceCorrectionDecision;
+  };
+};
+
+export function CorrectionRequestsManager({
+  data,
+  loadError,
+}: CorrectionRequestsManagerProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(allValue);
   const [issueType, setIssueType] = useState(allValue);
@@ -49,33 +58,35 @@ export function CorrectionRequestsManager() {
   const [submittedDate, setSubmittedDate] = useState("");
   const [attendanceDate, setAttendanceDate] = useState("");
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
-  const [decision, setDecision] = useState<CorrectionDecisionType | null>(null);
+  const [decision, setDecision] = useState<AttendanceCorrectionDecision | null>(null);
   const [decisionNote, setDecisionNote] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [mutationError, setMutationError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const departments = useMemo(
     () => [
       { value: allValue, label: "All departments" },
-      ...Array.from(new Set(correctionRequests.map((request) => request.department)))
-        .sort()
-        .map((value) => ({ value, label: value })),
+      ...data.departments.map((value) => ({ value, label: value })),
     ],
-    [correctionRequests],
+    [data.departments],
   );
 
   const filteredRequests = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
 
-    return correctionRequests.filter((request) => {
+    return data.records.filter((request) => {
       const matchesSearch = !normalizedSearch
         || request.id.toLowerCase().includes(normalizedSearch)
-        || request.employeeName.toLowerCase().includes(normalizedSearch)
+        || request.employee?.displayName.toLowerCase().includes(normalizedSearch)
         || request.employeeId.toLowerCase().includes(normalizedSearch);
       const matchesStatus = status === allValue || request.status === status;
       const matchesIssueType = issueType === allValue || request.issueType === issueType;
-      const matchesDepartment = department === allValue || request.department === department;
+      const matchesDepartment = department === allValue
+        || request.employee?.department === department;
       const matchesSubmittedDate = !submittedDate || request.submittedDate === submittedDate;
-      const matchesAttendanceDate = !attendanceDate || request.attendanceDate === attendanceDate;
+      const matchesAttendanceDate = !attendanceDate
+        || request.attendanceDate === attendanceDate;
 
       return matchesSearch
         && matchesStatus
@@ -84,12 +95,11 @@ export function CorrectionRequestsManager() {
         && matchesSubmittedDate
         && matchesAttendanceDate;
     });
-  }, [attendanceDate, correctionRequests, department, issueType, search, status, submittedDate]);
+  }, [attendanceDate, data.records, department, issueType, search, status, submittedDate]);
 
-  const selectedRequest = correctionRequests.find((request) => request.id === selectedRequestId) ?? null;
-  const selectedAttendanceRecord = selectedRequest
-    ? attendanceRecords.find((record) => record.id === selectedRequest.attendanceRecordId) ?? null
-    : null;
+  const selectedRequest = data.records.find(
+    (request) => request.id === selectedRequestId,
+  ) ?? null;
 
   const activeFilterCount = [
     search.trim(),
@@ -104,7 +114,8 @@ export function CorrectionRequestsManager() {
     if (!selectedRequestId && !decision) return;
 
     function closeOnEscape(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
+      if (event.key !== "Escape" || isSubmitting) return;
+
       setDecision(null);
       setSelectedRequestId(null);
       setDecisionNote("");
@@ -112,10 +123,8 @@ export function CorrectionRequestsManager() {
 
     document.addEventListener("keydown", closeOnEscape);
 
-    return () => {
-      document.removeEventListener("keydown", closeOnEscape);
-    };
-  }, [decision, selectedRequestId]);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [decision, isSubmitting, selectedRequestId]);
 
   function resetFilters() {
     setSearch("");
@@ -126,30 +135,55 @@ export function CorrectionRequestsManager() {
     setAttendanceDate("");
   }
 
-  function openDecision(nextDecision: CorrectionDecisionType) {
+  function openDecision(nextDecision: AttendanceCorrectionDecision) {
+    if (!selectedRequest || selectedRequest.status !== "pending") return;
+
+    setMutationError("");
     setDecision(nextDecision);
     setDecisionNote("");
   }
 
-  function confirmDecision() {
-    if (!selectedRequest || !decision) return;
+  async function confirmDecision() {
+    if (!selectedRequest || !decision || isSubmitting) return;
 
-    const selectedDecision = decisionConfig[decision];
-    const note = decisionNote.trim();
-    const historyNote = note || undefined;
+    setIsSubmitting(true);
+    setMutationError("");
+    setFeedback("");
 
-    updateCorrectionRequest(selectedRequest.id, selectedDecision.status, historyNote);
+    try {
+      await apiRequest<DecisionResponse>(
+        `/api/v1/hr/attendance-corrections/${encodeURIComponent(selectedRequest.id)}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            decision,
+            reviewNote: decisionNote.trim() || null,
+          }),
+        },
+      );
 
-    setFeedback(selectedDecision.status === "Approved"
-      ? "Correction request approved. The attendance record is now pending final HR verification."
-      : `${selectedDecision.action}.`);
-    setDecision(null);
-    setDecisionNote("");
+      setFeedback(decision === "approve"
+        ? "Correction approved successfully. Attendance was updated and the original values were preserved in correction history."
+        : "Correction request rejected. The attendance record was not changed.");
+      setDecision(null);
+      setSelectedRequestId(null);
+      setDecisionNote("");
+      router.refresh();
+    } catch (error) {
+      setMutationError(
+        error instanceof Error
+          ? error.message
+          : "The correction decision could not be completed.",
+      );
+      router.refresh();
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <div className="hr-correction-manager">
-      <CorrectionRequestSummary requests={correctionRequests} />
+      <CorrectionRequestSummary summary={data.summary} />
 
       <CorrectionRequestFilters
         search={search}
@@ -171,17 +205,38 @@ export function CorrectionRequestsManager() {
         onReset={resetFilters}
       />
 
-      <section className="hr-dashboard-panel hr-correction-queue" aria-labelledby="hr-correction-queue-heading">
+      <section
+        className="hr-dashboard-panel hr-correction-queue"
+        aria-labelledby="hr-correction-queue-heading"
+      >
         <div className="hr-panel-header">
           <div>
             <p className="hr-section-kicker">Operational records</p>
             <h2 id="hr-correction-queue-heading">Correction request queue</h2>
-            <p className="hr-panel-description">Review the current attendance record and the employee&apos;s requested change before deciding.</p>
+            <p className="hr-panel-description">
+              Review original attendance and the persisted employee request before deciding.
+            </p>
           </div>
-          <span className="hr-correction-result-count">Showing {filteredRequests.length} of {correctionRequests.length} requests</span>
+          <span className="hr-correction-result-count">
+            {loadError
+              ? "Requests unavailable"
+              : `Showing ${filteredRequests.length} of ${data.records.length} requests`}
+          </span>
         </div>
 
-        <CorrectionRequestsTable requests={filteredRequests} onSelectRequest={setSelectedRequestId} />
+        {loadError ? (
+          <div className="hr-correction-empty-state" role="alert">
+            <p>Correction requests could not be loaded. Try refreshing the page.</p>
+            <button type="button" className="button-secondary" onClick={() => router.refresh()}>
+              Try again
+            </button>
+          </div>
+        ) : (
+          <CorrectionRequestsTable
+            requests={filteredRequests}
+            onSelectRequest={setSelectedRequestId}
+          />
+        )}
       </section>
 
       {feedback ? (
@@ -190,9 +245,14 @@ export function CorrectionRequestsManager() {
         </p>
       ) : null}
 
+      {mutationError ? (
+        <p className="hr-correction-feedback is-error" role="alert">
+          {mutationError}
+        </p>
+      ) : null}
+
       <CorrectionRequestDrawer
         request={selectedRequest}
-        attendanceRecord={selectedAttendanceRecord}
         onClose={() => setSelectedRequestId(null)}
         onDecision={openDecision}
       />
@@ -201,10 +261,13 @@ export function CorrectionRequestsManager() {
         request={selectedRequest}
         decision={decision}
         note={decisionNote}
+        isSubmitting={isSubmitting}
         onNoteChange={setDecisionNote}
         onClose={() => {
-          setDecision(null);
-          setDecisionNote("");
+          if (!isSubmitting) {
+            setDecision(null);
+            setDecisionNote("");
+          }
         }}
         onConfirm={confirmDecision}
       />

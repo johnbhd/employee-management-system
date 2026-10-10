@@ -2,23 +2,21 @@ import type { ReactNode } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import type { AttendanceAuditEvent } from "@/data/hr-attendance-audit";
+import type { HrAuditHistoryItem } from "@/types/hr-audit-history";
 
 import { AuditChangeComparison } from "./AuditChangeComparison";
 import { AuditEventTimeline } from "./AuditEventTimeline";
 
 type AuditEventDrawerProps = {
-  event: AttendanceAuditEvent | null;
-  relatedEvents: readonly AttendanceAuditEvent[];
+  event: HrAuditHistoryItem | null;
+  relatedEvents: readonly HrAuditHistoryItem[];
   onClose: () => void;
 };
 
-function outcomeTone(outcome: AttendanceAuditEvent["outcome"]) {
-  if (outcome === "Approved") return "success" as const;
+function outcomeTone(outcome: HrAuditHistoryItem["outcome"]) {
+  if (outcome === "Approved" || outcome === "Recorded") return "success" as const;
   if (outcome === "Rejected") return "danger" as const;
-  if (outcome === "Needs Information") return "warning" as const;
-  if (outcome === "Under Review") return "info" as const;
-  if (outcome === "Verified") return "success" as const;
+  if (outcome === "Submitted") return "info" as const;
   return "muted" as const;
 }
 
@@ -74,17 +72,17 @@ export function AuditEventDrawer({ event, relatedEvents, onClose }: AuditEventDr
         <section className="hr-audit-detail-section" aria-labelledby="hr-audit-performed-by-heading">
           <h3 id="hr-audit-performed-by-heading">Performed by</h3>
           <dl className="hr-audit-detail-list">
-            <DetailRow label="Actor" value={event.actor.name} />
-            <DetailRow label="Actor role" value={event.actor.role} />
+            <DetailRow label="Actor" value={event.actor.displayName ?? "Unknown / unavailable"} />
+            <DetailRow label="Actor role" value={event.actor.role ?? "Role unavailable"} />
           </dl>
         </section>
 
         <section className="hr-audit-detail-section" aria-labelledby="hr-audit-employee-heading">
           <h3 id="hr-audit-employee-heading">Affected employee</h3>
           <dl className="hr-audit-detail-list">
-            <DetailRow label="Employee" value={event.employee.name} />
-            <DetailRow label="Employee ID" value={event.employee.employeeId} />
-            <DetailRow label="Department" value={event.employee.department} />
+            <DetailRow label="Employee" value={event.employee?.displayName ?? "Unknown / unavailable"} />
+            <DetailRow label="Employee ID" value={event.employee?.employeeId ?? "Unavailable"} />
+            <DetailRow label="Department" value={event.employee?.department ?? "Unavailable"} />
           </dl>
         </section>
 
@@ -94,10 +92,10 @@ export function AuditEventDrawer({ event, relatedEvents, onClose }: AuditEventDr
             <dl className="hr-audit-detail-list">
               <DetailRow label="Record reference" value={event.attendanceRecord.id} />
               <DetailRow label="Attendance date" value={formatDate(event.attendanceRecord.date)} />
-              <DetailRow label="Schedule" value={event.attendanceRecord.schedule} />
+              <DetailRow label="Time In" value={event.attendanceRecord.timeIn ?? "Not recorded"} />
+              <DetailRow label="Time Out" value={event.attendanceRecord.timeOut ?? "Not recorded"} />
               <DetailRow label="Source" value={event.attendanceRecord.source} />
               <DetailRow label="Attendance status" value={event.attendanceRecord.status} />
-              <DetailRow label="Validation status" value={event.attendanceRecord.validationStatus} />
             </dl>
           </section>
         ) : null}
@@ -107,7 +105,7 @@ export function AuditEventDrawer({ event, relatedEvents, onClose }: AuditEventDr
           {event.changes.length > 0 ? (
             <AuditChangeComparison changes={event.changes} />
           ) : (
-            <p className="hr-audit-note">This workflow event records an activity without a field-value change.</p>
+            <p className="hr-audit-note">This event records persisted workflow activity without a stored field-value change.</p>
           )}
         </section>
 
@@ -132,7 +130,7 @@ export function AuditEventDrawer({ event, relatedEvents, onClose }: AuditEventDr
 
         {relatedEvents.length > 1 ? (
           <section className="hr-audit-detail-section" aria-labelledby="hr-audit-related-heading">
-            <h3 id="hr-audit-related-heading">Related activity</h3>
+            <h3 id="hr-audit-related-heading">Related activity on this page</h3>
             <AuditEventTimeline events={relatedEvents} />
           </section>
         ) : null}

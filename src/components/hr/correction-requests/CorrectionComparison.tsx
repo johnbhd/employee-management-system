@@ -1,25 +1,34 @@
-import type { HrCorrectionRequest } from "@/data/hr-correction-requests";
+import type { AttendanceCorrectionRecord } from "@/types/attendance-correction";
 
 type CorrectionComparisonProps = {
-  request: HrCorrectionRequest;
+  request: AttendanceCorrectionRecord;
 };
 
-function displayValue(value?: string) {
+function displayValue(value: string | null | undefined) {
   return value ?? "—";
 }
 
 export function CorrectionComparison({ request }: CorrectionComparisonProps) {
   const comparisons = [
-    request.requestedValues.timeIn
-      ? { label: "Time In", current: request.currentValues.timeIn, requested: request.requestedValues.timeIn }
+    request.requestedChanges.timeIn
+      ? {
+          label: "Time In",
+          current: request.originalAttendance?.timeIn,
+          requested: request.requestedChanges.timeIn,
+        }
       : null,
-    request.requestedValues.timeOut
-      ? { label: "Time Out", current: request.currentValues.timeOut, requested: request.requestedValues.timeOut }
-      : null,
-    request.requestedValues.source
-      ? { label: "Source", current: request.currentValues.source, requested: request.requestedValues.source }
+    request.requestedChanges.timeOut
+      ? {
+          label: "Time Out",
+          current: request.originalAttendance?.timeOut,
+          requested: request.requestedChanges.timeOut,
+        }
       : null,
   ].filter((comparison): comparison is NonNullable<typeof comparison> => Boolean(comparison));
+
+  if (comparisons.length === 0) {
+    return <p className="hr-correction-muted-copy">No persisted requested time change is available.</p>;
+  }
 
   return (
     <div className="hr-correction-comparison">
@@ -28,7 +37,7 @@ export function CorrectionComparison({ request }: CorrectionComparisonProps) {
           <span className="hr-correction-comparison-label">{comparison.label}</span>
           <div className="hr-correction-comparison-value">
             <span>
-              <small>Current</small>
+              <small>Original</small>
               <strong>{displayValue(comparison.current)}</strong>
             </span>
             <span className="hr-correction-comparison-arrow" aria-hidden="true">→</span>

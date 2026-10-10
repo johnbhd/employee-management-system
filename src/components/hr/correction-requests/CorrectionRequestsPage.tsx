@@ -1,8 +1,17 @@
-import { ActionButton } from "@/components/ui/ActionButton";
+import type { AttendanceCorrectionData } from "@/types/attendance-correction";
 
 import { CorrectionRequestsManager } from "./CorrectionRequestsManager";
+import { CorrectionRequestsRefreshButton } from "./CorrectionRequestsRefreshButton";
 
-export function CorrectionRequestsPage() {
+type CorrectionRequestsPageProps = {
+  data: AttendanceCorrectionData;
+  loadError?: boolean;
+};
+
+export function CorrectionRequestsPage({
+  data,
+  loadError = false,
+}: CorrectionRequestsPageProps) {
   return (
     <div className="hr-dashboard-page hr-correction-requests-page">
       <header className="hr-dashboard-header">
@@ -14,13 +23,11 @@ export function CorrectionRequestsPage() {
           </p>
         </div>
         <div className="hr-dashboard-actions">
-          <ActionButton icon="refresh" action="Correction requests refreshed.">
-            Refresh requests
-          </ActionButton>
+          <CorrectionRequestsRefreshButton />
         </div>
       </header>
 
-      <CorrectionRequestsManager />
+      <CorrectionRequestsManager data={data} loadError={loadError} />
     </div>
   );
 }
