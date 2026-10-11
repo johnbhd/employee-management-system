@@ -15,6 +15,17 @@
   min-width: 0;
 }
 
+.payroll-verified-attendance__data-error {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f5c2c7;
+  border-radius: 0.75rem;
+  background: #fff5f5;
+  color: #9f1239;
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
 .payroll-verified-attendance__period {
   display: inline-flex;
   width: fit-content;
@@ -62,6 +73,25 @@
   color: var(--text-muted);
   font-size: 0.72rem;
   line-height: 1.55;
+}
+
+.payroll-verified-attendance__batch-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #e7d8b2;
+  border-radius: 0.75rem;
+  background: #fffaf0;
+  color: #7c5312;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.payroll-verified-attendance__batch-note .ui-icon {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
 }
 
 .payroll-verified-attendance__filters {
@@ -232,6 +262,12 @@
   color: var(--au-navy);
 }
 
+.payroll-verified-attendance__row-menu button:disabled {
+  cursor: not-allowed;
+  color: var(--text-faint);
+  opacity: 0.7;
+}
+
 .payroll-verified-attendance__empty {
   padding: 2rem 1rem !important;
   text-align: center;
@@ -269,6 +305,22 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0.35rem;
+}
+
+.payroll-verified-attendance__page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.payroll-verified-attendance__page-size select {
+  min-height: 2rem;
+  padding: 0 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.66rem;
 }
 
 .payroll-verified-attendance__page-button {
@@ -319,6 +371,91 @@
 .payroll-verified-attendance__boundary-note .ui-icon {
   flex: 0 0 auto;
   margin-top: 0.1rem;
+}
+
+.payroll-verified-attendance__modal-reasons {
+  margin: 0 1.35rem 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #f5c2c7;
+  border-radius: 0.75rem;
+  background: #fff5f5;
+  color: #9f1239;
+  font-size: 0.7rem;
+}
+
+.payroll-verified-attendance__modal-reasons h3 {
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+.payroll-verified-attendance__modal-reasons ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.45rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.payroll-verified-attendance__loading-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+}
+
+.payroll-verified-attendance__loading-content {
+  display: grid;
+  flex: 1;
+  gap: 0.45rem;
+}
+
+.payroll-verified-attendance__loading-block,
+.payroll-verified-attendance__loading-panel {
+  display: block;
+  border-radius: 0.45rem;
+  background: linear-gradient(90deg, #edf2f7 25%, #f8fafc 50%, #edf2f7 75%);
+  background-size: 200% 100%;
+  animation: payroll-verified-attendance-loading 1.5s ease-in-out infinite;
+}
+
+.payroll-verified-attendance__loading-icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 0.65rem;
+}
+
+.payroll-verified-attendance__loading-label {
+  width: 55%;
+  height: 0.55rem;
+}
+
+.payroll-verified-attendance__loading-value {
+  width: 38%;
+  height: 1.2rem;
+}
+
+.payroll-verified-attendance__loading-note {
+  width: 75%;
+  height: 0.5rem;
+}
+
+.payroll-verified-attendance__loading-panel {
+  min-height: 22rem;
+}
+
+@keyframes payroll-verified-attendance-loading {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payroll-verified-attendance__loading-block,
+  .payroll-verified-attendance__loading-panel {
+    animation: none;
+  }
 }
 
 .payroll-verified-attendance__modal-backdrop {
@@ -448,6 +585,11 @@
     align-items: flex-start;
     flex-direction: column;
     padding-inline: 1rem;
+  }
+
+  .payroll-verified-attendance__pagination nav {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .payroll-verified-attendance__modal-details {

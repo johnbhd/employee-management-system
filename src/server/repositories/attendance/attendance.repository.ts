@@ -27,6 +27,12 @@ export type StoredAttendanceCorrectionMetadata = {
     correctedBy: QrAttendanceOperatorSnapshot;
 };
 
+export type StoredAttendanceHrVerification = {
+    status: "verified";
+    verifiedAt: Timestamp;
+    verifiedBy: QrAttendanceOperatorSnapshot;
+};
+
 export type StoredQrAttendanceRecord = {
     employeeId: string;
     attendanceDate: string;
@@ -40,6 +46,7 @@ export type StoredQrAttendanceRecord = {
     createdAt: Timestamp;
     updatedAt: Timestamp;
     correction?: StoredAttendanceCorrectionMetadata;
+    hrVerification?: StoredAttendanceHrVerification;
 };
 
 export type QrAttendanceRepositoryResult = {
@@ -140,6 +147,32 @@ function parseCorrectionMetadata(
     };
 }
 
+function parseHrVerificationMetadata(
+    value: unknown,
+): StoredAttendanceHrVerification | undefined | null {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (!isRecord(value)) {
+        return null;
+    }
+
+    const status = value.status;
+    const verifiedAt = getTimestamp(value.verifiedAt);
+    const verifiedBy = parseOperator(value.verifiedBy);
+
+    if (status !== "verified" || !verifiedAt || !verifiedBy || verifiedBy.role !== "hr") {
+        return null;
+    }
+
+    return {
+        status,
+        verifiedAt,
+        verifiedBy,
+    };
+}
+
 export function parseStoredQrAttendanceRecord(
     data: DocumentData | undefined,
 ): StoredQrAttendanceRecord | null {
@@ -167,6 +200,7 @@ export function parseStoredQrAttendanceRecord(
     const createdAt = getTimestamp(data.createdAt);
     const updatedAt = getTimestamp(data.updatedAt);
     const correction = parseCorrectionMetadata(data.correction);
+    const hrVerification = parseHrVerificationMetadata(data.hrVerification);
 
     if (
         !employeeId
@@ -188,6 +222,7 @@ export function parseStoredQrAttendanceRecord(
         || !createdAt
         || !updatedAt
         || correction === null
+        || hrVerification === null
     ) {
         return null;
     }
@@ -205,6 +240,7 @@ export function parseStoredQrAttendanceRecord(
         createdAt,
         updatedAt,
         ...(correction ? { correction } : {}),
+        ...(hrVerification ? { hrVerification } : {}),
     };
 }
 

@@ -1,118 +1,303 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { ActionButton } from "@/components/ui/ActionButton";
 import { Icon } from "@/components/ui/Icon";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { SummaryCard } from "@/components/ui/SummaryCard";
-import {
-  payrollVerifiedAttendanceDepartments,
-  payrollVerifiedAttendanceRecords,
-  type PayrollBatchFilter,
-  type PayrollReadinessFilter,
-  type PayrollVerifiedAttendanceRecord,
-  verifiedAttendanceSummaryMetrics,
-} from "@/data/payroll/verified-attendance";
+import { payrollVerifiedAttendancePageSizes } from "@/server/payroll/payroll-verified-attendance-query";
+import type { ApiResponse } from "@/types/api/responses";
+import type { Metric } from "@/types/ui";
+import type {
+  PayrollVerifiedAttendanceData,
+  PayrollVerifiedAttendanceItem,
+  PayrollVerifiedAttendanceQuery,
+} from "@/types/payroll-verified-attendance";
 
 import { PayrollVerifiedAttendanceDetailsModal } from "./PayrollVerifiedAttendanceDetailsModal";
 import { PayrollVerifiedAttendanceFilters } from "./PayrollVerifiedAttendanceFilters";
 import { PayrollVerifiedAttendanceTable } from "./PayrollVerifiedAttendanceTable";
 
-export function PayrollVerifiedAttendancePage() {
-  const [search, setSearch] = useState("");
-  const [department, setDepartment] = useState("");
-  const [readiness, setReadiness] = useState<PayrollReadinessFilter | "">("");
-  const [batch, setBatch] = useState<PayrollBatchFilter | "">("");
+type PayrollVerifiedAttendanceApiResponse = ApiResponse<PayrollVerifiedAttendanceData>;
+
+type PayrollVerifiedAttendancePageProps = {
+  data: PayrollVerifiedAttendanceData;
+  query: PayrollVerifiedAttendanceQuery;
+  loadError?: boolean;
+};
+
+function buildQueryString(values: PayrollVerifiedAttendanceQuery) {
+  const params = new URLSearchParams();
+
+  if (values.search.trim()) {
+    params.set("search", values.search.trim());
+  }
+
+  if (values.department) {
+    params.set("department", values.department);
+  }
+
+  if (values.readiness) {
+    params.set("readiness", values.readiness);
+  }
+
+  if (values.batch) {
+    params.set("batch", values.batch);
+  }
+
+  if (values.page > 1) {
+    params.set("page", String(values.page));
+  }
+
+  if (values.pageSize !== payrollVerifiedAttendancePageSizes[0]) {
+    params.set("pageSize", String(values.pageSize));
+  }
+
+  return params.toString();
+}
+
+function getRangeLabel(data: PayrollVerifiedAttendanceData) {
+  const { page, pageSize, totalItems } = data.pagination;
+
+  if (totalItems === 0) {
+    return "Showing 0 of 0 records";
+  }
+
+  const first = (page - 1) * pageSize + 1;
+  const last = Math.min(page * pageSize, totalItems);
+
+  return `Showing ${first}–${last} of ${totalItems} records`;
+}
+
+function getSummaryMetrics(
+  data: PayrollVerifiedAttendanceData,
+  unavailable: boolean,
+): Metric[] {
+  if (unavailable) {
+    return [
+      { label: "Verified records", value: "—", note: "Unavailable", icon: "users", tone: "success" },
+      { label: "Ready for payroll", value: "—", note: "Unavailable", icon: "check", tone: "info" },
+      { label: "Already added to batch", value: "—", note: "Unavailable", icon: "layers", tone: "success" },
+      { label: "Blocked records", value: "—", note: "Unavailable", icon: "warning", tone: "warning" },
+      { label: "Needs follow-up", value: "—", note: "Unavailable", icon: "warning", tone: "danger" },
+    ];
+  }
+
+  return [
+    {
+      label: "Verified records",
+      value: String(data.summary.verifiedRecords),
+      note: "HR-final-verified employee-period records",
+      icon: "users",
+      tone: "success",
+    },
+    {
+      label: "Ready for payroll",
+      value: String(data.summary.ready),
+      note: "Eligible for future batch preparation",
+      icon: "check",
+      tone: "info",
+    },
+    {
+      label: "Already added to batch",
+      value: String(data.summary.includedInBatch),
+      note: "No persistent batch records yet",
+      icon: "layers",
+      tone: "success",
+    },
+    {
+      label: "Blocked records",
+      value: String(data.summary.blocked),
+      note: "Server-derived readiness blockers",
+      icon: "warning",
+      tone: "warning",
+    },
+    {
+      label: "Needs follow-up",
+      value: String(data.summary.needsFollowUp),
+      note: "Requires attendance workflow follow-up",
+      icon: "warning",
+      tone: "danger",
+    },
+  ];
+}
+
+function getDashboardErrorMessage(
+  status: number,
+  body: PayrollVerifiedAttendanceApiResponse,
+) {
+  if (status === 401) {
+    return "Your Payroll session has expired. Sign in again.";
+  }
+
+  if (status === 403) {
+    return "You do not have permission to view verified attendance.";
+  }
+
+  if (!body.success) {
+    return body.error.message;
+  }
+
+  return "Verified attendance could not be loaded.";
+}
+
+export function PayrollVerifiedAttendancePage({
+  data: initialData,
+  query,
+  loadError = false,
+}: PayrollVerifiedAttendancePageProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [data, setData] = useState(initialData);
+  const [error, setError] = useState(
+    loadError ? "Verified attendance could not be loaded." : null,
+  );
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
-  const [selectedRecord, setSelectedRecord] = useState<PayrollVerifiedAttendanceRecord | null>(null);
-  const [feedback, setFeedback] = useState("");
-
-  const filteredRecords = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return payrollVerifiedAttendanceRecords.filter((record) => {
-      const matchesSearch = !query
-        || record.employeeName.toLowerCase().includes(query)
-        || record.employeeId.toLowerCase().includes(query)
-        || record.department.toLowerCase().includes(query);
-      const matchesDepartment = !department || record.department === department;
-      const matchesReadiness = !readiness || record.readinessFilter === readiness;
-      const matchesBatch = !batch || record.batchFilter === batch;
-
-      return matchesSearch && matchesDepartment && matchesReadiness && matchesBatch;
-    });
-  }, [batch, department, readiness, search]);
+  const [selectedRecord, setSelectedRecord] = useState<PayrollVerifiedAttendanceItem | null>(null);
 
   useEffect(() => {
-    if (!selectedRecord) return;
+    if (!selectedRecord) {
+      return;
+    }
 
     function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") setSelectedRecord(null);
+      if (event.key === "Escape") {
+        setSelectedRecord(null);
+      }
     }
 
     document.addEventListener("keydown", closeOnEscape);
+
     return () => document.removeEventListener("keydown", closeOnEscape);
   }, [selectedRecord]);
 
-  function showFeedback(message: string) {
-    setFeedback(message);
-    window.setTimeout(() => setFeedback(""), 2400);
+  const refreshData = useCallback(async () => {
+    if (isRefreshing) {
+      return;
+    }
+
+    setIsRefreshing(true);
+
+    try {
+      const queryString = buildQueryString(query);
+      const response = await fetch(
+        queryString
+          ? `/api/v1/payroll/verified-attendance?${queryString}`
+          : "/api/v1/payroll/verified-attendance",
+        {
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        },
+      );
+      const body = await response.json() as PayrollVerifiedAttendanceApiResponse;
+
+      if (!response.ok || !body.success) {
+        throw new Error(getDashboardErrorMessage(response.status, body));
+      }
+
+      setData(body.data);
+      setError(null);
+      setSelectedIds(new Set());
+    } catch (refreshError) {
+      setError(
+        refreshError instanceof Error
+          ? refreshError.message
+          : "Verified attendance could not be loaded.",
+      );
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, query]);
+
+  function navigateToFilters(overrides: Partial<PayrollVerifiedAttendanceQuery> = {}) {
+    const nextQuery: PayrollVerifiedAttendanceQuery = {
+      ...query,
+      ...overrides,
+      page: overrides.page ?? 1,
+    };
+    const queryString = buildQueryString(nextQuery);
+
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  }
+
+  function resetFilters() {
+    router.push(pathname);
   }
 
   function toggleAllVisible(checked: boolean) {
     setSelectedIds((current) => {
       const next = new Set(current);
-      filteredRecords.forEach((record) => {
-        if (checked) next.add(record.employeeId);
-        else next.delete(record.employeeId);
+
+      data.items.forEach((item) => {
+        if (!item.selectable) {
+          return;
+        }
+
+        if (checked) {
+          next.add(item.id);
+        } else {
+          next.delete(item.id);
+        }
       });
+
       return next;
     });
   }
 
-  function toggleRecord(employeeId: string, checked: boolean) {
+  function toggleRecord(id: string, checked: boolean) {
     setSelectedIds((current) => {
       const next = new Set(current);
-      if (checked) next.add(employeeId);
-      else next.delete(employeeId);
+
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+
       return next;
     });
   }
 
-  function clearFilters() {
-    setSearch("");
-    setDepartment("");
-    setReadiness("");
-    setBatch("");
-  }
-
-  function addSelectedToBatch() {
-    if (selectedIds.size === 0) {
-      showFeedback("Select at least one attendance record before adding to a batch.");
-      return;
-    }
-
-    showFeedback(`${selectedIds.size} selected record${selectedIds.size === 1 ? "" : "s"} queued for a draft batch. No external write was made.`);
-  }
+  const summaryMetrics = getSummaryMetrics(data, Boolean(error));
+  const allSelectableSelected = data.items.some((item) => item.selectable)
+    && data.items.filter((item) => item.selectable).every((item) => selectedIds.has(item.id));
 
   return (
-    <div className="payroll-verified-attendance">
+    <div className="payroll-verified-attendance" aria-busy={isRefreshing}>
       <AdminPageHeader
         eyebrow="Payroll readiness"
         title="Verified Attendance"
-        description="Review HR-verified attendance records that are eligible for payroll preparation and handoff."
-        actions={<ActionButton icon="refresh" action="Verified attendance data refreshed.">Refresh data</ActionButton>}
+        description="Review HR-final-verified attendance records that are eligible for payroll preparation and handoff."
+        actions={(
+          <button
+            type="button"
+            className="button-secondary"
+            onClick={() => void refreshData()}
+            disabled={isRefreshing}
+          >
+            <Icon name="refresh" /> {isRefreshing ? "Refreshing…" : "Refresh data"}
+          </button>
+        )}
       />
+
+      {error ? (
+        <p className="payroll-verified-attendance__data-error" role="alert">
+          {data.pagination.totalItems > 0
+            ? `${error} Showing the last successful data.`
+            : `${error} Use Refresh data to try again.`}
+        </p>
+      ) : null}
 
       <p className="payroll-verified-attendance__period">
         <Icon name="calendar" />
-        Payroll period: September 1–15, 2026
+        Payroll period: {data.period.label}
       </p>
 
       <div className="metric-grid payroll-verified-attendance__summary">
-        {verifiedAttendanceSummaryMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
+        {summaryMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>
 
       <SectionCard
@@ -121,12 +306,12 @@ export function PayrollVerifiedAttendancePage() {
         className="payroll-verified-attendance__records-card"
         actions={(
           <div className="payroll-verified-attendance__header-actions">
-            <button type="button" className="button-secondary" onClick={clearFilters}>Clear filters</button>
+            <button type="button" className="button-secondary" onClick={resetFilters}>Clear filters</button>
             <button
               type="button"
               className="button-primary"
-              onClick={addSelectedToBatch}
-              disabled={selectedIds.size === 0}
+              disabled
+              title="Payroll batch processing is not yet available."
             >
               <Icon name="layers" /> Add to batch ({selectedIds.size})
             </button>
@@ -134,64 +319,85 @@ export function PayrollVerifiedAttendancePage() {
         )}
       >
         <p className="payroll-verified-attendance__description">
-          List of employees with HR-verified attendance for the selected payroll period.
+          Only attendance with a persisted HR final-verification state appears here. Attendance corrections and HR verification remain outside this Payroll workspace.
         </p>
 
         <PayrollVerifiedAttendanceFilters
-          search={search}
-          department={department}
-          readiness={readiness}
-          batch={batch}
-          departments={payrollVerifiedAttendanceDepartments}
-          onSearchChange={setSearch}
-          onDepartmentChange={setDepartment}
-          onReadinessChange={setReadiness}
-          onBatchChange={setBatch}
-          onReset={clearFilters}
+          search={query.search}
+          department={query.department ?? ""}
+          readiness={query.readiness ?? ""}
+          batch={query.batch ?? ""}
+          departments={data.departments}
+          onSearchChange={(value) => navigateToFilters({ search: value })}
+          onDepartmentChange={(value) => navigateToFilters({ department: value || null })}
+          onReadinessChange={(value) => navigateToFilters({ readiness: value || null })}
+          onBatchChange={(value) => navigateToFilters({ batch: value || null })}
+          onReset={resetFilters}
         />
 
         <p className="payroll-verified-attendance__result-meta" aria-live="polite">
-          Showing {filteredRecords.length ? `1 to ${filteredRecords.length}` : "0"} of 124 records · {filteredRecords.length} sample records loaded
+          <span>{error ? "Records unavailable" : getRangeLabel(data)}</span>
+          <span>{data.pagination.totalItems} HR-final-verified records</span>
         </p>
 
         <PayrollVerifiedAttendanceTable
-          records={filteredRecords}
+          records={data.items}
           selectedIds={selectedIds}
+          allSelectableSelected={allSelectableSelected}
           onToggleAll={toggleAllVisible}
           onToggleRecord={toggleRecord}
           onViewDetails={setSelectedRecord}
-          onAddToBatch={(record) => {
-            toggleRecord(record.employeeId, true);
-            showFeedback(`${record.employeeName} selected for the draft batch. No external write was made.`);
-          }}
-          onMarkReview={(record) => showFeedback(`${record.employeeName} marked for HR follow-up. No verification was changed.`)}
         />
 
         <footer className="payroll-verified-attendance__pagination">
-          <span>Sample data shows the first five records from the 124-record payroll period.</span>
+          <label className="payroll-verified-attendance__page-size">
+            <span>Rows per page</span>
+            <select
+              value={query.pageSize}
+              onChange={(event) => navigateToFilters({
+                pageSize: Number(event.target.value),
+                page: 1,
+              })}
+            >
+              {payrollVerifiedAttendancePageSizes.map((pageSize) => (
+                <option value={pageSize} key={pageSize}>{pageSize}</option>
+              ))}
+            </select>
+          </label>
           <nav aria-label="Verified attendance pages">
-            <button type="button" className="payroll-verified-attendance__page-button" disabled aria-label="Previous page">
-              <Icon name="chevron-left" />
+            <button
+              type="button"
+              className="payroll-verified-attendance__page-button"
+              onClick={() => navigateToFilters({ page: Math.max(1, data.pagination.page - 1) })}
+              disabled={data.pagination.page <= 1}
+            >
+              <Icon name="chevron-left" /> Previous
             </button>
-            <button type="button" className="payroll-verified-attendance__page-button is-active" aria-current="page">1</button>
-            <button type="button" className="payroll-verified-attendance__page-button" onClick={() => showFeedback("Additional payroll records are not connected in this prototype.")}>2</button>
-            <button type="button" className="payroll-verified-attendance__page-button" onClick={() => showFeedback("Additional payroll records are not connected in this prototype.")}>3</button>
-            <button type="button" className="payroll-verified-attendance__page-button" onClick={() => showFeedback("Additional payroll records are not connected in this prototype.")}>4</button>
-            <span aria-hidden="true">…</span>
-            <button type="button" className="payroll-verified-attendance__page-button" onClick={() => showFeedback("Additional payroll records are not connected in this prototype.")}>25</button>
-            <button type="button" className="payroll-verified-attendance__page-button" onClick={() => showFeedback("Additional payroll records are not connected in this prototype.")} aria-label="Next page">
-              <Icon name="chevron-right" />
+            <span aria-live="polite">
+              Page {data.pagination.page} of {data.pagination.totalPages}
+            </span>
+            <button
+              type="button"
+              className="payroll-verified-attendance__page-button"
+              onClick={() => navigateToFilters({ page: data.pagination.page + 1 })}
+              disabled={data.pagination.page >= data.pagination.totalPages}
+            >
+              Next <Icon name="chevron-right" />
             </button>
           </nav>
         </footer>
       </SectionCard>
 
-      <p className="payroll-verified-attendance__boundary-note">
-        <Icon name="shield" />
-        Payroll Staff can review HR-verified records and prepare batch selections here. HR verification, attendance correction decisions, salary calculations, and external payroll writes remain outside this workspace.
+      <p className="payroll-verified-attendance__batch-note">
+        <Icon name="info" />
+        Payroll batch persistence is not available yet. Records cannot be added to a batch from this page, and no Included or Transferred status is fabricated.
       </p>
 
-      <span className="sr-only" aria-live="polite">{feedback}</span>
+      <p className="payroll-verified-attendance__boundary-note">
+        <Icon name="shield" />
+        Payroll Staff can review HR-final-verified records here. Payroll cannot modify attendance, approve corrections, perform HR verification, calculate salary, or write to the Existing Payroll System.
+      </p>
+
       <PayrollVerifiedAttendanceDetailsModal
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}

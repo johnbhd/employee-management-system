@@ -1,20 +1,19 @@
-import type {
-  PayrollBatchFilter,
-  PayrollReadinessFilter,
-} from "@/data/payroll/verified-attendance";
-
 import { Icon } from "@/components/ui/Icon";
+import type {
+  PayrollBatchStatus,
+  PayrollReadinessStatus,
+} from "@/types/payroll-verified-attendance";
 
 type PayrollVerifiedAttendanceFiltersProps = {
   search: string;
   department: string;
-  readiness: PayrollReadinessFilter | "";
-  batch: PayrollBatchFilter | "";
+  readiness: PayrollReadinessStatus | "";
+  batch: PayrollBatchStatus | "";
   departments: readonly string[];
   onSearchChange: (value: string) => void;
   onDepartmentChange: (value: string) => void;
-  onReadinessChange: (value: PayrollReadinessFilter | "") => void;
-  onBatchChange: (value: PayrollBatchFilter | "") => void;
+  onReadinessChange: (value: PayrollReadinessStatus | "") => void;
+  onBatchChange: (value: PayrollBatchStatus | "") => void;
   onReset: () => void;
 };
 
@@ -67,7 +66,7 @@ export function PayrollVerifiedAttendanceFilters({
         <span>Payroll readiness</span>
         <select
           value={readiness}
-          onChange={(event) => onReadinessChange(event.target.value as PayrollReadinessFilter | "")}
+          onChange={(event) => onReadinessChange(event.target.value as PayrollReadinessStatus | "")}
           aria-label="Filter by payroll readiness"
         >
           <option value="">All statuses</option>
@@ -80,14 +79,11 @@ export function PayrollVerifiedAttendanceFilters({
         <span>Batch status</span>
         <select
           value={batch}
-          onChange={(event) => onBatchChange(event.target.value as PayrollBatchFilter | "")}
+          onChange={(event) => onBatchChange(event.target.value as PayrollBatchStatus | "")}
           aria-label="Filter by batch status"
         >
           <option value="">All statuses</option>
-          <option value="included">Included in batch</option>
-          <option value="ready-batch">Ready for batch</option>
-          <option value="not-included">Not included</option>
-          <option value="transferred">Transferred</option>
+          <option value="not-added">Not added to a batch</option>
         </select>
       </label>
 

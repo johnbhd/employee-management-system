@@ -1,41 +1,59 @@
-import type { PayrollVerifiedAttendanceRecord } from "@/data/payroll/verified-attendance";
+import type { PayrollVerifiedAttendanceItem } from "@/types/payroll-verified-attendance";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type PayrollVerifiedAttendanceTableProps = {
-  records: readonly PayrollVerifiedAttendanceRecord[];
+  records: readonly PayrollVerifiedAttendanceItem[];
   selectedIds: ReadonlySet<string>;
+  allSelectableSelected: boolean;
   onToggleAll: (checked: boolean) => void;
-  onToggleRecord: (employeeId: string, checked: boolean) => void;
-  onViewDetails: (record: PayrollVerifiedAttendanceRecord) => void;
-  onAddToBatch: (record: PayrollVerifiedAttendanceRecord) => void;
-  onMarkReview: (record: PayrollVerifiedAttendanceRecord) => void;
+  onToggleRecord: (id: string, checked: boolean) => void;
+  onViewDetails: (record: PayrollVerifiedAttendanceItem) => void;
 };
+
+function formatAttendanceSummary(item: PayrollVerifiedAttendanceItem) {
+  const values: string[] = [];
+  const { lateCount, lateMinutes, undertimeMinutes } = item.attendanceSummary;
+
+  if (lateCount !== null) {
+    values.push(`Late: ${lateCount}`);
+  }
+
+  if (lateMinutes !== null) {
+    values.push(`Late minutes: ${lateMinutes}`);
+  }
+
+  if (undertimeMinutes !== null) {
+    values.push(`Undertime: ${undertimeMinutes}m`);
+  }
+
+  return values.length > 0 ? values.join(" · ") : "Unavailable";
+}
 
 export function PayrollVerifiedAttendanceTable({
   records,
   selectedIds,
+  allSelectableSelected,
   onToggleAll,
   onToggleRecord,
   onViewDetails,
-  onAddToBatch,
-  onMarkReview,
 }: PayrollVerifiedAttendanceTableProps) {
-  const allSelected = records.length > 0 && records.every((record) => selectedIds.has(record.employeeId));
+  const hasSelectableRecords = records.some((record) => record.selectable);
 
   return (
     <div className="payroll-verified-attendance__table-wrap">
       <table className="data-table payroll-verified-attendance__table">
-        <caption className="sr-only">HR-verified attendance records for the selected payroll period</caption>
+        <caption className="sr-only">HR-final-verified attendance records for the selected payroll period</caption>
         <thead>
           <tr>
             <th scope="col">
               <input
                 type="checkbox"
-                checked={allSelected}
+                checked={allSelectableSelected}
                 onChange={(event) => onToggleAll(event.target.checked)}
-                aria-label="Select all visible attendance records"
+                disabled={!hasSelectableRecords}
+                aria-label="Select all eligible attendance records"
               />
             </th>
             <th scope="col">Employee</th>
@@ -52,24 +70,32 @@ export function PayrollVerifiedAttendanceTable({
         </thead>
         <tbody>
           {records.length > 0 ? records.map((record) => (
-            <tr key={record.employeeId}>
+            <tr key={record.id}>
               <td>
                 <input
                   type="checkbox"
-                  checked={selectedIds.has(record.employeeId)}
-                  onChange={(event) => onToggleRecord(record.employeeId, event.target.checked)}
+                  checked={selectedIds.has(record.id)}
+                  onChange={(event) => onToggleRecord(record.id, event.target.checked)}
+                  disabled={!record.selectable}
+                  title={record.selectable
+                    ? "Select this record for a future batch"
+                    : record.payrollReadiness.reasons.join("; ") || "This record is not ready for batching"}
                   aria-label={`Select ${record.employeeName}`}
                 />
               </td>
               <td><strong>{record.employeeName}</strong></td>
               <td>{record.employeeId}</td>
               <td>{record.department}</td>
-              <td>{record.payrollPeriod}</td>
-              <td>{record.daysPresent}</td>
-              <td>{record.lateUndertime}</td>
-              <td><StatusBadge tone={record.verificationTone}>{record.verification}</StatusBadge></td>
-              <td><StatusBadge tone={record.readinessTone}>{record.readiness}</StatusBadge></td>
-              <td><StatusBadge tone={record.batchTone}>{record.batchStatus}</StatusBadge></td>
+              <td>{record.payrollPeriod.label}</td>
+              <td>{record.attendanceSummary.presentDays}</td>
+              <td>{formatAttendanceSummary(record)}</td>
+              <td><StatusBadge tone="success">Verified</StatusBadge></td>
+              <td>
+                <StatusBadge tone={record.payrollReadiness.tone}>
+                  {record.payrollReadiness.status === "ready" ? "Ready" : "Blocked"}
+                </StatusBadge>
+              </td>
+              <td><StatusBadge tone={record.batch.tone}>{record.batch.label}</StatusBadge></td>
               <td>
                 <div className="payroll-verified-attendance__row-actions">
                   <button type="button" className="button-link" onClick={() => onViewDetails(record)}>
@@ -81,8 +107,9 @@ export function PayrollVerifiedAttendanceTable({
                     </summary>
                     <div>
                       <button type="button" onClick={() => onViewDetails(record)}>View details</button>
-                      <button type="button" onClick={() => onAddToBatch(record)}>Add to batch</button>
-                      <button type="button" onClick={() => onMarkReview(record)}>Mark for review</button>
+                      <button type="button" disabled title="Payroll batch processing is not yet available.">
+                        Add to batch unavailable
+                      </button>
                     </div>
                   </details>
                 </div>
@@ -91,8 +118,8 @@ export function PayrollVerifiedAttendanceTable({
           )) : (
             <tr>
               <td colSpan={11} className="payroll-verified-attendance__empty">
-                <strong>No attendance records match these filters.</strong>
-                <span>Clear a filter to return to the selected payroll-period records.</span>
+                <strong>No HR-final-verified attendance records match these filters.</strong>
+                <span>Records appear here only after HR final verification is persisted.</span>
               </td>
             </tr>
           )}
