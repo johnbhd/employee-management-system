@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll Batches — AU Payroll Operations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="payroll.css">
+  </head>
+  <body>
+    <div class="app">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <img src="new-au-logo.png" alt="Arellano University seal" class="brand-seal">
+          <div class="brand-text">
+            <span class="brand-name">Arellano University</span>
+            <span class="brand-campus">Juan Sumulong Campus</span>
+          </div>
+        </div>
+
+        <div class="workspace-row">
+          <span class="workspace-label">Payroll Operations</span>
+          <span class="workspace-badge">Payroll Staff</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="payroll-dashboard.html" class="nav-item"><i class="fa-solid fa-table-cells-large"></i>Dashboard</a>
+          <a href="payroll-verified-attendance.html" class="nav-item"><i class="fa-solid fa-user-group"></i>Verified Attendance</a>
+          <a href="payroll-batches.html" class="nav-item active"><i class="fa-regular fa-folder"></i>Payroll Batches</a>
+          <a href="#" class="nav-item"><i class="fa-solid fa-right-left"></i>Payroll Handoff</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-file-lines"></i>Payroll Results</a>
+          <a href="#" class="nav-item"><i class="fa-regular fa-file-lines"></i>Payroll History</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="user-block">
+            <div class="avatar-circle small"><i class="fa-solid fa-user"></i></div>
+            <div>
+              <strong>Maria Santos</strong>
+              <span>AU-JSC Payroll Account</span>
+            </div>
+          </div>
+        </div>
+
+        <a href="login.html" class="logout-full"><i class="fa-solid fa-power-off"></i> Log out</a>
+      </aside>
+
+      <!-- Main -->
+      <div class="main">
+
+        <header class="topbar">
+          <div class="topbar-left">
+            <h1>Payroll Batches</h1>
+            <span class="topbar-sub">Payroll operations workspace</span>
+          </div>
+          <div class="topbar-right">
+            <span class="date"><i class="fa-regular fa-calendar"></i> September 16, 2026 &middot; Wednesday</span>
+            <span class="icon-btn"><i class="fa-regular fa-bell"></i><span class="dot">3</span></span>
+            <span class="icon-btn"><i class="fa-solid fa-table-cells-large"></i></span>
+            <span class="icon-btn"><i class="fa-regular fa-circle-question"></i></span>
+            <span class="user-chip">
+              <span>
+                <strong>Maria Santos</strong>
+                <small>AU-JSC Payroll Operations</small>
+              </span>
+              <i class="fa-solid fa-chevron-down"></i>
+            </span>
+          </div>
+        </header>
+
+        <div class="page-head">
+          <div>
+            <span class="eyebrow">Payroll Preparation</span>
+            <h2>Payroll Batches</h2>
+            <p class="page-sub">Create, review, and prepare verified attendance batches for payroll handoff.</p>
+            <span class="period-chip"><i class="fa-regular fa-calendar"></i> Payroll Period: September 1 &ndash; 15, 2026</span>
+          </div>
+          <div class="head-actions">
+            <button class="btn-navy-solid" id="createBatchBtn"><i class="fa-regular fa-circle-plus"></i> Create Batch</button>
+            <button class="btn-white" id="refreshBtn"><i class="fa-solid fa-rotate" id="refreshIcon"></i> Refresh data</button>
+          </div>
+        </div>
+
+        <!-- Summary cards -->
+        <section class="pay-stats-grid">
+          <div class="pay-stat top-blue">
+            <i class="fa-regular fa-file-lines stat-icon blue"></i>
+            <div>
+              <span class="label">Draft Batches</span>
+              <span class="value" id="sumDraft">3</span>
+              <span class="sub">In preparation</span>
+            </div>
+          </div>
+          <div class="pay-stat top-green">
+            <i class="fa-solid fa-circle-check stat-icon green"></i>
+            <div>
+              <span class="label">Ready to Submit</span>
+              <span class="value" id="sumReady">2</span>
+              <span class="sub">Prepared for handoff</span>
+            </div>
+          </div>
+          <div class="pay-stat top-teal">
+            <i class="fa-solid fa-paper-plane stat-icon teal"></i>
+            <div>
+              <span class="label">Submitted Today</span>
+              <span class="value" id="sumSubmitted">1</span>
+              <span class="sub">Sent to Existing Payroll</span>
+            </div>
+          </div>
+          <div class="pay-stat top-amber">
+            <i class="fa-solid fa-triangle-exclamation stat-icon amber"></i>
+            <div>
+              <span class="label">Blocked Batches</span>
+              <span class="value" id="sumBlocked">1</span>
+              <span class="sub">Requires follow-up</span>
+            </div>
+          </div>
+          <div class="pay-stat top-blue">
+            <i class="fa-solid fa-user-group stat-icon blue"></i>
+            <div>
+              <span class="label">Total Records in Drafts</span>
+              <span class="value" id="sumDraftRecords">96</span>
+              <span class="sub">Included attendance records</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Current working batch -->
+        <section class="panel">
+          <div class="panel-head with-count">
+            <div>
+              <span class="eyebrow small">Current Working Batch</span>
+              <div class="title-row">
+                <h3 id="cbTitle">Batch PAY-2026-0915-B</h3>
+                <span id="cbBadge"></span>
+              </div>
+              <p class="panel-desc">Attendance records selected for the current payroll batch. Review the list before submitting.</p>
+            </div>
+            <div class="head-actions">
+              <button class="btn-white small" id="cbView"><i class="fa-solid fa-list-ul"></i> View Details</button>
+              <button class="btn-white small" id="cbEdit"><i class="fa-solid fa-pen"></i> Edit Batch</button>
+              <button class="btn-navy-solid small" id="cbSubmit"><i class="fa-solid fa-paper-plane"></i> Submit to Payroll</button>
+            </div>
+          </div>
+
+          <div class="cb-info">
+            <div class="cb-item">
+              <i class="fa-regular fa-calendar"></i>
+              <div><span class="cb-label">Payroll Period</span><span class="cb-value" id="cbPeriod"></span></div>
+            </div>
+            <div class="cb-item">
+              <i class="fa-solid fa-user-group"></i>
+              <div><span class="cb-label">Total Records</span><span class="cb-value" id="cbRecords"></span></div>
+            </div>
+            <div class="cb-item">
+              <i class="fa-regular fa-building"></i>
+              <div><span class="cb-label">Departments</span><span class="cb-value" id="cbDepts"></span></div>
+            </div>
+            <div class="cb-item">
+              <i class="fa-regular fa-user"></i>
+              <div><span class="cb-label">Created By</span><span class="cb-value" id="cbCreator"></span></div>
+            </div>
+            <div class="cb-item">
+              <i class="fa-regular fa-clock"></i>
+              <div><span class="cb-label">Created At</span><span class="cb-value" id="cbCreated"></span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Batch list + side panels -->
+        <section class="batches-layout">
+
+          <div class="panel">
+            <div class="list-head">
+              <div>
+                <span class="eyebrow small">Payroll Batch List</span>
+                <h3>All Payroll Batches</h3>
+                <p class="panel-desc">List of attendance batches for the selected payroll period.</p>
+              </div>
+              <div class="list-filters">
+                <div class="filter-field">
+                  <label for="periodFilter">Payroll Period</label>
+                  <select id="periodFilter">
+                    <option value="Sep 1 – 15, 2026">Sep 1 &ndash; 15, 2026</option>
+                    <option value="Aug 16 – 31, 2026">Aug 16 &ndash; 31, 2026</option>
+                    <option value="all" selected>All Periods</option>
+                  </select>
+                </div>
+                <div class="filter-field">
+                  <label for="statusFilter">Status</label>
+                  <select id="statusFilter">
+                    <option value="all">All Statuses</option>
+                    <option value="Draft">Draft</option>
+                    <option value="Ready">Ready</option>
+                    <option value="Transferred">Transferred</option>
+                    <option value="Blocked">Blocked</option>
+                  </select>
+                </div>
+                <div class="search-input">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="searchInput" placeholder="Search batch ID or created by...">
+                </div>
+              </div>
+            </div>
+
+            <div class="table-scroll">
+              <table class="verif-table batch-table">
+                <thead>
+                  <tr>
+                    <th>Batch ID</th>
+                    <th>Payroll Period</th>
+                    <th>Records</th>
+                    <th>Departments</th>
+                    <th>Created By</th>
+                    <th>Created At</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="batchTableBody"></tbody>
+              </table>
+            </div>
+
+            <div class="pagination dark">
+              <span class="pagination-info" id="pageInfo"></span>
+              <div class="pagination-controls" id="pageControls"></div>
+            </div>
+          </div>
+
+          <div class="batches-side">
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="eyebrow small">Batch Summary</span>
+                <h3>Batch Attendance by Department</h3>
+                <p class="panel-desc">Breakdown of records in the current batch.</p>
+              </div>
+              <div class="table-scroll">
+                <table class="verif-table mini-table">
+                  <thead>
+                    <tr>
+                      <th>Department</th>
+                      <th>Records</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="summaryBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="panel-head">
+                <span class="eyebrow small">Batch Actions</span>
+              </div>
+              <div class="batch-actions-row">
+                <button class="btn-white small" id="actView"><i class="fa-solid fa-list-ul"></i> View Records</button>
+                <button class="btn-white small" id="actEdit"><i class="fa-solid fa-pen"></i> Edit Batch</button>
+                <button class="btn-navy-solid small" id="actSubmit"><i class="fa-solid fa-paper-plane"></i> Submit to Payroll</button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- Shared modal (details / create / edit / confirm) -->
+    <div class="modal-overlay" id="appModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-box" id="modalBox">
+        <button class="modal-close" id="modalClose" aria-label="Close">&times;</button>
+        <h3 id="modalTitle"></h3>
+        <p class="modal-sub" id="modalSub"></p>
+        <div id="modalBody"></div>
+        <div class="modal-actions" id="modalFoot"></div>
+      </div>
+    </div>
+
+    <!-- Row action menu (positioned with JS so the table never clips it) -->
+    <div class="floating-menu" id="rowMenu"></div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      (function () {
+        'use strict';
+
+        // ---------- Data ----------
+        const PERIODS = ['Sep 1 – 15, 2026', 'Aug 16 – 31, 2026'];
+        const DEPT_NAMES = ['Information Technology', 'Operations', 'Facilities', 'Registrar',
+          'Human Resources', 'Accounting', 'Administration', 'Library', 'Guidance Office', 'Maintenance'];
+        const STATUS_CLASS = { Draft: 'dot-amber', Ready: 'dot-blue', Transferred: 'dot-green', Blocked: 'dot-red' };
+        const PAGE_SIZE = 5;
+
+        let batches = [
+          { id: 'PAY-2026-0915-A', period: 'Sep 1 – 15, 2026', records: 48, depts: 7, createdBy: 'Maria Santos', createdAt: 'Sep 15, 2026, 02:30 PM', status: 'Transferred', submittedToday: true },
+          { id: 'PAY-2026-0915-B', period: 'Sep 1 – 15, 2026', records: 31, depts: 5, createdBy: 'Maria Santos', createdAt: 'Sep 16, 2026, 10:24 AM', status: 'Draft', breakdown: [8, 6, 5, 4, 3, 3, 2] },
+          { id: 'PAY-2026-0915-C', period: 'Sep 1 – 15, 2026', records: 17, depts: 3, createdBy: 'Maria Santos', createdAt: 'Sep 16, 2026, 11:10 AM', status: 'Ready' },
+          { id: 'PAY-2026-0901-A', period: 'Aug 16 – 31, 2026', records: 52, depts: 8, createdBy: 'Maria Santos', createdAt: 'Aug 31, 2026, 03:15 PM', status: 'Transferred' },
+          { id: 'PAY-2026-0901-B', period: 'Aug 16 – 31, 2026', records: 12, depts: 2, createdBy: 'Maria Santos', createdAt: 'Aug 31, 2026, 09:40 AM', status: 'Blocked' },
+          { id: 'PAY-2026-0915-D', period: 'Sep 1 – 15, 2026', records: 36, depts: 6, createdBy: 'Maria Santos', createdAt: 'Sep 16, 2026, 12:05 PM', status: 'Draft' },
+          { id: 'PAY-2026-0915-E', period: 'Sep 1 – 15, 2026', records: 29, depts: 4, createdBy: 'Maria Santos', createdAt: 'Sep 16, 2026, 01:20 PM', status: 'Draft' },
+          { id: 'PAY-2026-0901-C', period: 'Aug 16 – 31, 2026', records: 22, depts: 4, createdBy: 'Maria Santos', createdAt: 'Aug 31, 2026, 11:30 AM', status: 'Ready' }
+        ];
+
+        let currentId = 'PAY-2026-0915-B';
+        let page = 1;
+        const filters = { period: 'all', status: 'all', q: '' };
+
+        // ---------- Helpers ----------
+        const $ = (sel) => document.querySelector(sel);
+        const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const findBatch = (id) => batches.find((b) => b.id === id);
+        const pill = (status) => `<span class="tag pill ${STATUS_CLASS[status]}">${status}</span>`;
+        const twoLine = (s) => esc(s).replace(/, (\d{2}:\d{2} [AP]M)$/, '<br><span class="emp-sub">$1</span>');
+        const oneLine = (s) => esc(s).replace(/, (\d{2}:\d{2} [AP]M)$/, ' $1');
+
+        function nowStamp() {
+          const d = new Date();
+          let h = d.getHours();
+          const m = String(d.getMinutes()).padStart(2, '0');
+          const ap = h >= 12 ? 'PM' : 'AM';
+          h = h % 12 || 12;
+          return `Sep 16, 2026, ${String(h).padStart(2, '0')}:${m} ${ap}`;
+        }
+
+        function nextBatchId(period) {
+          const prefix = period.indexOf('Aug') === 0 ? 'PAY-2026-0901-' : 'PAY-2026-0915-';
+          const used = batches.filter((b) => b.id.indexOf(prefix) === 0).map((b) => b.id.slice(prefix.length));
+          let code = 65;
+          while (used.indexOf(String.fromCharCode(code)) !== -1) code++;
+          return prefix + String.fromCharCode(code);
+        }
+
+        function getBreakdown(b) {
+          if (b.breakdown && b.breakdown.reduce((a, c) => a + c, 0) === b.records) {
+            return b.breakdown.map((c, i) => ({ name: DEPT_NAMES[i], count: c }));
+          }
+          const n = Math.max(1, Math.min(b.depts, DEPT_NAMES.length));
+          const base = Math.floor(b.records / n);
+          const rem = b.records % n;
+          return Array.from({ length: n }, (_, i) => ({ name: DEPT_NAMES[i], count: base + (i < rem ? 1 : 0) }));
+        }
+
+        function deptStatus(b) {
+          if (b.status === 'Blocked') return { t: 'Blocked', c: 'dot-red' };
+          if (b.status === 'Transferred') return { t: 'Transferred', c: 'dot-green' };
+          return { t: 'Ready', c: 'dot-green' };
+        }
+
+        // ---------- Toast ----------
+        let toastTimer;
+        function toast(msg, type) {
+          const t = $('#toast');
+          t.textContent = msg;
+          t.className = 'toast show' + (type === 'error' ? ' error' : '');
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+        }
+
+        // ---------- Modal ----------
+        const overlay = $('#appModal');
+
+        function closeModal() { overlay.classList.remove('open'); }
+
+        function showModal(opts) {
+          $('#modalTitle').textContent = opts.title;
+          const sub = $('#modalSub');
+          sub.textContent = opts.sub || '';
+          sub.style.display = opts.sub ? '' : 'none';
+          $('#modalBody').innerHTML = opts.body || '';
+          $('#modalBox').classList.toggle('wide', !!opts.wide);
+
+          const foot = $('#modalFoot');
+          foot.innerHTML = '';
+          (opts.actions || []).forEach((a) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = a.cls || 'btn-white small';
+            btn.innerHTML = a.label;
+            btn.addEventListener('click', () => {
+              if (a.onClick && a.onClick() === false) return;
+              closeModal();
+            });
+            foot.appendChild(btn);
+          });
+
+          overlay.classList.add('open');
+          const first = $('#modalBody input:not([readonly]), #modalBody select');
+          if (first) first.focus();
+        }
+
+        $('#modalClose').addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') { closeModal(); closeMenu(); }
+        });
+
+        const detailRow = (label, value) => `<div class="modal-row"><span>${label}</span><span>${value}</span></div>`;
+
+        // ---------- Rendering ----------
+        function renderSummary() {
+          const count = (s) => batches.filter((b) => b.status === s).length;
+          $('#sumDraft').textContent = count('Draft');
+          $('#sumReady').textContent = count('Ready');
+          $('#sumSubmitted').textContent = batches.filter((b) => b.submittedToday).length;
+          $('#sumBlocked').textContent = count('Blocked');
+          $('#sumDraftRecords').textContent = batches.filter((b) => b.status === 'Draft').reduce((a, b) => a + b.records, 0);
+        }
+
+        function renderCurrent() {
+          const b = findBatch(currentId);
+          $('#cbTitle').textContent = 'Batch ' + b.id;
+          $('#cbBadge').innerHTML = pill(b.status);
+          $('#cbPeriod').textContent = b.period;
+          $('#cbRecords').textContent = b.records;
+          $('#cbDepts').textContent = b.depts + (b.depts === 1 ? ' Department' : ' Departments');
+          $('#cbCreator').textContent = b.createdBy;
+          $('#cbCreated').innerHTML = oneLine(b.createdAt);
+
+          const done = b.status === 'Transferred';
+          ['#cbEdit', '#actEdit'].forEach((s) => {
+            $(s).disabled = done;
+            $(s).title = done ? 'Transferred batches cannot be edited' : '';
+          });
+          ['#cbSubmit', '#actSubmit'].forEach((s) => {
+            $(s).disabled = done;
+            $(s).title = done ? 'This batch has already been transferred' : '';
+          });
+        }
+
+        function renderSummaryTable() {
+          const b = findBatch(currentId);
+          const st = deptStatus(b);
+          const rows = getBreakdown(b).map((d) =>
+            `<tr><td>${esc(d.name)}</td><td>${d.count}</td><td><span class="tag pill ${st.c}">${st.t}</span></td></tr>`
+          ).join('');
+          $('#summaryBody').innerHTML = rows +
+            `<tr class="total-row"><td>Total</td><td>${b.records}</td><td><span class="tag pill ${st.c}">${st.t}</span></td></tr>`;
+        }
+
+        function getFiltered() {
+          const q = filters.q.trim().toLowerCase();
+          return batches.filter((b) =>
+            (filters.period === 'all' || b.period === filters.period) &&
+            (filters.status === 'all' || b.status === filters.status) &&
+            (!q || b.id.toLowerCase().indexOf(q) !== -1 || b.createdBy.toLowerCase().indexOf(q) !== -1)
+          );
+        }
+
+        function renderTable() {
+          const list = getFiltered();
+          const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+          if (page > pages) page = pages;
+          const slice = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+          $('#batchTableBody').innerHTML = slice.length ? slice.map((b) => `
+            <tr data-id="${esc(b.id)}">
+              <td class="emp-name">${esc(b.id)}</td>
+              <td>${esc(b.period)}</td>
+              <td>${b.records}</td>
+              <td>${b.depts}</td>
+              <td>${esc(b.createdBy)}</td>
+              <td>${twoLine(b.createdAt)}</td>
+              <td>${pill(b.status)}</td>
+              <td>
+                <div class="row-actions">
+                  <button type="button" class="btn-tiny outline" data-act="view">View Details</button>
+                  <button type="button" class="menu-btn" data-act="menu" aria-label="More actions"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                </div>
+              </td>
+            </tr>`).join('')
+            : '<tr><td colspan="8" class="empty-row">No batches match your filters.</td></tr>';
+
+          // pagination
+          const total = list.length;
+          const start = total ? (page - 1) * PAGE_SIZE + 1 : 0;
+          const end = Math.min(page * PAGE_SIZE, total);
+          $('#pageInfo').textContent = total
+            ? `Showing ${start} to ${end} of ${total} ${total === 1 ? 'batch' : 'batches'}`
+            : 'No batches found';
+
+          let html = `<button type="button" class="page-btn" data-page="prev" aria-label="Previous page" ${page === 1 ? 'disabled' : ''}><i class="fa-solid fa-chevron-left"></i></button>`;
+          for (let i = 1; i <= pages; i++) {
+            html += `<button type="button" class="page-btn ${i === page ? 'active' : ''}" data-page="${i}">${i}</button>`;
+          }
+          html += `<button type="button" class="page-btn" data-page="next" aria-label="Next page" ${page === pages ? 'disabled' : ''}><i class="fa-solid fa-chevron-right"></i></button>`;
+          $('#pageControls').innerHTML = html;
+        }
+
+        function renderAll() {
+          renderSummary();
+          renderCurrent();
+          renderSummaryTable();
+          renderTable();
+        }
+
+        // ---------- Row menu ----------
+        const menuEl = $('#rowMenu');
+
+        function closeMenu() { menuEl.classList.remove('open'); }
+
+        function openMenu(btn, id) {
+          const b = findBatch(id);
+          const items = [{ act: 'view', icon: 'fa-list-ul', label: 'View Details' }];
+          if (b.status !== 'Transferred') items.push({ act: 'edit', icon: 'fa-pen', label: 'Edit Batch' });
+          if (b.status === 'Draft' || b.status === 'Ready') items.push({ act: 'submit', icon: 'fa-paper-plane', label: 'Submit to Payroll' });
+          if (b.status === 'Transferred') items.push({ act: 'transfer', icon: 'fa-right-left', label: 'View Transfer Status' });
+
+          menuEl.innerHTML = items.map((i) =>
+            `<button type="button" data-act="${i.act}" data-id="${esc(id)}"><i class="fa-solid ${i.icon}"></i>${i.label}</button>`
+          ).join('');
+          menuEl.classList.add('open');
+
+          const r = btn.getBoundingClientRect();
+          const w = menuEl.offsetWidth;
+          const h = menuEl.offsetHeight;
+          let top = r.bottom + 4;
+          if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 4);
+          let left = r.right - w;
+          if (left < 8) left = 8;
+          menuEl.style.top = top + 'px';
+          menuEl.style.left = left + 'px';
+        }
+
+        menuEl.addEventListener('click', (e) => {
+          const btn = e.target.closest('button[data-act]');
+          if (!btn) return;
+          const id = btn.dataset.id;
+          closeMenu();
+          runAction(btn.dataset.act, id);
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('#rowMenu') && !e.target.closest('[data-act="menu"]')) closeMenu();
+        });
+        window.addEventListener('resize', closeMenu);
+        document.addEventListener('scroll', closeMenu, true);
+
+        function runAction(act, id) {
+          if (act === 'view') showDetails(id);
+          else if (act === 'edit') openEdit(id);
+          else if (act === 'submit') startSubmit(id);
+          else if (act === 'transfer') showTransfer(id);
+          else if (act === 'records') openRecords(id);
+        }
+
+        // ---------- Details / transfer / records ----------
+        function showDetails(id) {
+          const b = findBatch(id);
+          showModal({
+            title: b.id,
+            sub: 'Batch details',
+            body:
+              detailRow('Batch ID', esc(b.id)) +
+              detailRow('Payroll Period', esc(b.period)) +
+              detailRow('Records', b.records) +
+              detailRow('Departments', b.depts) +
+              detailRow('Created By', esc(b.createdBy)) +
+              detailRow('Created At', oneLine(b.createdAt)) +
+              detailRow('Status', pill(b.status)) +
+              (b.notes ? detailRow('Notes', esc(b.notes)) : ''),
+            actions: [{ label: 'Close' }]
+          });
+        }
+
+        function showTransfer(id) {
+          const b = findBatch(id);
+          showModal({
+            title: 'Transfer Status',
+            sub: b.id,
+            body:
+              detailRow('Status', pill('Transferred')) +
+              detailRow('Records Transferred', b.records) +
+              detailRow('Destination', 'Existing Payroll System') +
+              detailRow('Handoff', 'Completed'),
+            actions: [{ label: 'Close' }]
+          });
+        }
+
+        function openRecords(id) {
+          const b = findBatch(id);
+          const st = deptStatus(b);
+          const rows = getBreakdown(b).map((d) =>
+            `<tr><td>${esc(d.name)}</td><td>${d.count}</td><td><span class="tag pill ${st.c}">${st.t}</span></td></tr>`
+          ).join('');
+          showModal({
+            title: 'Batch Records',
+            sub: `${b.id} · ${b.records} attendance records`,
+            wide: true,
+            body: `<div class="table-scroll"><table class="verif-table mini-table">
+                    <thead><tr><th>Department</th><th>Records</th><th>Status</th></tr></thead>
+                    <tbody>${rows}<tr class="total-row"><td>Total</td><td>${b.records}</td><td><span class="tag pill ${st.c}">${st.t}</span></td></tr></tbody>
+                  </table></div>`,
+            actions: [
+              { label: 'Close' },
+              { label: '<i class="fa-solid fa-user-group"></i> Open Verified Attendance', cls: 'btn-navy-solid small', onClick: () => { window.location.href = 'payroll-verified-attendance.html'; } }
+            ]
+          });
+        }
+
+        // ---------- Create / edit form ----------
+        function formHTML(v, isEdit) {
+          return `
+            <form id="batchForm" novalidate>
+              <div class="form-field" data-field="period">
+                <label for="fPeriod">Payroll Period <span class="req">*</span></label>
+                <select id="fPeriod">${PERIODS.map((p) => `<option value="${p}" ${p === v.period ? 'selected' : ''}>${p}</option>`).join('')}</select>
+                <span class="field-error" data-err="period"></span>
+              </div>
+              <div class="form-field">
+                <label for="fBatchId">Batch ID</label>
+                <input id="fBatchId" type="text" value="${esc(v.id)}" readonly>
+              </div>
+              <div class="form-row">
+                <div class="form-field" data-field="records">
+                  <label for="fRecords">Total Records <span class="req">*</span></label>
+                  <input id="fRecords" type="number" min="1" value="${v.records || ''}" placeholder="e.g. 25">
+                  <span class="field-error" data-err="records"></span>
+                </div>
+                <div class="form-field" data-field="depts">
+                  <label for="fDepts">Departments <span class="req">*</span></label>
+                  <input id="fDepts" type="number" min="1" max="${DEPT_NAMES.length}" value="${v.depts || ''}" placeholder="e.g. 4">
+                  <span class="field-error" data-err="depts"></span>
+                </div>
+              </div>
+              <div class="form-field" data-field="createdBy">
+                <label for="fCreator">Created By <span class="req">*</span></label>
+                <input id="fCreator" type="text" value="${esc(v.createdBy)}">
+                <span class="field-error" data-err="createdBy"></span>
+              </div>
+              <div class="form-field">
+                <label for="fNotes">Notes (optional)</label>
+                <textarea id="fNotes" placeholder="Batch details or remarks">${esc(v.notes || '')}</textarea>
+              </div>
+            </form>`;
+        }
+
+        function readForm() {
+          return {
+            period: $('#fPeriod').value,
+            records: parseInt($('#fRecords').value, 10),
+            depts: parseInt($('#fDepts').value, 10),
+            createdBy: $('#fCreator').value.trim(),
+            notes: $('#fNotes').value.trim()
+          };
+        }
+
+        function validate(v) {
+          const e = {};
+          if (!v.period) e.period = 'Select a payroll period.';
+          if (!Number.isInteger(v.records) || v.records < 1) e.records = 'Enter at least 1 record.';
+          if (!Number.isInteger(v.depts) || v.depts < 1) e.depts = 'Enter at least 1 department.';
+          else if (v.depts > DEPT_NAMES.length) e.depts = 'Maximum of ' + DEPT_NAMES.length + ' departments.';
+          else if (!e.records && v.depts > v.records) e.depts = 'Departments cannot exceed the number of records.';
+          if (!v.createdBy) e.createdBy = 'Created by is required.';
+          return e;
+        }
+
+        function showErrors(errors) {
+          document.querySelectorAll('#batchForm [data-err]').forEach((el) => {
+            el.textContent = errors[el.dataset.err] || '';
+          });
+          document.querySelectorAll('#batchForm [data-field]').forEach((el) => {
+            el.classList.toggle('invalid', !!errors[el.dataset.field]);
+          });
+        }
+
+        function openCreate() {
+          const v = { period: PERIODS[0], id: nextBatchId(PERIODS[0]), records: '', depts: '', createdBy: 'Maria Santos', notes: '' };
+          showModal({
+            title: 'Create Batch',
+            sub: 'Prepare a new payroll batch as a draft.',
+            body: formHTML(v, false),
+            actions: [
+              { label: 'Cancel' },
+              {
+                label: '<i class="fa-regular fa-circle-plus"></i> Create Batch',
+                cls: 'btn-navy-solid small',
+                onClick: () => {
+                  const data = readForm();
+                  const errors = validate(data);
+                  showErrors(errors);
+                  if (Object.keys(errors).length) return false;
+                  const id = nextBatchId(data.period);
+                  batches.unshift({
+                    id: id, period: data.period, records: data.records, depts: data.depts,
+                    createdBy: data.createdBy, createdAt: nowStamp(), status: 'Draft', notes: data.notes
+                  });
+                  currentId = id;
+                  page = 1;
+                  renderAll();
+                  toast('Batch ' + id + ' created as Draft.');
+                }
+              }
+            ]
+          });
+          $('#fPeriod').addEventListener('change', (e) => { $('#fBatchId').value = nextBatchId(e.target.value); });
+        }
+
+        function openEdit(id) {
+          const b = findBatch(id);
+          if (b.status === 'Transferred') { toast('Transferred batches cannot be edited.', 'error'); return; }
+          showModal({
+            title: 'Edit Batch',
+            sub: b.id,
+            body: formHTML(b, true),
+            actions: [
+              { label: 'Cancel' },
+              {
+                label: 'Save Changes',
+                cls: 'btn-navy-solid small',
+                onClick: () => {
+                  const data = readForm();
+                  const errors = validate(data);
+                  showErrors(errors);
+                  if (Object.keys(errors).length) return false;
+                  if (data.records !== b.records || data.depts !== b.depts) delete b.breakdown;
+                  b.period = data.period;
+                  b.records = data.records;
+                  b.depts = data.depts;
+                  b.createdBy = data.createdBy;
+                  b.notes = data.notes;
+                  renderAll();
+                  toast('Batch ' + b.id + ' updated.');
+                }
+              }
+            ]
+          });
+        }
+
+        // ---------- Submit to payroll ----------
+        function startSubmit(id) {
+          const b = findBatch(id);
+          if (b.status === 'Transferred') { toast('This batch has already been transferred to payroll.', 'error'); return; }
+          if (b.status === 'Blocked') { toast('Batch ' + b.id + ' is blocked and cannot be submitted. Resolve the blocking issues first.', 'error'); return; }
+          if (b.records < 1) { toast('A batch needs at least one record before it can be submitted.', 'error'); return; }
+
+          showModal({
+            title: 'Submit to Payroll',
+            sub: b.id,
+            body: `<p class="confirm-text">You are about to submit <strong>${b.records} attendance records</strong> from
+                   <strong>${esc(b.id)}</strong> (${esc(b.period)}) to the Existing Payroll System.
+                   Once submitted, this batch can no longer be edited.</p>`,
+            actions: [
+              { label: 'Cancel' },
+              {
+                label: '<i class="fa-solid fa-paper-plane"></i> Confirm &amp; Submit',
+                cls: 'btn-navy-solid small',
+                onClick: () => {
+                  b.status = 'Transferred';
+                  b.submittedToday = true;
+                  renderAll();
+                  toast('Batch ' + b.id + ' submitted to payroll successfully.');
+                }
+              }
+            ]
+          });
+        }
+
+        // ---------- Event wiring ----------
+        $('#batchTableBody').addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-act]');
+          if (!btn) return;
+          const id = btn.closest('tr').dataset.id;
+          if (btn.dataset.act === 'view') showDetails(id);
+          else if (btn.dataset.act === 'menu') { e.stopPropagation(); openMenu(btn, id); }
+        });
+
+        $('#pageControls').addEventListener('click', (e) => {
+          const btn = e.target.closest('[data-page]');
+          if (!btn || btn.disabled) return;
+          const v = btn.dataset.page;
+          if (v === 'prev') page = Math.max(1, page - 1);
+          else if (v === 'next') page = page + 1;
+          else page = parseInt(v, 10);
+          renderTable();
+        });
+
+        $('#periodFilter').addEventListener('change', (e) => { filters.period = e.target.value; page = 1; renderTable(); });
+        $('#statusFilter').addEventListener('change', (e) => { filters.status = e.target.value; page = 1; renderTable(); });
+        $('#searchInput').addEventListener('input', (e) => { filters.q = e.target.value; page = 1; renderTable(); });
+
+        $('#createBatchBtn').addEventListener('click', openCreate);
+
+        $('#refreshBtn').addEventListener('click', () => {
+          const icon = $('#refreshIcon');
+          icon.classList.add('fa-spin');
+          setTimeout(() => {
+            icon.classList.remove('fa-spin');
+            renderAll();
+            toast('Data refreshed.');
+          }, 500);
+        });
+
+        $('#cbView').addEventListener('click', () => showDetails(currentId));
+        $('#cbEdit').addEventListener('click', () => openEdit(currentId));
+        $('#cbSubmit').addEventListener('click', () => startSubmit(currentId));
+        $('#actView').addEventListener('click', () => openRecords(currentId));
+        $('#actEdit').addEventListener('click', () => openEdit(currentId));
+        $('#actSubmit').addEventListener('click', () => startSubmit(currentId));
+
+        renderAll();
+      })();
+    </script>
+  </body>
+</html>
