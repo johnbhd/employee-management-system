@@ -55,6 +55,7 @@
 @import "./pages/accounting/transaction-history.css";
 @import "./pages/payroll/dashboard.css";
 @import "./pages/payroll/verified-attendance.css";
+@import "./pages/payroll/batches.css";
 
 *,
 *::before,

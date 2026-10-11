@@ -24,7 +24,7 @@ type PayrollNavigationItem = {
 const payrollNavigation: readonly PayrollNavigationItem[] = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "/payroll/dashboard" },
   { id: "verified-attendance", label: "Verified Attendance", icon: "users", href: "/payroll/verified-attendance" },
-  { id: "batches", label: "Payroll Batches", icon: "layers", planned: true },
+  { id: "batches", label: "Payroll Batches", icon: "layers", href: "/payroll/batches" },
   { id: "handoff", label: "Payroll Handoff", icon: "arrow", planned: true },
   { id: "results", label: "Payroll Results", icon: "file", planned: true },
   { id: "history", label: "Payroll History", icon: "clock", planned: true },
