@@ -1,11 +1,498 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Approved Payroll Information</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f4f6fa;
+    color: #1f2937;
+  }
+  svg { flex-shrink: 0; vertical-align: middle; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 14px 28px;
+    border-bottom: 1px solid #eef1f5;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .menu-icon { color: #374151; }
+  .topbar-title { font-size: 16px; font-weight: 700; color: #14204a; }
+  .topbar-sub { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .progress-pill {
+    background: #eaf7ee;
+    color: #2ea86b;
+    font-size: 12.5px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  .top-icon-btn {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+  }
+  .top-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9.5px;
+    font-weight: 700;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .topbar-user { display: flex; align-items: center; gap: 10px; }
+  .topbar-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eef1f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+  }
+  .topbar-user-name { font-size: 13.5px; font-weight: 700; color: #14204a; }
+  .topbar-user-role { font-size: 11px; color: #9ca3af; }
+
+  .page-header {
+    background: linear-gradient(135deg, #6b7280, #8f97a3 45%, #b9bfc8);
+    padding: 26px 28px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+    color: #fff;
+  }
+  .page-header-tag {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #dbe3f5;
+  }
+  .page-header h1 { font-size: 28px; font-weight: 800; margin-top: 4px; color: #fff; }
+  .page-header p { font-size: 13px; color: #e5e9f0; margin-top: 6px; }
+  .header-actions { display: flex; gap: 10px; }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-outline { background: #fff; border-color: #e2e5ea; color: #374151; }
+  .btn-primary { background: #14204a; color: #fff; }
+
+  .content { padding: 22px 28px 30px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #fff;
+    border: 1px solid #eef1f5;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .stat-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-icon.blue { background: #e3edff; color: #3b6fe0; }
+  .stat-icon.green { background: #e2f7ec; color: #2ea86b; }
+  .stat-icon.orange { background: #fdf1de; color: #e0972f; }
+  .stat-label { font-size: 12.5px; color: #6b7280; font-weight: 600; }
+  .stat-value { font-size: 21px; font-weight: 800; margin: 4px 0 2px; color: #111827; }
+  .stat-sub { font-size: 11.5px; color: #9ca3af; }
+
+  .notice {
+    background: #eef4fe;
+    border: 1px solid #d6e6fc;
+    border-radius: 10px;
+    padding: 13px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .notice .dot {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border-radius: 50%;
+    background: #d6e6fc;
+    color: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notice p { font-size: 13px; color: #33507a; line-height: 1.5; }
+  .notice strong { color: #1e3a5f; }
+
+  .panel {
+    background: #fff;
+    border: 1px solid #eef1f5;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-body-header { padding: 18px 22px 4px; }
+  .panel-title { font-size: 18px; font-weight: 800; color: #14204a; }
+  .panel-subtitle { font-size: 12.5px; color: #9ca3af; margin-top: 4px; }
+
+  .filters-row {
+    display: flex;
+    gap: 10px;
+    padding: 16px 22px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 220px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e5ea;
+    border-radius: 8px;
+    padding: 9px 14px;
+    color: #9ca3af;
+    font-size: 13px;
+  }
+  .search-box svg { color: #9ca3af; }
+  .filter-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e5ea;
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-size: 13px;
+    color: #374151;
+    background: #fff;
+    white-space: nowrap;
+  }
+  .reset-btn {
+    border: 1px solid #e2e5ea;
+    background: #fff;
+    color: #374151;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 920px; }
+  thead th {
+    text-align: left;
+    font-size: 11.5px;
+    color: #9ca3af;
+    font-weight: 600;
+    padding: 10px 22px;
+    border-bottom: 1px solid #f2f4f7;
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 14px 22px;
+    font-size: 13px;
+    color: #374151;
+    border-bottom: 1px solid #f6f7f9;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .ref-link { color: #2f5bd6; font-weight: 700; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+  }
+  .pill.green { background: #e2f7ec; color: #1f9d55; }
+  .pill.blue { background: #e3edff; color: #3b6fe0; }
+  .pill.red { background: #fde7e7; color: #e35b5b; }
+
+  .view-btn {
+    border: 1px solid #dbe1ea;
+    color: #374151;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .record-count { font-size: 13px; color: #6b7280; }
+  .page-nav { display: flex; align-items: center; gap: 6px; }
+  .page-btn {
+    border: 1px solid #e2e5ea;
+    background: #fff;
+    color: #374151;
+    font-size: 13px;
+    width: 32px;
+    height: 32px;
+    border-radius: 7px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-btn.active { background: #14204a; color: #fff; border-color: #14204a; }
+
+  @media (max-width: 1024px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .topbar { padding: 12px 16px; }
+    .topbar-title { font-size: 14px; }
+    .topbar-sub { display: none; }
+    .progress-pill { display: none; }
+    .page-header { padding: 20px 16px; }
+    .page-header h1 { font-size: 22px; }
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1; justify-content: center; }
+    .content { padding: 16px; }
+    .stats-grid { grid-template-columns: 1fr; }
+    .panel-body-header { padding: 16px 16px 4px; }
+    .filters-row { padding: 14px 16px; }
+    thead th, tbody td { padding: 12px 16px; }
+    .table-footer { padding: 14px 16px; }
+  }
+</style>
 </head>
 <body>
-    
+
+<div class="topbar">
+  <div class="topbar-left">
+    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <div>
+      <div class="topbar-title">Approved Payroll Information</div>
+      <div class="topbar-sub">Accounting integration workspace</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div class="progress-pill">5 / 6</div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="top-badge">1</span></div>
+    <div class="top-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+    <div class="topbar-user">
+      <div class="topbar-user-avatar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div>
+        <div class="topbar-user-name">Accounting Staff ▾</div>
+        <div class="topbar-user-role">Accounting</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div>
+    <div class="page-header-tag">PAYROLL DATA</div>
+    <h1>Approved Payroll Information</h1>
+    <p>Review payroll information approved by the Existing Payroll System before accounting transfer.</p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh data</button>
+    <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> View integration status</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div>
+        <div class="stat-label">Approved Payroll Periods</div>
+        <div class="stat-value">12</div>
+        <div class="stat-sub">Current prototype records</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div>
+        <div class="stat-label">Latest Payroll Employees</div>
+        <div class="stat-value">86</div>
+        <div class="stat-sub">Employees included</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><line x1="9" y1="3" x2="9" y2="21"/><path d="M9 8h7a3 3 0 0 1 0 6H9"/><line x1="6" y1="8" x2="13" y2="8"/><line x1="6" y1="14" x2="13" y2="14"/></svg></div>
+      <div>
+        <div class="stat-label">Latest Approved Amount</div>
+        <div class="stat-value">₱482,650.00</div>
+        <div class="stat-sub">Aug 16–31, 2026</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div>
+        <div class="stat-label">Ready for Transfer</div>
+        <div class="stat-value">3</div>
+        <div class="stat-sub">Awaiting accounting sync</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notice">
+    <div class="dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div>
+    <p><strong>Prototype payroll view.</strong> Amounts and payroll records shown here are mock data for the current integration-first prototype. Payroll computation remains inside the Existing Payroll System.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-body-header">
+      <div class="panel-title">Approved Payroll Records</div>
+      <div class="panel-subtitle">Payroll information approved by the Existing Payroll System and prepared for accounting integration.</div>
+    </div>
+
+    <div class="filters-row">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Search payroll reference
+      </div>
+      <div class="filter-select">All Payroll Periods ▾</div>
+      <div class="filter-select">All Approval Status ▾</div>
+      <div class="filter-select">All Accounting Status ▾</div>
+      <button class="reset-btn">Reset</button>
+    </div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Payroll Reference</th>
+            <th>Payroll Period</th>
+            <th>Employees</th>
+            <th>Approved Amount</th>
+            <th>Deductions / Contributions</th>
+            <th>Approval Status</th>
+            <th>Date Approved</th>
+            <th>Accounting Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="ref-link">PAY-2026-016</td>
+            <td>Aug 16–31, 2026</td>
+            <td>86</td>
+            <td>₱482,650.00</td>
+            <td>₱76,230.00</td>
+            <td><span class="pill green">✓ Approved</span></td>
+            <td>Sep 1, 2026</td>
+            <td><span class="pill blue">Ready for Transfer</span></td>
+            <td><button class="view-btn">View Details</button></td>
+          </tr>
+          <tr>
+            <td class="ref-link">PAY-2026-015</td>
+            <td>Aug 1–15, 2026</td>
+            <td>85</td>
+            <td>₱476,820.00</td>
+            <td>₱74,980.00</td>
+            <td><span class="pill green">✓ Approved</span></td>
+            <td>Aug 18, 2026</td>
+            <td><span class="pill green">Transferred</span></td>
+            <td><button class="view-btn">View Details</button></td>
+          </tr>
+          <tr>
+            <td class="ref-link">PAY-2026-014</td>
+            <td>Jul 16–31, 2026</td>
+            <td>84</td>
+            <td>₱471,340.00</td>
+            <td>₱73,610.00</td>
+            <td><span class="pill green">✓ Approved</span></td>
+            <td>Aug 2, 2026</td>
+            <td><span class="pill green">Transferred</span></td>
+            <td><button class="view-btn">View Details</button></td>
+          </tr>
+          <tr>
+            <td class="ref-link">PAY-2026-013</td>
+            <td>Jul 1–15, 2026</td>
+            <td>84</td>
+            <td>₱469,780.00</td>
+            <td>₱72,940.00</td>
+            <td><span class="pill green">✓ Approved</span></td>
+            <td>Jul 17, 2026</td>
+            <td><span class="pill red">✕ Failed</span></td>
+            <td><button class="view-btn">View Details</button></td>
+          </tr>
+          <tr>
+            <td class="ref-link">PAY-2026-012</td>
+            <td>Jun 16–30, 2026</td>
+            <td>83</td>
+            <td>₱463,290.00</td>
+            <td>₱71,850.00</td>
+            <td><span class="pill green">✓ Approved</span></td>
+            <td>Jul 2, 2026</td>
+            <td><span class="pill green">Transferred</span></td>
+            <td><button class="view-btn">View Details</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <div class="record-count">Showing 1–5 of 12 records</div>
+      <div class="page-nav">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 </body>
 </html>

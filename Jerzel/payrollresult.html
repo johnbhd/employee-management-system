@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Payroll Results</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #f1f4f9;
+    color: #1f2937;
+  }
+  svg { flex-shrink: 0; vertical-align: middle; }
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    padding: 12px 28px;
+    border-bottom: 1px solid #eef1f5;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .topbar-title { font-size: 16px; font-weight: 800; color: #14204a; }
+  .topbar-sub { font-size: 12px; color: #6b7280; margin-top: 1px; }
+  .topbar-right { display: flex; align-items: center; gap: 18px; }
+  .date-text {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #6b7280;
+  }
+  .top-icon {
+    position: relative;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+  }
+  .top-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .topbar-user { display: flex; align-items: center; gap: 8px; }
+  .topbar-user-name { font-size: 13px; font-weight: 700; color: #14204a; text-align: right; }
+  .topbar-user-role { font-size: 11px; color: #6b7280; text-align: right; }
+
+  .page-header {
+    background: linear-gradient(135deg, #f1f4f9, #e6ebf3);
+    padding: 24px 28px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .page-header-tag {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #d92626;
+  }
+  .page-header h1 {
+    font-size: 30px;
+    font-weight: 800;
+    margin-top: 4px;
+    color: #14204a;
+  }
+  .page-header p { font-size: 13px; color: #4b5563; margin-top: 6px; max-width: 760px; }
+  .period-line {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #14204a;
+  }
+  .header-actions { display: flex; gap: 10px; }
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn-outline { background: #fff; border-color: #e2e5ea; color: #14204a; }
+  .btn-primary { background: #14204a; color: #fff; }
+
+  .content { padding: 0 28px 30px; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+    margin-bottom: 18px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 10px;
+    border-top: 3px solid #3b6fe0;
+    padding: 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    box-shadow: 0 1px 3px rgba(20,32,74,0.05);
+  }
+  .stat-card.green { border-top-color: #2ea86b; }
+  .stat-card.orange { border-top-color: #e0972f; }
+  .stat-card.red { border-top-color: #e04545; }
+  .stat-icon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .stat-icon.blue { background: #e3edff; color: #3b6fe0; }
+  .stat-icon.green { background: #e2f7ec; color: #2ea86b; }
+  .stat-icon.orange { background: #fdf1de; color: #e0972f; }
+  .stat-icon.red { background: #fde7e7; color: #e04545; }
+  .stat-label { font-size: 12px; color: #4b5563; font-weight: 700; }
+  .stat-value { font-size: 24px; font-weight: 800; margin: 2px 0; color: #14204a; }
+  .stat-sub { font-size: 11px; color: #6b7280; }
+
+  .panel {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(20,32,74,0.05);
+    margin-bottom: 18px;
+    overflow: hidden;
+  }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 18px 22px 12px;
+    flex-wrap: wrap;
+  }
+  .section-tag {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #d92626;
+  }
+  .panel-title { font-size: 17px; font-weight: 800; color: #14204a; margin-top: 2px; }
+  .panel-subtitle { font-size: 12px; color: #6b7280; margin-top: 3px; }
+
+  .filters { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; }
+  .search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #e2e5ea;
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: #9ca3af;
+    font-size: 12px;
+    min-width: 200px;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-group label { font-size: 10.5px; color: #6b7280; font-weight: 600; }
+  .filter-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    border: 1px solid #e2e5ea;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: #374151;
+    background: #fff;
+    min-width: 120px;
+    white-space: nowrap;
+  }
+
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  .table-main { min-width: 1000px; }
+  .table-batch { min-width: 640px; }
+  thead th {
+    text-align: left;
+    font-size: 10.5px;
+    color: #4b5563;
+    font-weight: 700;
+    padding: 10px 14px;
+    background: #f7f8fb;
+    border-bottom: 1px solid #eef1f5;
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+  }
+  tbody td {
+    padding: 11px 14px;
+    font-size: 11.5px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .id-link { color: #3b6fe0; }
+  .emp-name { color: #14204a; font-weight: 500; }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+  .pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .pill.green { background: #e2f7ec; color: #1f9d55; border-color: #c4ead4; }
+  .pill.green .dot { background: #1f9d55; }
+  .pill.orange { background: #fdf1de; color: #c9780f; border-color: #f6dcb3; }
+  .pill.orange .dot { background: #e0972f; }
+  .pill.red { background: #fde7e7; color: #d33a3a; border-color: #f7c9c9; }
+  .pill.red .dot { background: #e04545; }
+
+  .actions-cell { display: flex; align-items: center; gap: 8px; }
+  .view-btn {
+    border: 1px solid #dbe1ea;
+    color: #14204a;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 92px;
+  }
+  .kebab {
+    width: 26px;
+    height: 28px;
+    border: 1px solid #dbe1ea;
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4b5563;
+    cursor: pointer;
+  }
+
+  .table-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .record-count { font-size: 12px; color: #6b7280; }
+  .page-nav { display: flex; align-items: center; gap: 5px; }
+  .page-btn {
+    border: 1px solid #e2e5ea;
+    background: #fff;
+    color: #374151;
+    font-size: 12px;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .page-btn.active { background: #1e3a8a; color: #fff; border-color: #1e3a8a; }
+  .page-ellipsis { font-size: 12px; color: #9ca3af; padding: 0 2px; }
+
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1.55fr 1fr;
+    gap: 18px;
+    align-items: start;
+  }
+  .bottom-grid .panel { margin-bottom: 0; }
+
+  .notice-head-btn {
+    border: 1px solid #dbe1ea;
+    background: #fff;
+    color: #14204a;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 8px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .notice-list { padding: 0 22px 14px; }
+  .notice-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 11px 0;
+    border-top: 1px solid #f3f4f6;
+  }
+  .notice-icon {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .notice-icon.green { background: #e2f7ec; color: #1f9d55; }
+  .notice-icon.orange { background: #fdf1de; color: #c9780f; }
+  .notice-icon.red { background: #fde7e7; color: #d33a3a; }
+  .notice-body { flex: 1; }
+  .notice-main { font-size: 11.5px; font-weight: 700; color: #14204a; }
+  .notice-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+  .notice-time { font-size: 10.5px; color: #6b7280; text-align: right; white-space: nowrap; }
+
+  @media (max-width: 1200px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
+    .topbar { padding: 12px 16px; }
+    .date-text { display: none; }
+    .topbar-user-role { display: none; }
+    .page-header { padding: 20px 16px 14px; }
+    .page-header h1 { font-size: 24px; }
+    .header-actions { width: 100%; }
+    .header-actions .btn { flex: 1; justify-content: center; }
+    .content { padding: 0 16px 24px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .panel-head { padding: 16px 16px 10px; }
+    .filters { width: 100%; }
+    .search-box { width: 100%; }
+    .filter-group { flex: 1; min-width: 140px; }
+    .filter-select { width: 100%; }
+    .table-footer { padding: 12px 16px; }
+    .notice-list { padding: 0 16px 12px; }
+  }
+  @media (max-width: 480px) {
+    .stats-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar-title">Payroll Results</div>
+    <div class="topbar-sub">Payroll operations workspace</div>
+  </div>
+  <div class="topbar-right">
+    <div class="date-text">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      September 16, 2026 · Wednesday
+    </div>
+    <div class="top-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="top-badge">3</span>
+    </div>
+    <div class="top-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><line x1="14" y1="14" x2="14" y2="14.01"/><line x1="21" y1="14" x2="21" y2="14.01"/><line x1="14" y1="21" x2="14" y2="21.01"/><line x1="21" y1="21" x2="21" y2="21.01"/><line x1="17.5" y1="17.5" x2="17.5" y2="17.51"/></svg>
+    </div>
+    <div class="top-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="topbar-user">
+      <div>
+        <div class="topbar-user-name">Maria Santos</div>
+        <div class="topbar-user-role">AU-JSC Payroll Operations</div>
+      </div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </div>
+</div>
+
+<div class="page-header">
+  <div>
+    <div class="page-header-tag">PAYROLL OUTPUT</div>
+    <h1>Payroll Results</h1>
+    <p>Review payroll processing results, employee payslip availability, and response status returned by the Existing Payroll System.</p>
+    <div class="period-line">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Payroll Period: September 1 – 15, 2026
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-outline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> View Handoff</button>
+    <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> Refresh results</button>
+  </div>
+</div>
+
+<div class="content">
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div>
+        <div class="stat-label">Processed Employees</div>
+        <div class="stat-value">124</div>
+        <div class="stat-sub">Returned by Existing Payroll</div>
+      </div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></div>
+      <div>
+        <div class="stat-label">Payslips Available</div>
+        <div class="stat-value">118</div>
+        <div class="stat-sub">Available for employees</div>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div>
+        <div class="stat-label">Pending Results</div>
+        <div class="stat-value">4</div>
+        <div class="stat-sub">Awaiting final result</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+      <div>
+        <div class="stat-label">Failed / Rejected</div>
+        <div class="stat-value">2</div>
+        <div class="stat-sub">Requires follow-up</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="19" height="19"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <div>
+        <div class="stat-label">Total Batches Processed</div>
+        <div class="stat-value">5</div>
+        <div class="stat-sub">For current payroll period</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <div class="section-tag">EMPLOYEE PAYROLL RESULTS</div>
+        <div class="panel-title">Payroll Result Records</div>
+        <div class="panel-subtitle">List of employees with payroll processing results returned by the Existing Payroll System.</div>
+      </div>
+      <div class="filters">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Search employee name, ID, or ...
+        </div>
+        <div class="filter-group">
+          <label>Payroll Period</label>
+          <div class="filter-select">Sep 1 – 15, 2026 <span>▾</span></div>
+        </div>
+        <div class="filter-group">
+          <label>Result Status</label>
+          <div class="filter-select">All Statuses <span>▾</span></div>
+        </div>
+        <div class="filter-group">
+          <label>Department</label>
+          <div class="filter-select">All Departments <span>▾</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-scroll">
+      <table class="table-main">
+        <thead>
+          <tr>
+            <th>EMPLOYEE</th>
+            <th>EMPLOYEE ID</th>
+            <th>DEPARTMENT</th>
+            <th>PAYROLL PERIOD</th>
+            <th>PAYROLL REFERENCE</th>
+            <th>PROCESSING STATUS</th>
+            <th>PAYSLIP STATUS</th>
+            <th>DATE RELEASED</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="emp-name">John Benedict M. Villegas</td>
+            <td class="id-link">AU-EMP-2026-0418</td>
+            <td>Information Technology</td>
+            <td>Sep 1 – 15, 2026</td>
+            <td class="id-link">PR-2026-0915-001</td>
+            <td><span class="pill green"><span class="dot"></span>Completed</span></td>
+            <td><span class="pill green"><span class="dot"></span>Available</span></td>
+            <td>Sep 16, 2026</td>
+            <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+          </tr>
+          <tr>
+            <td class="emp-name">Maria Santos</td>
+            <td class="id-link">AU-EMP-2026-0194</td>
+            <td>Operations</td>
+            <td>Sep 1 – 15, 2026</td>
+            <td class="id-link">PR-2026-0915-002</td>
+            <td><span class="pill green"><span class="dot"></span>Completed</span></td>
+            <td><span class="pill green"><span class="dot"></span>Available</span></td>
+            <td>Sep 16, 2026</td>
+            <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+          </tr>
+          <tr>
+            <td class="emp-name">Robert Cruz</td>
+            <td class="id-link">AU-EMP-2026-0332</td>
+            <td>Facilities</td>
+            <td>Sep 1 – 15, 2026</td>
+            <td>—</td>
+            <td><span class="pill orange"><span class="dot"></span>Pending</span></td>
+            <td><span class="pill red"><span class="dot"></span>Not Available</span></td>
+            <td>—</td>
+            <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+          </tr>
+          <tr>
+            <td class="emp-name">Ana Reyes</td>
+            <td class="id-link">AU-EMP-2026-0271</td>
+            <td>Registrar</td>
+            <td>Sep 1 – 15, 2026</td>
+            <td class="id-link">PR-2026-0915-003</td>
+            <td><span class="pill green"><span class="dot"></span>Completed</span></td>
+            <td><span class="pill green"><span class="dot"></span>Available</span></td>
+            <td>Sep 16, 2026</td>
+            <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+          </tr>
+          <tr>
+            <td class="emp-name">Carlos Dela Cruz</td>
+            <td class="id-link">AU-EMP-2026-0520</td>
+            <td>Human Resources</td>
+            <td>Sep 1 – 15, 2026</td>
+            <td>—</td>
+            <td><span class="pill red"><span class="dot"></span>Failed</span></td>
+            <td><span class="pill red"><span class="dot"></span>Not Available</span></td>
+            <td>—</td>
+            <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <div class="record-count">Showing 1 to 5 of 124 records</div>
+      <div class="page-nav">
+        <button class="page-btn">‹</button>
+        <button class="page-btn active">1</button>
+        <button class="page-btn">2</button>
+        <button class="page-btn">3</button>
+        <button class="page-btn">4</button>
+        <button class="page-btn">5</button>
+        <span class="page-ellipsis">…</span>
+        <button class="page-btn">25</button>
+        <button class="page-btn">›</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="section-tag">RECENT PAYROLL RESULTS BY BATCH</div>
+          <div class="panel-title">Latest Batch Results</div>
+          <div class="panel-subtitle">Recent payroll batches and their returned status from the Existing Payroll System.</div>
+        </div>
+      </div>
+      <div class="table-scroll">
+        <table class="table-batch">
+          <thead>
+            <tr>
+              <th>BATCH ID</th>
+              <th>PAYROLL PERIOD</th>
+              <th>EMPLOYEES</th>
+              <th>RETURNED AT</th>
+              <th>RESULT STATUS</th>
+              <th>PAYSLIPS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>PAY-2026-0915-A</td>
+              <td>Sep 1 – 15, 2026</td>
+              <td>48</td>
+              <td>Sep 16, 2026 02:35 PM</td>
+              <td><span class="pill green"><span class="dot"></span>Completed</span></td>
+              <td>48 / 48</td>
+              <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+            </tr>
+            <tr>
+              <td>PAY-2026-0915-B</td>
+              <td>Sep 1 – 15, 2026</td>
+              <td>31</td>
+              <td>Sep 16, 2026 11:20 AM</td>
+              <td><span class="pill orange"><span class="dot"></span>Pending</span></td>
+              <td>0 / 31</td>
+              <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+            </tr>
+            <tr>
+              <td>PAY-2026-0901-A</td>
+              <td>Aug 16 – 31, 2026</td>
+              <td>52</td>
+              <td>Aug 31, 2026 03:15 PM</td>
+              <td><span class="pill green"><span class="dot"></span>Completed</span></td>
+              <td>52 / 52</td>
+              <td><div class="actions-cell"><button class="view-btn">View Details</button><div class="kebab"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></div></div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <div class="section-tag">PAYROLL NOTICES</div>
+          <div class="panel-title">Results &amp; Follow-up</div>
+          <div class="panel-subtitle">Important updates and items that need attention.</div>
+        </div>
+        <button class="notice-head-btn">View All</button>
+      </div>
+      <div class="notice-list">
+        <div class="notice-item">
+          <div class="notice-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="notice-body">
+            <div class="notice-main">Batch PAY-2026-0915-A processed successfully.</div>
+            <div class="notice-sub">48 payslips are now available for employees.</div>
+          </div>
+          <div class="notice-time">Sep 16, 2026<br>02:35 PM</div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-icon orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="notice-body">
+            <div class="notice-main">Batch PAY-2026-0915-B is still pending final result.</div>
+            <div class="notice-sub">Awaiting response from the Existing Payroll System.</div>
+          </div>
+          <div class="notice-time">Sep 16, 2026<br>11:20 AM</div>
+        </div>
+        <div class="notice-item">
+          <div class="notice-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
+          <div class="notice-body">
+            <div class="notice-main">Batch PAY-2026-0801-A has 2 rejected records.</div>
+            <div class="notice-sub">Please coordinate with HR for the affected employees.</div>
+          </div>
+          <div class="notice-time">Aug 31, 2026<br>02:35 PM</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
