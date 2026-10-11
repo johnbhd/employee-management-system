@@ -6,13 +6,22 @@ import QRCode from "qrcode";
 import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
-import { formatCampusDateTime } from "@/lib/campus-time";
+import { formatCampusDateTime, formatCampusTime } from "@/lib/campus-time";
+import type { QrAttendanceData } from "@/types/attendance-qr";
 import type { EmployeeReference } from "@/types/employee";
+
+import { QrScanFeedback } from "./QrScanFeedback";
+import type { QrScanFeedbackState } from "./attendance-qr-types";
 
 const NOT_AVAILABLE_LABEL = "Unavailable";
 
 type AttendanceQrCardProps = {
+  attendance: QrAttendanceData | null;
+  attendanceError: string | null;
+  attendanceFeedback: QrScanFeedbackState | null;
+  attendanceRefreshing: boolean;
   employee: EmployeeReference | null;
+  onAttendanceRetry: () => Promise<void>;
   onQrRefreshed: () => Promise<void>;
   qrError: string | null;
   qrGeneratedAt: string | null;
@@ -21,7 +30,12 @@ type AttendanceQrCardProps = {
 };
 
 export function AttendanceQrCard({
+  attendance,
+  attendanceError,
+  attendanceFeedback,
+  attendanceRefreshing,
   employee,
+  onAttendanceRetry,
   onQrRefreshed,
   qrError,
   qrGeneratedAt,
@@ -49,9 +63,9 @@ export function AttendanceQrCard({
     },
     {
       label: "Attendance",
-      value: "Not recorded here",
-      isPill: false,
-      tone: "plain",
+      value: getAttendanceStatusLabel(attendance),
+      isPill: true,
+      tone: attendance?.timeOut ? "success" : attendance ? "info" : "muted",
     },
   ] as const;
 
@@ -83,6 +97,7 @@ export function AttendanceQrCard({
           key={qrValue ?? "employee-qr-unavailable"}
           qrValue={qrValue}
         />
+        {attendanceFeedback ? <QrScanFeedback feedback={attendanceFeedback} /> : null}
       </div>
 
       <div className="attendance-qr-meta">
@@ -119,6 +134,13 @@ export function AttendanceQrCard({
         </p>
       ) : null}
 
+      <AttendanceStatusPanel
+        attendance={attendance}
+        error={attendanceError}
+        isRefreshing={attendanceRefreshing}
+        onRetry={onAttendanceRetry}
+      />
+
       <div className="attendance-qr-actions">
         <button
           type="button"
@@ -136,10 +158,95 @@ export function AttendanceQrCard({
         </Link>
       </div>
       <p className="attendance-qr-feedback" role="status" aria-live="polite">
-        Attendance is not recorded from this page. Present the QR to an authorized scanner.
+        Attendance is recorded by an authorized scanner and reflected here automatically.
       </p>
     </article>
   );
+}
+
+function AttendanceStatusPanel({
+  attendance,
+  error,
+  isRefreshing,
+  onRetry,
+}: {
+  attendance: QrAttendanceData | null;
+  error: string | null;
+  isRefreshing: boolean;
+  onRetry: () => Promise<void>;
+}) {
+  const isComplete = Boolean(attendance?.timeOut);
+  const isTimedIn = Boolean(attendance?.timeIn);
+  const title = error
+    ? "Attendance status unavailable"
+    : isComplete
+      ? "Today's attendance is complete"
+      : isTimedIn
+        ? "Waiting for Time-Out"
+        : "Waiting for attendance scan";
+  const message = error
+    ? error
+    : isComplete
+      ? "Your Time-In and Time-Out have been recorded."
+      : isTimedIn
+        ? `Time-In recorded at ${formatAttendanceTime(attendance?.timeIn)}. Show this QR again when you leave the campus.`
+        : "Your QR is ready. Present it at an authorized scanner to record Time-In.";
+
+  return (
+    <section
+      className={`attendance-qr-live-status${error ? " is-error" : isComplete ? " is-complete" : ""}`}
+      aria-label="Live attendance status"
+      aria-live="polite"
+    >
+      <div className="attendance-qr-live-status-icon" aria-hidden="true">
+        <Icon name={error ? "warning" : isComplete ? "check" : isTimedIn ? "clock" : "qr"} />
+      </div>
+      <div className="attendance-qr-live-status-copy">
+        <strong>{title}</strong>
+        <p>{message}</p>
+        {isComplete ? (
+          <div className="attendance-qr-live-status-times">
+            <span>Time-In: {formatAttendanceTime(attendance?.timeIn)}</span>
+            <span>Time-Out: {formatAttendanceTime(attendance?.timeOut)}</span>
+          </div>
+        ) : null}
+      </div>
+      {error ? (
+        <button
+          type="button"
+          className="attendance-qr-retry-button"
+          disabled={isRefreshing}
+          onClick={() => void onRetry()}
+        >
+          {isRefreshing ? "Retrying…" : "Retry"}
+        </button>
+      ) : null}
+    </section>
+  );
+}
+
+function getAttendanceStatusLabel(attendance: QrAttendanceData | null) {
+  if (attendance?.timeOut) {
+    return "Completed";
+  }
+
+  if (attendance?.timeIn) {
+    return "Time-In recorded";
+  }
+
+  return "Waiting for scan";
+}
+
+function formatAttendanceTime(value: string | null | undefined) {
+  if (!value) {
+    return "Time unavailable";
+  }
+
+  const date = new Date(value);
+
+  return Number.isNaN(date.getTime())
+    ? "Time unavailable"
+    : formatCampusTime(date);
 }
 
 function EmployeeQrImage({

@@ -174,6 +174,103 @@
   font-weight: 500;
 }
 
+.attendance-qr-scan-feedback-times {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.attendance-qr-live-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  border: 1px solid #dce7f4;
+  border-radius: 0.65rem;
+  padding: 0.85rem 0.9rem;
+  background: #f7faff;
+}
+
+.attendance-qr-live-status.is-complete {
+  border-color: #cde8d6;
+  background: #f4fbf6;
+}
+
+.attendance-qr-live-status.is-error {
+  border-color: #f0c7c3;
+  background: #fff8f7;
+}
+
+.attendance-qr-live-status-icon {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #e6eefb;
+  color: var(--employee-blue);
+}
+
+.attendance-qr-live-status.is-complete .attendance-qr-live-status-icon {
+  background: #dff3e5;
+  color: var(--employee-green);
+}
+
+.attendance-qr-live-status.is-error .attendance-qr-live-status-icon {
+  background: #fde5e2;
+  color: var(--danger);
+}
+
+.attendance-qr-live-status-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.attendance-qr-live-status-copy strong {
+  display: block;
+  color: var(--employee-navy);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.attendance-qr-live-status-copy p {
+  margin: 0.25rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.attendance-qr-live-status-times {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.45rem;
+  color: var(--employee-green);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.attendance-qr-retry-button {
+  flex: 0 0 auto;
+  border: 1px solid #e3aaa5;
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  background: #fff;
+  color: var(--danger);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.attendance-qr-retry-button:hover {
+  border-color: var(--danger);
+  background: #fff2f0;
+}
+
+.attendance-qr-retry-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
 @keyframes attendance-qr-feedback-in {
   from {
     opacity: 0;
@@ -374,6 +471,14 @@
 
   .attendance-qr-scan-feedback strong {
     font-size: 0.86rem;
+  }
+
+  .attendance-qr-live-status {
+    flex-wrap: wrap;
+  }
+
+  .attendance-qr-retry-button {
+    margin-left: 2.75rem;
   }
 }
 
