@@ -3,6 +3,7 @@ export const applicationRoles = [
     "hr",
     "employee",
     "accounting",
+    "payroll",
 ] as const;
 
 export type ApplicationRole = (typeof applicationRoles)[number];
@@ -12,6 +13,7 @@ export const roleHomePaths = {
     hr: "/hr/dashboard",
     employee: "/employee/dashboard",
     accounting: "/accounting/dashboard",
+    payroll: "/payroll/dashboard",
 } as const satisfies Record<ApplicationRole, string>;
 
 export type RoleHomePath = (typeof roleHomePaths)[ApplicationRole];
@@ -37,5 +39,7 @@ export function getRoleLabel(role: ApplicationRole): string {
             return "Employee";
         case "accounting":
             return "Accounting Staff";
+        case "payroll":
+            return "Payroll Staff";
     }
 }

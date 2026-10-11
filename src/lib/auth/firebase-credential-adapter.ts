@@ -5,6 +5,7 @@ const authEmailByUsername: Readonly<Record<string, string>> = {
     "aujsc.hr": "aujsc.hr@auth.aujsc.local",
     "aujsc.employee": "aujsc.employee@auth.aujsc.local",
     "aujsc.accounting": "aujsc.accounting@auth.aujsc.local",
+    "aujsc.payroll": "aujsc.payroll@auth.aujsc.local",
     "aujsc.registrar.001": "aujsc.registrar.001@auth.aujsc.local",
     "aujsc.admissions.002": "aujsc.admissions.002@auth.aujsc.local",
     "aujsc.library.003": "aujsc.library.003@auth.aujsc.local",

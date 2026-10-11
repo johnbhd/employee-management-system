@@ -75,10 +75,11 @@ function toEmployee(
     : null;
 }
 
-function operatorRoleLabel(role: "admin" | "hr" | "employee" | "accounting") {
+function operatorRoleLabel(role: "admin" | "hr" | "employee" | "accounting" | "payroll") {
   if (role === "admin") return "IT Administrator";
   if (role === "employee") return "Employee";
   if (role === "accounting") return "Accounting Staff";
+  if (role === "payroll") return "Payroll Staff";
   return "HR / Attendance Staff";
 }
 

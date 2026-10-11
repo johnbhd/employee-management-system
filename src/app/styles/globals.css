@@ -11,6 +11,9 @@
 @import "./layouts/accounting.css";
 @import "./layouts/accounting-sidebar.css";
 @import "./layouts/accounting-navbar.css";
+@import "./layouts/payroll.css";
+@import "./layouts/payroll-sidebar.css";
+@import "./layouts/payroll-navbar.css";
 @import "./components/cards.css";
 @import "./components/tables.css";
 @import "./components/badges.css";
@@ -50,6 +53,7 @@
 @import "./pages/accounting/dashboard.css";
 @import "./pages/accounting/integration-status.css";
 @import "./pages/accounting/transaction-history.css";
+@import "./pages/payroll/dashboard.css";
 
 *,
 *::before,
