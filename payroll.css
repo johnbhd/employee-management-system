@@ -976,3 +976,439 @@ body {
     justify-content: center;
   }
 }
+
+/* =====================================================
+   Payroll Batches page
+   ===================================================== */
+
+/* Pill-style status badges (dot + soft background) */
+.tag.pill {
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.tag.pill.dot-green { background: var(--green-soft); }
+.tag.pill.dot-blue { background: var(--blue-soft); }
+.tag.pill.dot-amber { background: var(--amber-soft); }
+.tag.pill.dot-red { background: var(--red-soft); }
+.tag.pill.dot-teal { background: var(--teal-soft); }
+
+.btn-white:disabled,
+.btn-navy-solid:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Current working batch */
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.title-row h3 {
+  margin: 3px 0 4px;
+}
+
+.cb-info {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 2px;
+}
+
+.cb-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-left: 1px solid var(--line);
+  min-width: 0;
+}
+
+.cb-item:first-child {
+  border-left: none;
+  padding-left: 0;
+}
+
+.cb-item i {
+  color: var(--slate);
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.cb-label {
+  display: block;
+  font-size: 10.5px;
+  color: var(--slate);
+}
+
+.cb-value {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Layout: batch list + side panels */
+.batches-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 18px;
+  align-items: start;
+}
+
+.batches-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.list-head h3 {
+  font-size: 17px;
+  margin: 3px 0 4px;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.list-filters {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.list-filters .filter-field select {
+  min-width: 130px;
+}
+
+.list-filters .search-input {
+  flex: 0 0 210px;
+  align-self: flex-end;
+  margin-top: 0;
+}
+
+.batch-table {
+  min-width: 780px;
+}
+
+.mini-table {
+  min-width: 0;
+}
+
+.mini-table .total-row td {
+  font-weight: 700;
+  border-top: 1px solid var(--line);
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--slate);
+  padding: 24px 8px;
+}
+
+/* Row action menu button + floating dropdown */
+.menu-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--slate);
+  border-radius: 6px;
+  padding: 6px 9px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.menu-btn:hover {
+  background: var(--paper);
+}
+
+.floating-menu {
+  display: none;
+  position: fixed;
+  z-index: 150;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  min-width: 180px;
+  overflow: hidden;
+}
+
+.floating-menu.open {
+  display: block;
+}
+
+.floating-menu button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  text-align: left;
+  padding: 9px 12px;
+  border: none;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  color: var(--ink);
+}
+
+.floating-menu button i {
+  width: 14px;
+  text-align: center;
+  color: var(--slate);
+}
+
+.floating-menu button:hover {
+  background: var(--paper);
+}
+
+/* Pagination (dark blue active page) */
+.pagination.dark .page-btn.active {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+.page-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Batch actions */
+.batch-actions-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.batch-actions-row .btn-white,
+.batch-actions-row .btn-navy-solid {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+/* Modal: forms, confirm text, wide variant */
+.modal-box {
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.modal-box.wide {
+  max-width: 560px;
+}
+
+.form-field {
+  margin-bottom: 12px;
+}
+
+.form-field label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--slate);
+  margin-bottom: 5px;
+}
+
+.form-field .req {
+  color: var(--red);
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 12.5px;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+}
+
+.form-field input[readonly] {
+  background: var(--paper);
+  color: var(--slate);
+}
+
+.form-field textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus {
+  outline: none;
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+}
+
+.form-field.invalid input,
+.form-field.invalid select {
+  border-color: var(--red);
+}
+
+.field-error {
+  display: block;
+  font-size: 11px;
+  color: var(--red);
+  margin-top: 4px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.confirm-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 200;
+  max-width: 340px;
+  background: var(--navy);
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.toast.error {
+  background: var(--red);
+}
+
+@media (max-width: 1100px) {
+  .batches-layout {
+    grid-template-columns: 1fr;
+  }
+  .cb-info {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cb-item {
+    border-left: none;
+    padding-left: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 560px) {
+  .cb-info {
+    grid-template-columns: 1fr;
+  }
+  .list-filters .search-input {
+    flex: 1 1 100%;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =====================================================
+   Payroll Handoff page
+   ===================================================== */
+
+[hidden] {
+  display: none !important;
+}
+
+.two-col-equal {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 18px;
+  align-items: start;
+}
+
+.compact-table {
+  min-width: 520px;
+}
+
+.history-table {
+  min-width: 900px;
+}
+
+.btn-tiny i {
+  color: var(--blue);
+  margin-right: 4px;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.date-range i {
+  color: var(--slate);
+  font-size: 12px;
+}
+
+.date-range input {
+  border: none;
+  outline: none;
+  padding: 9px 0;
+  width: 112px;
+  font-size: 12.5px;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  color: var(--ink);
+  background: transparent;
+}
+
+.date-range span {
+  color: var(--slate);
+}
+
+.panel.flash {
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.25);
+}
+
+@media (max-width: 1100px) {
+  .two-col-equal {
+    grid-template-columns: 1fr;
+  }
+}
