@@ -38,6 +38,7 @@ export type IconName =
   | "support"
   | "sun"
   | "hand"
+  | "handoff"
   | "file"
   | "layers"
   | "shield"
