@@ -1,6 +1,5 @@
-import type { PayrollBatch } from "@/data/payroll/dashboard";
-
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { PayrollBatch } from "@/types/payroll-dashboard";
 
 export function PayrollRecentBatches({ batches }: { batches: readonly PayrollBatch[] }) {
   return (
@@ -17,15 +16,21 @@ export function PayrollRecentBatches({ batches }: { batches: readonly PayrollBat
           </tr>
         </thead>
         <tbody>
-          {batches.map((batch) => (
-            <tr key={batch.id}>
-              <td><strong>{batch.id}</strong></td>
-              <td>{batch.payrollPeriod}</td>
-              <td>{batch.employees}</td>
-              <td>{batch.createdBy}</td>
-              <td><StatusBadge tone={batch.transferTone}>{batch.transferStatus}</StatusBadge></td>
+          {batches.length > 0 ? batches.map((batch) => (
+              <tr key={batch.id}>
+                <td><strong>{batch.id}</strong></td>
+                <td>{batch.payrollPeriod}</td>
+                <td>{batch.employees}</td>
+                <td>{batch.createdBy}</td>
+                <td><StatusBadge tone={batch.transferTone}>{batch.transferStatus}</StatusBadge></td>
+              </tr>
+          )) : (
+            <tr>
+              <td colSpan={5} className="payroll-dashboard__empty-cell">
+                No payroll batches have been created for the current period.
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </table>
     </div>

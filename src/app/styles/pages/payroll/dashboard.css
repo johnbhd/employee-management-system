@@ -15,6 +15,77 @@
   min-width: 0;
 }
 
+.payroll-dashboard__data-error {
+  margin: 0;
+  border: 1px solid #f0c7c3;
+  border-radius: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: #fff8f7;
+  color: var(--danger);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.payroll-dashboard__loading-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.payroll-dashboard__loading-block {
+  display: block;
+  border-radius: 0.35rem;
+  background: #e9eef5;
+  animation: payroll-dashboard-loading 1.4s ease-in-out infinite;
+}
+
+.payroll-dashboard__loading-icon {
+  width: 2.15rem;
+  height: 2.15rem;
+  flex: 0 0 auto;
+  border-radius: 0.65rem;
+}
+
+.payroll-dashboard__loading-content {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 0.45rem;
+}
+
+.payroll-dashboard__loading-label {
+  width: 55%;
+  height: 0.55rem;
+}
+
+.payroll-dashboard__loading-value {
+  width: 38%;
+  height: 1.25rem;
+}
+
+.payroll-dashboard__loading-note {
+  width: 75%;
+  height: 0.5rem;
+}
+
+.payroll-dashboard__loading-panel {
+  min-height: 15rem;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: #fff;
+  animation: payroll-dashboard-loading 1.4s ease-in-out infinite;
+}
+
+@keyframes payroll-dashboard-loading {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
 .payroll-dashboard__summary {
   grid-template-columns: repeat(6, minmax(0, 1fr));
 }
@@ -48,6 +119,13 @@
   margin-top: 0.3rem;
   color: var(--text-faint);
   font-size: 0.63rem;
+}
+
+.payroll-dashboard__empty-cell {
+  padding: 2rem 1rem !important;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-align: center;
 }
 
 .payroll-dashboard__section-note {
@@ -116,6 +194,19 @@
   line-height: 1.5;
 }
 
+.payroll-dashboard__empty-alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1.25rem 0.75rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.payroll-dashboard__empty-alert .ui-icon {
+  color: var(--success);
+}
+
 .payroll-dashboard__boundary-note {
   display: flex;
   align-items: flex-start;
@@ -165,5 +256,12 @@
 @media (max-width: 480px) {
   .payroll-dashboard__summary {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .payroll-dashboard__loading-block,
+  .payroll-dashboard__loading-panel {
+    animation: none;
   }
 }
