@@ -27,7 +27,7 @@ const payrollNavigation: readonly PayrollNavigationItem[] = [
   { id: "batches", label: "Payroll Batches", icon: "layers", href: "/payroll/batches" },
   { id: "handoff", label: "Payroll Handoff", icon: "handoff", href: "/payroll/handoff" },
   { id: "results", label: "Payroll Results", icon: "file", href: "/payroll/results" },
-  { id: "history", label: "Payroll History", icon: "clock", planned: true },
+  { id: "history", label: "Payroll History", icon: "clock", href: "/payroll/history" },
 ];
 
 type PayrollSidebarProps = {
