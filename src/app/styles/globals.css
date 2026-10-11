@@ -57,6 +57,7 @@
 @import "./pages/payroll/verified-attendance.css";
 @import "./pages/payroll/batches.css";
 @import "./pages/payroll/handoff.css";
+@import "./pages/payroll/results.css";
 
 *,
 *::before,
