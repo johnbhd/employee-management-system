@@ -23,6 +23,8 @@ function getAccountingPageTitle(pathname: string) {
   switch (pathname) {
     case "/accounting/dashboard":
       return "Accounting Dashboard";
+    case "/accounting/approved-payroll":
+      return "Approved Payroll Information";
     case "/accounting/integration-status":
       return "Accounting Integration Status";
     case "/accounting/transaction-history":

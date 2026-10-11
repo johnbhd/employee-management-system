@@ -32,7 +32,7 @@ const accountingNavigation: AccountingNavigationItem[] = [
     id: "approved-payroll",
     label: "Approved Payroll Information",
     icon: "payroll",
-    planned: true,
+    href: "/accounting/approved-payroll",
   },
   {
     id: "integration-status",

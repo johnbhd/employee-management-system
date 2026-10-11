@@ -51,6 +51,7 @@
 @import "./pages/admin/audit-logs.css";
 @import "./pages/admin/settings.css";
 @import "./pages/accounting/dashboard.css";
+@import "./pages/accounting/approved-payroll.css";
 @import "./pages/accounting/integration-status.css";
 @import "./pages/accounting/transaction-history.css";
 @import "./pages/payroll/dashboard.css";
