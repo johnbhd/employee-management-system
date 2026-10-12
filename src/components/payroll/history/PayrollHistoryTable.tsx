@@ -1,6 +1,13 @@
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getPayrollHistoryTone, type PayrollHistoryRecord } from "@/data/payroll/history";
+import {
+  formatPayrollHistoryDate,
+  getPayrollHistoryAcknowledgementLabel,
+  getPayrollHistoryResultStatusLabel,
+  getPayrollHistoryTone,
+  getPayrollHistoryTransferStatusLabel,
+  type PayrollHistoryRecord,
+} from "@/data/payroll/history";
 
 type PayrollHistoryTableProps = {
   records: readonly PayrollHistoryRecord[];
@@ -26,29 +33,35 @@ export function PayrollHistoryTable({ records, onViewDetails }: PayrollHistoryTa
           </tr>
         </thead>
         <tbody>
-          {records.length > 0 ? records.map((record) => (
-            <tr key={record.id}>
-              <td><strong className="payroll-history__batch-id">{record.id}</strong></td>
-              <td>{record.period}</td>
-              <td>{record.employees}</td>
-              <td>{record.createdBy}</td>
-              <td>{record.createdAt}</td>
-              <td><StatusBadge tone={getPayrollHistoryTone(record.transferStatus)}>{record.transferStatus}</StatusBadge></td>
-              <td><StatusBadge tone={getPayrollHistoryTone(record.acknowledgement)}>{record.acknowledgement}</StatusBadge></td>
-              <td><StatusBadge tone={getPayrollHistoryTone(record.resultStatus)}>{record.resultStatus}</StatusBadge></td>
-              <td>
-                <div className="payroll-history__row-actions">
-                  <button type="button" className="button-link" onClick={() => onViewDetails(record)}>View details</button>
-                  <details className="payroll-history__row-menu">
-                    <summary aria-label={`More actions for ${record.id}`}><Icon name="menu" /></summary>
-                    <div>
-                      <button type="button" onClick={() => onViewDetails(record)}>View details</button>
-                    </div>
-                  </details>
-                </div>
-              </td>
-            </tr>
-          )) : (
+          {records.length > 0 ? records.map((record) => {
+            const transferStatus = getPayrollHistoryTransferStatusLabel(record.handoff.status);
+            const acknowledgement = getPayrollHistoryAcknowledgementLabel(record.handoff.acknowledgementStatus);
+            const resultStatus = getPayrollHistoryResultStatusLabel(record.result.status);
+
+            return (
+              <tr key={record.batchId}>
+                <td><strong className="payroll-history__batch-id">{record.batchId}</strong></td>
+                <td>{record.period.label}</td>
+                <td>{record.employeeCount}</td>
+                <td>{record.createdBy.displayName}</td>
+                <td>{formatPayrollHistoryDate(record.createdAt)}</td>
+                <td><StatusBadge tone={getPayrollHistoryTone(transferStatus)}>{transferStatus}</StatusBadge></td>
+                <td><StatusBadge tone={getPayrollHistoryTone(acknowledgement)}>{acknowledgement}</StatusBadge></td>
+                <td><StatusBadge tone={getPayrollHistoryTone(resultStatus)}>{resultStatus}</StatusBadge></td>
+                <td>
+                  <div className="payroll-history__row-actions">
+                    <button type="button" className="button-link" onClick={() => onViewDetails(record)}>View details</button>
+                    <details className="payroll-history__row-menu">
+                      <summary aria-label={`More actions for ${record.batchId}`}><Icon name="menu" /></summary>
+                      <div>
+                        <button type="button" onClick={() => onViewDetails(record)}>View details</button>
+                      </div>
+                    </details>
+                  </div>
+                </td>
+              </tr>
+            );
+          }) : (
             <tr>
               <td colSpan={9} className="payroll-history__empty">
                 <strong>No historical payroll records match your filters.</strong>

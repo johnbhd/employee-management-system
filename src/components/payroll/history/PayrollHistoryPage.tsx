@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
 import { ActionButton } from "@/components/ui/ActionButton";
@@ -10,52 +10,73 @@ import { SectionCard } from "@/components/ui/SectionCard";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 import {
   getPayrollHistorySummaryMetrics,
-  initialPayrollHistory,
-  payrollHistoryBatchStatuses,
-  payrollHistoryPeriods,
-  payrollHistoryResultStatuses,
-  payrollHistoryTransferStatuses,
-  type PayrollHistoryBatchStatus,
   type PayrollHistoryRecord,
-  type PayrollHistoryResultStatus,
-  type PayrollHistoryTransferStatus,
 } from "@/data/payroll/history";
+import type { PayrollBatchStatus } from "@/types/payroll-batches";
+import type { PayrollTransferStatus } from "@/types/payroll-handoff";
+import type { PayrollResultStatus } from "@/types/payroll-results";
+import type { PayrollHistoryData } from "@/types/payroll-history";
 
 import { PayrollHistoryDetailsModal } from "./PayrollHistoryDetailsModal";
 import { PayrollHistoryTable } from "./PayrollHistoryTable";
 
-const pageSize = 5;
+type PayrollHistoryPageProps = {
+  initialData: PayrollHistoryData;
+  loadError: boolean;
+};
 
-export function PayrollHistoryPage() {
+type ApiResult = {
+  success: boolean;
+  data?: PayrollHistoryData;
+  error?: { message?: string };
+};
+
+export function PayrollHistoryPage({ initialData, loadError: initialLoadError }: PayrollHistoryPageProps) {
+  const [data, setData] = useState(initialData);
   const [query, setQuery] = useState("");
   const [period, setPeriod] = useState("all");
-  const [batchStatus, setBatchStatus] = useState<PayrollHistoryBatchStatus | "all">("all");
-  const [transferStatus, setTransferStatus] = useState<PayrollHistoryTransferStatus | "all">("all");
-  const [resultStatus, setResultStatus] = useState<PayrollHistoryResultStatus | "all">("all");
+  const [batchStatus, setBatchStatus] = useState<PayrollBatchStatus | "all">("all");
+  const [transferStatus, setTransferStatus] = useState<PayrollTransferStatus | "all">("all");
+  const [resultStatus, setResultStatus] = useState<PayrollResultStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [selectedRecord, setSelectedRecord] = useState<PayrollHistoryRecord | null>(null);
   const [feedback, setFeedback] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(initialLoadError);
+  const firstRender = useRef(true);
 
-  const filteredRecords = useMemo(() => {
-    const normalizedQuery = query.trim().toLowerCase();
+  const loadHistory = useCallback(async () => {
+    setIsLoading(true);
+    const params = new URLSearchParams({ page: String(page), pageSize: String(data.pageSize || 5) });
+    if (query.trim()) params.set("search", query.trim());
+    if (period !== "all") params.set("periodStart", period);
+    if (batchStatus !== "all") params.set("batchStatus", batchStatus);
+    if (transferStatus !== "all") params.set("transferStatus", transferStatus);
+    if (resultStatus !== "all") params.set("resultStatus", resultStatus);
 
-    return initialPayrollHistory.filter((record) => (
-      (!normalizedQuery
-        || record.id.toLowerCase().includes(normalizedQuery)
-        || record.period.toLowerCase().includes(normalizedQuery)
-        || record.createdBy.toLowerCase().includes(normalizedQuery))
-      && (period === "all" || record.period === period)
-      && (batchStatus === "all" || record.batchStatus === batchStatus)
-      && (transferStatus === "all" || record.transferStatus === transferStatus)
-      && (resultStatus === "all" || record.resultStatus === resultStatus)
-    ));
-  }, [batchStatus, period, query, resultStatus, transferStatus]);
+    try {
+      const response = await fetch(`/api/v1/payroll/history?${params.toString()}`, { cache: "no-store" });
+      const payload = await response.json() as ApiResult;
+      if (!response.ok || !payload.success || !payload.data) {
+        throw new Error(payload.error?.message || "Payroll history data is temporarily unavailable.");
+      }
+      setData(payload.data);
+      setLoadError(false);
+    } catch (error) {
+      setLoadError(true);
+      setFeedback(error instanceof Error ? error.message : "Payroll history data is temporarily unavailable.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [batchStatus, data.pageSize, page, period, query, resultStatus, transferStatus]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
-  const visiblePage = Math.min(page, totalPages);
-  const pageRecords = filteredRecords.slice((visiblePage - 1) * pageSize, visiblePage * pageSize);
-  const firstVisible = filteredRecords.length === 0 ? 0 : (visiblePage - 1) * pageSize + 1;
-  const lastVisible = Math.min(visiblePage * pageSize, filteredRecords.length);
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+    void loadHistory();
+  }, [loadHistory]);
 
   useEffect(() => {
     if (!selectedRecord) return;
@@ -87,26 +108,40 @@ export function PayrollHistoryPage() {
     setPage(1);
   }
 
-  const metrics = getPayrollHistorySummaryMetrics(initialPayrollHistory);
+  const totalPages = Math.max(1, Math.ceil(data.total / data.pageSize));
+  const visiblePage = Math.min(data.page, totalPages);
+  const firstVisible = data.total === 0 ? 0 : (visiblePage - 1) * data.pageSize + 1;
+  const lastVisible = Math.min(visiblePage * data.pageSize, data.total);
+  const selectedPeriodLabel = period === "all"
+    ? "All periods"
+    : data.periodOptions.find((option) => option.start === period)?.label ?? period;
 
   return (
-    <div className="payroll-history">
+    <div className={`payroll-history${isLoading ? " is-loading" : ""}`}>
       <AdminPageHeader
         eyebrow="Payroll records"
         title="Payroll History"
         description="Review previous payroll batches, handoff activity, acknowledgement status, and payroll results by period."
         actions={(
           <div className="payroll-history__header-actions">
-            <ActionButton icon="download" variant="secondary" action="Export is available when the payroll export service is connected." onAction={() => showFeedback("Export is available when the payroll export service is connected.")}>Export history</ActionButton>
-            <ActionButton icon="refresh" variant="primary" action="Payroll history refreshed. No new records received in prototype data." onAction={() => showFeedback("Payroll history refreshed. No new records received in prototype data.")}>Refresh data</ActionButton>
+            <ActionButton icon="download" variant="secondary" action="History export is not available until an export service is connected." onAction={() => showFeedback("History export is not available until an export service is connected.")}>Export history</ActionButton>
+            <ActionButton icon="refresh" variant="primary" action="Payroll history refreshed." onAction={() => void loadHistory()}>Refresh data</ActionButton>
           </div>
         )}
       />
 
-      <p className="payroll-history__period"><Icon name="calendar" /> Payroll period: All periods</p>
+      {loadError ? (
+        <div className="payroll-history__load-error" role="alert">
+          <Icon name="warning" />
+          <span>Unable to load persistent payroll history.</span>
+          <button type="button" className="button-link" onClick={() => void loadHistory()}>Try again</button>
+        </div>
+      ) : null}
+
+      <p className="payroll-history__period"><Icon name="calendar" /> Payroll period: {selectedPeriodLabel}</p>
 
       <div className="metric-grid payroll-history__summary">
-        {metrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
+        {getPayrollHistorySummaryMetrics(data.summary).map((metric) => <SummaryCard key={metric.label} {...metric} />)}
       </div>
 
       <SectionCard className="payroll-history__filters-card" title="Filter payroll history" eyebrow="Find a previous payroll cycle">
@@ -128,28 +163,28 @@ export function PayrollHistoryPage() {
             <span>Payroll period</span>
             <select value={period} onChange={(event) => updateFilter(setPeriod, event.target.value)}>
               <option value="all">All periods</option>
-              {payrollHistoryPeriods.map((option) => <option key={option} value={option}>{option}</option>)}
+              {data.periodOptions.map((option) => <option key={option.start} value={option.start}>{option.label}</option>)}
             </select>
           </label>
           <label>
             <span>Batch status</span>
-            <select value={batchStatus} onChange={(event) => updateFilter(setBatchStatus, event.target.value as PayrollHistoryBatchStatus | "all")}>
+            <select value={batchStatus} onChange={(event) => updateFilter(setBatchStatus, event.target.value as PayrollBatchStatus | "all")}>
               <option value="all">All statuses</option>
-              {payrollHistoryBatchStatuses.map((option) => <option key={option} value={option}>{option}</option>)}
+              {data.batchStatusOptions.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </label>
           <label>
             <span>Transfer status</span>
-            <select value={transferStatus} onChange={(event) => updateFilter(setTransferStatus, event.target.value as PayrollHistoryTransferStatus | "all")}>
+            <select value={transferStatus} onChange={(event) => updateFilter(setTransferStatus, event.target.value as PayrollTransferStatus | "all")}>
               <option value="all">All statuses</option>
-              {payrollHistoryTransferStatuses.map((option) => <option key={option} value={option}>{option}</option>)}
+              {data.transferStatusOptions.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>
           </label>
           <label>
             <span>Result status</span>
-            <select value={resultStatus} onChange={(event) => updateFilter(setResultStatus, event.target.value as PayrollHistoryResultStatus | "all")}>
+            <select value={resultStatus} onChange={(event) => updateFilter(setResultStatus, event.target.value as PayrollResultStatus | "all")}>
               <option value="all">All statuses</option>
-              {payrollHistoryResultStatuses.map((option) => <option key={option} value={option}>{option}</option>)}
+              {data.resultStatusOptions.map((option) => <option key={option} value={option}>{option.replaceAll("_", " ")}</option>)}
             </select>
           </label>
           <button type="button" className="button-secondary payroll-history__clear" onClick={clearFilters}>Clear filters</button>
@@ -157,11 +192,11 @@ export function PayrollHistoryPage() {
       </SectionCard>
 
       <SectionCard className="payroll-history__records-card" title="Payroll Operations History" eyebrow="Historical payroll activity">
-        <p className="payroll-history__panel-description">View payroll batches and their complete handoff and result status from previous payroll periods.</p>
+        <p className="payroll-history__panel-description">View persistent payroll batches and their derived handoff and result status from previous payroll periods.</p>
         <p className="payroll-history__result-meta" aria-live="polite">
-          {filteredRecords.length ? `Showing ${firstVisible} to ${lastVisible} of ${filteredRecords.length} ${filteredRecords.length === 1 ? "batch" : "batches"}` : "No historical batches found"}
+          {isLoading ? "Refreshing payroll history…" : data.total ? `Showing ${firstVisible} to ${lastVisible} of ${data.total} ${data.total === 1 ? "batch" : "batches"}` : "No historical batches found"}
         </p>
-        <PayrollHistoryTable records={pageRecords} onViewDetails={setSelectedRecord} />
+        <PayrollHistoryTable records={data.records} onViewDetails={setSelectedRecord} />
         <footer className="payroll-history__pagination">
           <span>Page {visiblePage} of {totalPages}</span>
           <nav aria-label="Payroll history pages">
@@ -174,7 +209,7 @@ export function PayrollHistoryPage() {
         </footer>
       </SectionCard>
 
-      <p className="payroll-history__boundary-note"><Icon name="info" /> This is a migration prototype. History data is read-only local data; the page does not change payroll batches or connect to the Existing Payroll System.</p>
+      <p className="payroll-history__boundary-note"><Icon name="info" /> {data.providerNote}</p>
       <Link className="payroll-history__results-link" href="/payroll/results">View current payroll results <Icon name="arrow" /></Link>
       <span className="sr-only" aria-live="polite">{feedback}</span>
 
