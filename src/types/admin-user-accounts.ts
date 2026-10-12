@@ -52,6 +52,18 @@ export type AdminUserAccountsData = {
   hasNext: boolean;
 };
 
+export type AdminUserAccountSummary = {
+  total: number;
+  active: number;
+  disabled: number;
+  linked: number;
+  integrityIssues: number;
+  roleCounts: Array<{
+    roleId: ApplicationRole;
+    memberCount: number;
+  }>;
+};
+
 export type AdminUserAccountCreateInput = {
   email: string;
   password: string;

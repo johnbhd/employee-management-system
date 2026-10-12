@@ -2,6 +2,7 @@ import "server-only";
 
 import type { UserRecord } from "firebase-admin/auth";
 
+import { applicationRoleDefinitions } from "@/lib/auth/permissions";
 import { isApplicationRole, type ApplicationRole } from "@/lib/auth/roles";
 import { getFirebaseAdminAuth } from "@/lib/firebase/server";
 import type { EmployeeReference } from "@/types/employee";
@@ -9,6 +10,7 @@ import type {
   AdminUserAccount,
   AdminUserAccountCreateInput,
   AdminUserAccountUpdateInput,
+  AdminUserAccountSummary,
   AdminUserAccountsData,
 } from "@/types/admin-user-accounts";
 
@@ -199,7 +201,16 @@ function summaryFor(accounts: readonly AdminUserAccount[]) {
     integrityIssues: accounts.filter((account) => (
       account.profileStatus === "missing" || account.linkStatus === "invalid"
     )).length,
+    roleCounts: applicationRoleDefinitions.map((role) => ({
+      roleId: role.id,
+      memberCount: accounts.filter((account) => account.role === role.id).length,
+    })),
   };
+}
+
+export async function getAdminUserAccountSummary(): Promise<AdminUserAccountSummary> {
+  const accounts = await buildAccounts();
+  return summaryFor(accounts);
 }
 
 export async function getAdminUserAccountsData(

@@ -66,6 +66,36 @@ function getRoleView(
   };
 }
 
+function configurationSummary(roles: readonly RolePermissionView[]) {
+  const issues: string[] = [];
+
+  for (const role of roles) {
+    const permissions = new Set(role.permissions);
+
+    for (const permission of role.permissions) {
+      const definition = getPermissionDefinition(permission);
+      for (const dependency of definition?.dependsOn ?? []) {
+        if (!permissions.has(dependency)) {
+          issues.push(`${role.roleName} is missing ${getPermissionDefinition(dependency)?.label ?? dependency}.`);
+        }
+      }
+    }
+
+    if (role.roleId === "admin") {
+      for (const permission of reservedPermissionsForAdmin) {
+        if (!permissions.has(permission)) {
+          issues.push(`IT Administrator is missing ${getPermissionDefinition(permission)?.label ?? permission}.`);
+        }
+      }
+    }
+  }
+
+  return {
+    configurationStatus: issues.length === 0 ? "healthy" as const : "attention" as const,
+    configurationIssues: [...new Set(issues)],
+  };
+}
+
 export async function getRolesPermissionsData(): Promise<RolesPermissionsData> {
   const [assignments, users] = await Promise.all([
     Promise.all(applicationRoleDefinitions.map(async (role) => (
@@ -79,6 +109,11 @@ export async function getRolesPermissionsData(): Promise<RolesPermissionsData> {
     assignment,
     users.filter((user) => user.role === assignment.roleId).length,
   ));
+  const configuration = configurationSummary(roles);
+  const latestUpdatedAt = roles
+    .map((role) => role.updatedAt)
+    .filter((value): value is string => Boolean(value))
+    .sort((left, right) => right.localeCompare(left))[0] ?? null;
 
   return {
     roles,
@@ -87,6 +122,8 @@ export async function getRolesPermissionsData(): Promise<RolesPermissionsData> {
       roleCount: roles.length,
       permissionCount: permissionCatalog.length,
       assignedPermissionCount: roles.reduce((total, role) => total + role.permissions.length, 0),
+      ...configuration,
+      latestUpdatedAt,
     },
   };
 }

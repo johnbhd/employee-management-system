@@ -15,6 +15,9 @@ const emptyData: RolesPermissionsData = {
     roleCount: 0,
     permissionCount: 0,
     assignedPermissionCount: 0,
+    configurationStatus: "attention",
+    configurationIssues: [],
+    latestUpdatedAt: null,
   },
 };
 

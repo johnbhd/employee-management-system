@@ -97,5 +97,8 @@ export type RolesPermissionsData = {
     roleCount: number;
     permissionCount: number;
     assignedPermissionCount: number;
+    configurationStatus: "healthy" | "attention";
+    configurationIssues: string[];
+    latestUpdatedAt: string | null;
   };
 };
