@@ -33,6 +33,10 @@ import {
   getAccountingTransferTone,
 } from "@/data/accounting/approved-payroll";
 import { getAccountingApprovedPayrollItem } from "@/server/accounting/accounting-approved-payroll.service";
+import {
+  isAccountingTransferAwaitingAcknowledgement,
+  isAccountingTransferSuccessful,
+} from "@/server/accounting/accounting-lifecycle";
 import type {
   AccountingIntegrationStatusData,
   AccountingIntegrationStatusQuery,
@@ -41,7 +45,6 @@ import type {
   AccountingTransferView,
 } from "@/types/accounting-transfers";
 import type { AccountingApprovedPayrollItem } from "@/types/accounting-approved-payroll";
-import type { PayrollResultRecord } from "@/types/payroll-results";
 import type { SessionUser } from "@/types/auth";
 
 export class AccountingTransferValidationError extends Error {
@@ -64,16 +67,6 @@ export class AccountingTransferUnavailableError extends Error {
 
 function isInProgress(status: AccountingTransferStatus) {
   return status === "preparing" || status === "submitting";
-}
-
-function isSuccessful(transfer: AccountingTransferRecord) {
-  return transfer.transferStatus === "submitted"
-    && transfer.acknowledgementStatus === "accepted";
-}
-
-function isAwaitingAcknowledgement(transfer: AccountingTransferRecord) {
-  return transfer.transferStatus === "submitted"
-    && transfer.acknowledgementStatus === "pending";
 }
 
 function buildTransferView(transfer: AccountingTransferRecord): AccountingTransferView {
@@ -157,11 +150,11 @@ export function getAccountingIntegrationStatusSummary(
   return {
     readyForTransfer: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer || (!isSuccessful(transfer) && !isInProgress(transfer.transferStatus));
+      return !transfer || (!isAccountingTransferSuccessful(transfer) && !isInProgress(transfer.transferStatus));
     }).length,
     inProgress: transfers.filter((transfer) => isInProgress(transfer.transferStatus)).length,
-    successfulTransfers: transfers.filter(isSuccessful).length,
-    awaitingAcknowledgement: transfers.filter(isAwaitingAcknowledgement).length,
+    successfulTransfers: transfers.filter(isAccountingTransferSuccessful).length,
+    awaitingAcknowledgement: transfers.filter(isAccountingTransferAwaitingAcknowledgement).length,
     failedTransfers: transfers.filter((transfer) => transfer.transferStatus === "failed").length,
   };
 }
@@ -192,7 +185,7 @@ export async function getAccountingIntegrationStatusData(
   return {
     readyRecords: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer || (!isSuccessful(transfer) && !isInProgress(transfer.transferStatus));
+      return !transfer || (!isAccountingTransferSuccessful(transfer) && !isInProgress(transfer.transferStatus));
     }),
     transfers: pageTransfers,
     attention: pageTransfers

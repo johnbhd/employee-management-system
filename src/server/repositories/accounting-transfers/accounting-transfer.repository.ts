@@ -440,4 +440,35 @@ export async function writeAccountingTransferAuditEvent(input: {
   }, { merge: true });
 }
 
+export type AccountingTransferAuditEventRecord = {
+  id: string;
+  action: string;
+  occurredAt: string;
+};
+
+export async function listAccountingTransferAuditEvents(
+  transferId: string,
+): Promise<AccountingTransferAuditEventRecord[]> {
+  const snapshots = await getFirebaseAdminDb()
+    .collection(auditCollection)
+    .where("transferId", "==", transferId)
+    .get();
+
+  return snapshots.docs
+    .map((snapshot) => {
+      const data = snapshot.data();
+      const action = data.action;
+      const occurredAt = data.occurredAt;
+      if (typeof action !== "string" || !(occurredAt instanceof Timestamp)) return null;
+
+      return {
+        id: snapshot.id,
+        action,
+        occurredAt: occurredAt.toDate().toISOString(),
+      };
+    })
+    .filter((event): event is AccountingTransferAuditEventRecord => event !== null)
+    .sort((left, right) => left.occurredAt.localeCompare(right.occurredAt));
+}
+
 export { provider as accountingAdapterProvider };

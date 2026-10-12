@@ -31,6 +31,29 @@
   min-width: 0;
 }
 
+.accounting-transaction-history__loading-message {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.accounting-transaction-history__load-error {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f2cfd2;
+  border-radius: 0.7rem;
+  background: #fff5f5;
+  color: var(--danger);
+  font-size: 0.7rem;
+}
+
+.accounting-transaction-history__load-error span {
+  flex: 1 1 auto;
+  color: var(--text-muted);
+}
+
 .accounting-transaction-history__description {
   margin: 1rem 1.35rem 0;
   color: var(--text-muted);
@@ -128,7 +151,7 @@
 }
 
 .accounting-transaction-history__table {
-  min-width: 70rem;
+  min-width: 94rem;
 }
 
 .accounting-transaction-history__table td {
@@ -317,6 +340,16 @@
   max-width: 30rem;
 }
 
+.accounting-transaction-history__modal-message {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid #edf1f6;
+  border-radius: 0.7rem;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.74rem;
+}
+
 .accounting-transaction-history__modal-body section {
   min-width: 0;
 }
@@ -364,6 +397,32 @@
 
 .accounting-transaction-history__acknowledgement-detail {
   margin-top: 0.7rem;
+}
+
+.accounting-transaction-history__timeline {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accounting-transaction-history__timeline li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-left: 3px solid var(--au-blue);
+  background: var(--surface-muted);
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.accounting-transaction-history__timeline time {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  font-size: 0.66rem;
 }
 
 .accounting-transaction-history__error {
@@ -473,6 +532,12 @@
   }
 
   .accounting-transaction-history__modal-status {
+    flex-direction: column;
+  }
+
+  .accounting-transaction-history__load-error,
+  .accounting-transaction-history__timeline li {
+    align-items: flex-start;
     flex-direction: column;
   }
 }
