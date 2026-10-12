@@ -10,6 +10,7 @@ import {
 } from "@/server/repositories/attendance/attendance.repository";
 import { listAttendanceCorrectionRequests } from "@/server/repositories/attendance-corrections/attendance-correction.repository";
 import { listEmployees } from "@/server/repositories/employees/employee.repository";
+import { listPayrollBatches } from "@/server/repositories/payroll-batches/payroll-batch.repository";
 import type { EmployeeReference } from "@/types/employee";
 import type { PayrollDashboardPeriod } from "@/types/payroll-dashboard";
 import type {
@@ -25,8 +26,14 @@ type AttendanceDocument = Awaited<ReturnType<typeof listAttendanceForReport>>[nu
 type EmployeePeriodGroup = {
   employee: EmployeeReference;
   records: StoredQrAttendanceRecord[];
+  sourceAttendanceIds: string[];
   attendanceDates: Set<string>;
   verifiedAt: Date | null;
+};
+
+export type PayrollVerifiedAttendanceSource = {
+  item: PayrollVerifiedAttendanceItem;
+  sourceAttendanceIds: string[];
 };
 
 function isWithinPeriod(date: string, period: PayrollDashboardPeriod) {
@@ -122,7 +129,7 @@ function groupVerifiedAttendance(
 ) {
   const groups = new Map<string, EmployeePeriodGroup>();
 
-  documents.forEach(({ record }) => {
+  documents.forEach(({ id, record }) => {
     const employee = employeesById.get(record.employeeId);
 
     if (!employee) {
@@ -132,11 +139,13 @@ function groupVerifiedAttendance(
     const current = groups.get(employee.employeeId) ?? {
       employee,
       records: [],
+      sourceAttendanceIds: [],
       attendanceDates: new Set<string>(),
       verifiedAt: null,
     } satisfies EmployeePeriodGroup;
 
     current.records.push(record);
+    current.sourceAttendanceIds.push(id);
     current.attendanceDates.add(record.attendanceDate);
 
     if (
@@ -153,11 +162,9 @@ function groupVerifiedAttendance(
   return Array.from(groups.values());
 }
 
-export async function getPayrollVerifiedAttendanceData(
-  query: PayrollVerifiedAttendanceQuery,
-  now = new Date(),
-): Promise<PayrollVerifiedAttendanceData> {
-  const period = getCurrentPayrollPeriod(now);
+export async function getPayrollVerifiedAttendanceSourcesForPeriod(
+  period: PayrollDashboardPeriod,
+): Promise<PayrollVerifiedAttendanceSource[]> {
   const [employees, attendanceDocuments, correctionRequests] = await Promise.all([
     listEmployees(),
     listAttendanceForReport({
@@ -184,13 +191,79 @@ export async function getPayrollVerifiedAttendanceData(
     attendanceDocuments,
     period,
   );
-  const allItems = groupVerifiedAttendance(verifiedDocuments, employeesById)
+
+  return groupVerifiedAttendance(verifiedDocuments, employeesById)
     .sort((left, right) => left.employee.displayName.localeCompare(right.employee.displayName))
-    .map((group) => toVerifiedAttendanceItem(
-      group,
-      period,
-      pendingCorrectionsByEmployee.get(group.employee.employeeId) ?? new Set<string>(),
-    ));
+    .map((group) => ({
+      item: toVerifiedAttendanceItem(
+        group,
+        period,
+        pendingCorrectionsByEmployee.get(group.employee.employeeId) ?? new Set<string>(),
+      ),
+      sourceAttendanceIds: group.sourceAttendanceIds,
+    }));
+}
+
+function getBatchPresentation(status: string) {
+  switch (status) {
+    case "Draft":
+      return { label: "Draft", tone: "warning" as const };
+    case "Ready":
+      return { label: "Ready", tone: "info" as const };
+    case "Submitted":
+      return { label: "Submitted", tone: "success" as const };
+    case "Acknowledged":
+      return { label: "Acknowledged", tone: "success" as const };
+    case "Blocked":
+      return { label: "Blocked", tone: "danger" as const };
+    case "Failed":
+      return { label: "Failed", tone: "danger" as const };
+    default:
+      return { label: "Not added", tone: "muted" as const };
+  }
+}
+
+export async function getPayrollVerifiedAttendanceData(
+  query: PayrollVerifiedAttendanceQuery,
+  now = new Date(),
+): Promise<PayrollVerifiedAttendanceData> {
+  const period = getCurrentPayrollPeriod(now);
+  const [sources, batches] = await Promise.all([
+    getPayrollVerifiedAttendanceSourcesForPeriod(period),
+    listPayrollBatches(),
+  ]);
+  const batchByEmployeePeriodId = new Map<string, { id: string; status: string }>();
+
+  batches.forEach((batch) => {
+    batch.includedRecords.forEach((record) => {
+      batchByEmployeePeriodId.set(record.employeePeriodId, {
+        id: batch.id,
+        status: batch.status,
+      });
+    });
+  });
+
+  const allItems = sources.map(({ item }) => {
+    const batch = batchByEmployeePeriodId.get(item.id);
+
+    if (!batch) {
+      return item;
+    }
+
+    const presentation = getBatchPresentation(batch.status);
+
+    return {
+      ...item,
+      batch: {
+        status: batch.status as PayrollVerifiedAttendanceItem["batch"]["status"],
+        label: presentation.label,
+        tone: presentation.tone,
+        batchId: batch.id,
+      },
+      selectable: false,
+    };
+  });
+  const departments = Array.from(new Set(allItems.map((item) => item.department))).sort();
   const filteredItems = allItems.filter((item) => (
     matchesSearch(
       item.employeeName,
@@ -212,12 +285,12 @@ export async function getPayrollVerifiedAttendanceData(
     summary: {
       verifiedRecords: allItems.length,
       ready: allItems.filter((item) => item.payrollReadiness.status === "ready").length,
-      includedInBatch: 0,
+      includedInBatch: allItems.filter((item) => item.batch.status !== "not-added").length,
       blocked: allItems.filter((item) => item.payrollReadiness.status === "blocked").length,
       needsFollowUp: allItems.filter((item) => item.payrollReadiness.reasons.length > 0).length,
     },
     items: filteredItems.slice(startIndex, startIndex + query.pageSize),
-    departments: Array.from(new Set(employees.map((employee) => employee.department))).sort(),
+    departments,
     pagination: {
       page,
       pageSize: query.pageSize,

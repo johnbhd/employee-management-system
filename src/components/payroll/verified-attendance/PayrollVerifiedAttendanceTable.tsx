@@ -10,6 +10,7 @@ type PayrollVerifiedAttendanceTableProps = {
   onToggleAll: (checked: boolean) => void;
   onToggleRecord: (id: string, checked: boolean) => void;
   onViewDetails: (record: PayrollVerifiedAttendanceItem) => void;
+  onAddToBatch: (record: PayrollVerifiedAttendanceItem) => void;
 };
 
 function formatAttendanceSummary(item: PayrollVerifiedAttendanceItem) {
@@ -38,6 +39,7 @@ export function PayrollVerifiedAttendanceTable({
   onToggleAll,
   onToggleRecord,
   onViewDetails,
+  onAddToBatch,
 }: PayrollVerifiedAttendanceTableProps) {
   const hasSelectableRecords = records.some((record) => record.selectable);
 
@@ -107,8 +109,8 @@ export function PayrollVerifiedAttendanceTable({
                     </summary>
                     <div>
                       <button type="button" onClick={() => onViewDetails(record)}>View details</button>
-                      <button type="button" disabled title="Payroll batch processing is not yet available.">
-                        Add to batch unavailable
+                      <button type="button" onClick={() => onAddToBatch(record)} disabled={!record.selectable} title={record.selectable ? "Create a Draft batch with this record" : "Only Ready for Payroll records can be added."}>
+                        Add to batch
                       </button>
                     </div>
                   </details>

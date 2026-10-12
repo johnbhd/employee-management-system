@@ -3,7 +3,14 @@ import type { StatusTone } from "@/types/ui";
 
 export type PayrollReadinessStatus = "ready" | "blocked";
 
-export type PayrollBatchStatus = "not-added";
+export type PayrollBatchStatus =
+  | "not-added"
+  | "Draft"
+  | "Ready"
+  | "Submitted"
+  | "Acknowledged"
+  | "Blocked"
+  | "Failed";
 
 export type PayrollVerifiedAttendanceQuery = {
   search: string;
@@ -37,9 +44,9 @@ export type PayrollVerifiedAttendanceItem = {
   };
   batch: {
     status: PayrollBatchStatus;
-    label: "Not added";
+    label: string;
     tone: StatusTone;
-    batchId: null;
+    batchId: string | null;
   };
   selectable: boolean;
 };

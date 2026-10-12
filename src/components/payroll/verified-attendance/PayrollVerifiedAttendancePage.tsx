@@ -10,6 +10,7 @@ import { SummaryCard } from "@/components/ui/SummaryCard";
 import { payrollVerifiedAttendancePageSizes } from "@/server/payroll/payroll-verified-attendance-query";
 import type { ApiResponse } from "@/types/api/responses";
 import type { Metric } from "@/types/ui";
+import type { PayrollBatchRecord } from "@/types/payroll-batches";
 import type {
   PayrollVerifiedAttendanceData,
   PayrollVerifiedAttendanceItem,
@@ -126,7 +127,7 @@ function getSummaryMetrics(
 
 function getDashboardErrorMessage(
   status: number,
-  body: PayrollVerifiedAttendanceApiResponse,
+  body: ApiResponse<unknown>,
 ) {
   if (status === 401) {
     return "Your Payroll session has expired. Sign in again.";
@@ -155,6 +156,7 @@ export function PayrollVerifiedAttendancePage({
     loadError ? "Verified attendance could not be loaded." : null,
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isAddingToBatch, setIsAddingToBatch] = useState(false);
   const [selectedIds, setSelectedIds] = useState<ReadonlySet<string>>(new Set());
   const [selectedRecord, setSelectedRecord] = useState<PayrollVerifiedAttendanceItem | null>(null);
 
@@ -225,6 +227,42 @@ export function PayrollVerifiedAttendancePage({
 
   function resetFilters() {
     router.push(pathname);
+  }
+
+  async function addToBatch(recordIds: readonly string[]) {
+    if (recordIds.length === 0 || isAddingToBatch) {
+      return;
+    }
+
+    setIsAddingToBatch(true);
+
+    try {
+      const response = await fetch("/api/v1/payroll/batches", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          periodStart: data.period.start,
+          periodEnd: data.period.end,
+          employeePeriodIds: recordIds,
+        }),
+      });
+      const body = await response.json() as ApiResponse<PayrollBatchRecord>;
+
+      if (!response.ok || !body.success) {
+        throw new Error(getDashboardErrorMessage(response.status, body as PayrollVerifiedAttendanceApiResponse));
+      }
+
+      await refreshData();
+      setSelectedIds(new Set());
+      router.push(`/payroll/batches?periodStart=${body.data.period.start}&periodEnd=${body.data.period.end}`);
+    } catch (addError) {
+      setError(addError instanceof Error ? addError.message : "The selected records could not be added to a batch.");
+    } finally {
+      setIsAddingToBatch(false);
+    }
   }
 
   function toggleAllVisible(checked: boolean) {
@@ -310,10 +348,10 @@ export function PayrollVerifiedAttendancePage({
             <button
               type="button"
               className="button-primary"
-              disabled
-              title="Payroll batch processing is not yet available."
+              disabled={isAddingToBatch || selectedIds.size === 0}
+              onClick={() => void addToBatch(Array.from(selectedIds))}
             >
-              <Icon name="layers" /> Add to batch ({selectedIds.size})
+              <Icon name="layers" /> {isAddingToBatch ? "Adding…" : `Add to batch (${selectedIds.size})`}
             </button>
           </div>
         )}
@@ -347,6 +385,7 @@ export function PayrollVerifiedAttendancePage({
           onToggleAll={toggleAllVisible}
           onToggleRecord={toggleRecord}
           onViewDetails={setSelectedRecord}
+          onAddToBatch={(record) => void addToBatch([record.id])}
         />
 
         <footer className="payroll-verified-attendance__pagination">
@@ -390,7 +429,7 @@ export function PayrollVerifiedAttendancePage({
 
       <p className="payroll-verified-attendance__batch-note">
         <Icon name="info" />
-        Payroll batch persistence is not available yet. Records cannot be added to a batch from this page, and no Included or Transferred status is fabricated.
+        Add to batch creates a persistent Draft batch for the selected payroll period. The server rechecks HR verification, payroll readiness, and duplicate batch membership before saving immutable snapshots.
       </p>
 
       <p className="payroll-verified-attendance__boundary-note">

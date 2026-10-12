@@ -1,0 +1,443 @@
+import "server-only";
+
+import type { DocumentData } from "firebase-admin/firestore";
+import { Timestamp } from "firebase-admin/firestore";
+import { randomUUID } from "node:crypto";
+
+import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import type { SessionUser } from "@/types/auth";
+import type {
+  PayrollBatchActor,
+  PayrollBatchItemSnapshot,
+  PayrollBatchRecord,
+  PayrollBatchStatus,
+} from "@/types/payroll-batches";
+
+const batchCollection = "payrollBatches";
+const membershipCollection = "payrollBatchMembership";
+
+type BatchActor = Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
+
+export class PayrollBatchDataError extends Error {
+  readonly code = "PAYROLL_BATCH_DATA_INVALID";
+
+  constructor() {
+    super("The payroll batch record has an invalid shape.");
+    this.name = "PayrollBatchDataError";
+  }
+}
+
+export class PayrollBatchNotFoundError extends Error {
+  readonly code = "PAYROLL_BATCH_NOT_FOUND";
+
+  constructor() {
+    super("The payroll batch could not be found.");
+    this.name = "PayrollBatchNotFoundError";
+  }
+}
+
+export class PayrollBatchConflictError extends Error {
+  readonly code = "PAYROLL_BATCH_CONFLICT";
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PayrollBatchConflictError";
+  }
+}
+
+export class PayrollBatchValidationError extends Error {
+  readonly code = "PAYROLL_BATCH_VALIDATION_ERROR";
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PayrollBatchValidationError";
+  }
+}
+
+export class PayrollBatchEligibilityError extends Error {
+  readonly code = "PAYROLL_BATCH_RECORD_NOT_READY";
+
+  constructor(message: string) {
+    super(message);
+    this.name = "PayrollBatchEligibilityError";
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function getRequiredString(data: Record<string, unknown>, field: string): string | null {
+  const value = data[field];
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function getNullableString(data: Record<string, unknown>, field: string): string | null {
+  const value = data[field];
+  return value === null || value === undefined
+    ? null
+    : typeof value === "string" && value.trim() ? value : null;
+}
+
+function getTimestamp(value: unknown): Timestamp | null {
+  return value instanceof Timestamp ? value : null;
+}
+
+function getRequiredNumber(data: Record<string, unknown>, field: string): number | null {
+  const value = data[field];
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
+}
+
+function parseActor(value: unknown): PayrollBatchActor | null {
+  if (!isRecord(value)) return null;
+
+  const uid = getRequiredString(value, "uid");
+  const username = getRequiredString(value, "username");
+  const displayName = getRequiredString(value, "displayName");
+  const role = getRequiredString(value, "role");
+
+  return uid && username && displayName && role
+    ? { uid, username, displayName, role }
+    : null;
+}
+
+function parsePeriod(value: unknown): PayrollBatchItemSnapshot["payrollPeriod"] | null {
+  if (!isRecord(value)) return null;
+
+  const start = getRequiredString(value, "start");
+  const end = getRequiredString(value, "end");
+  const label = getRequiredString(value, "label");
+
+  return start && end && label && start <= end ? { start, end, label } : null;
+}
+
+function parseSnapshot(value: unknown): PayrollBatchItemSnapshot | null {
+  if (!isRecord(value)) return null;
+
+  const employeePeriodId = getRequiredString(value, "employeePeriodId");
+  const employeeId = getRequiredString(value, "employeeId");
+  const employeeName = getRequiredString(value, "employeeName");
+  const department = getRequiredString(value, "department");
+  const payrollPeriod = parsePeriod(value.payrollPeriod);
+  const presentDays = getRequiredNumber(value, "presentDays");
+  const lateCount = value.lateCount === null ? null : getRequiredNumber(value, "lateCount");
+  const lateMinutes = value.lateMinutes === null ? null : getRequiredNumber(value, "lateMinutes");
+  const undertimeMinutes = value.undertimeMinutes === null
+    ? null
+    : getRequiredNumber(value, "undertimeMinutes");
+  const sourceAttendanceIds = Array.isArray(value.sourceAttendanceIds)
+    && value.sourceAttendanceIds.every((id) => typeof id === "string" && id.trim())
+    ? value.sourceAttendanceIds
+    : null;
+  const snapshotCreatedAt = getTimestamp(value.snapshotCreatedAt);
+
+  if (
+    !employeePeriodId
+    || !employeeId
+    || !employeeName
+    || !department
+    || !payrollPeriod
+    || presentDays === null
+    || (value.lateCount !== null && lateCount === null)
+    || (value.lateMinutes !== null && lateMinutes === null)
+    || (value.undertimeMinutes !== null && undertimeMinutes === null)
+    || value.hrVerificationStatus !== "verified"
+    || value.payrollReadiness !== "ready"
+    || !sourceAttendanceIds
+    || !snapshotCreatedAt
+  ) {
+    return null;
+  }
+
+  return {
+    employeePeriodId,
+    employeeId,
+    employeeName,
+    department,
+    payrollPeriod,
+    presentDays,
+    lateCount,
+    lateMinutes,
+    undertimeMinutes,
+    hrVerificationStatus: "verified",
+    payrollReadiness: "ready",
+    sourceAttendanceIds,
+    snapshotCreatedAt: snapshotCreatedAt.toDate().toISOString(),
+  };
+}
+
+function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRecord | null {
+  if (!data) return null;
+
+  const period = parsePeriod(data.period);
+  const status = data.status as PayrollBatchStatus;
+  const createdBy = parseActor(data.createdBy);
+  const createdAt = getTimestamp(data.createdAt);
+  const updatedAt = getTimestamp(data.updatedAt);
+  const submittedBy = data.submittedBy === null || data.submittedBy === undefined
+    ? null
+    : parseActor(data.submittedBy);
+  const submittedAt = data.submittedAt === null || data.submittedAt === undefined
+    ? null
+    : getTimestamp(data.submittedAt);
+  const recordCount = getRequiredNumber(data, "recordCount");
+  const blockedCount = getRequiredNumber(data, "blockedCount");
+  const includedRecords = Array.isArray(data.includedRecords)
+    ? data.includedRecords.map(parseSnapshot)
+    : null;
+  const notes = getNullableString(data, "notes");
+
+  if (
+    !period
+    || !["Draft", "Ready", "Submitted", "Acknowledged", "Blocked", "Failed"].includes(status)
+    || !createdBy
+    || !createdAt
+    || !updatedAt
+    || (data.submittedBy !== null && data.submittedBy !== undefined && !submittedBy)
+    || (data.submittedAt !== null && data.submittedAt !== undefined && !submittedAt)
+    || recordCount === null
+    || blockedCount === null
+    || !includedRecords
+    || includedRecords.some((record) => record === null)
+  ) {
+    return null;
+  }
+
+  const records = includedRecords as PayrollBatchItemSnapshot[];
+  const departmentNames = Array.from(new Set(records.map((record) => record.department))).sort();
+
+  return {
+    id,
+    period,
+    status,
+    createdBy,
+    createdAt: createdAt.toDate().toISOString(),
+    updatedAt: updatedAt.toDate().toISOString(),
+    submittedBy,
+    submittedAt: submittedAt?.toDate().toISOString() ?? null,
+    recordCount,
+    blockedCount,
+    departmentNames,
+    includedRecords: records,
+    notes,
+  };
+}
+
+function toActor(actor: BatchActor): PayrollBatchActor {
+  return {
+    uid: actor.uid,
+    username: actor.username,
+    displayName: actor.displayName,
+    role: actor.role,
+  };
+}
+
+function membershipDocumentId(employeePeriodId: string) {
+  return encodeURIComponent(employeePeriodId);
+}
+
+export function getEmployeePeriodId(employeeId: string, periodStart: string) {
+  return `${employeeId}:${periodStart}`;
+}
+
+export function parsePayrollBatch(
+  id: string,
+  data: DocumentData | undefined,
+): PayrollBatchRecord | null {
+  return parseBatch(id, data);
+}
+
+export async function listPayrollBatches(): Promise<PayrollBatchRecord[]> {
+  const snapshots = await getFirebaseAdminDb().collection(batchCollection).get();
+
+  return snapshots.docs
+    .map((snapshot) => {
+      const batch = parseBatch(snapshot.id, snapshot.data());
+      if (!batch) throw new PayrollBatchDataError();
+      return batch;
+    })
+    .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+}
+
+export async function getPayrollBatchById(
+  batchId: string,
+): Promise<PayrollBatchRecord | null> {
+  const snapshot = await getFirebaseAdminDb().collection(batchCollection).doc(batchId).get();
+  if (!snapshot.exists) return null;
+
+  const batch = parseBatch(snapshot.id, snapshot.data());
+  if (!batch) throw new PayrollBatchDataError();
+  return batch;
+}
+
+export async function createPayrollBatch(input: {
+  period: PayrollBatchItemSnapshot["payrollPeriod"];
+  actor: BatchActor;
+  notes?: string | null;
+  blockedCount?: number;
+}): Promise<PayrollBatchRecord> {
+  const db = getFirebaseAdminDb();
+  const now = Timestamp.now();
+  const batchReference = db.collection(batchCollection).doc(`PAY-${input.period.start.replaceAll("-", "")}-${randomUUID().slice(0, 8).toUpperCase()}`);
+  const actor = toActor(input.actor);
+
+  await batchReference.set({
+    period: input.period,
+    status: "Draft",
+    createdBy: actor,
+    createdAt: now,
+    updatedAt: now,
+    submittedBy: null,
+    submittedAt: null,
+    recordCount: 0,
+    blockedCount: input.blockedCount ?? 0,
+    includedRecords: [],
+    notes: input.notes?.trim() || null,
+  });
+
+  const batch = parseBatch(batchReference.id, (await batchReference.get()).data());
+  if (!batch) throw new PayrollBatchDataError();
+  return batch;
+}
+
+export async function addPayrollBatchItem(input: {
+  batchId: string;
+  snapshot: PayrollBatchItemSnapshot;
+}): Promise<PayrollBatchRecord> {
+  const db = getFirebaseAdminDb();
+  const batchReference = db.collection(batchCollection).doc(input.batchId);
+  const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.snapshot.employeePeriodId));
+
+  return db.runTransaction(async (transaction) => {
+    const batchSnapshot = await transaction.get(batchReference);
+    const membershipSnapshot = await transaction.get(membershipReference);
+
+    if (!batchSnapshot.exists) throw new PayrollBatchNotFoundError();
+    const batch = parseBatch(batchSnapshot.id, batchSnapshot.data());
+    if (!batch) throw new PayrollBatchDataError();
+    if (batch.status !== "Draft") {
+      throw new PayrollBatchConflictError("Only Draft batches can be changed.");
+    }
+    if (batch.period.start !== input.snapshot.payrollPeriod.start || batch.period.end !== input.snapshot.payrollPeriod.end) {
+      throw new PayrollBatchValidationError("The attendance record belongs to a different payroll period.");
+    }
+
+    if (membershipSnapshot.exists) {
+      const currentBatchId = membershipSnapshot.data()?.batchId;
+      if (currentBatchId !== batch.id) {
+        throw new PayrollBatchConflictError("This employee-period record is already included in another payroll batch.");
+      }
+
+      return batch;
+    }
+
+    const includedRecords = batch.includedRecords.concat(input.snapshot);
+    const now = Timestamp.now();
+    transaction.update(batchReference, {
+      includedRecords,
+      recordCount: includedRecords.length,
+      updatedAt: now,
+    });
+    transaction.set(membershipReference, {
+      batchId: batch.id,
+      employeePeriodId: input.snapshot.employeePeriodId,
+      createdAt: now,
+    });
+
+    return {
+      ...batch,
+      includedRecords,
+      recordCount: includedRecords.length,
+      updatedAt: now.toDate().toISOString(),
+      departmentNames: Array.from(new Set(includedRecords.map((record) => record.department))).sort(),
+    };
+  });
+}
+
+export async function removePayrollBatchItem(input: {
+  batchId: string;
+  employeePeriodId: string;
+}): Promise<PayrollBatchRecord> {
+  const db = getFirebaseAdminDb();
+  const batchReference = db.collection(batchCollection).doc(input.batchId);
+  const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.employeePeriodId));
+
+  return db.runTransaction(async (transaction) => {
+    const batchSnapshot = await transaction.get(batchReference);
+    const membershipSnapshot = await transaction.get(membershipReference);
+    if (!batchSnapshot.exists) throw new PayrollBatchNotFoundError();
+    const batch = parseBatch(batchSnapshot.id, batchSnapshot.data());
+    if (!batch) throw new PayrollBatchDataError();
+    if (batch.status !== "Draft") throw new PayrollBatchConflictError("Only Draft batches can be changed.");
+
+    const includedRecords = batch.includedRecords.filter((record) => record.employeePeriodId !== input.employeePeriodId);
+    if (includedRecords.length === batch.includedRecords.length) {
+      return batch;
+    }
+
+    const now = Timestamp.now();
+    transaction.update(batchReference, {
+      includedRecords,
+      recordCount: includedRecords.length,
+      updatedAt: now,
+    });
+    if (membershipSnapshot.exists && membershipSnapshot.data()?.batchId === batch.id) {
+      transaction.delete(membershipReference);
+    }
+
+    return {
+      ...batch,
+      includedRecords,
+      recordCount: includedRecords.length,
+      updatedAt: now.toDate().toISOString(),
+      departmentNames: Array.from(new Set(includedRecords.map((record) => record.department))).sort(),
+    };
+  });
+}
+
+export async function updatePayrollBatchStatus(input: {
+  batchId: string;
+  status: "Ready" | "Submitted";
+  actor: BatchActor;
+}): Promise<PayrollBatchRecord> {
+  const db = getFirebaseAdminDb();
+  const batchReference = db.collection(batchCollection).doc(input.batchId);
+
+  return db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(batchReference);
+    if (!snapshot.exists) throw new PayrollBatchNotFoundError();
+    const batch = parseBatch(snapshot.id, snapshot.data());
+    if (!batch) throw new PayrollBatchDataError();
+
+    const expectedCurrentStatus = input.status === "Ready" ? "Draft" : "Ready";
+    if (batch.status !== expectedCurrentStatus) {
+      throw new PayrollBatchConflictError(
+        input.status === "Submitted"
+          ? "Only Ready batches can be submitted."
+          : "Only Draft batches can be marked Ready.",
+      );
+    }
+    if (batch.recordCount < 1) {
+      throw new PayrollBatchValidationError("Add at least one Ready for Payroll record before changing the batch status.");
+    }
+
+    const now = Timestamp.now();
+    const update: DocumentData = {
+      status: input.status,
+      updatedAt: now,
+    };
+    if (input.status === "Submitted") {
+      update.submittedBy = toActor(input.actor);
+      update.submittedAt = now;
+    }
+    transaction.update(batchReference, update);
+
+    return {
+      ...batch,
+      status: input.status,
+      updatedAt: now.toDate().toISOString(),
+      submittedBy: input.status === "Submitted" ? toActor(input.actor) : batch.submittedBy,
+      submittedAt: input.status === "Submitted" ? now.toDate().toISOString() : batch.submittedAt,
+    };
+  });
+}
