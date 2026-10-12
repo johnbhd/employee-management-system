@@ -33,9 +33,10 @@ function mapError(error: unknown) {
 }
 
 export async function DELETE(_request: Request, context: RouteContext) {
+  let authContext: Awaited<ReturnType<typeof requireApiRoleContext>>;
   try {
-    const context = await requireApiRoleContext("payroll");
-    await requireApiPermission("payroll.batch.manage", context.user);
+    authContext = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.manage", authContext.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
     return mapError(error);
@@ -46,6 +47,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     const data = await removePayrollBatchItem({
       batchId,
       employeePeriodId: decodeURIComponent(employeePeriodId),
+      actor: authContext.user,
     });
     const response: ApiSuccessResponse<PayrollBatchRecord> = { success: true, data };
     return NextResponse.json(response);

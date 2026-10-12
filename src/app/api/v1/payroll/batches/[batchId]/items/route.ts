@@ -43,9 +43,10 @@ function mapError(error: unknown) {
 }
 
 export async function POST(request: Request, context: RouteContext) {
+  let authContext: Awaited<ReturnType<typeof requireApiRoleContext>>;
   try {
-    const context = await requireApiRoleContext("payroll");
-    await requireApiPermission("payroll.batch.manage", context.user);
+    authContext = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.manage", authContext.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
     return mapError(error);
@@ -72,7 +73,7 @@ export async function POST(request: Request, context: RouteContext) {
       throw new PayrollBatchEligibilityError("Only Ready for Payroll records can be added to a batch.");
     }
 
-    const data = await addPayrollBatchItem({ batchId, snapshot: toPayrollBatchSnapshot(source) });
+    const data = await addPayrollBatchItem({ batchId, snapshot: toPayrollBatchSnapshot(source), actor: authContext.user });
     const response: ApiSuccessResponse<PayrollBatchRecord> = { success: true, data };
     return NextResponse.json(response, { status: 201 });
   } catch (error) {

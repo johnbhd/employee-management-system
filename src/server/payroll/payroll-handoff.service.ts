@@ -35,6 +35,7 @@ import {
   PayrollResultValidationError,
 } from "./payroll-result.service";
 import { getCurrentPayrollPeriod } from "./payroll-dashboard.service";
+import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
 
 export class PayrollHandoffValidationError extends Error {
   readonly code = "PAYROLL_HANDOFF_VALIDATION_ERROR";
@@ -248,13 +249,25 @@ export async function submitPayrollHandoff(input: {
       records: handoff.batchSnapshot,
     });
   } catch {
-    await updatePayrollHandoffResult({
+    const failed = await updatePayrollHandoffResult({
       batchId: batch.id,
       transferStatus: "failed",
       acknowledgementStatus: "not_received",
       provider: "simulated-payroll-adapter",
       failureCode: "ADAPTER_UNAVAILABLE",
       failureSummary: "Payroll handoff could not be completed. Technical follow-up is required.",
+    });
+    await recordAuditEvent({
+      id: `${failed.transferId}:failed`,
+      eventType: "payroll.handoff.failed",
+      action: "Payroll Handoff Failed",
+      module: "Payroll Integration",
+      actor: { type: "user", uid: input.actor.uid, displayName: input.actor.displayName, role: input.actor.role },
+      target: { type: "payroll_handoff", id: failed.transferId, reference: failed.transferId, label: failed.batchId },
+      outcome: "Failed",
+      summary: "The Payroll handoff failed and requires technical follow-up.",
+      metadata: { batchId: failed.batchId, transferId: failed.transferId, failureCode: failed.failureCode },
+      occurredAt: new Date(failed.failedAt ?? failed.updatedAt),
     });
     throw new PayrollHandoffIntegrationError();
   }
@@ -270,6 +283,34 @@ export async function submitPayrollHandoff(input: {
     failureCode: result.failureCode ?? null,
     failureSummary: result.failureSummary ?? null,
   });
+
+  await recordAuditEvent({
+    id: `${persisted.transferId}:submitted`,
+    eventType: "payroll.handoff.submitted",
+    action: "Payroll Handoff Submitted",
+    module: "Payroll Integration",
+    actor: { type: "user", uid: input.actor.uid, displayName: input.actor.displayName, role: input.actor.role },
+    target: { type: "payroll_handoff", id: persisted.transferId, reference: persisted.externalReference ?? persisted.transferId, label: persisted.batchId },
+    outcome: result.accepted ? "Successful" : "Failed",
+    summary: result.accepted ? "A Payroll batch was submitted to the configured integration adapter." : "A Payroll handoff was rejected by the configured integration adapter.",
+    metadata: { batchId: persisted.batchId, transferId: persisted.transferId, failureCode: persisted.failureCode },
+    occurredAt: new Date(persisted.updatedAt),
+  });
+
+  if (result.accepted && persisted.acknowledgementStatus === "accepted") {
+    await recordAuditEvent({
+      id: `${persisted.transferId}:acknowledged`,
+      eventType: "payroll.handoff.acknowledged",
+      action: "Payroll Handoff Acknowledged",
+      module: "Payroll Integration",
+      actor: { type: "integration", uid: `integration:${persisted.provider}`, displayName: "Payroll Integration", role: "system" },
+      target: { type: "payroll_handoff", id: persisted.transferId, reference: persisted.externalReference ?? persisted.transferId, label: persisted.batchId },
+      outcome: "Successful",
+      summary: "The Payroll integration acknowledged the handoff.",
+      metadata: { batchId: persisted.batchId, transferId: persisted.transferId },
+      occurredAt: new Date(persisted.acknowledgedAt ?? persisted.updatedAt),
+    });
+  }
 
   if (!result.accepted) {
     throw new PayrollHandoffIntegrationError(result.failureSummary ?? undefined);

@@ -15,6 +15,11 @@ const outcomeTones: Record<AdminAuditOutcome, StatusTone> = {
   Failed: "danger",
 };
 
+function formatMetadataValue(value: string | number | boolean | null | string[]) {
+  if (Array.isArray(value)) return value.join(", ");
+  return value === null ? "—" : String(value);
+}
+
 export function AuditLogDetailsDrawer({ event, relatedEvents, onClose }: AuditLogDetailsDrawerProps) {
   return (
     <div className="audit-logs-drawer-layer">
@@ -34,7 +39,7 @@ export function AuditLogDetailsDrawer({ event, relatedEvents, onClose }: AuditLo
         <div className="audit-logs-drawer-content">
           <div className="audit-logs-drawer-status-row">
             <StatusBadge tone={outcomeTones[event.outcome]}>{event.outcome}</StatusBadge>
-            <span>{event.module}</span>
+            <span>{event.module} · {event.eventType}</span>
           </div>
 
           <section className="audit-logs-detail-section">
@@ -43,7 +48,7 @@ export function AuditLogDetailsDrawer({ event, relatedEvents, onClose }: AuditLo
               <div>
                 <dt>Performed by</dt>
                 <dd>{event.actor.name}</dd>
-                <small>{event.actor.role}{event.actor.userId ? ` · ${event.actor.userId}` : ""}</small>
+                <small>{event.actor.role ?? "No role snapshot"} · {event.actor.type}{event.actor.userId ? ` · ${event.actor.userId}` : ""}</small>
               </div>
               <div>
                 <dt>Target</dt>
@@ -71,6 +76,16 @@ export function AuditLogDetailsDrawer({ event, relatedEvents, onClose }: AuditLo
             ) : (
               <p className="audit-logs-muted-copy">No field-level changes were recorded for this event.</p>
             )}
+            {Object.keys(event.metadata).length > 0 ? (
+              <dl className="audit-logs-detail-list">
+                {Object.entries(event.metadata).map(([key, value]) => (
+                  <div key={key}>
+                    <dt>{key}</dt>
+                    <dd>{formatMetadataValue(value)}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
             {event.details ? <p className="audit-logs-event-detail">{event.details}</p> : null}
           </section>
 
@@ -98,7 +113,7 @@ export function AuditLogDetailsDrawer({ event, relatedEvents, onClose }: AuditLo
         </div>
 
         <footer className="audit-logs-drawer-footer">
-          <span>Read-only prototype record</span>
+          <span>Read-only server record</span>
           <button type="button" className="button-secondary" onClick={onClose}>Close details</button>
         </footer>
       </aside>

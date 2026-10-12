@@ -5,6 +5,7 @@ import { Timestamp } from "firebase-admin/firestore";
 import { randomUUID } from "node:crypto";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
 import type { SessionUser } from "@/types/auth";
 import type {
   PayrollBatchActor,
@@ -232,6 +233,26 @@ function toActor(actor: BatchActor): PayrollBatchActor {
   };
 }
 
+async function writeBatchAuditEvent(
+  batch: PayrollBatchRecord,
+  eventType: "payroll.batch.created" | "payroll.batch.updated",
+  actor: BatchActor,
+  summary: string,
+) {
+  await recordAuditEvent({
+    id: `${batch.id}:${eventType}:${batch.updatedAt}`,
+    eventType,
+    action: eventType === "payroll.batch.created" ? "Payroll Batch Created" : "Payroll Batch Updated",
+    module: "Payroll Batches",
+    actor: { type: "user", uid: actor.uid, displayName: actor.displayName, role: actor.role },
+    target: { type: "payroll_batch", id: batch.id, reference: batch.id, label: batch.period.label },
+    outcome: "Successful",
+    summary,
+    metadata: { batchId: batch.id },
+    occurredAt: new Date(batch.updatedAt),
+  });
+}
+
 function membershipDocumentId(employeePeriodId: string) {
   return encodeURIComponent(employeePeriodId);
 }
@@ -297,18 +318,20 @@ export async function createPayrollBatch(input: {
 
   const batch = parseBatch(batchReference.id, (await batchReference.get()).data());
   if (!batch) throw new PayrollBatchDataError();
+  await writeBatchAuditEvent(batch, "payroll.batch.created", input.actor, "A Payroll batch was created.");
   return batch;
 }
 
 export async function addPayrollBatchItem(input: {
   batchId: string;
   snapshot: PayrollBatchItemSnapshot;
+  actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
   const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.snapshot.employeePeriodId));
 
-  return db.runTransaction(async (transaction) => {
+  const updated = await db.runTransaction(async (transaction) => {
     const batchSnapshot = await transaction.get(batchReference);
     const membershipSnapshot = await transaction.get(membershipReference);
 
@@ -352,17 +375,31 @@ export async function addPayrollBatchItem(input: {
       departmentNames: Array.from(new Set(includedRecords.map((record) => record.department))).sort(),
     };
   });
+  await recordAuditEvent({
+    id: `${updated.id}:item-added:${updated.updatedAt}`,
+    eventType: "payroll.batch.updated",
+    action: "Payroll Batch Updated",
+    module: "Payroll Batches",
+    actor: { type: "user", uid: input.actor.uid, displayName: input.actor.displayName, role: input.actor.role },
+    target: { type: "payroll_batch", id: updated.id, reference: updated.id, label: updated.period.label },
+    outcome: "Successful",
+    summary: "A verified attendance record was added to a Payroll batch.",
+    metadata: { batchId: updated.id },
+    occurredAt: new Date(updated.updatedAt),
+  });
+  return updated;
 }
 
 export async function removePayrollBatchItem(input: {
   batchId: string;
   employeePeriodId: string;
+  actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
   const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.employeePeriodId));
 
-  return db.runTransaction(async (transaction) => {
+  const updated = await db.runTransaction(async (transaction) => {
     const batchSnapshot = await transaction.get(batchReference);
     const membershipSnapshot = await transaction.get(membershipReference);
     if (!batchSnapshot.exists) throw new PayrollBatchNotFoundError();
@@ -393,6 +430,19 @@ export async function removePayrollBatchItem(input: {
       departmentNames: Array.from(new Set(includedRecords.map((record) => record.department))).sort(),
     };
   });
+  await recordAuditEvent({
+    id: `${updated.id}:item-removed:${updated.updatedAt}`,
+    eventType: "payroll.batch.updated",
+    action: "Payroll Batch Updated",
+    module: "Payroll Batches",
+    actor: { type: "user", uid: input.actor.uid, displayName: input.actor.displayName, role: input.actor.role },
+    target: { type: "payroll_batch", id: updated.id, reference: updated.id, label: updated.period.label },
+    outcome: "Successful",
+    summary: "An attendance record was removed from a Draft Payroll batch.",
+    metadata: { batchId: updated.id },
+    occurredAt: new Date(updated.updatedAt),
+  });
+  return updated;
 }
 
 export async function updatePayrollBatchStatus(input: {
@@ -403,7 +453,7 @@ export async function updatePayrollBatchStatus(input: {
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
 
-  return db.runTransaction(async (transaction) => {
+  const updated = await db.runTransaction(async (transaction) => {
     const snapshot = await transaction.get(batchReference);
     if (!snapshot.exists) throw new PayrollBatchNotFoundError();
     const batch = parseBatch(snapshot.id, snapshot.data());
@@ -440,6 +490,8 @@ export async function updatePayrollBatchStatus(input: {
       submittedAt: input.status === "Submitted" ? now.toDate().toISOString() : batch.submittedAt,
     };
   });
+  await writeBatchAuditEvent(updated, "payroll.batch.updated", input.actor, `Payroll batch status changed to ${input.status}.`);
+  return updated;
 }
 
 export async function markPayrollBatchSubmittedFromHandoff(input: {

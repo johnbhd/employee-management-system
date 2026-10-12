@@ -112,6 +112,7 @@ export async function POST(request: Request) {
       updatedBatch = await addPayrollBatchItem({
         batchId: updatedBatch.id,
         snapshot: toPayrollBatchSnapshot(source),
+        actor: context.user,
       });
     }
 

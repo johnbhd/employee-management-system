@@ -425,6 +425,7 @@ export async function writeAccountingTransferAuditEvent(input: {
   occurredAt: string;
 }) {
   const id = `${input.transfer.transferId}:${input.action.toLowerCase().replaceAll(" ", "-")}:${input.occurredAt}`;
+  const automatic = input.action === "Acknowledged" || input.action === "Rejected" || input.action === "Failed";
   await getFirebaseAdminDb().collection(auditCollection).doc(id).set({
     eventId: id,
     action: input.action,
@@ -434,7 +435,15 @@ export async function writeAccountingTransferAuditEvent(input: {
     payrollHandoffId: input.transfer.payrollHandoffId,
     externalPayrollReference: input.transfer.externalPayrollReference,
     externalAccountingReference: input.transfer.externalAccountingReference,
-    actor: input.transfer.submittedBy,
+    actor: automatic
+      ? {
+        uid: `integration:${input.transfer.provider}`,
+        username: input.transfer.provider,
+        displayName: "Accounting Integration",
+        role: "system",
+        type: "integration",
+      }
+      : { ...input.transfer.submittedBy, type: "user" },
     occurredAt: Timestamp.fromDate(new Date(input.occurredAt)),
     createdAt: FieldValue.serverTimestamp(),
   }, { merge: true });
