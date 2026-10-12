@@ -14,7 +14,6 @@ type PayrollHandoffTableProps = {
   onSubmit?: (batch: PayrollReadyBatch) => void;
   onViewReady?: (batch: PayrollReadyBatch) => void;
   onViewRecord?: (record: PayrollHandoffRecord) => void;
-  onRetry?: (record: PayrollHandoffRecord) => void;
   onCopyReference?: (record: PayrollHandoffRecord) => void;
 };
 
@@ -25,7 +24,6 @@ export function PayrollHandoffTable({
   onSubmit,
   onViewReady,
   onViewRecord,
-  onRetry,
   onCopyReference,
 }: PayrollHandoffTableProps) {
   if (kind === "ready") {
@@ -37,8 +35,9 @@ export function PayrollHandoffTable({
             <tr>
               <th scope="col">Batch ID</th>
               <th scope="col">Payroll period</th>
-              <th scope="col">Employees</th>
+              <th scope="col">Records</th>
               <th scope="col">Departments</th>
+              <th scope="col">Created by</th>
               <th scope="col">Created at</th>
               <th scope="col">Actions</th>
             </tr>
@@ -48,9 +47,10 @@ export function PayrollHandoffTable({
               <tr key={batch.id}>
                 <td><strong>{batch.id}</strong></td>
                 <td>{batch.period}</td>
-                <td>{batch.employees}</td>
+                <td>{batch.includedRecords}</td>
                 <td>{batch.departments}</td>
-                <td>{batch.createdAt}</td>
+                <td>{batch.createdBy}</td>
+                <td>{formatDate(batch.createdAt)}</td>
                 <td>
                   <div className="payroll-handoff__row-actions">
                     <button type="button" className="button-link" onClick={() => onSubmit?.(batch)}>Submit</button>
@@ -64,7 +64,7 @@ export function PayrollHandoffTable({
                   </div>
                 </td>
               </tr>
-            )) : <EmptyRow colSpan={6} message="No batches are ready for handoff." />}
+            )) : <EmptyRow colSpan={7} message="No payroll batches are currently ready for handoff." />}
           </tbody>
         </table>
       </div>
@@ -88,11 +88,11 @@ export function PayrollHandoffTable({
           </thead>
           <tbody>
             {records.length > 0 ? records.map((record) => (
-              <tr key={record.id}>
-                <td><strong>{record.id}</strong></td>
+              <tr key={record.transferId}>
+                <td><strong>{record.batchId}</strong></td>
                 <td>{record.period}</td>
                 <td>{record.employees}</td>
-                <td>{record.submittedAt}</td>
+                <td>{formatDate(record.submittedAt)}</td>
                 <td><StatusBadge tone={getPayrollHandoffTransferTone(record.transferStatus)}>{record.transferStatus}</StatusBadge></td>
                 <td><RowActions record={record} onViewRecord={onViewRecord} /></td>
               </tr>
@@ -109,6 +109,7 @@ export function PayrollHandoffTable({
         <caption className="sr-only">Payroll handoff history</caption>
         <thead>
           <tr>
+            <th scope="col">Transfer ID</th>
             <th scope="col">Batch ID</th>
             <th scope="col">Payroll period</th>
             <th scope="col">Employees</th>
@@ -121,17 +122,18 @@ export function PayrollHandoffTable({
         </thead>
         <tbody>
           {records.length > 0 ? records.map((record) => (
-            <tr key={record.id}>
-              <td><strong>{record.id}</strong></td>
+            <tr key={record.transferId}>
+              <td><strong>{record.transferId}</strong></td>
+              <td>{record.batchId}</td>
               <td>{record.period}</td>
               <td>{record.employees}</td>
-              <td>{record.submittedAt}</td>
+              <td>{formatDate(record.submittedAt)}</td>
               <td><StatusBadge tone={getPayrollHandoffTransferTone(record.transferStatus)}>{record.transferStatus}</StatusBadge></td>
               <td><StatusBadge tone={getPayrollHandoffAcknowledgementTone(record.acknowledgement)}>{record.acknowledgement}</StatusBadge></td>
               <td>{record.reference}</td>
-              <td><RowActions record={record} onViewRecord={onViewRecord} onRetry={onRetry} onCopyReference={onCopyReference} /></td>
+              <td><RowActions record={record} onViewRecord={onViewRecord} onCopyReference={onCopyReference} /></td>
             </tr>
-          )) : <EmptyRow colSpan={8} message="No handoff activity matches your filters." />}
+          )) : <EmptyRow colSpan={9} message="No payroll handoff activity is available for this period." />}
         </tbody>
       </table>
     </div>
@@ -141,12 +143,10 @@ export function PayrollHandoffTable({
 function RowActions({
   record,
   onViewRecord,
-  onRetry,
   onCopyReference,
 }: {
   record: PayrollHandoffRecord;
   onViewRecord?: (record: PayrollHandoffRecord) => void;
-  onRetry?: (record: PayrollHandoffRecord) => void;
   onCopyReference?: (record: PayrollHandoffRecord) => void;
 }) {
   return (
@@ -156,8 +156,7 @@ function RowActions({
         <summary aria-label={`More actions for ${record.id}`}><Icon name="menu" /></summary>
         <div>
           <button type="button" onClick={() => onViewRecord?.(record)}>View details</button>
-          {record.transferStatus === "Failed" ? <button type="button" onClick={() => onRetry?.(record)}>Retry transfer</button> : null}
-          {record.reference !== "—" ? <button type="button" onClick={() => onCopyReference?.(record)}>Copy reference</button> : null}
+          {record.reference.startsWith("SIM-") ? <button type="button" onClick={() => onCopyReference?.(record)}>Copy reference</button> : null}
         </div>
       </details>
     </div>
@@ -173,4 +172,12 @@ function EmptyRow({ colSpan, message }: { colSpan: number; message: string }) {
       </td>
     </tr>
   );
+}
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Asia/Manila",
+  }).format(new Date(value));
 }

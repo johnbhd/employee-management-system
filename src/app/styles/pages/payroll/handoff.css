@@ -432,6 +432,36 @@
   color: var(--au-navy);
 }
 
+.payroll-handoff__timeline {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0 1.35rem 1.25rem;
+  padding: 0.9rem;
+  border: 1px solid #edf1f6;
+  border-radius: 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.payroll-handoff__timeline > strong {
+  color: var(--au-navy);
+  font-size: 0.72rem;
+}
+
+.payroll-handoff__timeline > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.45rem;
+  border-top: 1px solid #edf1f6;
+}
+
+.payroll-handoff__timeline time {
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
 .payroll-handoff__confirm-copy {
   margin: 0;
   padding: 1.25rem 1.35rem;

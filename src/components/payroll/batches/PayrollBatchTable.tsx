@@ -8,10 +8,10 @@ type PayrollBatchTableProps = {
   onView: (batch: PayrollBatchRecord) => void;
   onRecords: (batch: PayrollBatchRecord) => void;
   onReady: (batch: PayrollBatchRecord) => void;
-  onSubmit: (batch: PayrollBatchRecord) => void;
+  onHandoff: (batch: PayrollBatchRecord) => void;
 };
 
-export function PayrollBatchTable({ batches, onView, onRecords, onReady, onSubmit }: PayrollBatchTableProps) {
+export function PayrollBatchTable({ batches, onView, onRecords, onReady, onHandoff }: PayrollBatchTableProps) {
   return (
     <div className="payroll-batches__table-wrap">
       <table className="data-table payroll-batches__table">
@@ -21,7 +21,7 @@ export function PayrollBatchTable({ batches, onView, onRecords, onReady, onSubmi
           {batches.length > 0 ? batches.map((batch) => (
             <tr key={batch.id}>
               <td><strong>{batch.id}</strong></td><td>{batch.period.label}</td><td>{batch.recordCount}</td><td>{batch.departmentNames.length}</td><td>{batch.createdBy.displayName}</td><td>{formatDate(batch.createdAt)}</td><td><StatusBadge tone={getPayrollBatchTone(batch.status)}>{batch.status}</StatusBadge></td>
-              <td><div className="payroll-batches__row-actions"><button type="button" className="button-link" onClick={() => onView(batch)}>View details</button><details className="payroll-batches__row-menu"><summary aria-label={`More actions for ${batch.id}`}><Icon name="menu" /></summary><div><button type="button" onClick={() => onView(batch)}>View details</button><button type="button" onClick={() => onRecords(batch)}>View records</button>{batch.status === "Draft" ? <button type="button" onClick={() => onReady(batch)}>Mark Ready</button> : null}{batch.status === "Ready" ? <button type="button" onClick={() => onSubmit(batch)}>Submit batch</button> : null}</div></details></div></td>
+              <td><div className="payroll-batches__row-actions"><button type="button" className="button-link" onClick={() => onView(batch)}>View details</button><details className="payroll-batches__row-menu"><summary aria-label={`More actions for ${batch.id}`}><Icon name="menu" /></summary><div><button type="button" onClick={() => onView(batch)}>View details</button><button type="button" onClick={() => onRecords(batch)}>View records</button>{batch.status === "Draft" ? <button type="button" onClick={() => onReady(batch)}>Mark Ready</button> : null}{batch.status === "Ready" ? <button type="button" onClick={() => onHandoff(batch)}>Open handoff</button> : null}</div></details></div></td>
             </tr>
           )) : <tr><td colSpan={8} className="payroll-batches__empty"><strong>No persistent payroll batches match these filters.</strong><span>Create a Draft batch or clear a filter to continue.</span></td></tr>}
         </tbody>

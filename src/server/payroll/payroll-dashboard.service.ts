@@ -11,7 +11,9 @@ import {
   listAttendanceCorrectionRequests,
 } from "@/server/repositories/attendance-corrections/attendance-correction.repository";
 import { listEmployees } from "@/server/repositories/employees/employee.repository";
-import type { PayrollDashboardData } from "@/types/payroll-dashboard";
+import { listPayrollBatches } from "@/server/repositories/payroll-batches/payroll-batch.repository";
+import { listPayrollHandoffs } from "@/server/repositories/payroll-handoffs/payroll-handoff.repository";
+import type { PayrollAlert, PayrollDashboardData } from "@/types/payroll-dashboard";
 
 const payrollPeriodMonthFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -80,12 +82,14 @@ export async function getPayrollDashboardData(
   now = new Date(),
 ): Promise<PayrollDashboardData> {
   const period = getCurrentPayrollPeriod(now);
-  const [employees, attendanceDocuments, correctionRequests] = await Promise.all([
+  const [employees, attendanceDocuments, correctionRequests, batches, handoffs] = await Promise.all([
     listEmployees(),
     listAttendanceForReport({
       attendanceMonth: period.start.slice(0, 7),
     }),
     listAttendanceCorrectionRequests(),
+    listPayrollBatches(),
+    listPayrollHandoffs(),
   ]);
   const employeesById = new Map(
     employees.map((employee) => [employee.employeeId, employee]),
@@ -128,7 +132,7 @@ export async function getPayrollDashboardData(
     });
   }
 
-  const alerts = Array.from(blockedCases.values())
+  const alerts: PayrollAlert[] = Array.from(blockedCases.values())
     .sort((left, right) => right.date.localeCompare(left.date))
     .slice(0, 5)
     .map((blockedCase) => ({
@@ -139,17 +143,74 @@ export async function getPayrollDashboardData(
       icon: "warning" as const,
     }));
 
+  const periodBatches = batches.filter((batch) => (
+    batch.period.start === period.start && batch.period.end === period.end
+  ));
+  const periodHandoffs = handoffs.filter((handoff) => (
+    handoff.period.start === period.start && handoff.period.end === period.end
+  ));
+  const readyBatches = periodBatches.filter((batch) => (
+    batch.status === "Ready" && batch.recordCount > 0 && batch.blockedCount === 0
+  ));
+  const failedHandoffs = periodHandoffs.filter((handoff) => handoff.transferStatus === "failed");
+  const pendingHandoffs = periodHandoffs.filter((handoff) => (
+    handoff.transferStatus === "submitted" && handoff.acknowledgementStatus === "pending"
+  ));
+
+  if (readyBatches.length > 0) {
+    alerts.unshift({
+      id: "handoff-ready",
+      message: `${readyBatches.length} payroll batch${readyBatches.length === 1 ? " is" : "es are"} ready for handoff.`,
+      status: "Ready",
+      tone: "info" as const,
+      icon: "check" as const,
+    });
+  }
+  failedHandoffs.forEach((handoff) => alerts.push({
+    id: `handoff-failed-${handoff.transferId}`,
+    message: `${handoff.batchId} requires technical follow-up after a failed handoff.`,
+    status: "Failed",
+    tone: "danger" as const,
+    icon: "warning" as const,
+  }));
+  if (pendingHandoffs.length > 0) {
+    alerts.push({
+      id: "handoff-pending",
+      message: `${pendingHandoffs.length} payroll handoff${pendingHandoffs.length === 1 ? " is" : "s are"} awaiting acknowledgement.`,
+      status: "Awaiting acknowledgement",
+      tone: "warning" as const,
+      icon: "clock" as const,
+    });
+  }
+
+  const recentBatches = periodBatches.slice(0, 5).map((batch) => {
+    const handoff = periodHandoffs.find((candidate) => candidate.batchId === batch.id);
+    const transferStatus = handoff?.transferStatus === "failed"
+      ? "Failed"
+      : handoff?.acknowledgementStatus === "accepted"
+        ? "Acknowledged"
+        : batch.status;
+    return {
+      id: batch.id,
+      payrollPeriod: batch.period.label,
+      employees: String(batch.recordCount),
+      createdBy: batch.createdBy.displayName,
+      transferStatus,
+      transferTone: transferStatus === "Failed" ? "danger" as const : transferStatus === "Ready" ? "info" as const : "success" as const,
+    };
+  });
+
   return {
     period,
     metrics: {
-      verifiedAttendance: 0,
-      readyForHandoff: 0,
+      verifiedAttendance: periodAttendance.filter(({ record }) => record.hrVerification?.status === "verified").length,
+      readyForHandoff: readyBatches.length,
       blocked: blockedCases.size,
-      transferred: 0,
-      transferIssues: 0,
+      transferred: periodHandoffs.filter((handoff) => handoff.transferStatus === "submitted").length,
+      transferIssues: failedHandoffs.length,
     },
     readiness: [],
-    recentBatches: [],
-    alerts,
+    recentBatches,
+    alerts: alerts.slice(0, 5),
   };
 }

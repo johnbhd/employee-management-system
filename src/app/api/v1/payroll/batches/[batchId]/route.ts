@@ -49,7 +49,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { batchId } = await context.params;
     const body = await request.json() as Record<string, unknown>;
-    const status = body.status === "Ready" || body.status === "Submitted" ? body.status : null;
+    const status = body.status === "Ready" ? body.status : null;
     if (!status) return errorResponse("PAYROLL_BATCH_STATUS_INVALID", "A valid next batch status is required.", 400);
 
     const data = await updatePayrollBatchStatus({

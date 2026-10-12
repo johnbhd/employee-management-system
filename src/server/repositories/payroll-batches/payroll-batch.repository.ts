@@ -111,7 +111,7 @@ function parsePeriod(value: unknown): PayrollBatchItemSnapshot["payrollPeriod"] 
   return start && end && label && start <= end ? { start, end, label } : null;
 }
 
-function parseSnapshot(value: unknown): PayrollBatchItemSnapshot | null {
+export function parsePayrollBatchItemSnapshot(value: unknown): PayrollBatchItemSnapshot | null {
   if (!isRecord(value)) return null;
 
   const employeePeriodId = getRequiredString(value, "employeePeriodId");
@@ -183,7 +183,7 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
   const recordCount = getRequiredNumber(data, "recordCount");
   const blockedCount = getRequiredNumber(data, "blockedCount");
   const includedRecords = Array.isArray(data.includedRecords)
-    ? data.includedRecords.map(parseSnapshot)
+    ? data.includedRecords.map(parsePayrollBatchItemSnapshot)
     : null;
   const notes = getNullableString(data, "notes");
 
@@ -438,6 +438,45 @@ export async function updatePayrollBatchStatus(input: {
       updatedAt: now.toDate().toISOString(),
       submittedBy: input.status === "Submitted" ? toActor(input.actor) : batch.submittedBy,
       submittedAt: input.status === "Submitted" ? now.toDate().toISOString() : batch.submittedAt,
+    };
+  });
+}
+
+export async function markPayrollBatchSubmittedFromHandoff(input: {
+  batchId: string;
+  actor: BatchActor;
+}): Promise<PayrollBatchRecord> {
+  const db = getFirebaseAdminDb();
+  const batchReference = db.collection(batchCollection).doc(input.batchId);
+
+  return db.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(batchReference);
+    if (!snapshot.exists) throw new PayrollBatchNotFoundError();
+    const batch = parseBatch(snapshot.id, snapshot.data());
+    if (!batch) throw new PayrollBatchDataError();
+    if (batch.status === "Submitted" || batch.status === "Acknowledged") return batch;
+    if (batch.status !== "Ready") {
+      throw new PayrollBatchConflictError("Only Ready batches can be submitted for payroll handoff.");
+    }
+    if (batch.recordCount < 1 || batch.blockedCount > 0) {
+      throw new PayrollBatchValidationError("Only complete Ready batches can be submitted for payroll handoff.");
+    }
+
+    const now = Timestamp.now();
+    const submittedBy = toActor(input.actor);
+    transaction.update(batchReference, {
+      status: "Submitted",
+      submittedBy,
+      submittedAt: now,
+      updatedAt: now,
+    });
+
+    return {
+      ...batch,
+      status: "Submitted" as const,
+      submittedBy,
+      submittedAt: now.toDate().toISOString(),
+      updatedAt: now.toDate().toISOString(),
     };
   });
 }
