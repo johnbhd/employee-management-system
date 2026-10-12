@@ -15,7 +15,7 @@ export default async function Page() {
   let data = null;
   let loadError = false;
   try {
-    data = await getAdminAuditLogsData(getDefaultAdminAuditLogsQuery());
+    data = await getAdminAuditLogsData(await getDefaultAdminAuditLogsQuery());
   } catch {
     loadError = true;
   }

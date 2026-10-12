@@ -52,6 +52,10 @@ export type AdminAuditLogsData = {
     actions: string[];
     outcomes: AdminAuditOutcome[];
   };
+  defaults?: {
+    pageSize: number;
+    outcome: AdminAuditOutcome | null;
+  };
 };
 
 export type AdminAuditLogsQuery = {

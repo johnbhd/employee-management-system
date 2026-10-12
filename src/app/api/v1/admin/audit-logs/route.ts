@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const context = await requireApiRoleContext("admin");
     await requireApiPermission("admin.audit_logs.view", context.user);
     const params = new URL(request.url).searchParams;
-    const defaults = getDefaultAdminAuditLogsQuery();
+    const defaults = await getDefaultAdminAuditLogsQuery();
     const page = Number(params.get("page") ?? defaults.page);
     const pageSize = Number(params.get("pageSize") ?? defaults.pageSize);
     const rawOutcome = params.get("outcome");

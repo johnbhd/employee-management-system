@@ -68,6 +68,10 @@ class SimulatedAccountingAdapter implements AccountingIntegrationAdapter {
   }
 }
 
+export function getAccountingIntegrationMode(): "simulated" {
+  return "simulated";
+}
+
 export function getAccountingIntegrationAdapter(): AccountingIntegrationAdapter {
   return new SimulatedAccountingAdapter();
 }

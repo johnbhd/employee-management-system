@@ -68,7 +68,10 @@ function buildQuery(filters: AuditFilters, page: number, pageSize: number) {
 
 export function AdminAuditLogsPage({ initialData, loadError }: AdminAuditLogsPageProps) {
   const [data, setData] = useState<AdminAuditLogsData | null>(initialData);
-  const [filters, setFilters] = useState<AuditFilters>(initialFilters);
+  const [filters, setFilters] = useState<AuditFilters>({
+    ...initialFilters,
+    outcome: initialData?.defaults?.outcome ?? "",
+  });
   const pageSize = initialData?.pageSize ?? 10;
   const [currentPage, setCurrentPage] = useState(initialData?.page ?? 1);
   const [selectedEvent, setSelectedEvent] = useState<AdminAuditLog | null>(null);

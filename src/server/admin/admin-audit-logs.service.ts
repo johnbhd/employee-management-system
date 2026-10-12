@@ -3,6 +3,7 @@ import "server-only";
 import { formatCampusDateKey, formatCampusDateTime } from "@/lib/campus-time";
 import { auditEventRegistry } from "@/server/audit/audit-registry";
 import { getAuditEventById, listAuditEvents, type AuditStoredEvent } from "@/server/repositories/audit/audit.repository";
+import { getRuntimeSettings } from "@/server/repositories/settings/settings.repository";
 import type {
   AdminAuditChange,
   AdminAuditLog,
@@ -155,11 +156,18 @@ function coverageFrom(events: readonly AdminAuditLog[]) {
     .sort((left, right) => right.count - left.count || left.module.localeCompare(right.module));
 }
 
-export function getDefaultAdminAuditLogsQuery(): AdminAuditLogsQuery {
-  return { search: "", from: null, to: null, role: null, module: null, action: null, outcome: null, page: 1, pageSize: defaultPageSize };
+export async function getDefaultAdminAuditLogsQuery(): Promise<AdminAuditLogsQuery> {
+  const runtime = await getRuntimeSettings();
+  const configuredPageSize = runtime.overrides["admin.audit.page_size"];
+  const pageSize = configuredPageSize === 25 || configuredPageSize === 50 ? configuredPageSize : defaultPageSize;
+  const configuredOutcome = runtime.overrides["admin.audit.default_outcome"];
+  const outcome = configuredOutcome === "Successful" || configuredOutcome === "Blocked" || configuredOutcome === "Failed"
+    ? configuredOutcome
+    : null;
+  return { search: "", from: null, to: null, role: null, module: null, action: null, outcome, page: 1, pageSize };
 }
 
-export async function getAdminAuditLogsData(query: AdminAuditLogsQuery = getDefaultAdminAuditLogsQuery()): Promise<AdminAuditLogsData> {
+export async function getAdminAuditLogsData(query: AdminAuditLogsQuery): Promise<AdminAuditLogsData> {
   if (query.page < 1 || query.pageSize < 1 || query.pageSize > maxPageSize) throw new Error("Audit log pagination values are invalid.");
   if (query.from && query.to && query.from > query.to) throw new Error("The audit date range is invalid.");
   const allEvents = (await listAuditEvents()).map(toListItem);
@@ -176,6 +184,7 @@ export async function getAdminAuditLogsData(query: AdminAuditLogsQuery = getDefa
     summary: summaryFrom(filtered),
     coverage: coverageFrom(filtered),
     options: optionsFrom(allEvents),
+    defaults: { pageSize: query.pageSize, outcome: query.outcome },
   };
 }
 

@@ -261,6 +261,17 @@
   overflow-wrap: anywhere;
 }
 
+.admin-settings-readonly-value.is-disabled {
+  opacity: 0.72;
+}
+
+.admin-settings-row-control > select:disabled,
+.admin-settings-input-group input:disabled {
+  cursor: not-allowed;
+  background: #f7f9fc;
+  color: var(--text-muted);
+}
+
 .admin-settings-preview,
 .admin-settings-status-preview,
 .admin-settings-boundary-note {
@@ -404,6 +415,75 @@
   color: var(--text-faint);
 }
 
+.admin-settings-integration-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin-top: 1rem;
+}
+
+.admin-settings-integration-card {
+  display: grid;
+  min-width: 0;
+  gap: 0.7rem;
+  padding: 0.9rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.7rem;
+  background: var(--surface-muted);
+}
+
+.admin-settings-integration-card-heading,
+.admin-settings-integration-card-footer {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+}
+
+.admin-settings-integration-card-heading > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.admin-settings-integration-card-heading strong {
+  color: #334155;
+  font-size: 0.72rem;
+}
+
+.admin-settings-integration-card-heading small,
+.admin-settings-integration-card-footer span {
+  color: var(--text-faint);
+  font-size: 0.61rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.admin-settings-integration-card p {
+  min-height: 2.7rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  line-height: 1.5;
+}
+
+.admin-settings-integration-card-footer {
+  align-items: flex-end;
+  padding-top: 0.55rem;
+  border-top: 1px solid #e9eef5;
+}
+
+.admin-settings-integration-card-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--au-blue);
+  font-size: 0.64rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .admin-settings-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -489,6 +569,25 @@
   font-weight: 700;
 }
 
+.admin-settings-feedback.is-error {
+  color: var(--danger);
+}
+
+.admin-settings-load-error {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.admin-settings-load-error p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.admin-settings-manager.is-loading {
+  opacity: 0.76;
+}
+
 .admin-settings-density-compact .admin-settings-row {
   padding-block: 0.75rem;
 }
@@ -526,7 +625,8 @@
   .admin-settings-nav-list,
   .admin-settings-link-grid,
   .admin-settings-system-links,
-  .admin-settings-info-grid {
+  .admin-settings-info-grid,
+  .admin-settings-integration-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -558,7 +658,8 @@
   .admin-settings-nav-list,
   .admin-settings-link-grid,
   .admin-settings-system-links,
-  .admin-settings-info-grid {
+  .admin-settings-info-grid,
+  .admin-settings-integration-grid {
     grid-template-columns: 1fr;
   }
 
@@ -584,7 +685,9 @@
   }
 
   .admin-settings-preview,
-  .admin-settings-status-preview {
+  .admin-settings-status-preview,
+  .admin-settings-integration-card-heading,
+  .admin-settings-integration-card-footer {
     align-items: flex-start;
     flex-direction: column;
   }

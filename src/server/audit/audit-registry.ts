@@ -27,6 +27,7 @@ export const auditEventRegistry: readonly AuditEventDefinition[] = [
   { eventType: "admin.user.enabled", action: "User Account Enabled", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.user.disabled", action: "User Account Disabled", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.role_permissions.updated", action: "Role Permissions Updated", module: "Roles & Permissions", defaultOutcome: "Successful" },
+  { eventType: "admin.settings.updated", action: "System Settings Updated", module: "System Settings", defaultOutcome: "Successful" },
 ];
 
 export function getAuditEventDefinition(eventType: string) {

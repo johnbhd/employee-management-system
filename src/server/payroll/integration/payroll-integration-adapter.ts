@@ -94,6 +94,10 @@ class SimulatedPayrollIntegrationAdapter implements PayrollIntegrationAdapter {
 
 const simulatedPayrollIntegrationAdapter = new SimulatedPayrollIntegrationAdapter();
 
+export function getPayrollIntegrationMode(): "simulated" {
+  return "simulated";
+}
+
 export function getPayrollIntegrationAdapter(): PayrollIntegrationAdapter {
   return simulatedPayrollIntegrationAdapter;
 }
