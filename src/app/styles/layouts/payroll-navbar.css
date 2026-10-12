@@ -139,6 +139,18 @@
   background: #f8fafc;
 }
 
+.payroll-profile-trigger .payroll-account-avatar {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf5ff;
+  color: var(--au-blue);
+  font-size: 0.9rem;
+}
+
 .payroll-profile-copy {
   display: grid;
   min-width: 0;
@@ -262,12 +274,5 @@
 
   .payroll-profile-trigger {
     padding: 0.15rem;
-  }
-
-  .payroll-profile-trigger .payroll-account-avatar {
-    width: 2.35rem;
-    height: 2.35rem;
-    background: #edf5ff;
-    color: var(--au-blue);
   }
 }
