@@ -4,6 +4,9 @@ import {
   listPayrollResults,
   PayrollResultDataError,
 } from "@/server/repositories/payroll-results/payroll-result.repository";
+import {
+  listAccountingTransfers,
+} from "@/server/repositories/accounting-transfers/accounting-transfer.repository";
 import { getAccountingReadiness } from "@/server/accounting/accounting-readiness.service";
 import {
   accountingReadinessStatuses,
@@ -13,6 +16,7 @@ import {
   type AccountingApprovedPayrollQuery,
   type AccountingApprovedPayrollSummary,
 } from "@/types/accounting-approved-payroll";
+import type { AccountingTransferRecord } from "@/types/accounting-transfers";
 import {
   payrollResultStatuses,
   type PayrollResultRecord,
@@ -39,9 +43,12 @@ export function getDefaultAccountingApprovedPayrollQuery(): AccountingApprovedPa
   };
 }
 
-function toAccountingApprovedPayrollItem(
+export function getAccountingApprovedPayrollItem(
   result: PayrollResultRecord,
+  transfers: readonly AccountingTransferRecord[] = [],
 ): AccountingApprovedPayrollItem {
+  const transfer = transfers.find((item) => item.payrollResultId === result.resultId);
+
   return {
     payrollResultId: result.resultId,
     period: result.period,
@@ -64,8 +71,13 @@ function toAccountingApprovedPayrollItem(
     },
     accountingReadiness: getAccountingReadiness(result),
     accountingTransfer: {
-      status: "not_transferred",
-      transferId: null,
+      status: transfer?.transferStatus ?? "not_transferred",
+      transferId: transfer?.transferId ?? null,
+      acknowledgementStatus: transfer?.acknowledgementStatus ?? null,
+      externalReference: transfer?.externalAccountingReference ?? null,
+      failureSummary: transfer?.failureSummary ?? null,
+      submittedAt: transfer?.submittedAt ?? null,
+      updatedAt: transfer?.updatedAt ?? null,
     },
     receivedAt: result.receivedAt,
     completedAt: result.completedAt,
@@ -125,10 +137,14 @@ function getSummary(
       (record) => record.payrollResultStatus === "completed",
     ).length,
     readyForTransfer: records.filter(
-      (record) => record.accountingReadiness.status === "ready",
+      (record) => record.accountingReadiness.status === "ready"
+        && record.accountingTransfer.status !== "submitted"
+        && record.accountingTransfer.status !== "preparing"
+        && record.accountingTransfer.status !== "submitting",
     ).length,
-    // ACC-BACK-002 will derive this from persisted Accounting transfers.
-    transferred: 0,
+    transferred: records.filter(
+      (record) => record.accountingTransfer.acknowledgementStatus === "accepted",
+    ).length,
     blocked: records.filter(
       (record) => record.accountingReadiness.status === "blocked",
     ).length,
@@ -144,9 +160,12 @@ export async function getAccountingApprovedPayrollData(
     );
   }
 
-  const results = await listPayrollResults();
+  const [results, transfers] = await Promise.all([
+    listPayrollResults(),
+    listAccountingTransfers(),
+  ]);
   const allRecords = results
-    .map(toAccountingApprovedPayrollItem)
+    .map((result) => getAccountingApprovedPayrollItem(result, transfers))
     .sort(compareItems);
   const filteredRecords = allRecords.filter((record) => matchesQuery(record, query));
   const totalPages = Math.max(1, Math.ceil(filteredRecords.length / query.pageSize));
@@ -165,7 +184,7 @@ export async function getAccountingApprovedPayrollData(
     resultStatusOptions: [...payrollResultStatuses],
     readinessStatusOptions: [...accountingReadinessStatuses],
     transferStatusOptions: [...accountingTransferStatuses],
-    providerNote: "Approved Payroll reads persisted Payroll Result snapshots. No Accounting transfer or payroll calculation is performed here.",
+    providerNote: "Approved Payroll reads persisted Payroll Result snapshots and Accounting transfer records. No payroll calculation is performed here.",
   };
 }
 

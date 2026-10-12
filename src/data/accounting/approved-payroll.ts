@@ -21,13 +21,27 @@ export function getAccountingReadinessTone(
 export function getAccountingTransferLabel(
   status: AccountingTransferStatus,
 ): string {
-  return status === "not_transferred" ? "Not yet transferred" : status;
+  switch (status) {
+    case "not_transferred":
+      return "Not yet transferred";
+    case "preparing":
+      return "Preparing";
+    case "submitting":
+      return "Submitting";
+    case "submitted":
+      return "Submitted";
+    case "failed":
+      return "Failed";
+  }
 }
 
 export function getAccountingTransferTone(
   status: AccountingTransferStatus,
 ): StatusTone {
-  return status === "not_transferred" ? "muted" : "info";
+  if (status === "not_transferred") return "muted";
+  if (status === "failed") return "danger";
+  if (status === "submitted") return "success";
+  return "warning";
 }
 
 export function formatAccountingReturnedAmount(

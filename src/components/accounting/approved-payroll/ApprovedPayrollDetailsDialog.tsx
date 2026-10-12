@@ -78,7 +78,7 @@ export function ApprovedPayrollDetailsDialog({
         <div className="accounting-approved-payroll__modal-body">
           <p>
             {record.accountingReadiness.status === "ready"
-              ? "This completed Payroll Result is ready for a future Accounting handoff."
+              ? "This completed Payroll Result is eligible for the Accounting transfer workflow."
               : "This Payroll Result is not ready for Accounting handoff."}
           </p>
 
@@ -151,6 +151,20 @@ export function ApprovedPayrollDetailsDialog({
                 </StatusBadge>
               </dd>
             </div>
+            <div>
+              <dt>Accounting reference</dt>
+              <dd>{record.accountingTransfer.externalReference ?? "Not assigned"}</dd>
+            </div>
+            <div>
+              <dt>Acknowledgement</dt>
+              <dd>{record.accountingTransfer.acknowledgementStatus ?? "Not transferred"}</dd>
+            </div>
+            {record.accountingTransfer.failureSummary ? (
+              <div>
+                <dt>Transfer issue</dt>
+                <dd>{record.accountingTransfer.failureSummary}</dd>
+              </div>
+            ) : null}
             <div>
               <dt>Received</dt>
               <dd>{formatPayrollResultDateTime(record.receivedAt)}</dd>

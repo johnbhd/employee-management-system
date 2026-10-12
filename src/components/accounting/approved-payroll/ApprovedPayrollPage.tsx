@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { getAccountingReadinessLabel } from "@/data/accounting/approved-payroll";
+import {
+  getAccountingReadinessLabel,
+  getAccountingTransferLabel,
+} from "@/data/accounting/approved-payroll";
 import { getPayrollResultStatusLabel } from "@/data/payroll/results";
 import { apiRequest } from "@/lib/api/client";
 import type { ApiSuccessResponse } from "@/types/api/responses";
@@ -145,7 +148,7 @@ export function ApprovedPayrollPage({
     {
       label: "Successfully transferred",
       value: formatCount(data.summary.transferred, "result"),
-      note: "Accounting transfer is not implemented yet",
+      note: "Persisted Accounting transfer records",
       icon: "check" as const,
       tone: "success" as const,
     },
@@ -328,7 +331,7 @@ export function ApprovedPayrollPage({
               <option value={allValue}>All transfer states</option>
               {data.transferStatusOptions.map((option) => (
                 <option value={option} key={option}>
-                  Not yet transferred
+                  {getAccountingTransferLabel(option)}
                 </option>
               ))}
             </select>

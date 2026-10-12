@@ -6,8 +6,13 @@ export const accountingReadinessStatuses = ["ready", "blocked"] as const;
 export type AccountingReadinessStatus =
   (typeof accountingReadinessStatuses)[number];
 
-// ACC-BACK-002 will replace this with the persisted Accounting transfer states.
-export const accountingTransferStatuses = ["not_transferred"] as const;
+export const accountingTransferStatuses = [
+  "not_transferred",
+  "preparing",
+  "submitting",
+  "submitted",
+  "failed",
+] as const;
 
 export type AccountingTransferStatus =
   (typeof accountingTransferStatuses)[number];
@@ -39,11 +44,26 @@ export type AccountingApprovedPayrollItem = {
   accountingTransfer: {
     status: AccountingTransferStatus;
     transferId: string | null;
+    acknowledgementStatus: AccountingAcknowledgementStatus | null;
+    externalReference: string | null;
+    failureSummary: string | null;
+    submittedAt: string | null;
+    updatedAt: string | null;
   };
   receivedAt: string;
   completedAt: string | null;
   updatedAt: string;
 };
+
+export const accountingAcknowledgementStatuses = [
+  "pending",
+  "accepted",
+  "rejected",
+  "not_received",
+] as const;
+
+export type AccountingAcknowledgementStatus =
+  (typeof accountingAcknowledgementStatuses)[number];
 
 export type AccountingApprovedPayrollSummary = {
   approvedPayroll: number;

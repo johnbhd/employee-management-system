@@ -1,13 +1,16 @@
-import type { AccountingAttentionTransfer } from "@/data/accounting/integration-status";
+import type { AccountingTransferView } from "@/types/accounting-transfers";
 
 import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type AccountingAttentionTableProps = {
-  items: readonly AccountingAttentionTransfer[];
+  items: readonly AccountingTransferView[];
+  retryingTransferId: string | null;
+  onView: (item: AccountingTransferView) => void;
+  onRetry: (item: AccountingTransferView) => void;
 };
 
-export function AccountingAttentionTable({ items }: AccountingAttentionTableProps) {
+export function AccountingAttentionTable({ items, retryingTransferId, onView, onRetry }: AccountingAttentionTableProps) {
   return (
     <div className="accounting-integration-status__table-wrap">
       <table className="data-table accounting-integration-status__attention-table">
@@ -26,7 +29,7 @@ export function AccountingAttentionTable({ items }: AccountingAttentionTableProp
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr key={item.transactionReference}>
+            <tr key={item.transferId}>
               <td>{item.transactionReference}</td>
               <td>{item.payrollReference}</td>
               <td>{item.period}</td>
@@ -35,7 +38,7 @@ export function AccountingAttentionTable({ items }: AccountingAttentionTableProp
                 <small className="accounting-integration-status__muted-cell">{item.time}</small>
               </td>
               <td>{item.amount}</td>
-              <td>{item.error}</td>
+              <td>{item.error ?? "No failure summary recorded"}</td>
               <td><StatusBadge tone={item.tone}>{item.status}</StatusBadge></td>
               <td>
                 <div className="accounting-integration-status__row-actions">
@@ -44,6 +47,7 @@ export function AccountingAttentionTable({ items }: AccountingAttentionTableProp
                     variant="link"
                     icon="warning"
                     action={`${item.transactionReference} error details opened.`}
+                    onAction={() => onView(item)}
                   >
                     View error
                   </ActionButton>
@@ -51,9 +55,10 @@ export function AccountingAttentionTable({ items }: AccountingAttentionTableProp
                     className="accounting-integration-status__row-action"
                     variant="secondary"
                     icon="refresh"
-                    action={`${item.transactionReference} retry queued locally.`}
+                    action={retryingTransferId === item.transferId ? "Retry submitted." : `${item.transactionReference} retry submitted.`}
+                    onAction={() => onRetry(item)}
                   >
-                    Retry
+                    {retryingTransferId === item.transferId ? "Retrying..." : "Retry"}
                   </ActionButton>
                 </div>
               </td>
