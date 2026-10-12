@@ -4,7 +4,16 @@ import type { PayrollBatchResult, PayrollResultRecord } from "@/data/payroll/res
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getPayrollPayslipTone, getPayrollResultTone } from "@/data/payroll/results";
+import {
+  formatPayrollResultDate,
+  formatPayrollResultDateTime,
+  getPayrollPayslipLabel,
+  getPayrollPayslipTone,
+  getPayrollResultLabel,
+  getPayrollResultStatusLabel,
+  getPayrollResultStatusTone,
+  getPayrollResultTone,
+} from "@/data/payroll/results";
 
 type PayrollResultsDetailsModalProps = {
   record: PayrollResultRecord | null;
@@ -38,26 +47,31 @@ export function PayrollResultsDetailsModal({ record, batch, onClose, onCopyRefer
           <dl className="payroll-results__modal-details">
             <Detail label="Employee ID" value={record.employeeId} />
             <Detail label="Department" value={record.department} />
-            <Detail label="Payroll period" value={record.period} />
-            <Detail label="Payroll reference" value={record.reference} />
-            <Detail label="Processing status" value={<StatusBadge tone={getPayrollResultTone(record.processingStatus)}>{record.processingStatus}</StatusBadge>} />
-            <Detail label="Payslip status" value={<StatusBadge tone={getPayrollPayslipTone(record.payslipStatus)}>{record.payslipStatus}</StatusBadge>} />
-            <Detail label="Date released" value={record.releasedAt} />
+            <Detail label="Payroll period" value={record.period.label} />
+            <Detail label="Payroll reference" value={record.externalPayrollReference ?? "—"} />
+            <Detail label="Processing status" value={<StatusBadge tone={getPayrollResultTone(record.processingStatus)}>{getPayrollResultLabel(record.processingStatus)}</StatusBadge>} />
+            <Detail label="Payslip status" value={<StatusBadge tone={getPayrollPayslipTone(record.payslipStatus)}>{getPayrollPayslipLabel(record.payslipStatus)}</StatusBadge>} />
+            <Detail label="Date released" value={formatPayrollResultDate(record.releasedAt)} />
+            <Detail label="Processed at" value={formatPayrollResultDateTime(record.processedAt)} />
             <Detail label="Source batch" value={record.batchId} />
+            <Detail label="Transfer ID" value={record.transferId} />
+            <Detail label="Issue" value={record.issueSummary ?? "No issue returned"} />
           </dl>
         ) : batch ? (
           <dl className="payroll-results__modal-details">
             <Detail label="Batch ID" value={batch.id} />
-            <Detail label="Payroll period" value={batch.period} />
+            <Detail label="Payroll period" value={batch.period.label} />
             <Detail label="Employees" value={String(batch.employees)} />
-            <Detail label="Returned at" value={batch.returnedAt} />
-            <Detail label="Result status" value={<StatusBadge tone={getPayrollResultTone(batch.resultStatus)}>{batch.resultStatus}</StatusBadge>} />
+            <Detail label="Returned at" value={formatPayrollResultDateTime(batch.returnedAt)} />
+            <Detail label="Result status" value={<StatusBadge tone={getPayrollResultStatusTone(batch.resultStatus)}>{getPayrollResultStatusLabel(batch.resultStatus)}</StatusBadge>} />
+            <Detail label="Result ID" value={batch.resultId} />
+            <Detail label="Transfer ID" value={batch.transferId} />
             <Detail label="Payslips available" value={`${batch.payslipsAvailable} / ${batch.employees}`} />
           </dl>
         ) : null}
 
         <footer className="payroll-results__modal-footer">
-          {record && record.reference !== "—" ? <button type="button" className="button-secondary" onClick={() => onCopyReference(record)}><Icon name="file" /> Copy reference</button> : null}
+          {record?.externalPayrollReference ? <button type="button" className="button-secondary" onClick={() => onCopyReference(record)}><Icon name="file" /> Copy reference</button> : null}
           <button type="button" className="button-secondary" onClick={onClose}>Close</button>
         </footer>
       </section>

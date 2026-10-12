@@ -2,7 +2,11 @@ import type { PayrollBatchResult } from "@/data/payroll/results";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { getPayrollResultTone } from "@/data/payroll/results";
+import {
+  formatPayrollResultDateTime,
+  getPayrollResultStatusLabel,
+  getPayrollResultStatusTone,
+} from "@/data/payroll/results";
 
 type PayrollBatchResultsTableProps = {
   batches: readonly PayrollBatchResult[];
@@ -26,13 +30,13 @@ export function PayrollBatchResultsTable({ batches, onViewDetails }: PayrollBatc
           </tr>
         </thead>
         <tbody>
-          {batches.map((batch) => (
-            <tr key={batch.id}>
+          {batches.length > 0 ? batches.map((batch) => (
+            <tr key={batch.resultId}>
               <td><strong>{batch.id}</strong></td>
-              <td>{batch.period}</td>
+              <td>{batch.period.label}</td>
               <td>{batch.employees}</td>
-              <td>{batch.returnedAt}</td>
-              <td><StatusBadge tone={getPayrollResultTone(batch.resultStatus)}>{batch.resultStatus}</StatusBadge></td>
+              <td>{formatPayrollResultDateTime(batch.returnedAt)}</td>
+              <td><StatusBadge tone={getPayrollResultStatusTone(batch.resultStatus)}>{getPayrollResultStatusLabel(batch.resultStatus)}</StatusBadge></td>
               <td>{batch.payslipsAvailable} / {batch.employees}</td>
               <td>
                 <button type="button" className="button-link" onClick={() => onViewDetails(batch)}>
@@ -40,7 +44,14 @@ export function PayrollBatchResultsTable({ batches, onViewDetails }: PayrollBatc
                 </button>
               </td>
             </tr>
-          ))}
+          )) : (
+            <tr>
+              <td colSpan={7} className="payroll-results__empty">
+                <strong>No returned batch results yet.</strong>
+                <span>Completed Payroll handoffs will be summarized here.</span>
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>

@@ -1,7 +1,7 @@
 import "server-only";
 
 import type { DocumentData } from "firebase-admin/firestore";
-import { Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
 
@@ -48,6 +48,23 @@ export type StoredPayrollPayslip = {
   source: "PAYROLL_SYSTEM";
   payrollReference: string;
   monthlySummary: StoredPayrollMonthlySummary;
+};
+
+export type PayrollResultPayslipUpsert = {
+  id: string;
+  employeeId: string;
+  periodStart: string;
+  periodEnd: string;
+  payrollReference: string;
+  releasedAt: string;
+  monthlyBasicSalary?: number | null;
+  cutoffBasicPay?: number | null;
+  referenceDailyRate?: number | null;
+  basicPay?: number | null;
+  grossPay?: number | null;
+  deductions?: StoredPayslipDeduction[];
+  totalDeductions?: number | null;
+  netPay?: number | null;
 };
 
 export class PayslipDataError extends Error {
@@ -293,4 +310,73 @@ export async function listPayslipsByEmployee(
 
       return periodOrder || right.id.localeCompare(left.id);
     });
+}
+
+function formatResultMonthLabel(monthKey: string): string {
+  const [year, month] = monthKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
+
+export async function upsertPayrollPayslipFromResult(
+  input: PayrollResultPayslipUpsert,
+): Promise<void> {
+  const reference = getFirebaseAdminDb().collection(payslipCollection).doc(input.id);
+  const releasedAt = Timestamp.fromDate(new Date(input.releasedAt));
+  const monthKey = input.periodStart.slice(0, 7);
+  const monthlySummary: StoredPayrollMonthlySummary = {
+    id: `monthly-${input.employeeId}-${monthKey}`,
+    monthKey,
+    monthLabel: formatResultMonthLabel(monthKey),
+    releasedCutoffCount: 1,
+    totalCutoffCount: 1,
+    monthlyBasicSalary: input.monthlyBasicSalary ?? null,
+    referenceDailyRate: input.referenceDailyRate ?? null,
+    totalEarnings: input.grossPay ?? null,
+    totalDeductions: input.totalDeductions ?? null,
+    netPay: input.netPay ?? null,
+    status: "complete",
+    includedPayslipIds: [input.id],
+  };
+  const data: DocumentData = {
+    employeeId: input.employeeId,
+    periodStart: input.periodStart,
+    periodEnd: input.periodEnd,
+    payFrequency: "Semi-monthly",
+    monthlyBasicSalary: input.monthlyBasicSalary ?? null,
+    cutoffBasicPay: input.cutoffBasicPay ?? null,
+    referenceDailyRate: input.referenceDailyRate ?? null,
+    basicPay: input.basicPay ?? null,
+    grossPay: input.grossPay ?? null,
+    deductions: input.deductions ?? [],
+    totalDeductions: input.totalDeductions ?? null,
+    netPay: input.netPay ?? null,
+    status: "released",
+    releasedAt,
+    source: "PAYROLL_SYSTEM",
+    payrollReference: input.payrollReference,
+    dataSource: "integration-result",
+    monthlySummary,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  await getFirebaseAdminDb().runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(reference);
+    if (snapshot.exists) {
+      const existing = parsePayslipRecord(snapshot.id, snapshot.data());
+      if (!existing || existing.employeeId !== input.employeeId) {
+        throw new PayslipDataError();
+      }
+      transaction.set(reference, data, { merge: true });
+      return;
+    }
+
+    transaction.create(reference, {
+      ...data,
+      createdAt: FieldValue.serverTimestamp(),
+    });
+  });
 }

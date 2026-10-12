@@ -28,6 +28,12 @@ import {
   getPayrollIntegrationAdapter,
   payrollIntegrationProviderNote,
 } from "./integration/payroll-integration-adapter";
+import {
+  ingestPayrollResult,
+  PayrollResultConflictError,
+  PayrollResultDataError,
+  PayrollResultValidationError,
+} from "./payroll-result.service";
 import { getCurrentPayrollPeriod } from "./payroll-dashboard.service";
 
 export class PayrollHandoffValidationError extends Error {
@@ -237,6 +243,7 @@ export async function submitPayrollHandoff(input: {
   try {
     result = await adapter.submitBatch({
       batchId: batch.id,
+      transferId: handoff.transferId,
       period: batch.period,
       records: handoff.batchSnapshot,
     });
@@ -268,6 +275,21 @@ export async function submitPayrollHandoff(input: {
     throw new PayrollHandoffIntegrationError(result.failureSummary ?? undefined);
   }
 
+  if (result.result) {
+    await ingestPayrollResult({
+      batchSnapshot: handoff.batchSnapshot,
+      handoff: {
+        resultId: `RES-${batch.id}`,
+        batchId: batch.id,
+        transferId: handoff.transferId,
+        period: batch.period,
+        provider: result.provider,
+        externalReference: result.externalReference ?? "",
+      },
+      result: result.result,
+    });
+  }
+
   await markPayrollBatchSubmittedFromHandoff({
     batchId: batch.id,
     actor: input.actor,
@@ -287,4 +309,7 @@ export {
   PayrollHandoffConflictError,
   PayrollHandoffDataError,
   PayrollHandoffNotFoundError,
+  PayrollResultConflictError,
+  PayrollResultDataError,
+  PayrollResultValidationError,
 };

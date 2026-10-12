@@ -17,10 +17,10 @@ export function PayrollResultsNotices({ notices, onViewAll }: PayrollResultsNoti
           <h2 id="payroll-results-notices-heading">Results &amp; Follow-up</h2>
           <p className="payroll-results__panel-description">Important updates and items that need attention.</p>
         </div>
-        <ActionButton variant="secondary" action="Showing all payroll result notices in the prototype." onAction={onViewAll}>View all</ActionButton>
+        <ActionButton variant="secondary" action="All returned result notices are shown here." onAction={onViewAll}>View all</ActionButton>
       </div>
       <div className="payroll-results__notice-list">
-        {notices.map((notice) => (
+        {notices.length > 0 ? notices.map((notice) => (
           <article className="payroll-results__notice" key={notice.id}>
             <span className={`payroll-results__notice-icon payroll-results__notice-icon--${notice.tone}`}><Icon name={notice.tone === "success" ? "check" : notice.tone === "warning" ? "clock" : "close"} /></span>
             <div className="payroll-results__notice-body">
@@ -29,7 +29,7 @@ export function PayrollResultsNotices({ notices, onViewAll }: PayrollResultsNoti
             </div>
             <time>{notice.date}<br />{notice.time}</time>
           </article>
-        ))}
+        )) : <p className="payroll-results__notice-empty">No returned result notices yet.</p>}
       </div>
     </section>
   );

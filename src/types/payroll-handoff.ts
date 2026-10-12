@@ -105,8 +105,40 @@ export type PayrollHandoffData = {
 
 export type PayrollHandoffSubmissionPayload = {
   batchId: string;
+  transferId: string;
   period: PayrollBatchPeriod;
   records: PayrollBatchItemSnapshot[];
+};
+
+export type PayrollExternalProcessingStatus = "processed" | "pending" | "rejected" | "failed";
+
+export type PayrollExternalPayslipStatus = "available" | "not_yet_available" | "unavailable";
+
+export type PayrollExternalResultStatus =
+  | "processing"
+  | "completed"
+  | "completed_with_issues"
+  | "partially_completed"
+  | "rejected"
+  | "failed";
+
+export type PayrollExternalResultItem = {
+  employeeId: string;
+  externalEmployeeReference: string;
+  externalPayrollReference: string | null;
+  processingStatus: PayrollExternalProcessingStatus;
+  payslipStatus: PayrollExternalPayslipStatus;
+  payslipId: string | null;
+  issueCode: string | null;
+  issueSummary: string | null;
+};
+
+export type PayrollExternalResult = {
+  batchId: string;
+  transferId: string;
+  externalResultReference: string;
+  status: PayrollExternalResultStatus;
+  items: PayrollExternalResultItem[];
 };
 
 export type PayrollIntegrationResponse = {
@@ -116,4 +148,5 @@ export type PayrollIntegrationResponse = {
   provider: string;
   failureCode?: string;
   failureSummary?: string;
+  result?: PayrollExternalResult;
 };

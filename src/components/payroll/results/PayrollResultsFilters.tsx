@@ -1,4 +1,4 @@
-import type { PayrollResultProcessingStatus } from "@/data/payroll/results";
+import type { PayrollResultProcessingStatus } from "@/types/payroll-results";
 
 import { Icon } from "@/components/ui/Icon";
 
@@ -7,7 +7,7 @@ type PayrollResultsFiltersProps = {
   period: string;
   status: PayrollResultProcessingStatus | "all";
   department: string;
-  periods: readonly string[];
+  periods: readonly { value: string; label: string }[];
   departments: readonly string[];
   onQueryChange: (value: string) => void;
   onPeriodChange: (value: string) => void;
@@ -33,22 +33,23 @@ export function PayrollResultsFilters({
     <form className="payroll-results__filters" onSubmit={(event) => event.preventDefault()} role="search" aria-label="Payroll result filters">
       <label className="payroll-results__search-field">
         <span>Search</span>
-        <span className="payroll-results__search-input"><Icon name="search" /><input type="search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Search employee name, ID, or department" aria-label="Search employee name, ID, or department" /></span>
+        <span className="payroll-results__search-input"><Icon name="search" /><input type="search" value={query} onChange={(event) => onQueryChange(event.target.value)} placeholder="Search employee name, ID, department, or reference" aria-label="Search employee name, ID, department, or reference" /></span>
       </label>
       <label>
         <span>Payroll period</span>
         <select value={period} onChange={(event) => onPeriodChange(event.target.value)} aria-label="Filter by payroll period">
           <option value="all">All periods</option>
-          {periods.map((option) => <option value={option} key={option}>{option}</option>)}
+          {periods.map((option) => <option value={option.value} key={option.value}>{option.label}</option>)}
         </select>
       </label>
       <label>
-        <span>Result status</span>
-        <select value={status} onChange={(event) => onStatusChange(event.target.value as PayrollResultProcessingStatus | "all")} aria-label="Filter by result status">
+        <span>Processing status</span>
+        <select value={status} onChange={(event) => onStatusChange(event.target.value as PayrollResultProcessingStatus | "all")} aria-label="Filter by processing status">
           <option value="all">All statuses</option>
-          <option value="Completed">Completed</option>
-          <option value="Pending">Pending</option>
-          <option value="Failed">Failed</option>
+          <option value="processed">Processed</option>
+          <option value="pending">Pending</option>
+          <option value="rejected">Rejected</option>
+          <option value="failed">Failed</option>
         </select>
       </label>
       <label>

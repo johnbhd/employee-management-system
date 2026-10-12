@@ -11,6 +11,32 @@
   min-width: 0;
 }
 
+.payroll-results--loading {
+  min-height: 20rem;
+  align-content: start;
+}
+
+.payroll-results__loading-message {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.payroll-results__load-error {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f4c8c8;
+  border-radius: 0.75rem;
+  background: var(--danger-soft);
+  color: #8f2525;
+  font-size: 0.7rem;
+}
+
+.payroll-results__load-error .button-link {
+  margin-left: auto;
+}
+
 .payroll-results .page-header {
   min-width: 0;
 }
@@ -310,6 +336,13 @@
 
 .payroll-results__notice-list {
   padding: 0 1.35rem 1.35rem;
+}
+
+.payroll-results__notice-empty {
+  margin: 0;
+  padding: 1rem 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
 }
 
 .payroll-results__notice {

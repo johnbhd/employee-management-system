@@ -10,6 +10,9 @@ import {
   getPayrollHandoffData,
   PayrollHandoffIntegrationError,
   PayrollHandoffValidationError,
+  PayrollResultConflictError,
+  PayrollResultDataError,
+  PayrollResultValidationError,
   submitPayrollHandoff,
 } from "@/server/payroll/payroll-handoff.service";
 import {
@@ -46,6 +49,9 @@ function mapError(error: unknown) {
   if (error instanceof PayrollBatchValidationError) return errorResponse(error.code, error.message, 422);
   if (error instanceof PayrollBatchNotFoundError) return errorResponse(error.code, error.message, 404);
   if (error instanceof PayrollHandoffIntegrationError) return errorResponse(error.code, error.message, 502);
+  if (error instanceof PayrollResultConflictError) return errorResponse(error.code, error.message, 409);
+  if (error instanceof PayrollResultValidationError) return errorResponse(error.code, error.message, 502);
+  if (error instanceof PayrollResultDataError) return errorResponse(error.code, error.message, 500);
   if (error instanceof PayrollHandoffDataError) return errorResponse(error.code, error.message, 500);
   if (error instanceof PayrollBatchDataError) return errorResponse(error.code, error.message, 500);
   if (error instanceof FirebaseAdminConfigurationError || error instanceof FirebaseAdminInitializationError) {
