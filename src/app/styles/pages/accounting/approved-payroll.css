@@ -11,6 +11,39 @@
   min-width: 0;
 }
 
+.accounting-approved-payroll__load-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid #f2caca;
+  border-radius: 0.75rem;
+  background: #fff7f7;
+  color: var(--error);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.accounting-approved-payroll__load-error .ui-icon {
+  flex: 0 0 auto;
+}
+
+.accounting-approved-payroll__load-error .button-link {
+  margin-left: auto;
+}
+
+.accounting-approved-payroll--loading {
+  align-content: start;
+  min-height: 18rem;
+}
+
+.accounting-approved-payroll__loading-message {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
 .accounting-approved-payroll .page-header {
   min-width: 0;
 }
@@ -128,7 +161,7 @@
 }
 
 .accounting-approved-payroll__table {
-  min-width: 82rem;
+  min-width: 92rem;
 }
 
 .accounting-approved-payroll__table td {
@@ -146,6 +179,14 @@
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.accounting-approved-payroll__secondary {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  line-height: 1.4;
 }
 
 .accounting-approved-payroll__details-trigger {
@@ -309,6 +350,27 @@
   color: var(--text-muted);
   font-size: 0.76rem;
   line-height: 1.6;
+}
+
+.accounting-approved-payroll__modal-body section {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.accounting-approved-payroll__modal-body section h3 {
+  margin: 0;
+  color: var(--au-navy);
+  font-size: 0.76rem;
+}
+
+.accounting-approved-payroll__reason-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
 }
 
 .accounting-approved-payroll__details-grid {

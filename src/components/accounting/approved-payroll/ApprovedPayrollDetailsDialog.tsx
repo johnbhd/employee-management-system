@@ -2,24 +2,41 @@
 
 import { useEffect, useRef } from "react";
 
-import type { AccountingPayrollBatch } from "@/data/accounting/dashboard";
+import {
+  formatAccountingReturnedAmount,
+  getAccountingReadinessLabel,
+  getAccountingReadinessTone,
+  getAccountingTransferLabel,
+  getAccountingTransferTone,
+} from "@/data/accounting/approved-payroll";
+import {
+  formatPayrollResultDateTime,
+  getPayrollResultStatusLabel,
+  getPayrollResultStatusTone,
+} from "@/data/payroll/results";
+import type { AccountingApprovedPayrollItem } from "@/types/accounting-approved-payroll";
 
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type ApprovedPayrollDetailsDialogProps = {
-  batch: AccountingPayrollBatch;
+  record: AccountingApprovedPayrollItem;
   onClose: () => void;
 };
 
-export function ApprovedPayrollDetailsDialog({ batch, onClose }: ApprovedPayrollDetailsDialogProps) {
+export function ApprovedPayrollDetailsDialog({
+  record,
+  onClose,
+}: ApprovedPayrollDetailsDialogProps) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     closeButtonRef.current?.focus();
 
     function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+      }
     }
 
     document.addEventListener("keydown", closeOnEscape);
@@ -31,7 +48,9 @@ export function ApprovedPayrollDetailsDialog({ batch, onClose }: ApprovedPayroll
       className="accounting-approved-payroll__modal-backdrop"
       role="presentation"
       onMouseDown={(event) => {
-        if (event.currentTarget === event.target) onClose();
+        if (event.currentTarget === event.target) {
+          onClose();
+        }
       }}
     >
       <section
@@ -42,8 +61,8 @@ export function ApprovedPayrollDetailsDialog({ batch, onClose }: ApprovedPayroll
       >
         <div className="accounting-approved-payroll__modal-header">
           <div>
-            <p className="section-kicker">Approved payroll record</p>
-            <h2 id="approved-payroll-details-title">{batch.payrollReference}</h2>
+            <p className="section-kicker">Payroll result</p>
+            <h2 id="approved-payroll-details-title">{record.payrollResultId}</h2>
           </div>
           <button
             type="button"
@@ -57,16 +76,105 @@ export function ApprovedPayrollDetailsDialog({ batch, onClose }: ApprovedPayroll
         </div>
 
         <div className="accounting-approved-payroll__modal-body">
-          <p>{batch.detail}</p>
+          <p>
+            {record.accountingReadiness.status === "ready"
+              ? "This completed Payroll Result is ready for a future Accounting handoff."
+              : "This Payroll Result is not ready for Accounting handoff."}
+          </p>
+
           <dl className="accounting-approved-payroll__details-grid">
-            <div><dt>Payroll period</dt><dd>{batch.payrollPeriod}</dd></div>
-            <div><dt>Employees</dt><dd>{batch.employeeCount}</dd></div>
-            <div><dt>Approved amount</dt><dd>{batch.approvedAmount}</dd></div>
-            <div><dt>Approval status</dt><dd><StatusBadge tone={batch.approvalTone}>{batch.approvalStatus}</StatusBadge></dd></div>
-            <div><dt>Accounting status</dt><dd><StatusBadge tone={batch.accountingTone}>{batch.accountingStatus}</StatusBadge></dd></div>
-            <div><dt>Transfer reference</dt><dd>{batch.transferReference}</dd></div>
-            <div><dt>Last updated</dt><dd>{batch.updatedAt}</dd></div>
+            <div>
+              <dt>Payroll period</dt>
+              <dd>{record.period.label}</dd>
+            </div>
+            <div>
+              <dt>Payroll result ID</dt>
+              <dd>{record.payrollResultId}</dd>
+            </div>
+            <div>
+              <dt>Batch ID</dt>
+              <dd>{record.references.batchId}</dd>
+            </div>
+            <div>
+              <dt>Payroll handoff ID</dt>
+              <dd>{record.references.payrollTransferId}</dd>
+            </div>
+            <div>
+              <dt>External Payroll reference</dt>
+              <dd>{record.references.externalPayrollReference ?? "—"}</dd>
+            </div>
+            <div>
+              <dt>Result status</dt>
+              <dd>
+                <StatusBadge tone={getPayrollResultStatusTone(record.payrollResultStatus)}>
+                  {getPayrollResultStatusLabel(record.payrollResultStatus)}
+                </StatusBadge>
+              </dd>
+            </div>
+            <div>
+              <dt>Employees submitted</dt>
+              <dd>{record.employeeCount}</dd>
+            </div>
+            <div>
+              <dt>Processed</dt>
+              <dd>{record.processedCount}</dd>
+            </div>
+            <div>
+              <dt>Pending</dt>
+              <dd>{record.pendingCount}</dd>
+            </div>
+            <div>
+              <dt>Rejected / failed</dt>
+              <dd>{record.rejectedCount + record.failedCount}</dd>
+            </div>
+            <div>
+              <dt>Payslips available</dt>
+              <dd>{record.payslipAvailableCount}</dd>
+            </div>
+            <div>
+              <dt>Returned amount</dt>
+              <dd>{formatAccountingReturnedAmount(record.returnedAmount)}</dd>
+            </div>
+            <div>
+              <dt>Accounting readiness</dt>
+              <dd>
+                <StatusBadge tone={getAccountingReadinessTone(record.accountingReadiness.status)}>
+                  {getAccountingReadinessLabel(record.accountingReadiness.status)}
+                </StatusBadge>
+              </dd>
+            </div>
+            <div>
+              <dt>Accounting transfer</dt>
+              <dd>
+                <StatusBadge tone={getAccountingTransferTone(record.accountingTransfer.status)}>
+                  {getAccountingTransferLabel(record.accountingTransfer.status)}
+                </StatusBadge>
+              </dd>
+            </div>
+            <div>
+              <dt>Received</dt>
+              <dd>{formatPayrollResultDateTime(record.receivedAt)}</dd>
+            </div>
+            <div>
+              <dt>Completed</dt>
+              <dd>{formatPayrollResultDateTime(record.completedAt)}</dd>
+            </div>
+            <div>
+              <dt>Provider</dt>
+              <dd>{record.provider}</dd>
+            </div>
           </dl>
+
+          {record.accountingReadiness.reasons.length > 0 ? (
+            <section aria-labelledby="approved-payroll-readiness-reasons-title">
+              <h3 id="approved-payroll-readiness-reasons-title">Readiness details</h3>
+              <ul className="accounting-approved-payroll__reason-list">
+                {record.accountingReadiness.reasons.map((reason) => (
+                  <li key={reason}>{reason}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
         </div>
       </section>
     </div>

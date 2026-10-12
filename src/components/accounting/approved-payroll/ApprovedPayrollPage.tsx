@@ -1,102 +1,199 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { getAccountingReadinessLabel } from "@/data/accounting/approved-payroll";
+import { getPayrollResultStatusLabel } from "@/data/payroll/results";
+import { apiRequest } from "@/lib/api/client";
+import type { ApiSuccessResponse } from "@/types/api/responses";
+import type {
+  AccountingApprovedPayrollData,
+  AccountingReadinessStatus,
+  AccountingTransferStatus,
+} from "@/types/accounting-approved-payroll";
+import type { PayrollResultStatus } from "@/types/payroll-results";
 
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
 import { ActionButton } from "@/components/ui/ActionButton";
 import { Icon } from "@/components/ui/Icon";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { SummaryCard } from "@/components/ui/SummaryCard";
-import {
-  accountingPayrollBatches,
-  type AccountingPayrollBatch,
-} from "@/data/accounting/dashboard";
 
 import { ApprovedPayrollDetailsDialog } from "./ApprovedPayrollDetailsDialog";
 import { ApprovedPayrollTable } from "./ApprovedPayrollTable";
 
-const pageSize = 4;
-const approvalStatuses = ["Approved", "Pending Approval"] as const;
-const accountingStatuses = ["Ready for Transfer", "Transferred", "Transfer Failed", "Pending"] as const;
+const allValue = "all";
 
-type ApprovalStatusFilter = "all" | (typeof approvalStatuses)[number];
-type AccountingStatusFilter = "all" | (typeof accountingStatuses)[number];
+type ApprovedPayrollPageProps = {
+  initialData: AccountingApprovedPayrollData;
+  loadError: boolean;
+};
 
-export function ApprovedPayrollPage() {
+type ApprovedPayrollApiResponse = ApiSuccessResponse<AccountingApprovedPayrollData>;
+
+function formatCount(value: number, singular: string, plural = `${singular}s`) {
+  return `${value} ${value === 1 ? singular : plural}`;
+}
+
+export function ApprovedPayrollPage({
+  initialData,
+  loadError: initialLoadError,
+}: ApprovedPayrollPageProps) {
+  const [data, setData] = useState(initialData);
   const [search, setSearch] = useState("");
-  const [period, setPeriod] = useState("all");
-  const [approvalStatus, setApprovalStatus] = useState<ApprovalStatusFilter>("all");
-  const [accountingStatus, setAccountingStatus] = useState<AccountingStatusFilter>("all");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedBatch, setSelectedBatch] = useState<AccountingPayrollBatch | null>(null);
+  const [period, setPeriod] = useState(allValue);
+  const [resultStatus, setResultStatus] = useState<PayrollResultStatus | typeof allValue>(allValue);
+  const [readinessStatus, setReadinessStatus] = useState<
+    AccountingReadinessStatus | typeof allValue
+  >(allValue);
+  const [transferStatus, setTransferStatus] = useState<
+    AccountingTransferStatus | typeof allValue
+  >(allValue);
+  const [page, setPage] = useState(1);
+  const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState(initialLoadError);
+  const firstRender = useRef(true);
 
-  const periods = useMemo(
-    () => Array.from(new Set(accountingPayrollBatches.map((batch) => batch.payrollPeriod))),
-    [],
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+
+    const params = new URLSearchParams({
+      page: String(page),
+      pageSize: String(data.pageSize || 5),
+    });
+
+    if (search.trim()) {
+      params.set("search", search.trim());
+    }
+    if (period !== allValue) {
+      params.set("periodStart", period);
+    }
+    if (resultStatus !== allValue) {
+      params.set("resultStatus", resultStatus);
+    }
+    if (readinessStatus !== allValue) {
+      params.set("readiness", readinessStatus);
+    }
+    if (transferStatus !== allValue) {
+      params.set("transferStatus", transferStatus);
+    }
+
+    try {
+      const response = await apiRequest<ApprovedPayrollApiResponse>(
+        `/api/v1/accounting/approved-payroll?${params.toString()}`,
+        { cache: "no-store" },
+      );
+
+      setData(response.data);
+      setLoadError(false);
+      setFeedback("");
+    } catch (error) {
+      setLoadError(true);
+      setFeedback(
+        error instanceof Error
+          ? error.message
+          : "Approved payroll information could not be loaded.",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    data.pageSize,
+    page,
+    period,
+    readinessStatus,
+    resultStatus,
+    search,
+    transferStatus,
+  ]);
+
+  useEffect(() => {
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    void loadData();
+  }, [loadData]);
+
+  const periodOptions = useMemo(
+    () => data.periodOptions.map((option) => ({
+      value: option.start,
+      label: option.label,
+    })),
+    [data.periodOptions],
   );
 
-  const summaryMetrics = useMemo(() => {
-    const approvedCount = accountingPayrollBatches.filter((batch) => batch.approvalStatus === "Approved").length;
-    const readyCount = accountingPayrollBatches.filter((batch) => batch.accountingStatus === "Ready for Transfer").length;
-    const transferredCount = accountingPayrollBatches.filter((batch) => batch.accountingStatus === "Transferred").length;
-    const issueCount = accountingPayrollBatches.filter((batch) => batch.accountingStatus === "Transfer Failed").length;
+  const summaryMetrics = [
+    {
+      label: "Approved payroll",
+      value: formatCount(data.summary.approvedPayroll, "result"),
+      note: "Completed Payroll Results",
+      icon: "payroll" as const,
+      tone: "info" as const,
+    },
+    {
+      label: "Ready for transfer",
+      value: formatCount(data.summary.readyForTransfer, "result"),
+      note: "Awaiting Accounting handoff",
+      icon: "arrow" as const,
+      tone: "warning" as const,
+    },
+    {
+      label: "Successfully transferred",
+      value: formatCount(data.summary.transferred, "result"),
+      note: "Accounting transfer is not implemented yet",
+      icon: "check" as const,
+      tone: "success" as const,
+    },
+    {
+      label: "Blocked / issues",
+      value: formatCount(data.summary.blocked, "result"),
+      note: "Requires Payroll follow-up",
+      icon: "warning" as const,
+      tone: "danger" as const,
+    },
+  ];
 
-    return [
-      { label: "Approved payroll", value: `${approvedCount} batches`, note: "Available from payroll", icon: "payroll" as const, tone: "info" as const },
-      { label: "Ready for transfer", value: `${readyCount} batch${readyCount === 1 ? "" : "es"}`, note: "Awaiting accounting handoff", icon: "arrow" as const, tone: "warning" as const },
-      { label: "Successfully transferred", value: `${transferredCount} batches`, note: "Transfer history confirmed", icon: "check" as const, tone: "success" as const },
-      { label: "Integration issues", value: `${issueCount} batch${issueCount === 1 ? "" : "es"}`, note: "Requires review", icon: "warning" as const, tone: "danger" as const },
-    ];
-  }, []);
+  const totalPages = Math.max(1, data.totalPages);
+  const visiblePage = Math.min(data.page, totalPages);
+  const firstVisible = data.total === 0
+    ? 0
+    : (visiblePage - 1) * data.pageSize + 1;
+  const lastVisible = Math.min(visiblePage * data.pageSize, data.total);
+  const selectedRecord = data.records.find(
+    (record) => record.payrollResultId === selectedResultId,
+  ) ?? null;
 
-  const filteredBatches = useMemo(() => {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    return accountingPayrollBatches.filter((batch) => {
-      const searchableText = `${batch.payrollReference} ${batch.payrollPeriod} ${batch.employeeCount}`.toLowerCase();
-      return (
-        (!normalizedSearch || searchableText.includes(normalizedSearch))
-        && (period === "all" || batch.payrollPeriod === period)
-        && (approvalStatus === "all" || batch.approvalStatus === approvalStatus)
-        && (accountingStatus === "all" || batch.accountingStatus === accountingStatus)
-      );
-    });
-  }, [accountingStatus, approvalStatus, period, search]);
-
-  const pageCount = Math.max(1, Math.ceil(filteredBatches.length / pageSize));
-  const safePage = Math.min(currentPage, pageCount);
-  const pageStart = (safePage - 1) * pageSize;
-  const visibleBatches = filteredBatches.slice(pageStart, pageStart + pageSize);
-  const rangeStart = filteredBatches.length === 0 ? 0 : pageStart + 1;
-  const rangeEnd = Math.min(pageStart + pageSize, filteredBatches.length);
-
-  function resetResultState() {
-    setCurrentPage(1);
-    setSelectedBatch(null);
-  }
-
-  function resetFilters() {
+  function clearFilters() {
     setSearch("");
-    setPeriod("all");
-    setApprovalStatus("all");
-    setAccountingStatus("all");
-    resetResultState();
+    setPeriod(allValue);
+    setResultStatus(allValue);
+    setReadinessStatus(allValue);
+    setTransferStatus(allValue);
+    setPage(1);
   }
 
   function handlePageChange(nextPage: number) {
-    setCurrentPage(Math.min(Math.max(nextPage, 1), pageCount));
+    setPage(Math.min(Math.max(nextPage, 1), totalPages));
   }
 
   return (
-    <div className="accounting-approved-payroll">
+    <div className={`accounting-approved-payroll${isLoading ? " is-loading" : ""}`}>
       <AdminPageHeader
         eyebrow="Approved payroll"
         title="Approved Payroll Information"
-        description="Review payroll information approved by Payroll Staff before it is transferred to the Existing Accounting System."
+        description="Review Payroll Results and their readiness for downstream Accounting processing."
         actions={(
           <div className="accounting-approved-payroll__header-actions">
-            <ActionButton icon="refresh" action="Approved payroll data refreshed from the local integration snapshot.">
+            <ActionButton
+              icon="refresh"
+              action="Approved payroll data refreshed."
+              onAction={() => void loadData()}
+            >
               Refresh data
             </ActionButton>
             <Link href="/accounting/integration-status" className="button-primary">
@@ -107,8 +204,22 @@ export function ApprovedPayrollPage() {
         )}
       />
 
+      {loadError ? (
+        <div className="accounting-approved-payroll__load-error" role="alert">
+          <Icon name="warning" />
+          <span>
+            {feedback || "Approved payroll information could not be loaded."}
+          </span>
+          <button type="button" className="button-link" onClick={() => void loadData()}>
+            Try again
+          </button>
+        </div>
+      ) : null}
+
       <div className="metric-grid accounting-approved-payroll__summary">
-        {summaryMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
+        {summaryMetrics.map((metric) => (
+          <SummaryCard key={metric.label} {...metric} />
+        ))}
       </div>
 
       <SectionCard
@@ -117,7 +228,7 @@ export function ApprovedPayrollPage() {
         className="accounting-approved-payroll__card"
       >
         <p className="accounting-approved-payroll__description">
-          Review approved payroll periods, employee totals, amounts, and accounting handoff readiness.
+          Review historical Payroll Result snapshots, output status, and Accounting readiness.
         </p>
 
         <form
@@ -133,61 +244,166 @@ export function ApprovedPayrollPage() {
               <input
                 type="search"
                 value={search}
-                onChange={(event) => { setSearch(event.target.value); setCurrentPage(1); }}
-                placeholder="Search payroll reference or period"
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
+                placeholder="Search result, batch, or Payroll reference"
                 aria-label="Search approved payroll"
               />
             </span>
           </label>
+
           <label className="accounting-approved-payroll__field">
             <span>Payroll period</span>
-            <select value={period} onChange={(event) => { setPeriod(event.target.value); setCurrentPage(1); }} aria-label="Filter by payroll period">
-              <option value="all">All periods</option>
-              {periods.map((option) => <option value={option} key={option}>{option}</option>)}
+            <select
+              value={period}
+              onChange={(event) => {
+                setPeriod(event.target.value);
+                setPage(1);
+              }}
+              aria-label="Filter by payroll period"
+            >
+              <option value={allValue}>All periods</option>
+              {periodOptions.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </label>
+
           <label className="accounting-approved-payroll__field">
-            <span>Approval</span>
-            <select value={approvalStatus} onChange={(event) => { setApprovalStatus(event.target.value as ApprovalStatusFilter); setCurrentPage(1); }} aria-label="Filter by approval status">
-              <option value="all">All statuses</option>
-              {approvalStatuses.map((option) => <option value={option} key={option}>{option}</option>)}
+            <span>Result status</span>
+            <select
+              value={resultStatus}
+              onChange={(event) => {
+                setResultStatus(event.target.value as PayrollResultStatus | typeof allValue);
+                setPage(1);
+              }}
+              aria-label="Filter by Payroll result status"
+            >
+              <option value={allValue}>All statuses</option>
+              {data.resultStatusOptions.map((option) => (
+                <option value={option} key={option}>
+                  {getPayrollResultStatusLabel(option)}
+                </option>
+              ))}
             </select>
           </label>
+
           <label className="accounting-approved-payroll__field">
-            <span>Accounting</span>
-            <select value={accountingStatus} onChange={(event) => { setAccountingStatus(event.target.value as AccountingStatusFilter); setCurrentPage(1); }} aria-label="Filter by accounting status">
-              <option value="all">All statuses</option>
-              {accountingStatuses.map((option) => <option value={option} key={option}>{option}</option>)}
+            <span>Accounting readiness</span>
+            <select
+              value={readinessStatus}
+              onChange={(event) => {
+                setReadinessStatus(
+                  event.target.value as AccountingReadinessStatus | typeof allValue,
+                );
+                setPage(1);
+              }}
+              aria-label="Filter by Accounting readiness"
+            >
+              <option value={allValue}>All readiness states</option>
+              {data.readinessStatusOptions.map((option) => (
+                <option value={option} key={option}>
+                  {getAccountingReadinessLabel(option)}
+                </option>
+              ))}
             </select>
           </label>
-          <button type="button" className="button-secondary" onClick={resetFilters}>Reset</button>
+
+          <label className="accounting-approved-payroll__field">
+            <span>Transfer status</span>
+            <select
+              value={transferStatus}
+              onChange={(event) => {
+                setTransferStatus(
+                  event.target.value as AccountingTransferStatus | typeof allValue,
+                );
+                setPage(1);
+              }}
+              aria-label="Filter by Accounting transfer status"
+            >
+              <option value={allValue}>All transfer states</option>
+              {data.transferStatusOptions.map((option) => (
+                <option value={option} key={option}>
+                  Not yet transferred
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <button type="button" className="button-secondary" onClick={clearFilters}>
+            Reset
+          </button>
         </form>
 
         <div className="accounting-approved-payroll__result-meta" aria-live="polite">
-          <span>Showing {rangeStart}-{rangeEnd} of {filteredBatches.length} batches</span>
-          <span>{accountingPayrollBatches.length} total records</span>
+          <span>
+            {isLoading
+              ? "Refreshing approved payroll information…"
+              : data.total
+                ? `Showing ${firstVisible}-${lastVisible} of ${data.total} results`
+                : "No approved payroll information is available for Accounting."}
+          </span>
+          <span>{formatCount(data.summary.approvedPayroll, "completed result")}</span>
         </div>
 
-        <ApprovedPayrollTable batches={visibleBatches} onViewDetails={setSelectedBatch} />
+        <ApprovedPayrollTable
+          records={data.records}
+          onViewDetails={(record) => setSelectedResultId(record.payrollResultId)}
+        />
 
         <footer className="accounting-approved-payroll__pagination">
-          <span>Page {safePage} of {pageCount}</span>
+          <span>Page {visiblePage} of {totalPages}</span>
           <nav aria-label="Approved payroll pages">
-            <button type="button" className="accounting-approved-payroll__page-button" onClick={() => handlePageChange(safePage - 1)} disabled={safePage === 1} aria-label="Previous approved payroll page"><Icon name="chevron-left" /></button>
-            {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
-              <button type="button" className={`accounting-approved-payroll__page-button ${page === safePage ? "is-active" : ""}`} key={page} onClick={() => handlePageChange(page)} aria-current={page === safePage ? "page" : undefined}>{page}</button>
+            <button
+              type="button"
+              className="accounting-approved-payroll__page-button"
+              onClick={() => handlePageChange(visiblePage - 1)}
+              disabled={visiblePage === 1}
+              aria-label="Previous approved payroll page"
+            >
+              <Icon name="chevron-left" />
+            </button>
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => (
+              <button
+                type="button"
+                className={`accounting-approved-payroll__page-button${pageNumber === visiblePage ? " is-active" : ""}`}
+                key={pageNumber}
+                onClick={() => handlePageChange(pageNumber)}
+                aria-current={pageNumber === visiblePage ? "page" : undefined}
+              >
+                {pageNumber}
+              </button>
             ))}
-            <button type="button" className="accounting-approved-payroll__page-button" onClick={() => handlePageChange(safePage + 1)} disabled={safePage === pageCount} aria-label="Next approved payroll page"><Icon name="chevron-right" /></button>
+            <button
+              type="button"
+              className="accounting-approved-payroll__page-button"
+              onClick={() => handlePageChange(visiblePage + 1)}
+              disabled={visiblePage === totalPages}
+              aria-label="Next approved payroll page"
+            >
+              <Icon name="chevron-right" />
+            </button>
           </nav>
         </footer>
       </SectionCard>
 
       <p className="accounting-approved-payroll__boundary-note">
         <Icon name="shield" />
-        This is a migration prototype. Approved payroll data is read-only deterministic integration data; this page does not calculate payroll, edit approvals, or write to the Existing Accounting System.
+        {data.providerNote}
       </p>
 
-      {selectedBatch ? <ApprovedPayrollDetailsDialog batch={selectedBatch} onClose={() => setSelectedBatch(null)} /> : null}
+      <span className="sr-only" aria-live="polite">{feedback}</span>
+
+      {selectedRecord ? (
+        <ApprovedPayrollDetailsDialog
+          record={selectedRecord}
+          onClose={() => setSelectedResultId(null)}
+        />
+      ) : null}
     </div>
   );
 }
