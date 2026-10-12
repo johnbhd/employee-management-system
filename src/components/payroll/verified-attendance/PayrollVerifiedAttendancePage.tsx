@@ -427,16 +427,6 @@ export function PayrollVerifiedAttendancePage({
         </footer>
       </SectionCard>
 
-      <p className="payroll-verified-attendance__batch-note">
-        <Icon name="info" />
-        Add to batch creates a persistent Draft batch for the selected payroll period. The server rechecks HR verification, payroll readiness, and duplicate batch membership before saving immutable snapshots.
-      </p>
-
-      <p className="payroll-verified-attendance__boundary-note">
-        <Icon name="shield" />
-        Payroll Staff can review HR-final-verified records here. Payroll cannot modify attendance, approve corrections, perform HR verification, calculate salary, or write to the Existing Payroll System.
-      </p>
-
       <PayrollVerifiedAttendanceDetailsModal
         record={selectedRecord}
         onClose={() => setSelectedRecord(null)}

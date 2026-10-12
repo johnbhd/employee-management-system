@@ -208,7 +208,6 @@ export function PayrollResultsPage({ initialData, loadError: initialLoadError }:
         <PayrollResultsNotices notices={data.notices} onViewAll={() => showFeedback("All returned result notices are shown here.")} />
       </div>
 
-      <p className="payroll-results__boundary-note"><Icon name="info" /> {data.providerNote}</p>
       <span className="sr-only" aria-live="polite">{feedback}</span>
 
       <PayrollResultsDetailsModal record={selectedRecord} batch={selectedBatch} onClose={() => setModal(null)} onCopyReference={copyReference} />

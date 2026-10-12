@@ -209,7 +209,6 @@ export function PayrollHistoryPage({ initialData, loadError: initialLoadError }:
         </footer>
       </SectionCard>
 
-      <p className="payroll-history__boundary-note"><Icon name="info" /> {data.providerNote}</p>
       <Link className="payroll-history__results-link" href="/payroll/results">View current payroll results <Icon name="arrow" /></Link>
       <span className="sr-only" aria-live="polite">{feedback}</span>
 

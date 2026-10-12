@@ -3,7 +3,6 @@
 import { useCallback, useState } from "react";
 
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
-import { Icon } from "@/components/ui/Icon";
 import { SectionCard } from "@/components/ui/SectionCard";
 import { SummaryCard } from "@/components/ui/SummaryCard";
 import type { ApiResponse } from "@/types/api/responses";
@@ -126,10 +125,6 @@ export function PayrollDashboardPage({
         </SectionCard>
       </div>
 
-      <p className="payroll-dashboard__boundary-note">
-        <Icon name="shield" />
-        This workspace displays server-derived payroll-readiness information only. It does not calculate salaries, approve payroll, or write to the Existing Payroll System.
-      </p>
     </div>
   );
 }
