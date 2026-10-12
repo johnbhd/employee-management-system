@@ -1,5 +1,11 @@
 import type { AccountingTransferRecord } from "@/types/accounting-transfers";
 import type { AccountingHistoryLifecycleStatus } from "@/types/accounting-transaction-history";
+import type { AccountingReadinessStatus } from "@/types/accounting-approved-payroll";
+import type { AccountingDashboardAccountingStatus } from "@/types/accounting-dashboard";
+import type {
+  AccountingAcknowledgementStatus,
+  AccountingTransferStatus,
+} from "@/types/accounting-transfers";
 
 export function determineAccountingLifecycleStatus(
   transfer: Pick<AccountingTransferRecord, "transferStatus" | "acknowledgementStatus">,
@@ -37,4 +43,40 @@ export function getAccountingTransferCompletionTimestamp(
   }
 
   return transfer.transferStatus === "failed" ? transfer.failedAt : null;
+}
+
+export function determineAccountingDashboardStatus(input: {
+  readinessStatus: AccountingReadinessStatus;
+  transfer: {
+    transferStatus: AccountingTransferStatus | "not_transferred";
+    acknowledgementStatus: AccountingAcknowledgementStatus | null;
+  };
+}): AccountingDashboardAccountingStatus {
+  if (input.transfer.transferStatus === "not_transferred") {
+    return input.readinessStatus === "ready"
+      ? "Ready for Transfer"
+      : "Blocked";
+  }
+
+  const transfer = input.transfer as Pick<
+    AccountingTransferRecord,
+    "transferStatus" | "acknowledgementStatus"
+  >;
+
+  if (
+    transfer.transferStatus === "preparing"
+    || transfer.transferStatus === "submitting"
+  ) {
+    return "Transfer In Progress";
+  }
+
+  if (isAccountingTransferSuccessful(transfer)) {
+    return "Transferred";
+  }
+
+  if (isAccountingTransferAwaitingAcknowledgement(transfer)) {
+    return "Awaiting Acknowledgement";
+  }
+
+  return "Integration Issue";
 }
