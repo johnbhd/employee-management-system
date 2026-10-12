@@ -128,6 +128,14 @@
   color: #92400e;
 }
 
+.user-accounts-hrps-page .user-account-delete-action {
+  color: #b42318;
+}
+
+.user-accounts-hrps-page .user-account-delete-action:hover {
+  color: #8f1d14;
+}
+
 .user-accounts-hrps-page .user-accounts-pagination {
   display: flex;
   align-items: center;
@@ -268,6 +276,94 @@
   color: #1e40af;
   font-size: 0.7rem;
   line-height: 1.5;
+}
+
+.user-accounts-confirmation-copy {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.user-accounts-confirmation-copy strong,
+.user-accounts-danger-note strong {
+  color: var(--au-navy);
+  font-size: 0.9rem;
+}
+
+.user-accounts-confirmation-copy span,
+.user-accounts-danger-note span {
+  color: var(--text-faint);
+  font-size: 0.72rem;
+}
+
+.user-accounts-danger-note {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.85rem;
+  border: 1px solid #fecaca;
+  border-radius: 0.7rem;
+  background: #fff1f2;
+}
+
+.user-accounts-danger-note p {
+  margin: 0.45rem 0 0;
+  color: #991b1b;
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.user-accounts-confirmation-list {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.85rem;
+  border: 1px solid #e5eaf1;
+  border-radius: 0.7rem;
+  background: var(--surface-muted);
+  color: var(--text-faint);
+  font-size: 0.72rem;
+}
+
+.user-accounts-confirmation-list strong {
+  color: var(--au-navy);
+  font-size: 0.7rem;
+}
+
+.user-accounts-confirmation-list ul {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0 0 0.45rem;
+  padding-left: 1.1rem;
+}
+
+.user-accounts-confirmation-list ul:last-child {
+  margin-bottom: 0;
+}
+
+.user-accounts-hrps-page .button-danger {
+  display: inline-flex;
+  min-height: 2.55rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #b42318;
+  border-radius: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  background: #b42318;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.user-accounts-hrps-page .button-danger:hover {
+  border-color: #8f1d14;
+  background: #8f1d14;
+}
+
+.user-accounts-hrps-page .button-danger:disabled,
+.user-accounts-hrps-page .button-primary:disabled,
+.user-accounts-hrps-page .button-secondary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }
 
 .user-accounts-form-grid {

@@ -69,6 +69,8 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
   const [feedback, setFeedback] = useState("");
   const [modal, setModal] = useState<ModalState>(null);
   const [selected, setSelected] = useState<AdminUserAccount | null>(null);
+  const [statusTarget, setStatusTarget] = useState<{ account: AdminUserAccount; disabled: boolean } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<AdminUserAccount | null>(null);
   const [isMutating, setIsMutating] = useState(false);
   const firstRender = useRef(true);
 
@@ -123,18 +125,47 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     setFeedback("");
   }
 
-  async function toggleDisabled(account: AdminUserAccount) {
-    const nextDisabled = account.authStatus !== "disabled";
-    const action = nextDisabled ? "disable" : "enable";
-    if (!window.confirm(`Are you sure you want to ${action} ${account.displayName}?`)) return;
+  function requestToggleDisabled(account: AdminUserAccount) {
+    setStatusTarget({ account, disabled: account.authStatus !== "disabled" });
+    setFeedback("");
+  }
+
+  async function toggleDisabled() {
+    if (!statusTarget) return;
+    const { account, disabled } = statusTarget;
+    const action = disabled ? "disable" : "enable";
     setIsMutating(true);
     setFeedback("");
     try {
-      await apiRequest<AccountApiResponse>(`/api/v1/admin/user-accounts/${encodeURIComponent(account.uid)}`, { method: "PATCH", body: JSON.stringify({ disabled: nextDisabled }) });
-      setFeedback(`Account ${nextDisabled ? "disabled" : "enabled"} successfully.`);
+      await apiRequest<AccountApiResponse>(`/api/v1/admin/user-accounts/${encodeURIComponent(account.uid)}/${disabled ? "disable" : "enable"}`, { method: "POST" });
+      setStatusTarget(null);
+      setFeedback(`Account ${disabled ? "disabled" : "enabled"} successfully.`);
       await loadData();
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : `The account could not be ${action}d.`);
+    } finally {
+      setIsMutating(false);
+    }
+  }
+
+  function requestDelete(account: AdminUserAccount) {
+    setDeleteTarget(account);
+    setFeedback("");
+  }
+
+  async function deleteAccount() {
+    if (!deleteTarget) return;
+    setIsMutating(true);
+    setFeedback("");
+    try {
+      await apiRequest<{ success: true }>(`/api/v1/admin/user-accounts/${encodeURIComponent(deleteTarget.uid)}`, { method: "DELETE" });
+      setDeleteTarget(null);
+      setSelected(null);
+      setModal(null);
+      setFeedback("Account permanently deleted. Employee and historical business records were preserved.");
+      await loadData();
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "The account could not be deleted safely.");
     } finally {
       setIsMutating(false);
     }
@@ -187,7 +218,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
             <label><span>Employee link</span><select value={link} onChange={(event) => updateFilter(setLink, event.target.value as typeof link)}><option value={allValue}>All links</option><option value="linked">Linked</option><option value="unlinked">Not linked</option><option value="invalid">Invalid link</option></select></label>
           </div>
 
-          {loadError && !data.items.length ? <div className="user-accounts-state user-accounts-error"><Icon name="warning" /><p>{feedback || "User account data could not be loaded."}</p><button type="button" className="button-secondary" onClick={() => void loadData()}>Try again</button></div> : data.items.length === 0 ? <div className="user-accounts-state"><Icon name="users" /><p>No real Firebase/application accounts match these filters.</p></div> : <div className="table-wrap user-accounts-table-wrap"><table className="data-table user-accounts-table"><caption className="sr-only">Firebase application accounts</caption><thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Employee link</th><th scope="col">Status</th><th scope="col">Email</th><th scope="col">Last sign-in</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{data.items.map((account) => { const state = accountStatus(account); const canEdit = canManage && account.profileStatus === "valid" && account.authStatus !== "missing"; return <tr key={account.uid}><td><div className="user-account-identity"><strong>{account.displayName}</strong><span>{account.email ?? "No Firebase email"}</span><small>{account.uid}</small></div></td><td>{roleLabel(account.role)}</td><td><span className={account.linkStatus === "invalid" ? "user-account-invalid-link" : ""}>{linkLabel(account)}</span></td><td><StatusBadge tone={state.tone}>{state.label}</StatusBadge></td><td>{account.emailVerified ? <StatusBadge tone="success">Verified</StatusBadge> : <StatusBadge tone="warning">Unverified</StatusBadge>}</td><td>{formatTimestamp(account.lastSignInAt)}</td><td><div className="user-account-row-actions"><button type="button" className="button-link" onClick={() => openDetails(account)}>View</button>{canEdit ? <button type="button" className="button-link" onClick={() => openEdit(account)}>Edit</button> : null}{canManage && account.authStatus !== "missing" ? <button type="button" className="button-link user-account-status-action" onClick={() => void toggleDisabled(account)} disabled={isMutating}>{account.authStatus === "disabled" ? "Enable" : "Disable"}</button> : null}</div></td></tr>; })}</tbody></table></div>}
+          {loadError && !data.items.length ? <div className="user-accounts-state user-accounts-error"><Icon name="warning" /><p>{feedback || "User account data could not be loaded."}</p><button type="button" className="button-secondary" onClick={() => void loadData()}>Try again</button></div> : data.items.length === 0 ? <div className="user-accounts-state"><Icon name="users" /><p>No real Firebase/application accounts match these filters.</p></div> : <div className="table-wrap user-accounts-table-wrap"><table className="data-table user-accounts-table"><caption className="sr-only">Firebase application accounts</caption><thead><tr><th scope="col">User</th><th scope="col">Role</th><th scope="col">Employee link</th><th scope="col">Status</th><th scope="col">Email</th><th scope="col">Last sign-in</th><th scope="col"><span className="sr-only">Actions</span></th></tr></thead><tbody>{data.items.map((account) => { const state = accountStatus(account); const canEdit = canManage && account.profileStatus === "valid" && account.authStatus !== "missing"; return <tr key={account.uid}><td><div className="user-account-identity"><strong>{account.displayName}</strong><span>{account.email ?? "No Firebase email"}</span><small>{account.uid}</small></div></td><td>{roleLabel(account.role)}</td><td><span className={account.linkStatus === "invalid" ? "user-account-invalid-link" : ""}>{linkLabel(account)}</span></td><td><StatusBadge tone={state.tone}>{state.label}</StatusBadge></td><td>{account.emailVerified ? <StatusBadge tone="success">Verified</StatusBadge> : <StatusBadge tone="warning">Unverified</StatusBadge>}</td><td>{formatTimestamp(account.lastSignInAt)}</td><td><div className="user-account-row-actions"><button type="button" className="button-link" onClick={() => openDetails(account)}>View</button>{canEdit ? <button type="button" className="button-link" onClick={() => openEdit(account)}>Edit</button> : null}{canManage && account.authStatus !== "missing" ? <button type="button" className="button-link user-account-status-action" onClick={() => requestToggleDisabled(account)} disabled={isMutating}>{account.authStatus === "disabled" ? "Enable" : "Disable"}</button> : null}{canManage ? <button type="button" className="button-link user-account-delete-action" onClick={() => requestDelete(account)} disabled={isMutating}>Delete</button> : null}</div></td></tr>; })}</tbody></table></div>}
 
           <div className="user-accounts-pagination"><span>Showing {data.items.length} of {data.total} matching account{data.total === 1 ? "" : "s"}</span><div><button type="button" className="button-secondary" onClick={() => setPage((value) => Math.max(1, value - 1))} disabled={data.page <= 1 || isLoading}>Previous</button><span>Page {data.page} of {data.totalPages}</span><button type="button" className="button-secondary" onClick={() => setPage((value) => value + 1)} disabled={!data.hasNext || isLoading}>Next</button></div></div>
         </div>
@@ -199,12 +230,31 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
       {modal === "create" ? <CreateAccountModal employees={data.employees} busy={isMutating} onClose={() => setModal(null)} onSubmit={(input) => void createAccount(input)} /> : null}
       {modal === "edit" && selected ? <EditAccountModal account={selected} employees={data.employees} busy={isMutating} onClose={() => setModal(null)} onSubmit={(input) => void updateAccount(input)} /> : null}
       {modal === "details" && selected ? <AccountDetailsModal account={selected} onClose={() => setModal(null)} onEdit={() => openEdit(selected)} /> : null}
+      {statusTarget ? <AccountStatusModal account={statusTarget.account} disabled={statusTarget.disabled} busy={isMutating} onClose={() => setStatusTarget(null)} onConfirm={() => void toggleDisabled()} /> : null}
+      {deleteTarget ? <DeleteAccountModal account={deleteTarget} busy={isMutating} onClose={() => setDeleteTarget(null)} onConfirm={() => void deleteAccount()} /> : null}
     </div>
   );
 }
 
 function ModalShell({ title, eyebrow, children, onClose }: { title: string; eyebrow: string; children: ReactNode; onClose: () => void }) {
   return <div className="user-accounts-modal-layer"><button type="button" className="user-accounts-modal-backdrop" onClick={onClose} aria-label="Close dialog" /><section className="user-accounts-modal" role="dialog" aria-modal="true" aria-labelledby="user-accounts-modal-title"><header><div><p className="page-eyebrow">{eyebrow}</p><h2 id="user-accounts-modal-title">{title}</h2></div><button type="button" className="button-secondary user-accounts-modal-close" onClick={onClose} aria-label="Close dialog"><Icon name="close" /></button></header>{children}</section></div>;
+}
+
+function AccountStatusModal({ account, disabled, busy, onClose, onConfirm }: { account: AdminUserAccount; disabled: boolean; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+  const action = disabled ? "Disable" : "Enable";
+  return <ModalShell title={`${action} account?`} eyebrow="Access management" onClose={onClose}><div className="user-accounts-details"><div className="user-accounts-confirmation-copy"><strong>{account.displayName}</strong><span>{account.email ?? account.uid}</span></div><p>{disabled ? "This user will no longer be able to sign in. Their application profile, employee link, and historical records will not be deleted." : "This user will be allowed to sign in again using their existing authentication credentials. Their role and employee link will remain unchanged."}</p><div className="user-accounts-modal-actions"><button type="button" className="button-secondary" onClick={onClose} disabled={busy}>Cancel</button><button type="button" className={disabled ? "button-danger" : "button-primary"} onClick={onConfirm} disabled={busy}>{busy ? `${action}ing…` : `${action} account`}</button></div></div></ModalShell>;
+}
+
+function DeleteAccountModal({ account, busy, onClose, onConfirm }: { account: AdminUserAccount; busy: boolean; onClose: () => void; onConfirm: () => void }) {
+  const [confirmation, setConfirmation] = useState("");
+  const canConfirm = confirmation.trim().toUpperCase() === "DELETE";
+
+  function submit(event: FormEvent) {
+    event.preventDefault();
+    if (canConfirm) onConfirm();
+  }
+
+  return <ModalShell title="Delete account?" eyebrow="Permanent access removal" onClose={onClose}><form className="user-accounts-form" onSubmit={submit}><div className="user-accounts-danger-note"><strong>{account.displayName}</strong><span>{account.email ?? account.uid}</span><p>This permanently deletes the Firebase Authentication identity and application profile. This action cannot be undone.</p></div><div className="user-accounts-confirmation-list"><strong>Will be removed</strong><ul><li>Firebase Authentication account</li><li>Application user/profile and current employee login link</li></ul><strong>Will remain</strong><ul><li>Official HRPS employee record</li><li>Attendance, payroll, accounting, and audit history</li></ul></div><label><span>Type DELETE to confirm</span><input value={confirmation} onChange={(event) => setConfirmation(event.target.value)} autoComplete="off" autoFocus required /></label><div className="user-accounts-modal-actions"><button type="button" className="button-secondary" onClick={onClose} disabled={busy}>Cancel</button><button type="submit" className="button-danger" disabled={!canConfirm || busy}>{busy ? "Deleting…" : "Delete permanently"}</button></div></form></ModalShell>;
 }
 
 function EmployeeSelect({ employees, value, onChange, required = false }: { employees: EmployeeReference[]; value: string; onChange: (value: string) => void; required?: boolean }) {

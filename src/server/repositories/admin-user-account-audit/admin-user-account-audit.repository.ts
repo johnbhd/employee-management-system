@@ -49,6 +49,7 @@ function parseAction(value: unknown): AuditAction | null {
     || value === "profile_updated"
     || value === "enabled"
     || value === "disabled"
+    || value === "deleted"
     ? value
     : null;
 }

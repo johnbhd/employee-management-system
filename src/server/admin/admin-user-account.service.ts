@@ -30,9 +30,9 @@ import { listAdminUserAccountAuditEvents } from "@/server/repositories/admin-use
 
 export class AdminUserAccountError extends Error {
   readonly code: string;
-  readonly status: 400 | 404 | 409;
+  readonly status: 400 | 404 | 409 | 503;
 
-  constructor(code: string, message: string, status: 400 | 404 | 409) {
+  constructor(code: string, message: string, status: 400 | 404 | 409 | 503) {
     super(message);
     this.name = "AdminUserAccountError";
     this.code = code;
@@ -305,8 +305,14 @@ async function activeAdminCount(): Promise<number> {
   return profiles.filter((profile) => profile.role === "admin" && enabledUids.has(profile.uid)).length;
 }
 
-function assertAdminSelfProtection(actor: Actor, targetUid: string, nextRole?: ApplicationRole, disable?: boolean) {
-  if (actor.uid === targetUid && (nextRole && nextRole !== "admin" || disable === true)) {
+async function adminIdentityCount(): Promise<number> {
+  const [profiles, authUsers] = await Promise.all([listApplicationUsers(), listAllAuthUsers()]);
+  const authUids = new Set(authUsers.map((record) => record.uid));
+  return profiles.filter((profile) => profile.role === "admin" && authUids.has(profile.uid)).length;
+}
+
+function assertAdminSelfProtection(actor: Actor, targetUid: string, nextRole?: ApplicationRole) {
+  if (actor.uid === targetUid && nextRole && nextRole !== "admin") {
     throw new AdminUserAccountError(
       "SELF_PROTECTION",
       "You cannot remove or disable your own IT Administrator access.",
@@ -365,7 +371,17 @@ export async function createAdminUserAccount(
       ],
     });
   } catch (error) {
-    await getFirebaseAdminAuth().deleteUser(record.uid).catch(() => undefined);
+    const cleanup = await Promise.allSettled([
+      deleteApplicationUserProfile(record.uid),
+      getFirebaseAdminAuth().deleteUser(record.uid),
+    ]);
+    if (cleanup.some((result) => result.status === "rejected")) {
+      throw new AdminUserAccountError(
+        "ACCOUNT_PROVISIONING_INCOMPLETE",
+        "The account could not be provisioned safely. Contact an administrator before retrying.",
+        503,
+      );
+    }
     throw error;
   }
 
@@ -391,7 +407,7 @@ export async function updateAdminUserAccount(
     ? currentProfile?.employeeId ?? null
     : nullableString(input.employeeId, "Employee link");
 
-  if (!currentProfile && input.disabled === undefined) {
+  if (!currentProfile) {
     throw new AdminUserAccountError("PROFILE_MISSING", "This Firebase account has no valid application profile yet.", 409);
   }
   if (!nextRole) {
@@ -400,21 +416,16 @@ export async function updateAdminUserAccount(
   if (nextRole === "employee" && !nextEmployeeId) {
     throw new AdminUserAccountError("EMPLOYEE_LINK_REQUIRED", "Employee accounts must be linked to an existing employee record.", 400);
   }
-  assertAdminSelfProtection(actor, uid, nextRole, input.disabled);
+  assertAdminSelfProtection(actor, uid, nextRole);
   if (input.role !== undefined && currentProfile?.role === "admin" && nextRole !== "admin" && await activeAdminCount() <= 1) {
     throw new AdminUserAccountError("LAST_ADMIN_PROTECTION", "The last active IT Administrator cannot be demoted.", 409);
   }
-  if (input.disabled === true && currentProfile?.role === "admin" && await activeAdminCount() <= 1) {
-    throw new AdminUserAccountError("LAST_ADMIN_PROTECTION", "The last active IT Administrator cannot be disabled.", 409);
-  }
-
   if (input.username !== undefined) await ensureUsernameIsAvailable(nextUsername, uid);
   if (input.employeeId !== undefined || input.role === "employee") {
     await ensureEmployeeLinkIsValid(nextEmployeeId, uid);
   }
 
   const changes = [] as Array<{ field: string; from: string | null; to: string | null }>;
-  const targetDisplayName = currentProfile?.displayName ?? target.authRecord?.displayName ?? "Unnamed account";
 
   if (currentProfile && (input.username !== undefined || input.displayName !== undefined || input.role !== undefined || input.employeeId !== undefined)) {
     if (input.username !== undefined && currentProfile.username !== nextUsername) changes.push({ field: "username", from: currentProfile.username, to: nextUsername });
@@ -432,20 +443,6 @@ export async function updateAdminUserAccount(
     }
   }
 
-  if (input.disabled !== undefined && target.authRecord) {
-    const wasDisabled = target.authRecord.disabled;
-    if (wasDisabled !== input.disabled) {
-      await getFirebaseAdminAuth().updateUser(uid, { disabled: input.disabled });
-      await updateApplicationUserProfile(uid, { status: input.disabled ? "disabled" : "active" });
-      await writeAdminUserAccountAuditEvent({
-        action: input.disabled ? "disabled" : "enabled",
-        actor,
-        target: { uid, displayName: targetDisplayName },
-        changes: [{ field: "disabled", from: String(wasDisabled), to: String(input.disabled) }],
-      });
-    }
-  }
-
   if (changes.length > 0) {
     await writeAdminUserAccountAuditEvent({
       action: "profile_updated",
@@ -457,6 +454,116 @@ export async function updateAdminUserAccount(
 
   const refreshed = await getAdminUserAccountsData({ search: uid, pageSize: 1 });
   return refreshed.items[0] ?? null;
+}
+
+export async function setAdminUserAccountDisabled(
+  actor: Actor,
+  uid: string,
+  disabled: boolean,
+) {
+  const target = await requireTarget(uid);
+  if (!target.authRecord) {
+    throw new AdminUserAccountError("AUTH_ACCOUNT_MISSING", "This account has no Firebase Authentication identity to update.", 409);
+  }
+
+  assertAdminSelfProtection(actor, uid, disabled ? "employee" : undefined);
+  if (disabled && target.profile?.role === "admin" && await activeAdminCount() <= 1) {
+    throw new AdminUserAccountError("LAST_ADMIN_PROTECTION", "The last active IT Administrator cannot be disabled.", 409);
+  }
+
+  const wasDisabled = target.authRecord.disabled;
+  if (wasDisabled === disabled) {
+    return toAccount(
+      target.authRecord,
+      target.profile,
+      target.profile?.employeeId ? await getEmployeeById(target.profile.employeeId) : null,
+    );
+  }
+
+  await getFirebaseAdminAuth().updateUser(uid, { disabled });
+  try {
+    if (target.profile) {
+      await updateApplicationUserProfile(uid, { status: disabled ? "disabled" : "active" });
+    }
+  } catch {
+    await getFirebaseAdminAuth().updateUser(uid, { disabled: wasDisabled }).catch(() => undefined);
+    throw new AdminUserAccountError(
+      "ACCOUNT_STATUS_SYNC_FAILED",
+      "The account status could not be synchronized safely. No business history was changed.",
+      503,
+    );
+  }
+
+  await writeAdminUserAccountAuditEvent({
+    action: disabled ? "disabled" : "enabled",
+    actor,
+    target: { uid, displayName: target.profile?.displayName ?? target.authRecord.displayName ?? "Unnamed account" },
+    changes: [{ field: "disabled", from: String(wasDisabled), to: String(disabled) }],
+  });
+
+  return getAdminUserAccount(uid);
+}
+
+export async function deleteAdminUserAccount(actor: Actor, uid: string): Promise<void> {
+  const target = await requireTarget(uid);
+  if (actor.uid === uid) {
+    throw new AdminUserAccountError("SELF_PROTECTION", "You cannot permanently delete your own IT Administrator account.", 409);
+  }
+  if (target.profile?.role === "admin" && await adminIdentityCount() <= 1) {
+    throw new AdminUserAccountError("LAST_ADMIN_PROTECTION", "The final IT Administrator account cannot be deleted.", 409);
+  }
+
+  const targetDisplayName = target.profile?.displayName ?? target.authRecord?.displayName ?? "Unnamed account";
+  const profile = target.profile;
+
+  if (profile) {
+    await deleteApplicationUserProfile(uid);
+  }
+
+  try {
+    if (target.authRecord) {
+      await getFirebaseAdminAuth().deleteUser(uid);
+    }
+  } catch (error) {
+    const code = error && typeof error === "object" && "code" in error ? error.code : null;
+    if (code !== "auth/user-not-found") {
+      if (profile) {
+        try {
+          await createApplicationUserProfile(uid, {
+            username: profile.username,
+            displayName: profile.displayName,
+            role: profile.role,
+            employeeId: profile.employeeId,
+          });
+          if (profile.status !== "active") {
+            await updateApplicationUserProfile(uid, { status: profile.status });
+          }
+        } catch {
+          throw new AdminUserAccountError(
+            "ACCOUNT_DELETE_INCONSISTENT",
+            "The account could not be deleted safely and its application profile could not be restored. Contact an administrator immediately.",
+            503,
+          );
+        }
+      }
+      throw new AdminUserAccountError(
+        "ACCOUNT_DELETE_FAILED",
+        "The account could not be deleted safely. No business history was changed.",
+        503,
+      );
+    }
+  }
+
+  await writeAdminUserAccountAuditEvent({
+    action: "deleted",
+    actor,
+    target: { uid, displayName: targetDisplayName },
+    changes: [
+      { field: "email", from: target.authRecord?.email ?? null, to: null },
+      { field: "role", from: profile?.role ?? null, to: null },
+      { field: "employeeId", from: profile?.employeeId ?? null, to: null },
+    ],
+  });
 }
 
 export async function getAdminUserAccount(uid: string) {

@@ -7,6 +7,7 @@ import {
 import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AdminUserAccountError,
+  deleteAdminUserAccount,
   getAdminUserAccount,
   updateAdminUserAccount,
 } from "@/server/admin/admin-user-account.service";
@@ -64,12 +65,25 @@ export async function PATCH(
     if (typeof body.displayName === "string") input.displayName = body.displayName;
     if (body.role !== undefined) input.role = body.role as AdminUserAccountUpdateInput["role"];
     if (body.employeeId === null || typeof body.employeeId === "string") input.employeeId = body.employeeId;
-    if (typeof body.disabled === "boolean") input.disabled = body.disabled;
-
     return NextResponse.json({
       success: true,
       data: await updateAdminUserAccount(context.user, uid, input),
     });
+  } catch (error) {
+    return handleError(error);
+  }
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ uid: string }> },
+) {
+  try {
+    const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.user_accounts.manage", context.user);
+    const { uid } = await params;
+    await deleteAdminUserAccount(context.user, uid);
+    return NextResponse.json({ success: true, data: { uid, deleted: true } });
   } catch (error) {
     return handleError(error);
   }
