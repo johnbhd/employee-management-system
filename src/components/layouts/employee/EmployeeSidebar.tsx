@@ -9,29 +9,31 @@ import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 
 type EmployeeSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-const employeeLinks = [
-  { label: "Dashboard", icon: "dashboard" as const, href: "/employee/dashboard" },
-  { label: "My Attendance", icon: "calendar" as const, href: "/employee/my-attendance" },
-  { label: "Show Attendance QR", icon: "qr" as const, href: "/employee/attendance-qr" },
-  { label: "Attendance History", icon: "clock" as const, href: "/employee/attendance-history" },
-  { label: "My Payslips", icon: "payroll" as const, href: "/employee/payslips" },
-  { label: "My Profile", icon: "user" as const, href: "/employee/profile" },
+const employeeLinks: readonly { label: string; icon: "dashboard" | "calendar" | "qr" | "clock" | "payroll" | "user" | "settings" | "activity" | "help"; href: string; permission?: PermissionKey }[] = [
+  { label: "Dashboard", icon: "dashboard", href: "/employee/dashboard", permission: "employee.dashboard.view" },
+  { label: "My Attendance", icon: "calendar", href: "/employee/my-attendance", permission: "employee.attendance.view_own" },
+  { label: "Show Attendance QR", icon: "qr", href: "/employee/attendance-qr", permission: "employee.attendance_qr.view_own" },
+  { label: "Attendance History", icon: "clock", href: "/employee/attendance-history", permission: "employee.attendance.history.view_own" },
+  { label: "My Payslips", icon: "payroll", href: "/employee/payslips", permission: "employee.payslip.view_own" },
+  { label: "My Profile", icon: "user", href: "/employee/profile", permission: "employee.profile.view_own" },
   { label: "Settings", icon: "settings" as const, href: "/employee/settings" },
   { label: "Announcements", icon: "activity" as const, href: "/employee/announcements" },
   { label: "Help and Support", icon: "help" as const, href: "/employee/help-support" },
 ];
 
-export function EmployeeSidebar({ user, employee, isOpen, onClose }: EmployeeSidebarProps) {
+export function EmployeeSidebar({ user, employee, permissions, isOpen, onClose }: EmployeeSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -54,7 +56,7 @@ export function EmployeeSidebar({ user, employee, isOpen, onClose }: EmployeeSid
           <span><strong>Arellano University</strong><small>Juan Sumulong Campus</small></span>
         </div>
         <nav className="employee-nav" aria-label="Employee portal navigation">
-          {employeeLinks.map((item) => {
+          {employeeLinks.filter((item) => !item.permission || permissions.includes(item.permission)).map((item) => {
             const isActive = item.href === pathname;
             const className = `employee-nav-link ${isActive ? "is-active" : ""}`;
             const content = (

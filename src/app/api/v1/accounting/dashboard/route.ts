@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import { getAccountingDashboardData } from "@/server/accounting/accounting-dashboard.service";
 import {
   AccountingTransferDataError,
@@ -24,7 +24,8 @@ function errorResponse(code: string, message: string, status: number) {
 
 export async function GET() {
   try {
-    await requireApiRoleContext("accounting");
+    const context = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.dashboard.view", context.user);
     const data = await getAccountingDashboardData();
     const response: ApiSuccessResponse<AccountingDashboardData> = {
       success: true,

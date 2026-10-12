@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AccountingTransferDataError,
   getAccountingTransferDetail,
@@ -31,7 +31,8 @@ export async function GET(
   context: { params: Promise<{ transferId: string }> },
 ) {
   try {
-    await requireApiRoleContext("accounting");
+    const authContext = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.transfer.view", authContext.user);
     const { transferId } = await context.params;
     const transfer = await getAccountingTransferDetail(transferId);
     if (!transfer) return errorResponse("ACCOUNTING_TRANSFER_NOT_FOUND", "The Accounting transfer could not be found.", 404);

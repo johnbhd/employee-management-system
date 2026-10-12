@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollHistoryPage } from "@/components/payroll/history/PayrollHistoryPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import { getPayrollHistoryData } from "@/server/payroll/payroll-history.service";
 import type { PayrollHistoryData } from "@/types/payroll-history";
 
@@ -26,6 +29,11 @@ const emptyHistoryData: PayrollHistoryData = {
 };
 
 export default async function PayrollHistoryRoute() {
+  const context = await requireRoleContext("payroll");
+  if (!(await hasPermission(context.user, "payroll.history.view"))) {
+    return <PermissionDeniedPage title="Payroll History unavailable" backHref="/payroll/dashboard" backLabel="Back to Payroll Dashboard" />;
+  }
+
   let data = emptyHistoryData;
   let loadError = false;
 

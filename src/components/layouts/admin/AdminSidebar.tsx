@@ -11,17 +11,19 @@ import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import { getRoleLabel } from "@/lib/auth/roles";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ user, employee, permissions, isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -61,7 +63,18 @@ export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarPr
               <span className="role-pill">{getRoleLabel(user.role)}</span>
             </div>
             <nav className="admin-sidebar-nav" aria-label="Primary navigation">
-              {adminNavigation.map((item) => {
+              {adminNavigation.filter((item) => {
+                const permissionByPath: Record<string, PermissionKey> = {
+                  "/admin/dashboard": "admin.dashboard.view",
+                  "/admin/integration-monitoring": "admin.integration_monitoring.view",
+                  "/admin/user-accounts": "admin.user_accounts.view",
+                  "/admin/roles-permissions": "admin.roles_permissions.view",
+                  "/admin/audit-logs": "admin.audit_logs.view",
+                  "/admin/settings": "admin.settings.view",
+                };
+                const permission = item.href ? permissionByPath[item.href] : undefined;
+                return !permission || permissions.includes(permission);
+              }).map((item) => {
                 const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
 
                 if (!item.href) {

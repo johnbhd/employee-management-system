@@ -5,7 +5,7 @@ import {
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
 import { isPayrollDateKey } from "@/server/payroll/payroll-batches.service";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AccountingTransferDataError,
   AccountingTransactionHistoryValidationError,
@@ -55,7 +55,8 @@ function mapError(error: unknown) {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("accounting");
+    const context = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.history.view", context.user);
     const params = new URL(request.url).searchParams;
     const defaults = getDefaultAccountingTransactionHistoryQuery();
     const page = Number(params.get("page") ?? defaults.page);

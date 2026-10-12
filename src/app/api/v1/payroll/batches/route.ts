@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiPermission, requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
 import {
   addPayrollBatchItem,
   createPayrollBatch,
@@ -56,7 +56,8 @@ function getPeriodQuery(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.view", context.user);
     const data = await getPayrollBatchesData(getPeriodQuery(request));
     const response: ApiSuccessResponse<PayrollBatchesData> = { success: true, data };
     return NextResponse.json(response);
@@ -71,6 +72,7 @@ export async function POST(request: Request) {
 
   try {
     context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.manage", context.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
     return mapError(error);

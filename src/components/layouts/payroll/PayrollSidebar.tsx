@@ -10,6 +10,7 @@ import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
 import type { IconName } from "@/types/ui";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 
@@ -19,25 +20,27 @@ type PayrollNavigationItem = {
   icon: IconName;
   href?: string;
   planned?: boolean;
+  permission?: PermissionKey;
 };
 
 const payrollNavigation: readonly PayrollNavigationItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "/payroll/dashboard" },
-  { id: "verified-attendance", label: "Verified Attendance", icon: "users", href: "/payroll/verified-attendance" },
-  { id: "batches", label: "Payroll Batches", icon: "layers", href: "/payroll/batches" },
-  { id: "handoff", label: "Payroll Handoff", icon: "handoff", href: "/payroll/handoff" },
-  { id: "results", label: "Payroll Results", icon: "file", href: "/payroll/results" },
-  { id: "history", label: "Payroll History", icon: "clock", href: "/payroll/history" },
+  { id: "dashboard", label: "Dashboard", icon: "dashboard", href: "/payroll/dashboard", permission: "payroll.dashboard.view" },
+  { id: "verified-attendance", label: "Verified Attendance", icon: "users", href: "/payroll/verified-attendance", permission: "payroll.verified_attendance.view" },
+  { id: "batches", label: "Payroll Batches", icon: "layers", href: "/payroll/batches", permission: "payroll.batch.view" },
+  { id: "handoff", label: "Payroll Handoff", icon: "handoff", href: "/payroll/handoff", permission: "payroll.handoff.view" },
+  { id: "results", label: "Payroll Results", icon: "file", href: "/payroll/results", permission: "payroll.result.view" },
+  { id: "history", label: "Payroll History", icon: "clock", href: "/payroll/history", permission: "payroll.history.view" },
 ];
 
 type PayrollSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function PayrollSidebar({ user, employee, isOpen, onClose }: PayrollSidebarProps) {
+export function PayrollSidebar({ user, employee, permissions, isOpen, onClose }: PayrollSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -77,7 +80,7 @@ export function PayrollSidebar({ user, employee, isOpen, onClose }: PayrollSideb
               <span className="payroll-role-pill">{displayName}</span>
             </div>
             <nav className="payroll-sidebar-nav" aria-label="Payroll portal navigation">
-              {payrollNavigation.map((item) => {
+              {payrollNavigation.filter((item) => !item.permission || permissions.includes(item.permission)).map((item) => {
                 const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
                 const content = (
                   <>

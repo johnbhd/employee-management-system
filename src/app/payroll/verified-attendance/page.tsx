@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollVerifiedAttendancePage } from "@/components/payroll/verified-attendance/PayrollVerifiedAttendancePage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import { getCurrentPayrollPeriod } from "@/server/payroll/payroll-dashboard.service";
 import { parsePayrollVerifiedAttendanceQuery } from "@/server/payroll/payroll-verified-attendance-query";
 import { getPayrollVerifiedAttendanceData } from "@/server/payroll/payroll-verified-attendance.service";
@@ -48,6 +51,11 @@ function getEmptyData(pageSize: number): PayrollVerifiedAttendanceData {
 export const dynamic = "force-dynamic";
 
 export default async function Page({ searchParams }: PageProps) {
+  const context = await requireRoleContext("payroll");
+  if (!(await hasPermission(context.user, "payroll.verified_attendance.view"))) {
+    return <PermissionDeniedPage title="Verified attendance unavailable" backHref="/payroll/dashboard" backLabel="Back to Payroll Dashboard" />;
+  }
+
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = parsePayrollVerifiedAttendanceQuery(
     toSearchParams(resolvedSearchParams),

@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiPermission, requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
 import {
   PayrollBatchConflictError,
   PayrollBatchDataError,
@@ -41,6 +41,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   let authContext: Awaited<ReturnType<typeof requireApiRoleContext>>;
   try {
     authContext = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.manage", authContext.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
     return mapError(error);

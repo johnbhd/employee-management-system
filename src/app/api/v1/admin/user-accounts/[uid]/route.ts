@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AdminUserAccountError,
   getAdminUserAccount,
@@ -40,7 +40,8 @@ export async function GET(
   { params }: { params: Promise<{ uid: string }> },
 ) {
   try {
-    await requireApiRoleContext("admin");
+    const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.user_accounts.view", context.user);
     const { uid } = await params;
     return NextResponse.json({ success: true, data: await getAdminUserAccount(uid) });
   } catch (error) {
@@ -54,6 +55,7 @@ export async function PATCH(
 ) {
   try {
     const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.user_accounts.manage", context.user);
     const { uid } = await params;
     const body = await request.json() as Record<string, unknown>;
     const input: AdminUserAccountUpdateInput = {};

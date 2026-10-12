@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   getPayrollHistoryDetail,
   PayrollHistoryValidationError,
@@ -25,7 +25,8 @@ export async function GET(
   context: { params: Promise<{ batchId: string }> },
 ) {
   try {
-    await requireApiRoleContext("payroll");
+    const authContext = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.history.view", authContext.user);
     const { batchId } = await context.params;
     if (!batchId.trim()) return errorResponse("PAYROLL_HISTORY_NOT_FOUND", "The payroll history record could not be found.", 404);
     const data = await getPayrollHistoryDetail(batchId);

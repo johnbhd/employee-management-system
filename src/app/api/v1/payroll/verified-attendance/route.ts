@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiPermission, requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
 import { parsePayrollVerifiedAttendanceQuery } from "@/server/payroll/payroll-verified-attendance-query";
 import { getPayrollVerifiedAttendanceData } from "@/server/payroll/payroll-verified-attendance.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
@@ -31,7 +31,8 @@ function getErrorResponse(
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.verified_attendance.view", context.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) {
       return getErrorResponse(error.code, error.message, error.status);

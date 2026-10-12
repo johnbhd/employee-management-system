@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { AccountingTransactionHistoryPage } from "@/components/accounting/transaction-history/AccountingTransactionHistoryPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import { getAccountingTransactionHistoryData } from "@/server/accounting/accounting-transaction-history.service";
 import type { AccountingTransactionHistoryData } from "@/types/accounting-transaction-history";
 
@@ -25,6 +28,11 @@ const emptyHistoryData: AccountingTransactionHistoryData = {
 };
 
 export default async function Page() {
+  const context = await requireRoleContext("accounting");
+  if (!(await hasPermission(context.user, "accounting.history.view"))) {
+    return <PermissionDeniedPage title="Accounting History unavailable" backHref="/accounting/dashboard" backLabel="Back to Accounting Dashboard" />;
+  }
+
   let data = emptyHistoryData;
   let loadError = false;
 

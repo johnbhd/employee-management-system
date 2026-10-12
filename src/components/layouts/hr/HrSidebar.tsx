@@ -9,6 +9,7 @@ import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 import type { IconName } from "@/types/ui";
@@ -19,26 +20,28 @@ type HrNavigationItem = {
   icon: IconName;
   href?: string;
   planned?: boolean;
+  permission?: PermissionKey;
 };
 
 const hrNavigation: HrNavigationItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard" },
-  { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring" },
-  { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests" },
-  { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules" },
-  { id: "employee-directory", label: "Employee Directory", icon: "users" as const, href: "/hr/employee-directory" },
-  { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, href: "/hr/attendance-reports" },
-  { id: "audit-history", label: "Audit History", icon: "audit" as const, href: "/hr/audit-history" },
+  { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard", permission: "hr.dashboard.view" },
+  { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring", permission: "hr.attendance.view" },
+  { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests", permission: "hr.correction.view" },
+  { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules", permission: "hr.schedule.view" },
+  { id: "employee-directory", label: "Employee Directory", icon: "users" as const, href: "/hr/employee-directory", permission: "hr.employee_directory.view" },
+  { id: "attendance-reports", label: "Attendance Reports", icon: "file" as const, href: "/hr/attendance-reports", permission: "hr.attendance.reports.view" },
+  { id: "audit-history", label: "Audit History", icon: "audit" as const, href: "/hr/audit-history", permission: "hr.audit_history.view" },
 ];
 
 type HrSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function HrSidebar({ user, employee, isOpen, onClose }: HrSidebarProps) {
+export function HrSidebar({ user, employee, permissions, isOpen, onClose }: HrSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -78,7 +81,7 @@ export function HrSidebar({ user, employee, isOpen, onClose }: HrSidebarProps) {
               <span className="hr-role-pill">HR / Attendance Staff</span>
             </div>
             <nav className="hr-sidebar-nav" aria-label="HR portal navigation">
-              {hrNavigation.map((item) => {
+              {hrNavigation.filter((item) => !item.permission || permissions.includes(item.permission)).map((item) => {
                 const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
                 const content = (
                   <>

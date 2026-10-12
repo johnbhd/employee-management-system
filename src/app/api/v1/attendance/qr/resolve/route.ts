@@ -8,7 +8,7 @@ import {
     AttendanceQrEmployeeUnavailableError,
     recordEmployeeQrAttendance,
 } from "@/server/attendance/qr/attendance-qr.service";
-import { requireApiRoles, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiPermission, requireApiRoles, ApiAuthorizationError } from "@/server/auth/guards";
 import {
     FirebaseAdminConfigurationError,
     FirebaseAdminInitializationError,
@@ -48,6 +48,9 @@ export async function POST(request: Request) {
 
     try {
         scannerOperator = await requireApiRoles("hr", "admin");
+        if (scannerOperator.role === "hr") {
+            await requireApiPermission("hr.attendance.scan", scannerOperator);
+        }
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {
             return getErrorResponse(error.code, error.message, error.status);

@@ -4,18 +4,19 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import type { CurrentUserContext } from "@/types/auth";
+import type { PermissionKey } from "@/types/permissions";
 
 import { PayrollMain } from "./PayrollMain";
 import { PayrollNavbar } from "./PayrollNavbar";
 import { PayrollSidebar } from "./PayrollSidebar";
 
-export function PayrollShell({
-  children,
-  context,
-}: {
+type PayrollShellProps = {
   children: ReactNode;
   context: CurrentUserContext;
-}) {
+  permissions: readonly PermissionKey[];
+};
+
+export function PayrollShell({ children, context, permissions }: PayrollShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export function PayrollShell({
       <PayrollSidebar
         user={context.user}
         employee={context.employee}
+        permissions={permissions}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

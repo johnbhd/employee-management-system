@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AccountingTransferDataError,
   getAccountingTransactionHistoryDetail,
@@ -42,7 +42,8 @@ export async function GET(
   context: { params: Promise<{ transferId: string }> },
 ) {
   try {
-    await requireApiRoleContext("accounting");
+    const authContext = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.history.view", authContext.user);
     const { transferId } = await context.params;
     const detail = await getAccountingTransactionHistoryDetail(transferId);
     if (!detail) {

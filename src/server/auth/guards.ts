@@ -15,7 +15,9 @@ import {
     getCurrentUserContext,
     requireCurrentUserContext,
 } from "./current-user-context";
+import { hasPermission } from "./permission.service";
 import { getOptionalSessionUser } from "./session";
+import type { PermissionKey } from "@/types/permissions";
 
 export class ApiAuthorizationError extends Error {
     readonly code: "UNAUTHENTICATED" | "FORBIDDEN";
@@ -147,4 +149,21 @@ export async function requireApiRoleContext(
     }
 
     return context;
+}
+
+export async function requireApiPermission(
+    permission: PermissionKey,
+    user?: SessionUser,
+): Promise<SessionUser> {
+    const sessionUser = user ?? await requireApiSessionUser();
+
+    if (!(await hasPermission(sessionUser, permission))) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "You do not have permission to perform this operation.",
+        );
+    }
+
+    return sessionUser;
 }

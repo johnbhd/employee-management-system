@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollBatchesPage } from "@/components/payroll/batches/PayrollBatchesPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import {
   getDefaultPayrollBatchesQuery,
   getPayrollBatchesData,
@@ -24,6 +27,11 @@ function getEmptyData(): PayrollBatchesData {
 export const dynamic = "force-dynamic";
 
 export default async function Page({ searchParams }: PageProps) {
+  const context = await requireRoleContext("payroll");
+  if (!(await hasPermission(context.user, "payroll.batch.view"))) {
+    return <PermissionDeniedPage title="Payroll Batches unavailable" backHref="/payroll/dashboard" backLabel="Back to Payroll Dashboard" />;
+  }
+
   const values = searchParams ? await searchParams : {};
   const defaults = getDefaultPayrollBatchesQuery();
   const query = {

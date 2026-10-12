@@ -8,11 +8,15 @@ import {
   getTodayAttendanceForEmployee,
 } from "@/server/attendance/attendance.service";
 import { requireCurrentUserContext } from "@/server/auth/current-user-context";
+import { hasPermission } from "@/server/auth/permission.service";
 import type { AttendanceCalendarRecord } from "@/types/attendance-history";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 export default async function Page() {
   const context = await requireCurrentUserContext();
+  if (!(await hasPermission(context.user, "employee.attendance.view_own"))) {
+    return <PermissionDeniedPage title="My Attendance unavailable" backHref="/employee/dashboard" backLabel="Back to Employee Dashboard" />;
+  }
   const now = new Date();
   const fallbackAttendance: TodayAttendanceData = {
     attendance: null,
@@ -53,3 +57,4 @@ export default async function Page() {
     />
   );
 }
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";

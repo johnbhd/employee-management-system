@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollResultsPage } from "@/components/payroll/results/PayrollResultsPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import { getPayrollResultsData } from "@/server/payroll/payroll-result.service";
 import type { PayrollResultsData } from "@/types/payroll-results";
 
@@ -27,6 +30,11 @@ const emptyResultsData: PayrollResultsData = {
 };
 
 export default async function PayrollResultsRoute() {
+  const context = await requireRoleContext("payroll");
+  if (!(await hasPermission(context.user, "payroll.result.view"))) {
+    return <PermissionDeniedPage title="Payroll Results unavailable" backHref="/payroll/dashboard" backLabel="Back to Payroll Dashboard" />;
+  }
+
   let data = emptyResultsData;
   let loadError = false;
 

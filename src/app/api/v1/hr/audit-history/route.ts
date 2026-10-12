@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { ApiAuthorizationError, requireApiRole } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRole } from "@/server/auth/guards";
 import {
   createHrAuditHistoryCsv,
   getHrAuditHistoryExportEvents,
@@ -11,7 +11,8 @@ export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {
-    await requireApiRole("hr");
+    const user = await requireApiRole("hr");
+    await requireApiPermission("hr.audit_history.view", user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) {
       return NextResponse.json(

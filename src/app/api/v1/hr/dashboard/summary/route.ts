@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getHrDashboardSummary } from "@/server/hr/hr-dashboard.service";
 import {
     ApiAuthorizationError,
+    requireApiPermission,
     requireApiRoleContext,
 } from "@/server/auth/guards";
 import {
@@ -36,6 +37,7 @@ export async function GET() {
 
     try {
         context = await requireApiRoleContext("hr");
+        await requireApiPermission("hr.dashboard.view", context.user);
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {
             return getErrorResponse(error.code, error.message, error.status);

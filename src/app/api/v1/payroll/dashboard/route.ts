@@ -7,6 +7,7 @@ import {
 import { getPayrollDashboardData } from "@/server/payroll/payroll-dashboard.service";
 import {
   ApiAuthorizationError,
+  requireApiPermission,
   requireApiRoleContext,
 } from "@/server/auth/guards";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
@@ -33,7 +34,8 @@ function getErrorResponse(
 
 export async function GET() {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.dashboard.view", context.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) {
       return getErrorResponse(error.code, error.message, error.status);

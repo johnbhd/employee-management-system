@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
+import { requireApiPermission, requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
 import {
   addPayrollBatchItem,
   PayrollBatchConflictError,
@@ -44,7 +44,8 @@ function mapError(error: unknown) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.batch.manage", context.user);
   } catch (error) {
     if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
     return mapError(error);

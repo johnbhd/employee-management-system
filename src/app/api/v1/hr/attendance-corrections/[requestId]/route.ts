@@ -6,6 +6,7 @@ import {
 } from "@/lib/firebase/server";
 import {
     ApiAuthorizationError,
+    requireApiPermission,
     requireApiRoleContext,
 } from "@/server/auth/guards";
 import { reviewAttendanceCorrection } from "@/server/hr/attendance-corrections.service";
@@ -114,6 +115,7 @@ export async function POST(
 
     try {
         context = await requireApiRoleContext("hr");
+        await requireApiPermission("hr.correction.review", context.user);
         ({ requestId } = await routeContext.params);
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {

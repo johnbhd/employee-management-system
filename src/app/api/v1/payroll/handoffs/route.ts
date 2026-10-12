@@ -17,6 +17,7 @@ import {
 } from "@/server/payroll/payroll-handoff.service";
 import {
   ApiAuthorizationError,
+  requireApiPermission,
   requireApiRoleContext,
 } from "@/server/auth/guards";
 import {
@@ -93,7 +94,8 @@ function getQuery(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.handoff.view", context.user);
     const query = getQuery(request);
     if ([query.periodStart, query.fromDate, query.toDate].includes("invalid")) {
       return errorResponse("PAYROLL_HANDOFF_QUERY_INVALID", "One or more handoff date filters are invalid.", 400);
@@ -110,6 +112,7 @@ export async function POST(request: Request) {
   let context: Awaited<ReturnType<typeof requireApiRoleContext>>;
   try {
     context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.handoff.submit", context.user);
   } catch (error) {
     return mapError(error);
   }

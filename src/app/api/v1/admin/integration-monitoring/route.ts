@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import { getAdminIntegrationMonitoringData } from "@/server/admin/integration-monitoring.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
 import type { AdminIntegrationMonitoringData } from "@/types/admin-integration-monitoring";
@@ -20,7 +20,8 @@ function errorResponse(code: string, message: string, status: number) {
 
 export async function GET() {
   try {
-    await requireApiRoleContext("admin");
+    const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.integration_monitoring.view", context.user);
     const data = await getAdminIntegrationMonitoringData();
     const response: ApiSuccessResponse<AdminIntegrationMonitoringData> = {
       success: true,

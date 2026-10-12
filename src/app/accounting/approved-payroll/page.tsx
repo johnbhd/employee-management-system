@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { ApprovedPayrollPage } from "@/components/accounting/approved-payroll/ApprovedPayrollPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import { getAccountingApprovedPayrollData } from "@/server/accounting/accounting-approved-payroll.service";
 import type { AccountingApprovedPayrollData } from "@/types/accounting-approved-payroll";
 
@@ -25,6 +28,11 @@ const emptyApprovedPayrollData: AccountingApprovedPayrollData = {
 };
 
 export default async function ApprovedPayrollRoute() {
+  const context = await requireRoleContext("accounting");
+  if (!(await hasPermission(context.user, "accounting.approved_payroll.view"))) {
+    return <PermissionDeniedPage title="Approved Payroll unavailable" backHref="/accounting/dashboard" backLabel="Back to Accounting Dashboard" />;
+  }
+
   let data = emptyApprovedPayrollData;
   let loadError = false;
 

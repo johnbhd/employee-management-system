@@ -5,6 +5,7 @@ import {
 } from "@/server/attendance/qr/attendance-qr-token";
 import { createEmployeeQrData } from "@/server/attendance/qr/attendance-qr.service";
 import {
+    requireApiPermission,
     requireApiRoleContext,
     ApiAuthorizationError,
 } from "@/server/auth/guards";
@@ -37,6 +38,7 @@ function getErrorResponse(
 export async function GET() {
     try {
         const context = await requireApiRoleContext("employee");
+        await requireApiPermission("employee.attendance_qr.view_own", context.user);
 
         if (!context.employee) {
             return getErrorResponse(

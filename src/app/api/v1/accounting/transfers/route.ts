@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AccountingTransferConflictError,
   AccountingTransferDataError,
@@ -47,7 +47,8 @@ function parseStatus(value: string | null): AccountingTransferStatus | null {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("accounting");
+    const context = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.transfer.view", context.user);
     const params = new URL(request.url).searchParams;
     const defaults = getDefaultAccountingIntegrationStatusQuery();
     const page = Number(params.get("page") ?? defaults.page);
@@ -79,6 +80,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const context = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.transfer.submit", context.user);
     let body: unknown;
     try {
       body = await request.json();

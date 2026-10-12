@@ -3,10 +3,17 @@ import { formatCampusDateKey } from "@/lib/campus-time";
 import { getTodayAttendanceForEmployee } from "@/server/attendance/attendance.service";
 import { createEmployeeQrData } from "@/server/attendance/qr/attendance-qr.service";
 import { requireCurrentUserContext } from "@/server/auth/current-user-context";
+import { hasPermission } from "@/server/auth/permission.service";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
 
 export default async function Page() {
   const context = await requireCurrentUserContext();
+  if (
+    !(await hasPermission(context.user, "employee.attendance_qr.view_own"))
+    || !(await hasPermission(context.user, "employee.attendance.view_own"))
+  ) {
+    return <PermissionDeniedPage title="Attendance QR unavailable" backHref="/employee/dashboard" backLabel="Back to Employee Dashboard" />;
+  }
   const employee = context.employee;
   let initialQrValue: string | null = null;
   let initialQrGeneratedAt: string | null = null;
@@ -55,3 +62,4 @@ export default async function Page() {
     />
   );
 }
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";

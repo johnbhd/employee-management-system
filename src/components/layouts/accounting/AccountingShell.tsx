@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import type { CurrentUserContext } from "@/types/auth";
+import type { PermissionKey } from "@/types/permissions";
 
 import { AccountingMain } from "./AccountingMain";
 import { AccountingNavbar } from "./AccountingNavbar";
@@ -12,9 +13,10 @@ import { AccountingSidebar } from "./AccountingSidebar";
 type AccountingShellProps = {
   children: ReactNode;
   context: CurrentUserContext;
+  permissions: readonly PermissionKey[];
 };
 
-export function AccountingShell({ children, context }: AccountingShellProps) {
+export function AccountingShell({ children, context, permissions }: AccountingShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -33,6 +35,7 @@ export function AccountingShell({ children, context }: AccountingShellProps) {
       <AccountingSidebar
         user={context.user}
         employee={context.employee}
+        permissions={permissions}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

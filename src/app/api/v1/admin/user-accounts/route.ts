@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   AdminUserAccountError,
   createAdminUserAccount,
@@ -32,7 +32,8 @@ function queryNumber(value: string | null, fallback: number) {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("admin");
+    const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.user_accounts.view", context.user);
     const url = new URL(request.url);
     const role = url.searchParams.get("role");
     const status = url.searchParams.get("status");
@@ -55,6 +56,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const context = await requireApiRoleContext("admin");
+    await requireApiPermission("admin.user_accounts.manage", context.user);
     const body = await request.json() as Partial<AdminUserAccountCreateInput>;
     const data = await createAdminUserAccount(context.user, {
       email: body.email ?? "",

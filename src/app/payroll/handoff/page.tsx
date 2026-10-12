@@ -1,4 +1,7 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollHandoffPage } from "@/components/payroll/handoff/PayrollHandoffPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 import {
   getDefaultPayrollHandoffQuery,
   getPayrollHandoffData,
@@ -30,6 +33,11 @@ function getEmptyData(): PayrollHandoffData {
 export const dynamic = "force-dynamic";
 
 export default async function PayrollHandoffRoute() {
+  const context = await requireRoleContext("payroll");
+  if (!(await hasPermission(context.user, "payroll.handoff.view"))) {
+    return <PermissionDeniedPage title="Payroll Handoff unavailable" backHref="/payroll/dashboard" backLabel="Back to Payroll Dashboard" />;
+  }
+
   let data = getEmptyData();
   let loadError = false;
 

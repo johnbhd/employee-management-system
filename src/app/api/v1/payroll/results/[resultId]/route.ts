@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import { getPayrollResultDetail } from "@/server/payroll/payroll-result.service";
 import { PayrollResultDataError } from "@/server/repositories/payroll-results/payroll-result.repository";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
@@ -24,7 +24,8 @@ export async function GET(
 ) {
   void request;
   try {
-    await requireApiRoleContext("payroll");
+    const authContext = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.result.view", authContext.user);
     const { resultId } = await context.params;
     const data = await getPayrollResultDetail(resultId);
     if (!data) return errorResponse("PAYROLL_RESULT_NOT_FOUND", "The payroll result could not be found.", 404);

@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import { isPayrollDateKey } from "@/server/payroll/payroll-batches.service";
 import {
   getDefaultPayrollHistoryQuery,
@@ -47,7 +47,8 @@ function mapError(error: unknown) {
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("payroll");
+    const context = await requireApiRoleContext("payroll");
+    await requireApiPermission("payroll.history.view", context.user);
     const params = new URL(request.url).searchParams;
     const defaults = getDefaultPayrollHistoryQuery();
     const rawPage = Number(params.get("page") ?? defaults.page);

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getTodayAttendanceForEmployee } from "@/server/attendance/attendance.service";
 import {
     ApiAuthorizationError,
+    requireApiPermission,
     requireApiRoleContext,
 } from "@/server/auth/guards";
 import {
@@ -39,6 +40,7 @@ export async function GET() {
 
     try {
         context = await requireApiRoleContext("employee");
+        await requireApiPermission("employee.attendance.view_own", context.user);
     } catch (error) {
         if (error instanceof ApiAuthorizationError) {
             return getErrorResponse(error.code, error.message, error.status);

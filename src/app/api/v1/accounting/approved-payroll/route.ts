@@ -4,7 +4,7 @@ import {
   FirebaseAdminConfigurationError,
   FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
-import { ApiAuthorizationError, requireApiRoleContext } from "@/server/auth/guards";
+import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } from "@/server/auth/guards";
 import {
   getAccountingApprovedPayrollData,
   getDefaultAccountingApprovedPayrollQuery,
@@ -84,7 +84,8 @@ function parseAllowedValue<T extends string>(
 
 export async function GET(request: Request) {
   try {
-    await requireApiRoleContext("accounting");
+    const context = await requireApiRoleContext("accounting");
+    await requireApiPermission("accounting.approved_payroll.view", context.user);
 
     const params = new URL(request.url).searchParams;
     const defaults = getDefaultAccountingApprovedPayrollQuery();
