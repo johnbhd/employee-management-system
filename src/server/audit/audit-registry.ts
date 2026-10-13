@@ -24,6 +24,7 @@ export const auditEventRegistry: readonly AuditEventDefinition[] = [
   { eventType: "accounting.transfer.failed", action: "Accounting Transfer Failed", module: "Accounting Integration", defaultOutcome: "Failed" },
   { eventType: "admin.user.created", action: "User Account Created", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.user.profile_updated", action: "User Account Updated", module: "User Accounts", defaultOutcome: "Successful" },
+  { eventType: "admin.user.role_changed", action: "User Role Changed", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.user.enabled", action: "User Account Enabled", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.user.disabled", action: "User Account Disabled", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.user.deleted", action: "User Account Deleted", module: "User Accounts", defaultOutcome: "Successful" },

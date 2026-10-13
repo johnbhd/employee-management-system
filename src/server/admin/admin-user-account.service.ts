@@ -444,8 +444,9 @@ export async function updateAdminUserAccount(
   }
 
   if (changes.length > 0) {
+    const roleChanged = changes.some((change) => change.field === "role");
     await writeAdminUserAccountAuditEvent({
-      action: "profile_updated",
+      action: roleChanged ? "role_changed" : "profile_updated",
       actor,
       target: { uid, displayName: nextDisplayName },
       changes,

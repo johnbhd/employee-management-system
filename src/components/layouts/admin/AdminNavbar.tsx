@@ -83,7 +83,7 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
             <Icon name="qr" />
           </Link>
           <div className="profile-wrap">
-            <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
+            <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-label="Open administrator profile menu" aria-expanded={profileOpen}>
               <span className="account-avatar"><Icon name="user" /></span>
               <span className="profile-copy"><strong>{displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
               <Icon name="chevron" />

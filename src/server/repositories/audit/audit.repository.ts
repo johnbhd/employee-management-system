@@ -128,7 +128,18 @@ function mapLegacy(id: string, collection: string, data: DocumentData): AuditSto
     if (!action || !actorName || !actorUid || !targetUid || !targetName) return null;
     const actionLabel = action === "profile_updated"
       ? "User Account Updated"
+      : action === "role_changed"
+        ? "User Role Changed"
       : `User Account ${action.charAt(0).toUpperCase()}${action.slice(1)}`;
+    const changes = Array.isArray(data.changes) ? data.changes : [];
+    const roleChange = changes.find((change) => (
+      isRecord(change) && change.field === "role"
+    ));
+    const metadata: Record<string, unknown> = { changes };
+    if (action === "role_changed" && roleChange) {
+      metadata.previousRole = stringValue(roleChange.from);
+      metadata.newRole = stringValue(roleChange.to);
+    }
     return {
       id: `${collection}:${id}`,
       eventType: `admin.user.${action}`,
@@ -138,7 +149,7 @@ function mapLegacy(id: string, collection: string, data: DocumentData): AuditSto
       target: { type: "user_account", id: targetUid, reference: targetUid, label: targetName },
       outcome: "Successful",
       summary: "A user account was changed by an administrator.",
-      metadata: { changes: Array.isArray(data.changes) ? data.changes : [] },
+      metadata,
       occurredAt,
     };
   }

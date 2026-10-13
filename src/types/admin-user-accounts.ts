@@ -25,7 +25,7 @@ export type AdminUserAccount = {
 
 export type AdminUserAccountAuditEvent = {
   id: string;
-  action: "created" | "profile_updated" | "enabled" | "disabled" | "deleted";
+  action: "created" | "profile_updated" | "role_changed" | "enabled" | "disabled" | "deleted";
   actorUid: string;
   actorDisplayName: string;
   targetUid: string;

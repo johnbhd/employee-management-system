@@ -47,6 +47,7 @@ function getChanges(value: unknown): AuditChange[] {
 function parseAction(value: unknown): AuditAction | null {
   return value === "created"
     || value === "profile_updated"
+    || value === "role_changed"
     || value === "enabled"
     || value === "disabled"
     || value === "deleted"
