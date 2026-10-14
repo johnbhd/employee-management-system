@@ -11,6 +11,7 @@
     "db:validate": "prisma validate",
     "db:migrate:dev": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
+    "db:migrate:firestore": "tsx scripts/migration/firestore-to-postgres/index.ts",
     "auth:bootstrap": "tsx scripts/auth/bootstrap-postgres-identity.ts",
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",
     "qr:attendance:verify": "tsx scripts/attendance/verify-qr-attendance.ts",

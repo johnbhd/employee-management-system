@@ -49,3 +49,6 @@ next-env.d.ts
 
 # Local workflow and project-context files
 Workflows/
+
+# Firestore migration reports and manifests contain operational metadata and remain local.
+.migration-reports/
