@@ -29,7 +29,7 @@ class SimulatedPayrollIntegrationAdapter implements PayrollIntegrationAdapter {
         externalReference: null,
         provider: "simulated-payroll-adapter",
         failureCode: "SIMULATED_FAILURE",
-        failureSummary: "The development payroll adapter was configured to return a failure.",
+        failureSummary: "The configured simulated Payroll adapter was set to return a failure.",
       };
     }
 
@@ -103,4 +103,4 @@ export function getPayrollIntegrationAdapter(): PayrollIntegrationAdapter {
 }
 
 export const payrollIntegrationProviderNote =
-  "Development mode uses a deterministic simulated payroll adapter; no live university Payroll API is configured.";
+  "Payroll handoff uses a deterministic simulated adapter; no live university Payroll API credentials are configured.";

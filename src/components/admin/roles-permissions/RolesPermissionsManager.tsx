@@ -116,7 +116,7 @@ export function RolesPermissionsManager({
           <div>
             <p className="section-kicker">Application access model</p>
             <h2 id="roles-workspace-heading">Role management</h2>
-            <p className="roles-panel-description">Select a system role to review its current server-backed capabilities and assignment scope.</p>
+            <p className="roles-panel-description">Select a system role to review its current capabilities and assignment scope.</p>
           </div>
           <StatusBadge tone={canManage ? "info" : "muted"}><Icon name="shield" /> {canManage ? "Application roles" : "Read-only"}</StatusBadge>
         </div>

@@ -5,6 +5,13 @@
 
 ## Current Overall Status
 
+- SYSTEM-UI-CLEAN-003 is complete. Production portal wording no longer exposes
+  obsolete prototype, demo, sample, mock, or development-only language. Real
+  simulated adapter, unavailable, pending, failed, not-configured, and
+  read-only states remain explicit. Lint, TypeScript, diff, and production
+  build checks passed; browser, visual, responsive, accessibility, and live
+  provider checks were not available for this cleanup.
+
 - ADMIN-BACK-004 follow-up hardening now records account role changes as the
   distinct `admin.user.role_changed` event and gives the shared Admin profile
   menu trigger an accessible name. TypeScript, lint, diff, and production build

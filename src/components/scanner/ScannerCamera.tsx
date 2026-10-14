@@ -210,5 +210,5 @@ function getCameraErrorMessage(error: unknown) {
     }
   }
 
-  return "The camera could not be started. You can paste a QR value below for development testing.";
+  return "The camera could not be started. You can paste a QR value below to continue with manual entry.";
 }

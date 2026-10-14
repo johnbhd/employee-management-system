@@ -192,7 +192,7 @@ export async function EmployeeDashboardPage({
             <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
           </div>
           <p className="payroll-empty-state">
-            No server-backed announcements are available for this account.
+            No announcements are available for this account.
           </p>
         </section>
       </div>

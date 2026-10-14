@@ -260,7 +260,7 @@ export function AdminDashboardPage({
               </div>
               <AccountSummaryRow
                 label="Assigned permissions"
-                detail="Current server-backed role assignments."
+                detail="Current role assignments."
                 value={data.rolesPermissions.assignedPermissionCount}
               />
               <div className="list-row">
@@ -334,7 +334,7 @@ export function AdminDashboardPage({
 
       {data ? (
         <p className="page-feedback">
-          <Icon name="info" /> Generated {formatTimestamp(data.generatedAt)} from the current server-backed Admin sources.
+          <Icon name="info" /> Updated {formatTimestamp(data.generatedAt)}.
         </p>
       ) : null}
     </div>

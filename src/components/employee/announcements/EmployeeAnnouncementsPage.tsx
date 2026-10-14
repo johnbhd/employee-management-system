@@ -3,7 +3,7 @@ export function EmployeeAnnouncementsPage() {
     <div className="employee-announcements-page">
       <header className="employee-announcements-heading">
         <span className="employee-announcements-heading-label">Campus updates</span>
-        <p>Server-backed announcements are not configured for this employee portal.</p>
+        <p>Announcements are not configured for this employee portal.</p>
       </header>
       <section className="employee-panel" role="status">
         <div className="employee-panel-heading">

@@ -88,7 +88,6 @@
   box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
 }
 
-/* Top brand panel — kept as the source prototype's plain white panel. */
 .brand-panel {
   display: flex;
   flex-direction: column;
