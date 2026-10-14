@@ -60,5 +60,22 @@ Local Payroll calculation: Not allowed
 
 `DB-SUPABASE-007 - Supabase PostgreSQL Connection Foundation`.
 
+## DB-SUPABASE-007 implementation
+
+The initial connection foundation is now implemented with the server-only
+`pg` package. `src/lib/postgres/server.ts` owns lazy pool creation, SSL,
+connection/query timeouts, parameterized query execution, transaction support,
+safe error normalization, and the minimal `SELECT 1` health probe. The pool is
+cached on `globalThis` for local hot reload reuse and serverless instance reuse.
+
+The `DATABASE_URL` environment variable is server-only and should point to the
+Supabase pooler for deployed/serverless use. `GET /api/health/postgres` reports
+only configured/connected status and returns HTTP 503 when the database is not
+configured or cannot be reached. DBeaver may use a separate administrator
+connection; its credentials are not stored in this repository.
+
+No PostgreSQL schema, business write, repository migration, Firebase Auth
+change, or Firestore change is part of this foundation.
+
 Do not begin destructive migration or delete Firestore until the retirement
 criteria in `MIGRATION-PLAN.md` are satisfied.

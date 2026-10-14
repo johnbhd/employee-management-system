@@ -184,11 +184,19 @@ The future connection foundation should:
 7. document a separate DBeaver connection method without reusing application
    secrets in source control.
 
-No driver or ORM is selected by this task. A small typed `pg` repository layer
-using parameterized SQL is the conservative recommendation for the current
-server-owned architecture. An ORM is acceptable only if it preserves explicit
-transactions, migrations, and query visibility; it must not become a browser
-database client.
+The connection foundation selects the small typed `pg` package. The server-only
+module at `src/lib/postgres/server.ts` uses a lazy `Pool` with SSL, a bounded
+connection pool, connection/query timeouts, parameterized query support, and a
+transaction helper. The pool is cached on `globalThis` so local development
+does not create a new pool during every hot reload and deployed serverless
+instances can reuse a warm pool.
+
+`DATABASE_URL` is the only application connection variable and must remain
+server-only. `GET /api/health/postgres` runs only `SELECT 1` and reports safe
+`configured`/`connected` state without returning the URL or raw driver errors.
+An ORM remains unnecessary unless a later schema task shows that it preserves
+explicit transactions, migrations, and query visibility; the database client
+must not become a browser database client.
 
 ## RLS and authorization decision
 
