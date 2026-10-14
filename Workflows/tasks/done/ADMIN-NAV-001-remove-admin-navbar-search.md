@@ -55,4 +55,4 @@ filters remain intentionally available.
 
 ## Git Reference
 
-Not committed yet.
+`3713abf` (`refactor: remove admin navbar search`)
