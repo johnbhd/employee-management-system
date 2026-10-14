@@ -1551,24 +1551,41 @@ route in the administrator navigation. Audit Logs now has the implemented
   diff checks passed; authenticated Firebase lifecycle and browser visual/
   responsive checks remain unavailable in this environment.
 
+## SYSTEM-CLEAN-002 Cleanup Snapshot
+
+The confirmed prototype/dead-code cleanup is complete. Seven legacy Admin
+integration pages and their static data/components/styles were removed from the
+route graph and navigation. The unused HR in-memory workflow provider and
+static workflow records, the unused Employee QR demo hook/storage utility, and
+the old static Employee dashboard/support submission data were removed. The
+Employee dashboard now renders only server-derived attendance plus truthful
+unavailable states for unsupported announcements/payslip summary; Employee
+settings remains explicitly device-local preference state. HR dashboard UI
+types were moved out of the removed static HR data module. The HRPS employee
+seed module remains because Firebase seed scripts use it.
+
+Live API routes, server repositories/services, canonical audit/RBAC/settings
+boundaries, Payroll and Accounting simulated adapters, historical data
+compatibility, and development seed data were preserved. Monitoring and
+settings links now point to the real Admin Integration Monitoring boundary.
+The current route graph contains the real portal pages only; removed legacy
+pages no longer have direct source route files.
+
+Verification passed for TypeScript, production build, lint with one existing
+unused-helper warning in `src/server/repositories/payroll/payslip.repository.ts`,
+and `git diff --check`. Authenticated Firebase, live-provider, browser,
+responsive, visual, keyboard, accessibility, and runtime smoke checks were not
+available in this environment. The next implementation priority remains
+`SYSTEM-FIX-002` for server-authoritative HR final verification and Payroll
+readiness.
+
 ## Next Likely Work
 
-1. Optional follow-up: make an Android/ARM64-compatible Next.js SWC binary
-   available, start the frontend, and verify the HR dashboard, Attendance
-   Monitoring, Correction Requests, HR Verification / Payroll Readiness flow,
-  Employee Schedules, Employee Directory, Attendance Reports, Audit History,
-   Roles &
-   Permissions workspace, Employee routes including Payslips, mobile account
-   menu, Profile and logout links at 390px, 430px, 768px, 1024px, 1280px, 1366px, 1440px, and
-  1920px+; confirm no page-level overflow, verify the Employee Announcements
-  route and modal, verify the Navbar notification latest-five list, View all
-  navigation, and query-linked modal behavior, verify the Employee Help &
-  Support form validation,
-  verify the My Attendance calendar's month/year selectors and cross-year
-  navigation,
-  routing, success feedback, FAQ, and links, verify the Attendance QR demo at
-   each required width, and confirm unchanged
-   Admin/Login behavior.
-2. If verification finds a defect, create a new focused task in `CURRENT.md`;
-   do not reopen the completed implementation records without a specific
-   defect.
+1. `SYSTEM-FIX-002`: persist HR final verification through a protected
+   server/API command and connect it to Payroll readiness.
+2. `HR-CORR-002`: connect Employee correction submission to the persisted HR
+   review workflow.
+3. `SYSTEM-SEC-004`: add direct page guards for HR directory and schedule
+   routes.
+4. `SYSTEM-DATA-003`: normalize active status/DTO/type mappings after the
+   higher-priority workflow fixes.

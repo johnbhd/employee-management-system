@@ -180,78 +180,15 @@
   padding-bottom: 0.85rem;
 }
 
-.payroll-period,
-.payroll-meta {
-  margin: 1.1rem 1.25rem 0;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-}
-
-.payroll-amount {
-  display: block;
-  margin: 0.35rem 1.25rem 0;
-  color: var(--employee-navy);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 1.8rem;
-  font-weight: 500;
-}
-
 .payroll-empty-state {
   margin: 1.1rem 1.25rem 0;
   color: var(--text-muted);
   font-size: 0.78rem;
 }
 
-.payroll-meta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
-}
-
 .full-width {
   width: calc(100% - 2.5rem);
   margin: 1.15rem 1.25rem 0;
-}
-
-.announcement-list {
-  display: grid;
-}
-
-.announcement-item {
-  display: flex;
-  gap: 0.75rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #edf0f4;
-}
-
-.announcement-item:last-child {
-  border-bottom: 0;
-}
-
-.announcement-item h3 {
-  margin: 0.35rem 0 0;
-  color: var(--employee-navy);
-  font-size: 0.76rem;
-}
-
-.announcement-item p {
-  margin: 0.3rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.68rem;
-  line-height: 1.5;
-}
-
-.announcement-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.announcement-meta time {
-  color: var(--text-faint);
-  font-size: 0.62rem;
 }
 
 @media (max-width: 800px) {

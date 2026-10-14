@@ -66,7 +66,7 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
           </label>
           <div className="system-status compact-status">
             <span className="status-dot status-success" />
-            <strong>5 / 6</strong>
+            <strong>Configured</strong>
           </div>
           <button type="button" className="icon-button search-trigger" onClick={onOpenSearch} aria-label="Open search">
             <Icon name="search" />
@@ -92,7 +92,7 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
               <div className="profile-menu">
                 <strong>{displayName} account</strong>
                 <small>AU-JSC integration access</small>
-                <button type="button" onClick={() => notify("Account settings are not connected in the prototype.")}><Icon name="settings" />Account settings</button>
+                <button type="button" onClick={() => notify("Account settings are managed from System & Settings.")}><Icon name="settings" />Account settings</button>
                 <Link href="/" onClick={handleLogout}>
                   <Icon name="logout" />
                   Logout

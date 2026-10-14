@@ -148,7 +148,7 @@ function buildPayrollHandoffIssues(
       detectedAt: handoff.failedAt ?? handoff.updatedAt,
       lastAttemptAt: handoff.updatedAt,
       retrySupported: false,
-      detailHref: "/admin/payroll-integration",
+      detailHref: "/admin/integration-monitoring",
     }));
 }
 
@@ -172,7 +172,7 @@ function buildPayrollResultIssues(
       detectedAt: result.completedAt ?? result.processedAt ?? result.receivedAt,
       lastAttemptAt: result.updatedAt,
       retrySupported: false,
-      detailHref: "/admin/payroll-integration",
+      detailHref: "/admin/integration-monitoring",
     }));
 }
 
@@ -195,7 +195,7 @@ function buildAccountingIssues(
       detectedAt: transfer.failedAt ?? transfer.updatedAt,
       lastAttemptAt: transfer.updatedAt,
       retrySupported: false,
-      detailHref: "/admin/accounting-integration",
+      detailHref: "/admin/integration-monitoring",
     }));
 }
 
@@ -453,7 +453,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
         ? `${employees.length} employee reference${employees.length === 1 ? "" : "s"} and ${schedules.length} schedule reference${schedules.length === 1 ? "" : "s"} loaded.`
         : "No employee reference records are available.",
       lastSuccessfulAt: null,
-      detailHref: "/admin/hrps-integration",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "bundy",
@@ -464,7 +464,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       mode: "not_configured",
       provider: null,
       detail: "No Bundy ingestion adapter or persisted Bundy log repository is configured.",
-      detailHref: "/admin/bundy-biometric-etl",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "qr-attendance",
@@ -478,7 +478,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
         ? `${qrAttendance.length} persisted QR attendance write${qrAttendance.length === 1 ? "" : "s"} available.`
         : "No QR attendance write has been recorded; no failure is inferred.",
       lastSuccessfulAt: qrLatest,
-      detailHref: "/admin/qr-attendance",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "unified-attendance",
@@ -492,7 +492,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
         ? `${attendance.length} persisted attendance record${attendance.length === 1 ? "" : "s"} available.`
         : "No attendance record is available; no failure is inferred.",
       lastSuccessfulAt: attendanceLatest,
-      detailHref: "/admin/unified-attendance",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "payroll-handoff",
@@ -507,7 +507,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       issueCount: handoffIssues,
       lastSuccessfulAt: latestTimestamp(handoffSuccesses.map((item) => item.acknowledgedAt)),
       lastFailureAt: latestTimestamp(handoffs.filter(hasPayrollHandoffFailure).map((item) => item.failedAt ?? item.updatedAt)),
-      detailHref: "/admin/payroll-integration",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "payroll-results",
@@ -522,7 +522,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       issueCount: resultIssues,
       lastSuccessfulAt: latestTimestamp(completedResults.map((item) => item.completedAt ?? item.processedAt)),
       lastFailureAt: latestTimestamp(results.filter(hasPayrollResultFailure).map((item) => item.updatedAt)),
-      detailHref: "/admin/payroll-integration",
+      detailHref: "/admin/integration-monitoring",
     }),
     integrationStatus({
       key: "accounting",
@@ -537,7 +537,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       issueCount: accountingIssues,
       lastSuccessfulAt: latestTimestamp(acceptedTransfers.map((item) => item.acknowledgedAt)),
       lastFailureAt: latestTimestamp(transfers.filter(hasAccountingFailure).map((item) => item.failedAt ?? item.updatedAt)),
-      detailHref: "/admin/accounting-integration",
+      detailHref: "/admin/integration-monitoring",
     }),
   ];
 

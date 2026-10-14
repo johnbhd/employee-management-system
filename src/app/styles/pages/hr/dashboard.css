@@ -164,17 +164,6 @@
   line-height: 1.5;
 }
 
-.hr-prototype-label {
-  flex: 0 0 auto;
-  border: 1px solid #eadfbd;
-  border-radius: 999px;
-  padding: 0.35rem 0.55rem;
-  color: #8a6a1f;
-  font-size: 0.6rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
 .hr-dashboard-table-scroll {
   min-width: 0;
   overflow-x: auto;
@@ -424,10 +413,6 @@
 
   .hr-panel-header {
     flex-direction: column;
-  }
-
-  .hr-prototype-label {
-    align-self: flex-start;
   }
 
   .hr-dashboard-summary {

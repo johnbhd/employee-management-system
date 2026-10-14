@@ -114,11 +114,11 @@ export function AccountingNavbar({ user, employee, onOpenSidebar }: AccountingNa
         </div>
 
         <div className="accounting-navbar-actions">
-          <span className="accounting-progress-badge">5 / 6</span>
+          <span className="accounting-progress-badge">Accounting</span>
           <button
             type="button"
             className="accounting-icon-button accounting-search-button"
-            onClick={() => notify("Accounting search is not connected in the prototype.")}
+            onClick={() => notify("Use the filters in the current Accounting workspace.")}
             aria-label="Search accounting workspace"
           >
             <Icon name="search" />
@@ -141,7 +141,7 @@ export function AccountingNavbar({ user, employee, onOpenSidebar }: AccountingNa
           <button
             type="button"
             className="accounting-icon-button accounting-help-button"
-            onClick={() => notify("Accounting help center is a prototype action.")}
+            onClick={() => notify("Accounting help is available through the authorized support process.")}
             aria-label="Open accounting help"
           >
             <Icon name="help" />
@@ -173,7 +173,7 @@ export function AccountingNavbar({ user, employee, onOpenSidebar }: AccountingNa
               >
                 <strong>{displayName}</strong>
                 <small>Accounting integration access</small>
-                <button type="button" onClick={() => notify("Accounting settings are not connected in the prototype.")}>
+                <button type="button" onClick={() => notify("Accounting settings are managed by the authorized administrator.")}>
                   <Icon name="settings" />
                   Settings
                 </button>

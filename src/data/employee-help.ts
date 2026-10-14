@@ -25,20 +25,6 @@ export type EmployeeFaq = {
   answer: string;
 };
 
-export type EmployeeSupportConcernType =
-  | "technical"
-  | "account-access"
-  | "attendance"
-  | "payroll"
-  | "general";
-
-export type EmployeeSupportConcernOption = {
-  value: EmployeeSupportConcernType;
-  label: string;
-  destination: string;
-  guidance: string;
-};
-
 export const employeeHelpQuickLinks: readonly EmployeeHelpLink[] = [
   {
     id: "attendance",
@@ -223,35 +209,5 @@ export const employeeHelpFaqs: readonly EmployeeFaq[] = [
   },
 ];
 
-export const employeeSupportConcernOptions: readonly EmployeeSupportConcernOption[] = [
-  {
-    value: "technical",
-    label: "Technical System Problem",
-    destination: "IT Support",
-    guidance: "For system errors, unavailable features, or pages that do not work as expected.",
-  },
-  {
-    value: "account-access",
-    label: "Account Access Concern",
-    destination: "IT Support / IT Administrator",
-    guidance: "For application access or account-related problems. Do not include password values.",
-  },
-  {
-    value: "attendance",
-    label: "Attendance Concern",
-    destination: "HR / Attendance Staff",
-    guidance: "For attendance questions. Use the correction workflow when an official record must be changed.",
-  },
-  {
-    value: "payroll",
-    label: "Payslip / Payroll Concern",
-    destination: "Payroll / HR Staff",
-    guidance: "For questions about payslip or payroll information displayed in the portal.",
-  },
-  {
-    value: "general",
-    label: "General Employee Concern",
-    destination: "HR / Appropriate Staff",
-    guidance: "For employee concerns that do not fit the categories above.",
-  },
-];
+// This module contains guidance content only; action requests use authorized office processes.
+export const employeeHelpAvailability = "guidance-only" as const;

@@ -1,6 +1,6 @@
 import { formatCampusDateKeyLabel } from "@/lib/campus-time";
 import type { HrDashboardSummary } from "@/types/hr-dashboard";
-import type { HrPendingAction, HrSummaryMetric } from "@/data/hr";
+import type { HrPendingAction, HrSummaryMetric } from "@/types/hr-dashboard-ui";
 
 import { HrAttendanceSummary } from "./HrAttendanceSummary";
 import { HrDashboardRefreshButton } from "./HrDashboardRefreshButton";

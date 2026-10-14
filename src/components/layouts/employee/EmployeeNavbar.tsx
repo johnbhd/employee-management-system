@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 
-import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
@@ -43,8 +42,16 @@ function getEmployeePageTitle(pathname: string) {
   }
 }
 
-const latestNotifications = getLatestAnnouncements(5);
-const notificationCount = announcements.length;
+const latestNotifications: Array<{
+  id: string;
+  title: string;
+  tone: string;
+  category: string;
+  postedAt: string;
+  date: string;
+  message: string;
+}> = [];
+const notificationCount = 0;
 const notificationBadge = notificationCount > 9 ? "9+" : String(notificationCount);
 
 export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbarProps) {

@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { getLatestAnnouncements } from "@/data/employee";
-import { getEmployeeDashboardData } from "@/data/employee-dashboard";
 import { defaultAttendanceHistoryQuery } from "@/server/attendance/attendance-history-query";
 import {
   getAttendanceHistoryForEmployee,
@@ -56,8 +54,6 @@ export async function EmployeeDashboardPage({
 }: {
   employee: EmployeeReference;
 }) {
-  const dashboardData = getEmployeeDashboardData(employee.employeeId);
-  const latestAnnouncements = getLatestAnnouncements(3);
   const now = new Date();
   const fallbackTodayAttendance: TodayAttendanceData = {
     attendance: null,
@@ -91,31 +87,24 @@ export async function EmployeeDashboardPage({
     attendanceHistoryLoadError = true;
   }
 
-  const dashboardStats = dashboardData.stats.map((stat) => {
-    if (stat.label !== "Days Present") {
-      return stat;
-    }
-
-    if (attendanceHistoryData) {
-      return {
-        ...stat,
-        value: String(attendanceHistoryData.totalRecords),
-        note: attendanceHistoryData.totalRecords > 0
-          ? "All available records"
-          : "No records",
-      };
-    }
-
-    if (attendanceHistoryLoadError) {
-      return {
-        ...stat,
-        value: todayAttendance.attendance ? "1" : "—",
-        note: todayAttendance.attendance ? "Today's record" : "Unavailable",
-      };
-    }
-
-    return stat;
-  });
+  const dashboardStats = [
+    {
+      label: "Attendance records",
+      value: attendanceHistoryData ? String(attendanceHistoryData.totalRecords) : "—",
+      unit: "records",
+      note: attendanceHistoryLoadError ? "Unavailable" : "All available records",
+      tone: "info" as const,
+      icon: "calendar" as const,
+    },
+    {
+      label: "Today",
+      value: todayAttendance.attendance ? "Recorded" : "—",
+      unit: "",
+      note: attendanceLoadError ? "Unavailable" : "Current attendance status",
+      tone: todayAttendance.attendance ? "success" as const : "muted" as const,
+      icon: "clock" as const,
+    },
+  ];
 
   return (
     <div className="employee-dashboard-page">
@@ -145,7 +134,15 @@ export async function EmployeeDashboardPage({
         <div className="table-wrap employee-table-wrap">
           <table className="data-table employee-data-table">
             <caption className="sr-only">Recent employee attendance history</caption>
-            <thead><tr><th>Date</th><th>Time in</th><th>Time out</th><th>Hours</th><th>Status</th></tr></thead>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Time in</th>
+                <th>Time out</th>
+                <th>Hours</th>
+                <th>Status</th>
+              </tr>
+            </thead>
             <tbody>
               {attendanceHistoryLoadError ? (
                 <tr>
@@ -156,7 +153,10 @@ export async function EmployeeDashboardPage({
               ) : attendanceHistory.length > 0 ? (
                 attendanceHistory.map((record) => (
                   <tr key={record.date}>
-                    <td>{record.date}</td><td>{record.timeIn}</td><td>{record.timeOut}</td><td>{record.hours}</td>
+                    <td>{record.date}</td>
+                    <td>{record.timeIn}</td>
+                    <td>{record.timeOut}</td>
+                    <td>{record.hours}</td>
                     <td><StatusBadge tone={record.tone}>{record.status}</StatusBadge></td>
                   </tr>
                 ))
@@ -178,16 +178,12 @@ export async function EmployeeDashboardPage({
             <div><p className="employee-section-kicker">Payroll</p><h2>Latest payslip</h2></div>
             <Icon name="payroll" />
           </div>
-          {dashboardData.latestPayslip ? (
-            <>
-              <p className="payroll-period">{dashboardData.latestPayslip.period}</p>
-              <strong className="payroll-amount">{dashboardData.latestPayslip.amount}</strong>
-              <div className="payroll-meta"><span>{dashboardData.latestPayslip.releasedDate}</span><StatusBadge tone="success">Available</StatusBadge></div>
-            </>
-          ) : (
-            <p className="payroll-empty-state">No payslip available.</p>
-          )}
-          <Link href="/employee/payslips" className="employee-secondary-button full-width"><Icon name="file" /> View payslip</Link>
+          <p className="payroll-empty-state">
+            Payslip summary is available in the My Payslips workspace.
+          </p>
+          <Link href="/employee/payslips" className="employee-secondary-button full-width">
+            <Icon name="file" /> View payslip
+          </Link>
         </section>
 
         <section className="employee-panel announcements-card">
@@ -195,14 +191,9 @@ export async function EmployeeDashboardPage({
             <div><p className="employee-section-kicker">Campus updates</p><h2>Announcements</h2></div>
             <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
           </div>
-          <div className="announcement-list">
-            {latestAnnouncements.map((announcement) => (
-              <article className="announcement-item" key={announcement.id}>
-                <div className={`announcement-icon ${announcement.tone}`}><Icon name="info" /></div>
-                <div><div className="announcement-meta"><StatusBadge tone={announcement.tone}>{announcement.category}</StatusBadge><time>{announcement.date}</time></div><h3>{announcement.title}</h3><p>{announcement.message}</p></div>
-              </article>
-            ))}
-          </div>
+          <p className="payroll-empty-state">
+            No server-backed announcements are available for this account.
+          </p>
         </section>
       </div>
     </div>

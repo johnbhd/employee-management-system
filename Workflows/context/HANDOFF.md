@@ -1,7 +1,9 @@
 # No Active Handoff
 
-`SYSTEM-RECON-001` is complete. No unfinished implementation is being handed
-off. The evidence-backed gap register and the recommended next action are in
+`SYSTEM-RECON-001` and `SYSTEM-CLEAN-002` are complete. No unfinished
+implementation is being handed off. The cleanup record is in
+`Workflows/tasks/done/SYSTEM-CLEAN-002-prototype-cleanup.md`; the reconciliation
+evidence is in
 `Workflows/tasks/done/SYSTEM-RECON-001-full-project-integration-reconciliation.md`.
 
 If work resumes, start with `SYSTEM-FIX-002`: persist HR final verification

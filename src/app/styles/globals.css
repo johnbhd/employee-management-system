@@ -27,7 +27,6 @@
 @import "./pages/employee/profile.css";
 @import "./pages/employee/settings.css";
 @import "./pages/employee/payslips.css";
-@import "./pages/employee/announcements.css";
 @import "./pages/employee/help-support.css";
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
@@ -39,13 +38,6 @@
 @import "./pages/hr/scanner.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
-@import "./pages/admin/hrps-integration.css";
-@import "./pages/admin/bundy-biometric-etl.css";
-@import "./pages/admin/qr-attendance.css";
-@import "./pages/admin/unified-attendance.css";
-@import "./pages/admin/payroll-accounting-flow.css";
-@import "./pages/admin/accounting-integration-page.css";
-@import "./pages/admin/integration-errors.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
 @import "./pages/admin/roles-permissions.css";
 @import "./pages/admin/audit-logs.css";

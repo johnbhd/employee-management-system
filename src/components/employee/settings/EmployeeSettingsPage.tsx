@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 
@@ -51,16 +51,10 @@ function saveSettings(settings: EmployeeSettings) {
 }
 
 export function EmployeeSettingsPage() {
-  const [settings, setSettings] = useState<EmployeeSettings>(defaultSettings);
+  const [settings, setSettings] = useState<EmployeeSettings>(() => (
+    typeof window === "undefined" ? defaultSettings : readSavedSettings()
+  ));
   const [feedback, setFeedback] = useState("");
-
-  useEffect(() => {
-    const timeoutId = window.setTimeout(() => {
-      setSettings(readSavedSettings());
-    }, 0);
-
-    return () => window.clearTimeout(timeoutId);
-  }, []);
 
   function updateSetting(key: keyof EmployeeSettings, value: boolean) {
     const nextSettings = { ...settings, [key]: value };

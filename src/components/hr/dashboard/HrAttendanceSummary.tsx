@@ -1,4 +1,4 @@
-import type { HrSummaryMetric } from "@/data/hr";
+import type { HrSummaryMetric } from "@/types/hr-dashboard-ui";
 
 import { Icon } from "@/components/ui/Icon";
 

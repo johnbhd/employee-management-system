@@ -110,7 +110,7 @@ export function PayrollNavbar({ user, employee, onOpenSidebar }: PayrollNavbarPr
 
         <div className="payroll-navbar-actions">
           <span className="payroll-progress-badge">Payroll Staff</span>
-          <button type="button" className="payroll-icon-button payroll-search-button" onClick={() => notify("Payroll search is not connected in the prototype.")} aria-label="Search payroll workspace">
+          <button type="button" className="payroll-icon-button payroll-search-button" onClick={() => notify("Use the filters in the current Payroll workspace.")} aria-label="Search payroll workspace">
             <Icon name="search" />
           </button>
           {campusNow ? (
@@ -119,7 +119,7 @@ export function PayrollNavbar({ user, employee, onOpenSidebar }: PayrollNavbarPr
           <button type="button" className="payroll-icon-button payroll-notification-button" onClick={() => notify("No new payroll notifications.")} aria-label="View payroll notifications">
             <Icon name="bell" /><span>2</span>
           </button>
-          <button type="button" className="payroll-icon-button payroll-help-button" onClick={() => notify("Payroll help center is a prototype action.")} aria-label="Open payroll help">
+          <button type="button" className="payroll-icon-button payroll-help-button" onClick={() => notify("Payroll help is available through the authorized support process.")} aria-label="Open payroll help">
             <Icon name="help" />
           </button>
           <div className="payroll-profile-wrap" ref={profileRef}>
@@ -140,7 +140,7 @@ export function PayrollNavbar({ user, employee, onOpenSidebar }: PayrollNavbarPr
               <nav id="payroll-profile-menu" className="payroll-profile-menu" aria-label="Payroll Staff account menu">
                 <strong>{displayName}</strong>
                 <small>Payroll operations access</small>
-                <button type="button" onClick={() => notify("Payroll settings are not connected in the prototype.")}>
+                <button type="button" onClick={() => notify("Payroll settings are managed by the authorized administrator.")}>
                   <Icon name="settings" />Settings
                 </button>
                 <Link href="/" onClick={handleLogout}><Icon name="logout" />Log out</Link>

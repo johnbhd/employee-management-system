@@ -1,4 +1,4 @@
-import type { HrPendingAction } from "@/data/hr";
+import type { HrPendingAction } from "@/types/hr-dashboard-ui";
 
 import { Icon } from "@/components/ui/Icon";
 

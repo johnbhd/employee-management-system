@@ -9,7 +9,6 @@ import type { PermissionKey } from "@/types/permissions";
 import { HrMain } from "./HrMain";
 import { HrNavbar } from "./HrNavbar";
 import { HrSidebar } from "./HrSidebar";
-import { HrWorkflowProvider } from "./HrWorkflowContext";
 
 type HrShellProps = {
   children: ReactNode;
@@ -32,7 +31,6 @@ export function HrShell({ children, context, permissions }: HrShellProps) {
   }, []);
 
   return (
-    <HrWorkflowProvider>
       <div className="hr-shell">
         <HrSidebar
           user={context.user}
@@ -50,6 +48,5 @@ export function HrShell({ children, context, permissions }: HrShellProps) {
           <HrMain>{children}</HrMain>
         </div>
       </div>
-    </HrWorkflowProvider>
   );
 }

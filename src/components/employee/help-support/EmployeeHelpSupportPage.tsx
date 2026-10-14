@@ -8,7 +8,6 @@ import {
 } from "@/data/employee-help";
 
 import { HelpSupportFaq } from "./HelpSupportFaq";
-import { SupportRequestSection } from "./SupportRequestSection";
 
 export function EmployeeHelpSupportPage() {
   return (
@@ -21,7 +20,21 @@ export function EmployeeHelpSupportPage() {
         </p>
       </header>
 
-      <SupportRequestSection />
+      <section className="employee-help-section" aria-label="Support boundary">
+        <div className="employee-help-section-heading">
+          <div>
+            <span className="employee-help-section-kicker">Support boundary</span>
+            <h2>Use the authorized office process</h2>
+          </div>
+        </div>
+        <div className="employee-help-boundary-body">
+          <p className="employee-help-boundary-intro">
+            This portal provides guidance only. It does not submit support tickets
+            or contact an external support system. For account, attendance, or
+            payroll action, contact the responsible authorized office.
+          </p>
+        </div>
+      </section>
 
       <section
         className="employee-help-section employee-help-quick-help"

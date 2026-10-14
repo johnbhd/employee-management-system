@@ -109,7 +109,7 @@ export function AdminSidebar({ user, employee, permissions, isOpen, onClose }: A
                 <span>Integration layer</span>
               </div>
               <strong>Live</strong>
-              <p>Six connected services monitored from one control center.</p>
+              <p>Configured integration boundaries monitored from one control center.</p>
             </div>
             <div className="sidebar-account">
               <span className="account-avatar"><Icon name="user" /></span>
