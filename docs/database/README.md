@@ -35,6 +35,8 @@ tasks.
 - [REPOSITORY-MIGRATION-010.md](./REPOSITORY-MIGRATION-010.md) - parallel
   Prisma repository layer, migration matrix, query strategy, transaction
   boundaries, and cutover prerequisites.
+- [ADMIN-BOOTSTRAP-011A.md](./ADMIN-BOOTSTRAP-011A.md) - controlled Admin-only
+  PostgreSQL identity and RBAC bootstrap.
 
 ## Source-of-truth summary
 
@@ -56,10 +58,11 @@ Local Payroll calculation: Not allowed
 
 ## Confirmed blockers and limitations
 
-- Live Firebase identity bootstrap was not applied because the configured
-  project currently returns `8 RESOURCE_EXHAUSTED: Quota exceeded` for the
-  targeted Firebase Auth/Firestore reads. Re-run the controlled bootstrap after
-  quota/access is restored.
+- The legacy multi-identity Firebase/Firestore bootstrap was not applied
+  because the configured project returned `8 RESOURCE_EXHAUSTED: Quota
+  exceeded` for its historical Auth/Firestore reads. The Admin-only
+  PostgreSQL bootstrap does not read Firestore and accepts an explicit real
+  Firebase UID instead.
 - The initial application PostgreSQL business schema is deployed through
   `prisma/migrations/20261014120000_initial_sia_schema`.
 - External HRPS, Bundy, Payroll, and Accounting contracts are not available;
