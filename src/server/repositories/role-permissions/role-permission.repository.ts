@@ -1,14 +1,10 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-
-import { isApplicationRole, type ApplicationRole } from "@/lib/auth/roles";
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import { applicationRoles, type ApplicationRole } from "@/lib/auth/roles";
+import { getPrismaClient } from "@/lib/prisma/server";
 import { permissionKeys, type PermissionKey } from "@/types/permissions";
 import type { RolePermissionAssignment } from "@/types/permissions";
 
-const rolePermissionCollection = "rolePermissions";
 const permissionKeySet = new Set<string>(permissionKeys);
 
 export class RolePermissionDataError extends Error {
@@ -29,82 +25,106 @@ export class RolePermissionConflictError extends Error {
   }
 }
 
-function parseUpdatedBy(value: unknown) {
-  if (value === null || value === undefined) return null;
-  if (!value || typeof value !== "object") return undefined;
-  const candidate = value as Record<string, unknown>;
-  if (typeof candidate.uid !== "string" || typeof candidate.displayName !== "string") {
-    return undefined;
+type RolePermissionRow = {
+  version: number;
+  updatedAt: Date;
+  updatedBySnapshot: unknown;
+  permission: { key: string };
+  updatedByUser: { firebaseUid: string; displayName: string } | null;
+};
+
+function updatedByForRows(rows: readonly RolePermissionRow[]) {
+  const latest = [...rows].sort(
+    (left, right) => right.updatedAt.getTime() - left.updatedAt.getTime(),
+  )[0];
+
+  if (!latest) return null;
+
+  if (latest.updatedByUser) {
+    return {
+      uid: latest.updatedByUser.firebaseUid,
+      displayName: latest.updatedByUser.displayName,
+    };
   }
+
+  if (
+    latest.updatedBySnapshot
+    && typeof latest.updatedBySnapshot === "object"
+    && "uid" in latest.updatedBySnapshot
+    && "displayName" in latest.updatedBySnapshot
+    && typeof latest.updatedBySnapshot.uid === "string"
+    && typeof latest.updatedBySnapshot.displayName === "string"
+  ) {
+    return {
+      uid: latest.updatedBySnapshot.uid,
+      displayName: latest.updatedBySnapshot.displayName,
+    };
+  }
+
+  return null;
+}
+
+function toAssignment(
+  role: ApplicationRole,
+  rows: readonly RolePermissionRow[],
+): RolePermissionAssignment {
+  const permissions = rows.map((row) => row.permission.key);
+
+  if (
+    permissions.some((permission) => !permissionKeySet.has(permission))
+    || new Set(permissions).size !== permissions.length
+  ) {
+    throw new RolePermissionDataError(`The ${role} permission list contains an unknown or duplicate key.`);
+  }
+
+  const latestUpdatedAt = rows
+    .map((row) => row.updatedAt)
+    .sort((left, right) => right.getTime() - left.getTime())[0] ?? null;
+
   return {
-    uid: candidate.uid,
-    displayName: candidate.displayName,
+    roleId: role,
+    permissions: permissions as PermissionKey[],
+    version: rows.length ? Math.max(...rows.map((row) => row.version)) : 0,
+    updatedAt: latestUpdatedAt?.toISOString() ?? null,
+    updatedBy: updatedByForRows(rows),
+    source: "postgresql",
   };
 }
 
-function parseAssignment(
-  id: string,
-  data: DocumentData | undefined,
-): RolePermissionAssignment | null {
-  if (!data) return null;
-  if (data.roleId !== id || !isApplicationRole(data.roleId)) {
-    throw new RolePermissionDataError(`The ${id} role identifier is invalid.`);
-  }
-  if (!Array.isArray(data.permissions) || data.permissions.some((value) => (
-    typeof value !== "string" || !permissionKeySet.has(value)
-  ))) {
-    throw new RolePermissionDataError(`The ${id} permission list contains an unknown key.`);
-  }
-  if (typeof data.version !== "number" || !Number.isInteger(data.version) || data.version < 1) {
-    throw new RolePermissionDataError(`The ${id} permission version is invalid.`);
+async function getRoleId(role: ApplicationRole): Promise<string> {
+  const record = await getPrismaClient().applicationRole.findUnique({
+    where: { code: role },
+    select: { id: true },
+  });
+
+  if (!record) {
+    throw new RolePermissionDataError(`The ${role} application role is not configured.`);
   }
 
-  const updatedBy = parseUpdatedBy(data.updatedBy);
-  if (updatedBy === undefined) {
-    throw new RolePermissionDataError(`The ${id} update actor is invalid.`);
-  }
-
-  const updatedAt = data.updatedAt instanceof Timestamp
-    ? data.updatedAt.toDate().toISOString()
-    : null;
-
-  if (new Set(data.permissions).size !== data.permissions.length) {
-    throw new RolePermissionDataError(`The ${id} permission list contains duplicates.`);
-  }
-
-  return {
-    roleId: data.roleId,
-    permissions: data.permissions as PermissionKey[],
-    version: data.version,
-    updatedAt,
-    updatedBy,
-    source: "firestore",
-  };
+  return record.id;
 }
 
 export async function getRolePermissionAssignment(
   role: ApplicationRole,
 ): Promise<RolePermissionAssignment | null> {
-  const snapshot = await getFirebaseAdminDb()
-    .collection(rolePermissionCollection)
-    .doc(role)
-    .get();
+  const roleId = await getRoleId(role);
+  const rows = await getPrismaClient().rolePermission.findMany({
+    where: { roleId },
+    include: {
+      permission: { select: { key: true } },
+      updatedByUser: { select: { firebaseUid: true, displayName: true } },
+    },
+  });
 
-  return snapshot.exists ? parseAssignment(snapshot.id, snapshot.data()) : null;
+  return rows.length ? toAssignment(role, rows) : null;
 }
 
 export async function listRolePermissionAssignments(): Promise<RolePermissionAssignment[]> {
-  const snapshots = await getFirebaseAdminDb()
-    .collection(rolePermissionCollection)
-    .get();
-
-  return snapshots.docs.map((snapshot) => {
-    const assignment = parseAssignment(snapshot.id, snapshot.data());
-    if (!assignment) {
-      throw new RolePermissionDataError(`The role-permission document ${snapshot.id} is invalid.`);
-    }
-    return assignment;
-  });
+  return Promise.all(
+    applicationRoles.map((role) => getRolePermissionAssignment(role)),
+  ).then((assignments) => (
+    assignments.filter((assignment): assignment is RolePermissionAssignment => Boolean(assignment))
+  ));
 }
 
 export async function updateRolePermissionAssignment(input: {
@@ -113,13 +133,40 @@ export async function updateRolePermissionAssignment(input: {
   expectedVersion?: number;
   updatedBy: { uid: string; displayName: string };
 }): Promise<RolePermissionAssignment> {
-  const db = getFirebaseAdminDb();
-  const reference = db.collection(rolePermissionCollection).doc(input.role);
+  const prisma = getPrismaClient();
+  const roleId = await getRoleId(input.role);
+  const permissionRecords = await prisma.permission.findMany({
+    where: { key: { in: input.permissions } },
+    select: { id: true, key: true },
+  });
 
-  await db.runTransaction(async (transaction) => {
-    const snapshot = await transaction.get(reference);
-    const current = snapshot.exists ? parseAssignment(snapshot.id, snapshot.data()) : null;
-    const currentVersion = current?.version ?? 0;
+  if (
+    permissionRecords.length !== input.permissions.length
+    || permissionRecords.some((permission) => !permissionKeySet.has(permission.key))
+  ) {
+    throw new RolePermissionDataError("The permission catalog does not contain every requested key.");
+  }
+
+  const actor = await prisma.user.findUnique({
+    where: { firebaseUid: input.updatedBy.uid },
+    select: { id: true },
+  });
+
+  if (!actor) {
+    throw new RolePermissionDataError("The authorization actor is not mapped in PostgreSQL.");
+  }
+
+  let nextVersion = 1;
+  const now = new Date();
+
+  await prisma.$transaction(async (transaction) => {
+    const currentRows = await transaction.rolePermission.findMany({
+      where: { roleId },
+      select: { version: true },
+    });
+    const currentVersion = currentRows.length
+      ? Math.max(...currentRows.map((row) => row.version))
+      : 0;
 
     if (
       input.expectedVersion !== undefined
@@ -128,21 +175,32 @@ export async function updateRolePermissionAssignment(input: {
       throw new RolePermissionConflictError();
     }
 
-    transaction.set(reference, {
-      roleId: input.role,
-      permissions: [...new Set(input.permissions)],
-      version: currentVersion + 1,
-      updatedAt: FieldValue.serverTimestamp(),
-      updatedBy: input.updatedBy,
-    });
+    nextVersion = currentVersion + 1;
+    await transaction.rolePermission.deleteMany({ where: { roleId } });
+
+    if (permissionRecords.length) {
+      await transaction.rolePermission.createMany({
+        data: permissionRecords.map((permission) => ({
+          roleId,
+          permissionId: permission.id,
+          version: nextVersion,
+          updatedByUserId: actor.id,
+          updatedBySnapshot: {
+            uid: input.updatedBy.uid,
+            displayName: input.updatedBy.displayName,
+          },
+          updatedAt: now,
+        })),
+      });
+    }
   });
 
-  const saved = await reference.get();
-  const assignment = parseAssignment(saved.id, saved.data());
-
-  if (!assignment) {
-    throw new RolePermissionDataError("The updated role-permission assignment could not be read back.");
-  }
-
-  return assignment;
+  return (await getRolePermissionAssignment(input.role)) ?? {
+    roleId: input.role,
+    permissions: [],
+    version: nextVersion,
+    updatedAt: now.toISOString(),
+    updatedBy: input.updatedBy,
+    source: "postgresql",
+  };
 }

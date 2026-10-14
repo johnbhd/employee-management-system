@@ -16,7 +16,7 @@ import {
     requireCurrentUserContext,
 } from "./current-user-context";
 import { hasPermission } from "./permission.service";
-import { getOptionalSessionUser } from "./session";
+import { AuthSessionError, getOptionalSessionUser } from "./session";
 import type { PermissionKey } from "@/types/permissions";
 
 export class ApiAuthorizationError extends Error {
@@ -82,7 +82,21 @@ export async function requireAnyRoleContext(
 }
 
 export async function requireApiSessionUser(): Promise<SessionUser> {
-    const user = await getOptionalSessionUser();
+    let user: SessionUser | null;
+
+    try {
+        user = await getOptionalSessionUser();
+    } catch (error) {
+        if (error instanceof AuthSessionError) {
+            throw new ApiAuthorizationError(
+                error.code === "INVALID_ID_TOKEN" ? "UNAUTHENTICATED" : "FORBIDDEN",
+                error.status,
+                error.message,
+            );
+        }
+
+        throw error;
+    }
 
     if (!user) {
         throw new ApiAuthorizationError(

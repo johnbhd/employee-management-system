@@ -3,16 +3,18 @@
 ## Executive summary
 
 Current business persistence is server-side Firebase Admin + Cloud Firestore;
-Firebase Authentication is a separate identity authority. The recommended
-target is Firebase Authentication + Next.js server/API/services + Supabase
-PostgreSQL for business persistence. Direct browser-to-PostgreSQL access is
-not part of the architecture, and Docker is not required.
+Firebase Authentication remains the credential authority, and PostgreSQL now
+owns application identity and RBAC. The target is Firebase Authentication +
+Next.js server/API/services + Supabase PostgreSQL for all business persistence.
+Direct browser-to-PostgreSQL access is not part of the architecture, and Docker
+is not required.
 
 The repository audit found real Firestore repositories, lifecycle transactions,
 and server-owned authorization. The architecture work was followed by a
-server-only PostgreSQL foundation and the `DB-SCHEMA-008` initial business
-schema migration. Firestore remains the current application source until the
-later auth bridge, data migration, repository migration, and cutover tasks.
+server-only PostgreSQL foundation, the `DB-SCHEMA-008` initial business schema
+migration, and the `DB-AUTH-BRIDGE-009` identity/RBAC cutover. Firestore
+business repositories remain during the later repository migration and cutover
+tasks.
 
 ## Documents
 
@@ -34,7 +36,8 @@ later auth bridge, data migration, repository migration, and cutover tasks.
 ## Source-of-truth summary
 
 ```text
-Current business database: Cloud Firestore
+Current business database: Cloud Firestore (migration in progress)
+Application identity/RBAC database: Supabase PostgreSQL via Prisma
 Target business database: Supabase PostgreSQL
 Authentication: Firebase Authentication - retained
 Backend/API: Next.js - retained
@@ -50,9 +53,10 @@ Local Payroll calculation: Not allowed
 
 ## Confirmed blockers and limitations
 
-- Live Firestore counts and sample exports were not collected because the
-  configured project currently returns `8 RESOURCE_EXHAUSTED: Quota exceeded`
-  for a targeted Firestore health read.
+- Live Firebase identity bootstrap was not applied because the configured
+  project currently returns `8 RESOURCE_EXHAUSTED: Quota exceeded` for the
+  targeted Firebase Auth/Firestore reads. Re-run the controlled bootstrap after
+  quota/access is restored.
 - The initial application PostgreSQL business schema is deployed through
   `prisma/migrations/20261014120000_initial_sia_schema`.
 - External HRPS, Bundy, Payroll, and Accounting contracts are not available;
@@ -62,8 +66,7 @@ Local Payroll calculation: Not allowed
 
 ## Recommended next task
 
-`DB-AUTH-BRIDGE-009 - Firebase Authentication Identity -> PostgreSQL
-Application User / Role / Employee Mapping`.
+`DB-REPO-MIGRATION-010 - Firestore Business Repositories -> Prisma/PostgreSQL`.
 
 ## DB-SUPABASE-007 and DB-PRISMA-007A implementation
 

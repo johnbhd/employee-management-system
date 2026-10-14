@@ -125,7 +125,32 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-    const user = await getOptionalSessionUser();
+    let user;
+
+    try {
+        user = await getOptionalSessionUser();
+    } catch (error) {
+        if (error instanceof AuthSessionError) {
+            return getErrorResponse(error.code, error.message, error.status);
+        }
+
+        if (
+            error instanceof FirebaseAdminConfigurationError
+            || error instanceof FirebaseAdminInitializationError
+        ) {
+            return getErrorResponse(
+                "AUTHENTICATION_UNAVAILABLE",
+                "Authentication is temporarily unavailable. Please try again.",
+                503,
+            );
+        }
+
+        return getErrorResponse(
+            "AUTHENTICATION_UNAVAILABLE",
+            "Authentication is temporarily unavailable. Please try again.",
+            503,
+        );
+    }
 
     if (!user) {
         return getErrorResponse(

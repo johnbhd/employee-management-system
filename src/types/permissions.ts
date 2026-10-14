@@ -81,7 +81,7 @@ export type RolePermissionAssignment = {
   version: number;
   updatedAt: string | null;
   updatedBy: { uid: string; displayName: string } | null;
-  source: "default" | "firestore";
+  source: "default" | "postgresql";
 };
 
 export type RolePermissionView = RolePermissionAssignment & {

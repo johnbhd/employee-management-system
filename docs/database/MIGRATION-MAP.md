@@ -1,12 +1,14 @@
 # DB-ARCH-006 - Firestore to PostgreSQL Mapping
 
-## DB-SCHEMA-008 status
+## DB-SCHEMA-008 and DB-AUTH-BRIDGE-009 status
 
 The target tables in this map are now implemented by Prisma 6.19.0 and the
 `20261014120000_initial_sia_schema` migration is applied to Supabase
-PostgreSQL. This document remains a future Firestore data-migration map: no
-Firestore records were copied, repositories were changed, or legacy
-collections were deleted.
+PostgreSQL. The identity/RBAC bridge is also implemented: application users,
+role assignments, permission resolution, and explicit application-user
+Employee links now use PostgreSQL via Prisma. This document remains a future
+Firestore business-data migration map: no attendance, Payroll, Accounting,
+settings, or audit records were copied, and no legacy collections were deleted.
 
 This map describes a safe target shape. It is not a migration script and does
 not authorize a destructive delete. Firestore document IDs and field names are
@@ -50,7 +52,7 @@ canonical names for later schema/repository tasks.
 | `accountingTransfers` | `accounting_transfers` | Transfer ID, Payroll result/batch/handoff FKs, period, refs, status/ack/provider/attempt/failure/timestamps. | Unique current transfer per Payroll result; retain failed retry lineage. |
 | `accountingTransferMembership` | `accounting_transfers` unique `payroll_result_id` | Map result-to-transfer and created time. | Use a database unique constraint to replace the idempotency guard. |
 | `accountingTransferAuditEvents` | `audit_events` | Map action/actor/transfer/result/batch/reference/failure metadata. | Preserve legacy source identity during reconciliation. |
-| `rolePermissions` | `application_roles`, `permissions`, `role_permissions` | Expand permission key array into rows; map version/update actor/timestamps. | Seed all canonical roles/catalog keys first. Missing Firestore role docs retain code defaults until explicitly reconciled. |
+| `rolePermissions` | `application_roles`, `permissions`, `role_permissions` | The identity bridge now reads and writes the seeded PostgreSQL rows; the legacy Firestore array is retained only as migration evidence. | Seed all canonical roles/catalog keys first. Do not use the Firestore role document as an authorization fallback. |
 | `systemSettings/runtime` | `system_settings` | `overrides` JSONB, version, updated actor/time. | Only registered runtime keys may be imported; unknown/sensitive keys are quarantined. |
 | `auditEvents` | `audit_events` | Directly map canonical event/actor/target/outcome/summary/metadata/timestamps. | Append-only import; keep original event ID where collision-free. |
 | `adminAuditEvents` | `audit_events` | Normalize legacy role-permission action, module, actor, target, metadata. | Preserve legacy event source; do not discard because it predates canonical audit. |

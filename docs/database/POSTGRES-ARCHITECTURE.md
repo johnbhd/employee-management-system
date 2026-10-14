@@ -30,8 +30,9 @@ Repository interfaces
 Supabase PostgreSQL
 ```
 
-Firebase Authentication remains in place. Supabase PostgreSQL becomes the
-authoritative business database only after repository migration and validation.
+Firebase Authentication remains in place. Supabase PostgreSQL is now the
+authoritative application identity and RBAC database; business repositories
+remain on Firestore until their later migration and validation tasks.
 The browser must not connect directly to PostgreSQL. DBeaver is an
 administration/inspection client, not an application runtime dependency.
 Docker is not required by this design.
@@ -116,6 +117,14 @@ The database FK from `users.employee_id` to `employees.id` is nullable because
 the current Admin, Payroll, Accounting, and some HR accounts need not be
 employee-linked. The application must continue to reject employee-role
 accounts without a valid employee link where that rule applies.
+
+The identity bridge is implemented. `GET /api/me`, session creation, protected
+server contexts, permission-aware navigation inputs, role-permission updates,
+and Admin application-account writes resolve application identity through
+Prisma/PostgreSQL. Firebase Auth remains the credential and verified-session
+provider. The controlled bootstrap is documented in
+`docs/auth/IDENTITY-BRIDGE.md`; it is intentionally separate from the later
+full Firestore business-data migration.
 
 ## Key and timestamp strategy
 
@@ -221,6 +230,7 @@ migration credentials remain server/admin-only.
 
 ## Non-goals
 
-This document does not replace repositories, migrate data, migrate Firebase
-Authentication, implement HRPS/Bundy import, add Payroll calculations, or
-delete Firestore. Repository cutover and data migration remain later tasks.
+This document does not migrate Firebase Authentication, implement HRPS/Bundy
+import, add Payroll calculations, migrate business repositories, or delete
+Firestore. Attendance, Payroll, Accounting, settings, audit, and remaining
+HRPS business reads remain later repository/cutover work.

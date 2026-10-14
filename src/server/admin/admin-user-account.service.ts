@@ -26,6 +26,11 @@ import {
   getEmployeeById,
   listEmployees,
 } from "@/server/repositories/employees/employee.repository";
+import {
+  getApplicationEmployeeById,
+  listApplicationEmployees,
+  upsertApplicationEmployee,
+} from "@/server/repositories/application-employees/application-employee.repository";
 import { listAdminUserAccountAuditEvents } from "@/server/repositories/admin-user-account-audit/admin-user-account-audit.repository";
 
 export class AdminUserAccountError extends Error {
@@ -155,14 +160,14 @@ async function listAllAuthUsers(): Promise<UserRecord[]> {
 }
 
 async function buildAccounts(): Promise<AdminUserAccount[]> {
-  const [authUsers, profiles, employees] = await Promise.all([
+  const [authUsers, profiles, applicationEmployees] = await Promise.all([
     listAllAuthUsers(),
     listApplicationUsers(),
-    listEmployees(),
+    listApplicationEmployees(),
   ]);
   const authByUid = new Map(authUsers.map((record) => [record.uid, record]));
   const profileByUid = new Map(profiles.map((profile) => [profile.uid, profile]));
-  const employeeById = new Map(employees.map((employee) => [employee.employeeId, employee]));
+  const employeeById = new Map(applicationEmployees.map((employee) => [employee.employeeId, employee]));
   const ids = new Set([...authByUid.keys(), ...profileByUid.keys()]);
 
   return [...ids]
@@ -272,6 +277,8 @@ async function ensureEmployeeLinkIsValid(
       400,
     );
   }
+
+  await upsertApplicationEmployee(employee);
 
   const profiles = await listApplicationUsers();
   const duplicate = profiles.find((profile) => (
@@ -477,7 +484,7 @@ export async function setAdminUserAccountDisabled(
     return toAccount(
       target.authRecord,
       target.profile,
-      target.profile?.employeeId ? await getEmployeeById(target.profile.employeeId) : null,
+      target.profile?.employeeId ? await getApplicationEmployeeById(target.profile.employeeId) : null,
     );
   }
 
@@ -569,7 +576,7 @@ export async function deleteAdminUserAccount(actor: Actor, uid: string): Promise
 
 export async function getAdminUserAccount(uid: string) {
   const target = await requireTarget(uid);
-  const employee = target.profile?.employeeId ? await getEmployeeById(target.profile.employeeId) : null;
+  const employee = target.profile?.employeeId ? await getApplicationEmployeeById(target.profile.employeeId) : null;
   return toAccount(target.authRecord, target.profile, employee);
 }
 

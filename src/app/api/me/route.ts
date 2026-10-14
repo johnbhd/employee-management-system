@@ -5,6 +5,7 @@ import {
     FirebaseAdminInitializationError,
 } from "@/lib/firebase/server";
 import { getCurrentUserContext } from "@/server/auth/current-user-context";
+import { AuthSessionError } from "@/server/auth/session";
 import type { ApiErrorResponse } from "@/types/api/responses";
 import type { CurrentUserSuccessResponse } from "@/types/auth";
 
@@ -57,6 +58,10 @@ export async function GET() {
 
         return NextResponse.json(response, { status: 200 });
     } catch (error) {
+        if (error instanceof AuthSessionError) {
+            return getErrorResponse(error.code, error.message, error.status);
+        }
+
         if (
             error instanceof FirebaseAdminConfigurationError
             || error instanceof FirebaseAdminInitializationError
