@@ -111,7 +111,22 @@
 
 .admin-sidebar-nav {
   display: grid;
+  gap: 1rem;
+}
+
+.admin-nav-section {
+  display: grid;
   gap: 0.25rem;
+}
+
+.admin-nav-section-label {
+  margin: 0 0 0.2rem;
+  padding: 0 0.5rem;
+  color: rgba(219, 234, 254, 0.48);
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .admin-nav-link {

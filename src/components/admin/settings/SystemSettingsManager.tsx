@@ -128,7 +128,7 @@ function IntegrationCard({ integration }: { integration: AdminSettingsIntegratio
     <div className="admin-settings-integration-card">
       <div className="admin-settings-integration-card-heading"><div><strong>{integration.name}</strong><small>{integration.provider ?? "No provider configured"}</small></div><StatusBadge tone={tone}>{integration.status}</StatusBadge></div>
       <p>{integration.detail}</p>
-      <div className="admin-settings-integration-card-footer"><span>{integration.credentialsStatus} credentials</span><Link href={integration.monitoringHref}>Open monitoring <Icon name="arrow" /></Link></div>
+      <div className="admin-settings-integration-card-footer"><span>{integration.credentialsStatus} credentials</span><Link href={integration.monitoringHref}>Open integration <Icon name="arrow" /></Link></div>
     </div>
   );
 }

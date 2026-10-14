@@ -1653,3 +1653,21 @@ The Employee navbar no longer renders a notification count badge when the
 notification count is zero. The notification menu and profile menu now use a
 truthful no-new-notifications state while preserving the existing count badge
 for positive counts.
+
+## ADMIN-INTEGRATION-NAV-005 Integration Navigation Snapshot
+
+The Admin portal now has centralized Workspace, Integrations, and
+Administration navigation. Dedicated technical integration routes exist for
+HRPS, Bundy / Biometric ETL, QR Attendance, Unified Attendance, Payroll, and
+Accounting. The existing Admin integration-monitoring read model powers these
+pages, including real health, mode, provider, pending-operation, issue, and
+activity values where available.
+
+Dashboard, Integration Monitoring, and System & Settings integration links now
+open the appropriate detail destination. The new pages preserve the existing
+`admin.integration_monitoring.view` permission, server-owned data boundary,
+and truthful loading, error, empty, not-configured, and unauthorized states.
+No HR CRUD, Payroll calculation, Accounting ERP behavior, file importer, or
+new API route was added. The next implementation task is
+`INTEGRATION-HRPS-006` for the real HRPS employee import and synchronization
+workflow.

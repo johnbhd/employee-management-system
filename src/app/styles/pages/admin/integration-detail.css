@@ -1,0 +1,222 @@
+.admin-integration-detail-metrics .metric-card {
+  min-height: 7.7rem;
+}
+
+.admin-integration-detail-top-grid {
+  align-items: start;
+}
+
+.integration-detail-status-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.integration-detail-status-card {
+  display: grid;
+  gap: 0.65rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #e8edf4;
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+}
+
+.integration-detail-status-card.is-failed {
+  border-color: #f0c9c5;
+  background: #fff9f8;
+}
+
+.integration-detail-status-card.is-pending,
+.integration-detail-status-card.is-degraded {
+  border-color: #f0ddb1;
+  background: #fffdf7;
+}
+
+.integration-detail-status-card.is-not_configured {
+  background: #f8fafc;
+}
+
+.integration-detail-status-heading,
+.integration-detail-status-title,
+.integration-detail-issue-heading {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.integration-detail-status-heading,
+.integration-detail-issue-heading {
+  justify-content: space-between;
+}
+
+.integration-detail-status-title strong,
+.integration-detail-issue-heading h3 {
+  min-width: 0;
+  color: #334155;
+  font-size: 0.78rem;
+}
+
+.integration-detail-status-title .ui-icon {
+  color: var(--au-blue);
+}
+
+.integration-detail-status-card > p,
+.integration-detail-description {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.integration-detail-status-meta {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.integration-detail-list {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+}
+
+.integration-detail-list > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.integration-detail-list > div:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.integration-detail-list dt,
+.integration-detail-list dd {
+  margin: 0;
+  font-size: 0.7rem;
+}
+
+.integration-detail-list dt {
+  color: var(--text-faint);
+}
+
+.integration-detail-list dd {
+  max-width: 65%;
+  color: #475569;
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.integration-detail-list + .integration-detail-description {
+  margin-top: 1rem;
+}
+
+.integration-detail-capability-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.integration-detail-capability {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid #e9eef5;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.integration-detail-capability strong {
+  color: #334155;
+  font-size: 0.74rem;
+}
+
+.integration-detail-capability p {
+  margin: 0.35rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.69rem;
+  line-height: 1.5;
+}
+
+.integration-detail-scope {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem;
+  border: 1px solid #cfe1fa;
+  border-radius: 0.75rem;
+  background: var(--info-soft);
+}
+
+.integration-detail-scope strong {
+  color: var(--au-navy);
+  font-size: 0.78rem;
+}
+
+.integration-detail-scope p {
+  max-width: 60rem;
+  margin: 0.35rem 0 0;
+  color: #174a7a;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.integration-detail-activity-table {
+  min-width: 42rem;
+}
+
+.integration-detail-issue-heading h3 {
+  margin: 0;
+}
+
+.integration-detail-issue-heading + p {
+  margin-top: 0.3rem;
+}
+
+.integration-detail-issue-heading ~ small {
+  display: block;
+  margin-top: 0.45rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  line-height: 1.5;
+}
+
+.admin-integration-detail-skeleton,
+.admin-integration-detail-skeleton-panel {
+  background: linear-gradient(90deg, #f2f5f9 25%, #e8edf4 50%, #f2f5f9 75%);
+  background-size: 200% 100%;
+  animation: admin-integration-detail-loading 1.4s ease-in-out infinite;
+}
+
+.admin-integration-detail-skeleton-panel {
+  min-height: 16rem;
+}
+
+@keyframes admin-integration-detail-loading {
+  50% {
+    background-position: -100% 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .integration-detail-capability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .integration-detail-scope {
+    flex-direction: column;
+  }
+
+  .integration-detail-list dd {
+    max-width: 55%;
+  }
+}

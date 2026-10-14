@@ -178,7 +178,7 @@ async function getIntegrationSettings(): Promise<{
       status: "Configured",
       credentialsStatus: "Not applicable",
       detail: `${employees.length} employee reference${employees.length === 1 ? "" : "s"} and ${schedules.length} schedule reference${schedules.length === 1 ? "" : "s"} loaded from the local HRPS boundary.`,
-      monitoringHref: "/admin/integration-monitoring",
+      monitoringHref: "/admin/hrps-integration",
     }),
     integrationStatus({
       key: "bundy",
@@ -188,7 +188,7 @@ async function getIntegrationSettings(): Promise<{
       status: "Not configured",
       credentialsStatus: "Not applicable",
       detail: "No Bundy ingestion adapter or persisted Bundy log repository is configured.",
-      monitoringHref: "/admin/integration-monitoring",
+      monitoringHref: "/admin/bundy-etl",
     }),
     integrationStatus({
       key: "qr",
@@ -200,7 +200,7 @@ async function getIntegrationSettings(): Promise<{
       detail: qrConfigured
         ? "The server-side QR signing secret is configured; its value is never returned."
         : "QR signing is not configured in the server environment.",
-      monitoringHref: "/admin/integration-monitoring",
+      monitoringHref: "/admin/qr-attendance",
     }),
     integrationStatus({
       key: "payroll",
@@ -210,7 +210,7 @@ async function getIntegrationSettings(): Promise<{
       status: "Simulated",
       credentialsStatus: "Not configured",
       detail: "Payroll handoff uses the deterministic simulated adapter. No live Payroll API credentials are configured.",
-      monitoringHref: "/admin/integration-monitoring",
+      monitoringHref: "/admin/payroll-integration",
     }),
     integrationStatus({
       key: "accounting",
@@ -220,7 +220,7 @@ async function getIntegrationSettings(): Promise<{
       status: "Simulated",
       credentialsStatus: "Not configured",
       detail: "Accounting transfer uses the deterministic simulated adapter. No live Accounting API credentials are configured.",
-      monitoringHref: "/admin/integration-monitoring",
+      monitoringHref: "/admin/accounting-integration",
     }),
   ];
 

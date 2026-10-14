@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
-import { adminNavigation } from "@/data/admin";
+import { adminNavigation, adminNavigationSections } from "@/data/admin";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import { getRoleLabel } from "@/lib/auth/roles";
@@ -59,44 +59,37 @@ export function AdminSidebar({ user, employee, permissions, isOpen, onClose }: A
 
           <div className="admin-sidebar-scroll">
             <div className="workspace-label">
-              <span>Workspace</span>
+              <span>IT Administrator</span>
               <span className="role-pill">{getRoleLabel(user.role)}</span>
             </div>
             <nav className="admin-sidebar-nav" aria-label="Primary navigation">
-              {adminNavigation.filter((item) => {
-                const permissionByPath: Record<string, PermissionKey> = {
-                  "/admin/dashboard": "admin.dashboard.view",
-                  "/admin/integration-monitoring": "admin.integration_monitoring.view",
-                  "/admin/user-accounts": "admin.user_accounts.view",
-                  "/admin/roles-permissions": "admin.roles_permissions.view",
-                  "/admin/audit-logs": "admin.audit_logs.view",
-                  "/admin/settings": "admin.settings.view",
-                };
-                const permission = item.href ? permissionByPath[item.href] : undefined;
-                return !permission || permissions.includes(permission);
-              }).map((item) => {
-                const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
+              {adminNavigationSections.map((section) => {
+                const items = adminNavigation.filter((item) => (
+                  item.section === section.id && permissions.includes(item.permission)
+                ));
 
-                if (!item.href) {
-                  return (
-                    <span className="admin-nav-link admin-nav-placeholder" key={item.id} aria-disabled="true">
-                      <Icon name={item.icon} />
-                      <span>{item.label}</span>
-                    </span>
-                  );
-                }
+                if (items.length === 0) return null;
 
                 return (
-                  <Link
-                    href={item.href}
-                    className={`admin-nav-link ${active ? "is-active" : ""}`}
-                    aria-current={active ? "page" : undefined}
-                    key={item.id}
-                    onClick={onClose}
-                  >
-                    <Icon name={item.icon} />
-                    <span>{item.label}</span>
-                  </Link>
+                  <div className="admin-nav-section" key={section.id}>
+                    <p className="admin-nav-section-label">{section.label}</p>
+                    {items.map((item) => {
+                      const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
+
+                      return (
+                        <Link
+                          href={item.href}
+                          className={`admin-nav-link ${active ? "is-active" : ""}`}
+                          aria-current={active ? "page" : undefined}
+                          key={item.id}
+                          onClick={onClose}
+                        >
+                          <Icon name={item.icon} />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </nav>

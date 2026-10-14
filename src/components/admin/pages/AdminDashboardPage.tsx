@@ -291,7 +291,7 @@ export function AdminDashboardPage({
                   <div className="connection-status">
                     <StatusBadge tone={getConfigurationTone(integration.mode)}>{integration.status}</StatusBadge>
                     <Link className="button-link" href={integration.monitoringHref}>
-                      View
+                      View integration
                     </Link>
                   </div>
                 </div>
@@ -375,7 +375,14 @@ function IntegrationHealthRow({ system }: { system: AdminIntegrationStatus }) {
           Last success: {formatTimestamp(system.lastSuccessfulAt)}
         </small>
       </div>
-      <StatusBadge tone={getHealthTone(system.health)}>{getHealthLabel(system.health)}</StatusBadge>
+      <div className="integration-health-actions">
+        <StatusBadge tone={getHealthTone(system.health)}>{getHealthLabel(system.health)}</StatusBadge>
+        {system.detailHref ? (
+          <Link className="button-link" href={system.detailHref}>
+            View details <Icon name="arrow" />
+          </Link>
+        ) : null}
+      </div>
     </div>
   );
 }
