@@ -89,7 +89,7 @@ export function AuditHistoryExplorer({
   };
   const exportQuery = buildQueryString({ ...filterQuery, page: 1 });
   const exportHref = data.total > 0
-    ? `/api/v1/hr/audit-history?format=csv${exportQuery ? `&${exportQuery}` : ""}`
+    ? `/api/hr/audit-history?format=csv${exportQuery ? `&${exportQuery}` : ""}`
     : undefined;
   const activeFilterCount = [
     search.trim(),

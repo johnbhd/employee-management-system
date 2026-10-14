@@ -93,7 +93,7 @@ export function PayrollBatchesPage({ initialData, loadError = false }: Props) {
   async function loadData(period = data.period) {
     try {
       const params = new URLSearchParams({ periodStart: period.start, periodEnd: period.end });
-      const response = await fetch(`/api/v1/payroll/batches?${params.toString()}`, { cache: "no-store", headers: { Accept: "application/json" } });
+      const response = await fetch(`/api/payroll/batches?${params.toString()}`, { cache: "no-store", headers: { Accept: "application/json" } });
       const body = await response.json() as BatchesApiResponse;
       if (!response.ok || !body.success) throw new Error(getErrorMessage(response.status, body));
       setData(body.data);
@@ -115,7 +115,7 @@ export function PayrollBatchesPage({ initialData, loadError = false }: Props) {
   async function handleCreate(values: PayrollBatchFormValues) {
     setIsBusy(true);
     try {
-      const batch = await request<PayrollBatchRecord>("/api/v1/payroll/batches", { method: "POST", body: JSON.stringify(values) });
+      const batch = await request<PayrollBatchRecord>("/api/payroll/batches", { method: "POST", body: JSON.stringify(values) });
       setCurrentId(batch.id);
       setModal(null);
       await loadData(batch.period);
@@ -130,7 +130,7 @@ export function PayrollBatchesPage({ initialData, loadError = false }: Props) {
     setIsBusy(true);
     try {
       for (const employeePeriodId of employeePeriodIds) {
-        await request<PayrollBatchRecord>(`/api/v1/payroll/batches/${encodeURIComponent(modalBatch.id)}/items`, { method: "POST", body: JSON.stringify({ employeePeriodId }) });
+      await request<PayrollBatchRecord>(`/api/payroll/batches/${encodeURIComponent(modalBatch.id)}/items`, { method: "POST", body: JSON.stringify({ employeePeriodId }) });
       }
       setModal(null);
       await loadData(modalBatch.period);
@@ -145,7 +145,7 @@ export function PayrollBatchesPage({ initialData, loadError = false }: Props) {
     if (!modalBatch) return;
     setIsBusy(true);
     try {
-      await request<PayrollBatchRecord>(`/api/v1/payroll/batches/${encodeURIComponent(modalBatch.id)}/items/${encodeURIComponent(employeePeriodId)}`, { method: "DELETE" });
+      await request<PayrollBatchRecord>(`/api/payroll/batches/${encodeURIComponent(modalBatch.id)}/items/${encodeURIComponent(employeePeriodId)}`, { method: "DELETE" });
       await loadData(modalBatch.period);
       showFeedback("The record was removed from the Draft batch.");
     } catch (removeError) { showFeedback(removeError instanceof Error ? removeError.message : "The record could not be removed."); }
@@ -155,7 +155,7 @@ export function PayrollBatchesPage({ initialData, loadError = false }: Props) {
   async function changeStatus(batch: PayrollBatchRecord) {
     setIsBusy(true);
     try {
-      await request<PayrollBatchRecord>(`/api/v1/payroll/batches/${encodeURIComponent(batch.id)}`, { method: "PATCH", body: JSON.stringify({ status: "Ready" }) });
+      await request<PayrollBatchRecord>(`/api/payroll/batches/${encodeURIComponent(batch.id)}`, { method: "PATCH", body: JSON.stringify({ status: "Ready" }) });
       setModal(null);
       await loadData(data.period);
       showFeedback(`${batch.id} is ready for payroll handoff.`);

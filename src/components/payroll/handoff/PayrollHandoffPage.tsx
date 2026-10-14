@@ -87,7 +87,7 @@ export function PayrollHandoffPage({
       if (fromDate) params.set("fromDate", fromDate);
       if (toDate) params.set("toDate", toDate);
 
-      const response = await fetch(`/api/v1/payroll/handoffs?${params.toString()}`, {
+      const response = await fetch(`/api/payroll/handoffs?${params.toString()}`, {
         cache: "no-store",
         headers: { Accept: "application/json" },
       });
@@ -129,7 +129,7 @@ export function PayrollHandoffPage({
     if (!modal || modal.kind !== "submit" || !selectedReadyBatch) return;
     setIsBusy(true);
     try {
-      const response = await fetch("/api/v1/payroll/handoffs", {
+      const response = await fetch("/api/payroll/handoffs", {
         method: "POST",
         headers: { Accept: "application/json", "Content-Type": "application/json" },
         body: JSON.stringify({ batchId: selectedReadyBatch.id }),

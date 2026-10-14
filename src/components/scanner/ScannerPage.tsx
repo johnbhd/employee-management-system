@@ -60,7 +60,7 @@ export function ScannerPage() {
 
     try {
       const response = await fetch(
-        "/api/v1/attendance/qr/resolve",
+        "/api/attendance/qr/resolve",
         {
           body: JSON.stringify({
             qrValue: qrValue.trim(),

@@ -37,7 +37,7 @@ export function PayrollDashboardPage({
     setIsRefreshing(true);
 
     try {
-      const response = await fetch("/api/v1/payroll/dashboard", {
+      const response = await fetch("/api/payroll/dashboard", {
         cache: "no-store",
         headers: {
           Accept: "application/json",

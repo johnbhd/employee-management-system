@@ -110,7 +110,7 @@ export async function signInWithFirebaseSession(
         const idToken = await credential.user.getIdToken();
 
         const response = await apiRequest<AuthSessionSuccessResponse>(
-            "/api/v1/auth/session",
+            "/api/auth/session",
             {
                 method: "POST",
                 body: JSON.stringify({
@@ -151,7 +151,7 @@ export async function logoutFromFirebaseSession(): Promise<void> {
     setAuthFlashToast({ type: "logout-success" });
 
     try {
-        await fetch("/api/v1/auth/session", {
+        await fetch("/api/auth/session", {
             method: "DELETE",
         });
     } catch {

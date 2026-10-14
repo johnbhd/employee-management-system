@@ -86,7 +86,7 @@ export function ApprovedPayrollPage({
 
     try {
       const response = await apiRequest<ApprovedPayrollApiResponse>(
-        `/api/v1/accounting/approved-payroll?${params.toString()}`,
+        `/api/accounting/approved-payroll?${params.toString()}`,
         { cache: "no-store" },
       );
 

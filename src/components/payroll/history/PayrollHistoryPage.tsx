@@ -55,7 +55,7 @@ export function PayrollHistoryPage({ initialData, loadError: initialLoadError }:
     if (resultStatus !== "all") params.set("resultStatus", resultStatus);
 
     try {
-      const response = await fetch(`/api/v1/payroll/history?${params.toString()}`, { cache: "no-store" });
+      const response = await fetch(`/api/payroll/history?${params.toString()}`, { cache: "no-store" });
       const payload = await response.json() as ApiResult;
       if (!response.ok || !payload.success || !payload.data) {
         throw new Error(payload.error?.message || "Payroll history data is temporarily unavailable.");

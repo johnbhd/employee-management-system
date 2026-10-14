@@ -84,7 +84,7 @@ export function AttendanceQrPage({
     }
 
     try {
-      const response = await fetch("/api/v1/attendance/me/today", {
+      const response = await fetch("/api/attendance/me/today", {
         cache: "no-store",
         headers: {
           Accept: "application/json",
@@ -171,7 +171,7 @@ export function AttendanceQrPage({
 
     try {
       const response = await fetch(
-        "/api/v1/attendance/qr",
+        "/api/attendance/qr",
         {
           cache: "no-store",
         },

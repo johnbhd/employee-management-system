@@ -187,8 +187,8 @@ export function PayrollVerifiedAttendancePage({
       const queryString = buildQueryString(query);
       const response = await fetch(
         queryString
-          ? `/api/v1/payroll/verified-attendance?${queryString}`
-          : "/api/v1/payroll/verified-attendance",
+          ? `/api/payroll/verified-attendance?${queryString}`
+          : "/api/payroll/verified-attendance",
         {
           cache: "no-store",
           headers: { Accept: "application/json" },
@@ -237,7 +237,7 @@ export function PayrollVerifiedAttendancePage({
     setIsAddingToBatch(true);
 
     try {
-      const response = await fetch("/api/v1/payroll/batches", {
+      const response = await fetch("/api/payroll/batches", {
         method: "POST",
         headers: {
           Accept: "application/json",

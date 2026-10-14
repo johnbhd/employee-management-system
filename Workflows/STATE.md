@@ -1617,3 +1617,24 @@ environment cannot provide those checks.
 The next implementation priority remains server-authoritative HR final
 verification and Payroll readiness, followed by Employee correction submission
 and direct HR route guards.
+
+## SYSTEM-API-005 API Namespace Migration Snapshot
+
+`SYSTEM-API-005` is complete. All 40 Next.js Route Handler files now live
+under `src/app/api/`, and active source consumers and README examples use the
+canonical `/api/...` namespace. The former `/api/v1/...` route tree was
+removed; no active source, configuration, script, or documentation reference
+remains. Historical task records retain their original paths as evidence and
+were not rewritten.
+
+The migration preserved the existing authentication, RBAC, ownership,
+validation, service, repository, and DTO boundaries. The production build and
+post-build TypeScript check passed. Lint passed with the existing unused-helper
+warning in `src/server/repositories/payroll/payslip.repository.ts`. Runtime
+smoke checks confirmed `/api/health` returns 200, `/api/v1/health` returns 404,
+and representative protected canonical routes return 401 without a session.
+Authenticated browser, live-provider, visual, responsive, and accessibility
+checks were not run.
+
+The next recommended implementation priority is `SYSTEM-SEC-006` for the
+authentication, RBAC, and authorization audit.

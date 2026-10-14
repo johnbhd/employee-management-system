@@ -45,7 +45,7 @@ React UI
     ↓
 src/lib/api/ client functions
     ↓
-src/app/api/v1/ Route Handlers
+src/app/api/ Route Handlers
     ↓
 src/server/services/ business logic
     ↓
@@ -89,8 +89,8 @@ value, preserve escaped newline characters (`\\n`); the server initializer
 normalizes them before creating the Admin credential. Configure the same
 variables in Vercel under Project Settings → Environment Variables.
 
-The existing health contract remains available at `GET /api/v1/health`. The
-Firebase foundation check is available at `GET /api/v1/health/firebase` and
+The existing health contract remains available at `GET /api/health`. The
+Firebase foundation check is available at `GET /api/health/firebase` and
 returns a safe `503` error response when server configuration is missing or
 Firestore cannot be reached. It never returns credentials, stack traces, or
 service-account details. The Firestore check reads the reserved
@@ -120,19 +120,19 @@ yarn qr:attendance:verify
 The Employee `/employee/my-attendance` page reads the authenticated Employee's
 current Asia/Manila attendance record through the server-side attendance
 service. The equivalent protected API is `GET
-/api/v1/attendance/me/today`; it derives the Employee ID from the HttpOnly
+/api/attendance/me/today`; it derives the Employee ID from the HttpOnly
 session and does not accept an Employee ID from the browser.
 
 The Employee `/employee/attendance-history` page reads the same canonical
 Firestore attendance collection through the authenticated Employee context.
-The protected `GET /api/v1/attendance/me/history` endpoint returns only the
+The protected `GET /api/attendance/me/history` endpoint returns only the
 linked Employee's daily records, newest first, with serialized date, Time In,
 Time Out, source, and status values. The page does not accept a browser-supplied
 Employee ID or use browser storage/mock rows as an authority.
 
 The protected HR `/hr/dashboard` page now reads the active Employee reference
 count and current Asia/Manila attendance records through the server-side HR
-dashboard service. Its equivalent API is `GET /api/v1/hr/dashboard/summary`;
+dashboard service. Its equivalent API is `GET /api/hr/dashboard/summary`;
 it derives Timed In Today, Completed Today, Awaiting Time-Out, and recent
 awaiting-Time-Out items from the canonical attendance collection. Correction,
 verification, schedule, lateness, absence, and overtime values remain

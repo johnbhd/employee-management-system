@@ -66,7 +66,7 @@ export function AccountingTransactionHistoryPage({
 
     try {
       const response = await apiRequest<AccountingTransactionHistoryApiResponse>(
-        `/api/v1/accounting/transaction-history?${params.toString()}`,
+        `/api/accounting/transaction-history?${params.toString()}`,
         { cache: "no-store" },
       );
       setData(response.data);
@@ -98,7 +98,7 @@ export function AccountingTransactionHistoryPage({
 
     try {
       const response = await apiRequest<AccountingTransactionHistoryDetailApiResponse>(
-        `/api/v1/accounting/transaction-history/${encodeURIComponent(transaction.transferId)}`,
+        `/api/accounting/transaction-history/${encodeURIComponent(transaction.transferId)}`,
         { cache: "no-store" },
       );
       setSelectedDetail(response.data);

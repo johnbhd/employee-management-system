@@ -80,7 +80,7 @@ export function RolesPermissionsManager({
 
     try {
       const response = await apiRequest<RolePermissionsApiResponse>(
-        `/api/v1/admin/roles-permissions/${selectedRole.roleId}`,
+        `/api/admin/roles-permissions/${selectedRole.roleId}`,
         {
           method: "PUT",
           body: JSON.stringify({

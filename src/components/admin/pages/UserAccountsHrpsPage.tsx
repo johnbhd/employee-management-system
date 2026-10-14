@@ -82,7 +82,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     if (status !== allValue) params.set("status", status);
     if (link !== allValue) params.set("link", link);
     try {
-      const response = await apiRequest<UserAccountsApiResponse>(`/api/v1/admin/user-accounts?${params.toString()}`, { cache: "no-store" });
+      const response = await apiRequest<UserAccountsApiResponse>(`/api/admin/user-accounts?${params.toString()}`, { cache: "no-store" });
       setData(response.data);
       setLoadError(false);
       setFeedback("");
@@ -137,7 +137,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     setIsMutating(true);
     setFeedback("");
     try {
-      await apiRequest<AccountApiResponse>(`/api/v1/admin/user-accounts/${encodeURIComponent(account.uid)}/${disabled ? "disable" : "enable"}`, { method: "POST" });
+      await apiRequest<AccountApiResponse>(`/api/admin/user-accounts/${encodeURIComponent(account.uid)}/${disabled ? "disable" : "enable"}`, { method: "POST" });
       setStatusTarget(null);
       setFeedback(`Account ${disabled ? "disabled" : "enabled"} successfully.`);
       await loadData();
@@ -158,7 +158,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     setIsMutating(true);
     setFeedback("");
     try {
-      await apiRequest<{ success: true }>(`/api/v1/admin/user-accounts/${encodeURIComponent(deleteTarget.uid)}`, { method: "DELETE" });
+      await apiRequest<{ success: true }>(`/api/admin/user-accounts/${encodeURIComponent(deleteTarget.uid)}`, { method: "DELETE" });
       setDeleteTarget(null);
       setSelected(null);
       setModal(null);
@@ -175,7 +175,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     setIsMutating(true);
     setFeedback("");
     try {
-      await apiRequest<AccountApiResponse>("/api/v1/admin/user-accounts", { method: "POST", body: JSON.stringify(input) });
+      await apiRequest<AccountApiResponse>("/api/admin/user-accounts", { method: "POST", body: JSON.stringify(input) });
       setModal(null);
       setFeedback("Account created. The temporary password was used only for Firebase provisioning and is not stored here.");
       setPage(1);
@@ -192,7 +192,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     setIsMutating(true);
     setFeedback("");
     try {
-      await apiRequest<AccountApiResponse>(`/api/v1/admin/user-accounts/${encodeURIComponent(selected.uid)}`, { method: "PATCH", body: JSON.stringify(input) });
+      await apiRequest<AccountApiResponse>(`/api/admin/user-accounts/${encodeURIComponent(selected.uid)}`, { method: "PATCH", body: JSON.stringify(input) });
       setModal(null);
       setFeedback("Account profile updated successfully.");
       await loadData();

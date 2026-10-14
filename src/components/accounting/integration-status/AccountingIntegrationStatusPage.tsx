@@ -54,7 +54,7 @@ export function AccountingIntegrationStatusPage({
 
     try {
       const response = await apiRequest<AccountingIntegrationStatusApiResponse>(
-        `/api/v1/accounting/transfers?${params.toString()}`,
+        `/api/accounting/transfers?${params.toString()}`,
         { cache: "no-store" },
       );
       setData(response.data);
@@ -85,7 +85,7 @@ export function AccountingIntegrationStatusPage({
     if (!window.confirm("Submit this completed Payroll Result to the Accounting integration?")) return;
     setSubmittingResultId(payrollResultId);
     try {
-      await apiRequest(`/api/v1/accounting/transfers`, {
+      await apiRequest(`/api/accounting/transfers`, {
         method: "POST",
         body: JSON.stringify({ payrollResultId }),
       });

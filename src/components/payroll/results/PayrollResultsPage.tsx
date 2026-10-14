@@ -60,7 +60,7 @@ export function PayrollResultsPage({ initialData, loadError: initialLoadError }:
     if (department !== "all") params.set("department", department);
 
     try {
-      const response = await fetch(`/api/v1/payroll/results?${params.toString()}`, { cache: "no-store" });
+      const response = await fetch(`/api/payroll/results?${params.toString()}`, { cache: "no-store" });
       const payload = await response.json() as ApiResult;
       if (!response.ok || !payload.success || !payload.data) {
         throw new Error(payload.error?.message || "Payroll result data is temporarily unavailable.");

@@ -162,7 +162,7 @@ export function SystemSettingsManager({
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await apiRequest<ApiSuccessResponse<AdminSettingsData>>("/api/v1/admin/settings", { cache: "no-store" });
+      const response = await apiRequest<ApiSuccessResponse<AdminSettingsData>>("/api/admin/settings", { cache: "no-store" });
       const nextSettings = stateFromData(response.data);
       setData(response.data);
       setSavedSettings(nextSettings);
@@ -196,7 +196,7 @@ export function SystemSettingsManager({
     setIsSaving(true);
     setFeedback("");
     try {
-      const response = await apiRequest<ApiSuccessResponse<AdminSettingsData>>("/api/v1/admin/settings", {
+      const response = await apiRequest<ApiSuccessResponse<AdminSettingsData>>("/api/admin/settings", {
         method: "PATCH",
         body: JSON.stringify({ expectedVersion: data.version, settings: draftSettings }),
       });

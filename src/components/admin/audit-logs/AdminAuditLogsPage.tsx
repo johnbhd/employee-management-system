@@ -83,7 +83,7 @@ export function AdminAuditLogsPage({ initialData, loadError }: AdminAuditLogsPag
     setLoading(true);
     setError(false);
     try {
-      const response = await fetch(`/api/v1/admin/audit-logs?${buildQuery(filters, currentPage, pageSize)}`, {
+      const response = await fetch(`/api/admin/audit-logs?${buildQuery(filters, currentPage, pageSize)}`, {
         cache: "no-store",
         signal,
       });
@@ -145,7 +145,7 @@ export function AdminAuditLogsPage({ initialData, loadError }: AdminAuditLogsPag
   }
 
   async function openDetails(eventId: string) {
-    const response = await fetch(`/api/v1/admin/audit-logs/${encodeURIComponent(eventId)}`, { cache: "no-store" });
+    const response = await fetch(`/api/admin/audit-logs/${encodeURIComponent(eventId)}`, { cache: "no-store" });
     const payload = await response.json() as { success?: boolean; data?: AdminAuditLog };
     if (response.ok && payload.success && payload.data) setSelectedEvent(payload.data);
   }

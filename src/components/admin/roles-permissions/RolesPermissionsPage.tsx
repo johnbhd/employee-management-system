@@ -33,7 +33,7 @@ export function RolesPermissionsPage({
     setIsLoading(true);
     try {
       const response = await apiRequest<RolesPermissionsApiResponse>(
-        "/api/v1/admin/roles-permissions",
+        "/api/admin/roles-permissions",
         { cache: "no-store" },
       );
       setData(response.data);

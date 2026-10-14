@@ -47,7 +47,7 @@ export function AdminDashboardPage({
 
     try {
       const response = await apiRequest<DashboardApiResponse>(
-        "/api/v1/admin/dashboard",
+        "/api/admin/dashboard",
         { cache: "no-store" },
       );
       setData(response.data);

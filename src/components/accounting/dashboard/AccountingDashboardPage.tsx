@@ -41,7 +41,7 @@ export function AccountingDashboardPage({
 
     try {
       const response = await apiRequest<AccountingDashboardApiResponse>(
-        "/api/v1/accounting/dashboard",
+        "/api/accounting/dashboard",
         { cache: "no-store" },
       );
       setData(response.data);

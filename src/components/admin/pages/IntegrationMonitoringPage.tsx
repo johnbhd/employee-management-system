@@ -45,7 +45,7 @@ export function IntegrationMonitoringPage({
 
     try {
       const response = await apiRequest<MonitoringApiResponse>(
-        "/api/v1/admin/integration-monitoring",
+        "/api/admin/integration-monitoring",
         { cache: "no-store" },
       );
       setData(response.data);
