@@ -1638,3 +1638,10 @@ checks were not run.
 
 The next recommended implementation priority is `SYSTEM-SEC-006` for the
 authentication, RBAC, and authorization audit.
+
+## EMPLOYEE-NOTIF-001 Notification Empty-State Snapshot
+
+The Employee navbar no longer renders a notification count badge when the
+notification count is zero. The notification menu and profile menu now use a
+truthful no-new-notifications state while preserving the existing count badge
+for positive counts.
