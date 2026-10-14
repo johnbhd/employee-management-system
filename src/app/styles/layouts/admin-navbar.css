@@ -44,8 +44,7 @@
   color: var(--au-navy);
 }
 
-.sidebar-open-button,
-.search-trigger {
+.sidebar-open-button {
   display: none;
 }
 
@@ -72,53 +71,6 @@
   color: var(--text-muted);
   font-size: 0.68rem;
   font-weight: 600;
-}
-
-.desktop-search {
-  position: relative;
-  display: flex;
-  min-width: 11rem;
-  flex: 1;
-  align-items: center;
-  max-width: 23rem;
-  margin-left: auto;
-}
-
-.desktop-search > .ui-icon {
-  position: absolute;
-  left: 0.8rem;
-  color: #94a3b8;
-}
-
-.desktop-search input,
-.mobile-search-mode input {
-  min-height: 2.7rem;
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  background: #f8fafc;
-  color: #475569;
-  font-size: 0.72rem;
-  outline: none;
-  padding: 0.6rem 4.3rem 0.6rem 2.5rem;
-}
-
-.desktop-search input:focus,
-.mobile-search-mode input:focus {
-  border-color: #a6bde7;
-  box-shadow: 0 0 0 3px #eaf2ff;
-}
-
-.desktop-search kbd {
-  position: absolute;
-  right: 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 0.35rem;
-  background: #fff;
-  color: #94a3b8;
-  font-size: 0.55rem;
-  font-weight: 800;
-  padding: 0.22rem 0.35rem;
 }
 
 .system-status {
@@ -253,72 +205,9 @@
   color: var(--au-navy);
 }
 
-.mobile-search-mode {
-  display: none;
-  min-width: 0;
-  flex: 1;
-}
-
-.mobile-search-mode label {
-  position: relative;
-  display: block;
-}
-
-.mobile-search-mode label > .ui-icon {
-  position: absolute;
-  top: 50%;
-  left: 0.8rem;
-  color: #94a3b8;
-  transform: translateY(-50%);
-}
-
-.mobile-search-mode button {
-  position: absolute;
-  top: 50%;
-  right: 0.35rem;
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border: 0;
-  border-radius: 0.55rem;
-  background: transparent;
-  color: #64748b;
-  transform: translateY(-50%);
-}
-
-.mobile-search-mode button:hover {
-  background: #f1f5f9;
-  color: var(--au-navy);
-}
-
-.admin-navbar-inner.search-is-open .admin-navbar-normal {
-  display: flex;
-}
-
-.admin-navbar-inner.search-is-open .mobile-search-mode {
-  display: none;
-}
-
 @media (max-width: 1400px) {
-  .desktop-search {
-    display: none;
-  }
-
   .navbar-title {
     flex: 1 1 auto;
-  }
-
-  .search-trigger {
-    display: grid;
-  }
-
-  .admin-navbar-inner.search-is-open .admin-navbar-normal {
-    display: none;
-  }
-
-  .admin-navbar-inner.search-is-open .mobile-search-mode {
-    display: block;
   }
 }
 

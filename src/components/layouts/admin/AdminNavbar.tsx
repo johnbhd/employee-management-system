@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
@@ -16,25 +16,14 @@ import { Icon } from "../../ui/Icon";
 type AdminNavbarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
-  searchOpen: boolean;
   onOpenSidebar: () => void;
-  onOpenSearch: () => void;
-  onCloseSearch: () => void;
 };
 
-export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenSearch, onCloseSearch }: AdminNavbarProps) {
-  const searchRef = useRef<HTMLInputElement>(null);
+export function AdminNavbar({ user, employee, onOpenSidebar }: AdminNavbarProps) {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
   const [feedback, setFeedback] = useState("");
   const displayName = getAuthenticatedDisplayName(user, employee);
-
-  useEffect(() => {
-    if (searchOpen) {
-      searchRef.current?.focus();
-      searchRef.current?.select();
-    }
-  }, [searchOpen]);
 
   function notify(message: string) {
     setFeedback(message);
@@ -49,7 +38,7 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
 
   return (
     <header className="admin-navbar" aria-label="Administration header">
-      <div className={`admin-navbar-inner ${searchOpen ? "search-is-open" : ""}`}>
+      <div className="admin-navbar-inner">
         <div className="admin-navbar-normal">
           <button type="button" className="icon-button sidebar-open-button" onClick={onOpenSidebar} aria-label="Open navigation menu">
             <Icon name="menu" />
@@ -58,19 +47,10 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
             <strong>IT Administrator Dashboard</strong>
             <span>Integration control center</span>
           </div>
-          <label className="desktop-search">
-            <span className="sr-only">Search dashboard</span>
-            <Icon name="search" />
-            <input type="search" placeholder="Search dashboard" aria-label="Search dashboard" />
-            <kbd>Ctrl K</kbd>
-          </label>
           <div className="system-status compact-status">
             <span className="status-dot status-success" />
             <strong>Configured</strong>
           </div>
-          <button type="button" className="icon-button search-trigger" onClick={onOpenSearch} aria-label="Open search">
-            <Icon name="search" />
-          </button>
           <button type="button" className="icon-button notification-button" onClick={() => notify("No new notifications.")} aria-label="View notifications">
             <Icon name="bell" />
             <span>3</span>
@@ -100,14 +80,6 @@ export function AdminNavbar({ user, employee, searchOpen, onOpenSidebar, onOpenS
               </div>
             ) : null}
           </div>
-        </div>
-        <div className={`mobile-search-mode ${searchOpen ? "is-open" : ""}`}>
-          <label>
-            <span className="sr-only">Search dashboard</span>
-            <Icon name="search" />
-            <input ref={searchRef} type="search" placeholder="Search dashboard" aria-label="Search dashboard" />
-            <button type="button" onClick={onCloseSearch} aria-label="Close search"><Icon name="close" /></button>
-          </label>
         </div>
       </div>
       <span className="sr-only" aria-live="polite">{feedback}</span>

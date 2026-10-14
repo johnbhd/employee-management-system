@@ -1639,6 +1639,14 @@ checks were not run.
 The next recommended implementation priority is `SYSTEM-SEC-006` for the
 authentication, RBAC, and authorization audit.
 
+## ADMIN-NAV-001 Admin Navbar Search Removal Snapshot
+
+The Admin shell no longer includes the unused dashboard search input, search
+trigger, mobile search mode, or Ctrl/Cmd+K search handler. The Admin navbar
+retains its navigation, configured status, notifications, scanner, and profile
+controls. Search fields inside Admin page workspaces remain available where
+they support actual filtering, including Audit Logs and User Accounts.
+
 ## EMPLOYEE-NOTIF-001 Notification Empty-State Snapshot
 
 The Employee navbar no longer renders a notification count badge when the
