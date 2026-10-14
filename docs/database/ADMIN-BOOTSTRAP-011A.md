@@ -29,6 +29,12 @@ ADMIN_USERNAME=<controlled application username>
 ADMIN_DISPLAY_NAME=<controlled application display name>
 ```
 
+The local `DATABASE_URL` must retain the configured Supabase pooler host,
+port `5432`, and database `postgres`. URL-encode reserved password characters
+inside the URI (for example `@` as `%40`) and include
+`?sslmode=require` (or append `&sslmode=require` when query parameters already
+exist). Never print or commit the real connection string.
+
 The command does not request or store a Firebase password, token, private key,
 or Supabase Auth credential. It does not read Firestore, so the historical
 Firestore quota issue does not block this PostgreSQL-only operation.
