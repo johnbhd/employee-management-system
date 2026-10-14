@@ -1596,3 +1596,24 @@ readiness.
    routes.
 4. `SYSTEM-DATA-003`: normalize active status/DTO/type mappings after the
    higher-priority workflow fixes.
+
+## SYSTEM-DATA-004 Consistency Audit Snapshot
+
+`SYSTEM-DATA-004` is complete. The active Payroll and Accounting contracts now
+reuse canonical status registries at the API and Firestore parser boundaries.
+Approved Payroll explicitly uses a projection type that includes
+`not_transferred`, while persisted Accounting transfer records retain only
+their actual transfer lifecycle values. Payroll Result, employee-level result,
+payslip, Payroll Batch, Payroll Handoff, Accounting acknowledgement, and UI-only
+filter states remain distinct. No persisted field rename or data migration was
+performed.
+
+TypeScript and the production build passed. Lint passed with the existing
+unused-helper warning in `src/server/repositories/payroll/payslip.repository.ts`;
+`git diff --check` passed. Browser, responsive, accessibility, authenticated
+Firebase, live-provider, and mutation checks were not run because the configured
+environment cannot provide those checks.
+
+The next implementation priority remains server-authoritative HR final
+verification and Payroll readiness, followed by Employee correction submission
+and direct HR route guards.

@@ -1,4 +1,4 @@
-import type { PayrollBatchPeriod } from "@/types/payroll-batches";
+import type { PayrollBatchPeriod, PayrollBatchStatus } from "@/types/payroll-batches";
 import type {
   PayrollHandoffData,
   PayrollHandoffReadyBatch,
@@ -39,7 +39,7 @@ export type PayrollHandoffRecord = {
   provider: string;
   attemptCount: number;
   timeline: StoredPayrollHandoffRecord["timeline"];
-  batchStatus: string;
+  batchStatus: PayrollBatchStatus;
 };
 
 export function mapPayrollHandoffData(data: PayrollHandoffData) {

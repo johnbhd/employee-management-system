@@ -4,7 +4,7 @@ import type { AccountingReadinessStatus } from "@/types/accounting-approved-payr
 import type { AccountingDashboardAccountingStatus } from "@/types/accounting-dashboard";
 import type {
   AccountingAcknowledgementStatus,
-  AccountingTransferStatus,
+  AccountingApprovedPayrollTransferStatus,
 } from "@/types/accounting-transfers";
 
 export function determineAccountingLifecycleStatus(
@@ -48,7 +48,7 @@ export function getAccountingTransferCompletionTimestamp(
 export function determineAccountingDashboardStatus(input: {
   readinessStatus: AccountingReadinessStatus;
   transfer: {
-    transferStatus: AccountingTransferStatus | "not_transferred";
+    transferStatus: AccountingApprovedPayrollTransferStatus;
     acknowledgementStatus: AccountingAcknowledgementStatus | null;
   };
 }): AccountingDashboardAccountingStatus {

@@ -18,6 +18,7 @@ import type {
   PayrollVerifiedAttendanceItem,
   PayrollVerifiedAttendanceQuery,
 } from "@/types/payroll-verified-attendance";
+import type { PayrollBatchStatus } from "@/types/payroll-batches";
 
 import { getCurrentPayrollPeriod } from "./payroll-dashboard.service";
 
@@ -204,7 +205,7 @@ export async function getPayrollVerifiedAttendanceSourcesForPeriod(
     }));
 }
 
-function getBatchPresentation(status: string) {
+function getBatchPresentation(status: PayrollBatchStatus) {
   switch (status) {
     case "Draft":
       return { label: "Draft", tone: "warning" as const };
@@ -232,7 +233,7 @@ export async function getPayrollVerifiedAttendanceData(
     getPayrollVerifiedAttendanceSourcesForPeriod(period),
     listPayrollBatches(),
   ]);
-  const batchByEmployeePeriodId = new Map<string, { id: string; status: string }>();
+  const batchByEmployeePeriodId = new Map<string, { id: string; status: PayrollBatchStatus }>();
 
   batches.forEach((batch) => {
     batch.includedRecords.forEach((record) => {
@@ -255,7 +256,7 @@ export async function getPayrollVerifiedAttendanceData(
     return {
       ...item,
       batch: {
-        status: batch.status as PayrollVerifiedAttendanceItem["batch"]["status"],
+        status: batch.status,
         label: presentation.label,
         tone: presentation.tone,
         batchId: batch.id,

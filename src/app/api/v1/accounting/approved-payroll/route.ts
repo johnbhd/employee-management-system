@@ -15,10 +15,10 @@ import { isPayrollDateKey } from "@/server/payroll/payroll-batches.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
 import {
   accountingReadinessStatuses,
-  accountingTransferStatuses,
+  accountingApprovedPayrollTransferStatuses,
   type AccountingApprovedPayrollData,
+  type AccountingApprovedPayrollTransferStatus,
   type AccountingReadinessStatus,
-  type AccountingTransferStatus,
 } from "@/types/accounting-approved-payroll";
 import {
   payrollResultStatuses,
@@ -103,9 +103,9 @@ export async function GET(request: Request) {
       rawReadinessStatus,
       accountingReadinessStatuses,
     );
-    const transferStatus = parseAllowedValue<AccountingTransferStatus>(
+    const transferStatus = parseAllowedValue<AccountingApprovedPayrollTransferStatus>(
       rawTransferStatus,
-      accountingTransferStatuses,
+      accountingApprovedPayrollTransferStatuses,
     );
 
     if (

@@ -9,6 +9,11 @@ import type {
   PayrollResultRecord,
   PayrollResultStatus,
 } from "@/types/payroll-results";
+import {
+  payrollExternalPayslipStatuses,
+  payrollExternalProcessingStatuses,
+} from "@/types/payroll-handoff";
+import { payrollResultStatuses } from "@/types/payroll-results";
 
 const resultCollection = "payrollResults";
 const itemCollection = "items";
@@ -67,20 +72,15 @@ function getPeriod(value: unknown) {
 }
 
 function isResultStatus(value: unknown): value is PayrollResultStatus {
-  return value === "processing"
-    || value === "completed"
-    || value === "completed_with_issues"
-    || value === "partially_completed"
-    || value === "rejected"
-    || value === "failed";
+  return payrollResultStatuses.includes(value as PayrollResultStatus);
 }
 
 function isProcessingStatus(value: unknown): value is PayrollResultItem["processingStatus"] {
-  return value === "processed" || value === "pending" || value === "rejected" || value === "failed";
+  return payrollExternalProcessingStatuses.includes(value as PayrollResultItem["processingStatus"]);
 }
 
 function isPayslipStatus(value: unknown): value is PayrollResultItem["payslipStatus"] {
-  return value === "available" || value === "not_yet_available" || value === "unavailable";
+  return payrollExternalPayslipStatuses.includes(value as PayrollResultItem["payslipStatus"]);
 }
 
 function parseResult(id: string, data: DocumentData | undefined): PayrollResultRecord | null {

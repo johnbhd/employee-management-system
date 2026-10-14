@@ -1,8 +1,8 @@
 import { formatPhilippinePeso } from "@/lib/format-currency";
 import type {
   AccountingApprovedPayrollItem,
+  AccountingApprovedPayrollTransferStatus,
   AccountingReadinessStatus,
-  AccountingTransferStatus,
 } from "@/types/accounting-approved-payroll";
 import type { StatusTone } from "@/types/ui";
 
@@ -19,7 +19,7 @@ export function getAccountingReadinessTone(
 }
 
 export function getAccountingTransferLabel(
-  status: AccountingTransferStatus,
+  status: AccountingApprovedPayrollTransferStatus,
 ): string {
   switch (status) {
     case "not_transferred":
@@ -36,7 +36,7 @@ export function getAccountingTransferLabel(
 }
 
 export function getAccountingTransferTone(
-  status: AccountingTransferStatus,
+  status: AccountingApprovedPayrollTransferStatus,
 ): StatusTone {
   if (status === "not_transferred") return "muted";
   if (status === "failed") return "danger";

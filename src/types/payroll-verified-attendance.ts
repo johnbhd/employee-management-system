@@ -1,22 +1,16 @@
 import type { PayrollDashboardPeriod } from "@/types/payroll-dashboard";
+import type { PayrollBatchStatus } from "@/types/payroll-batches";
 import type { StatusTone } from "@/types/ui";
 
 export type PayrollReadinessStatus = "ready" | "blocked";
 
-export type PayrollBatchStatus =
-  | "not-added"
-  | "Draft"
-  | "Ready"
-  | "Submitted"
-  | "Acknowledged"
-  | "Blocked"
-  | "Failed";
+export type PayrollVerifiedAttendanceBatchStatus = PayrollBatchStatus | "not-added";
 
 export type PayrollVerifiedAttendanceQuery = {
   search: string;
   department: string | null;
   readiness: PayrollReadinessStatus | null;
-  batch: PayrollBatchStatus | null;
+  batch: PayrollVerifiedAttendanceBatchStatus | null;
   page: number;
   pageSize: number;
 };
@@ -43,7 +37,7 @@ export type PayrollVerifiedAttendanceItem = {
     reasons: string[];
   };
   batch: {
-    status: PayrollBatchStatus;
+    status: PayrollVerifiedAttendanceBatchStatus;
     label: string;
     tone: StatusTone;
     batchId: string | null;

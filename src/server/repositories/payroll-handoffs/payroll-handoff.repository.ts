@@ -14,7 +14,16 @@ import type {
   PayrollHandoffTimelineEvent,
   PayrollTransferStatus,
 } from "@/types/payroll-handoff";
-import type { PayrollBatchItemSnapshot, PayrollBatchPeriod } from "@/types/payroll-batches";
+import {
+  payrollAcknowledgementStatuses,
+  payrollTransferStatuses,
+} from "@/types/payroll-handoff";
+import {
+  payrollBatchStatuses,
+  type PayrollBatchItemSnapshot,
+  type PayrollBatchPeriod,
+  type PayrollBatchStatus,
+} from "@/types/payroll-batches";
 import { parsePayrollBatchItemSnapshot } from "@/server/repositories/payroll-batches/payroll-batch.repository";
 
 const handoffCollection = "payrollHandoffs";
@@ -109,13 +118,16 @@ function parseBatchSummary(value: unknown): PayrollHandoffBatchSummary | null {
   const includedRecordCount = getRequiredNumber(value, "includedRecordCount");
   const blockedRecordCount = getRequiredNumber(value, "blockedRecordCount");
   const departmentCount = getRequiredNumber(value, "departmentCount");
-  const batchStatus = getRequiredString(value, "batchStatus");
+  const rawBatchStatus = getRequiredString(value, "batchStatus");
+  const batchStatus = rawBatchStatus && payrollBatchStatuses.includes(rawBatchStatus as PayrollBatchStatus)
+    ? rawBatchStatus as PayrollBatchStatus
+    : null;
 
   return employeeCount !== null
     && includedRecordCount !== null
     && blockedRecordCount !== null
     && departmentCount !== null
-    && batchStatus
+    && batchStatus !== null
     ? { employeeCount, includedRecordCount, blockedRecordCount, departmentCount, batchStatus }
     : null;
 }
@@ -158,8 +170,8 @@ function parseHandoff(id: string, data: DocumentData | undefined): PayrollStored
     || (data.failedAt !== null && data.failedAt !== undefined && !failedAt)
     || !createdAt
     || !updatedAt
-    || !["preparing", "submitting", "submitted", "failed"].includes(transferStatus)
-    || !["pending", "accepted", "rejected", "not_received"].includes(acknowledgementStatus)
+    || !payrollTransferStatuses.includes(transferStatus)
+    || !payrollAcknowledgementStatuses.includes(acknowledgementStatus)
     || !provider
     || attemptCount === null
     || !batchSummary

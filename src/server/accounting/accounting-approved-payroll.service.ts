@@ -10,7 +10,7 @@ import {
 import { getAccountingReadiness } from "@/server/accounting/accounting-readiness.service";
 import {
   accountingReadinessStatuses,
-  accountingTransferStatuses,
+  accountingApprovedPayrollTransferStatuses,
   type AccountingApprovedPayrollData,
   type AccountingApprovedPayrollItem,
   type AccountingApprovedPayrollQuery,
@@ -183,7 +183,7 @@ export async function getAccountingApprovedPayrollData(
     periodOptions: getPeriodOptions(allRecords),
     resultStatusOptions: [...payrollResultStatuses],
     readinessStatusOptions: [...accountingReadinessStatuses],
-    transferStatusOptions: [...accountingTransferStatuses],
+    transferStatusOptions: [...accountingApprovedPayrollTransferStatuses],
     providerNote: "Approved Payroll reads persisted Payroll Result snapshots and Accounting transfer records. No payroll calculation is performed here.",
   };
 }

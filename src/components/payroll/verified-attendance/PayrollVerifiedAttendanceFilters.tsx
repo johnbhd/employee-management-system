@@ -1,19 +1,19 @@
 import { Icon } from "@/components/ui/Icon";
 import type {
-  PayrollBatchStatus,
   PayrollReadinessStatus,
+  PayrollVerifiedAttendanceBatchStatus,
 } from "@/types/payroll-verified-attendance";
 
 type PayrollVerifiedAttendanceFiltersProps = {
   search: string;
   department: string;
   readiness: PayrollReadinessStatus | "";
-  batch: PayrollBatchStatus | "";
+  batch: PayrollVerifiedAttendanceBatchStatus | "";
   departments: readonly string[];
   onSearchChange: (value: string) => void;
   onDepartmentChange: (value: string) => void;
   onReadinessChange: (value: PayrollReadinessStatus | "") => void;
-  onBatchChange: (value: PayrollBatchStatus | "") => void;
+  onBatchChange: (value: PayrollVerifiedAttendanceBatchStatus | "") => void;
   onReset: () => void;
 };
 
@@ -79,7 +79,7 @@ export function PayrollVerifiedAttendanceFilters({
         <span>Batch status</span>
         <select
           value={batch}
-          onChange={(event) => onBatchChange(event.target.value as PayrollBatchStatus | "")}
+          onChange={(event) => onBatchChange(event.target.value as PayrollVerifiedAttendanceBatchStatus | "")}
           aria-label="Filter by batch status"
         >
           <option value="">All statuses</option>

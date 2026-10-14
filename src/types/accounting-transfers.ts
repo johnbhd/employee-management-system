@@ -1,5 +1,6 @@
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import type { AccountingApprovedPayrollItem } from "@/types/accounting-approved-payroll";
+import type { PayrollResultStatus } from "@/types/payroll-results";
 
 export const accountingTransferStatuses = [
   "preparing",
@@ -9,6 +10,14 @@ export const accountingTransferStatuses = [
 ] as const;
 
 export type AccountingTransferStatus = (typeof accountingTransferStatuses)[number];
+
+export const accountingApprovedPayrollTransferStatuses = [
+  "not_transferred",
+  ...accountingTransferStatuses,
+] as const;
+
+export type AccountingApprovedPayrollTransferStatus =
+  (typeof accountingApprovedPayrollTransferStatuses)[number];
 
 export const accountingAcknowledgementStatuses = [
   "pending",
@@ -41,7 +50,7 @@ export type AccountingTransferRecord = {
   period: PayrollBatchPeriod;
   externalPayrollReference: string;
   employeeCount: number;
-  payrollResultStatus: string;
+  payrollResultStatus: PayrollResultStatus;
   submittedBy: AccountingTransferActor;
   submittedAt: string;
   acknowledgedAt: string | null;

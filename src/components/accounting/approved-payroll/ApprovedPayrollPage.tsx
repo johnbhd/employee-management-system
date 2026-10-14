@@ -12,8 +12,8 @@ import { apiRequest } from "@/lib/api/client";
 import type { ApiSuccessResponse } from "@/types/api/responses";
 import type {
   AccountingApprovedPayrollData,
+  AccountingApprovedPayrollTransferStatus,
   AccountingReadinessStatus,
-  AccountingTransferStatus,
 } from "@/types/accounting-approved-payroll";
 import type { PayrollResultStatus } from "@/types/payroll-results";
 
@@ -51,7 +51,7 @@ export function ApprovedPayrollPage({
     AccountingReadinessStatus | typeof allValue
   >(allValue);
   const [transferStatus, setTransferStatus] = useState<
-    AccountingTransferStatus | typeof allValue
+    AccountingApprovedPayrollTransferStatus | typeof allValue
   >(allValue);
   const [page, setPage] = useState(1);
   const [selectedResultId, setSelectedResultId] = useState<string | null>(null);
@@ -322,7 +322,7 @@ export function ApprovedPayrollPage({
               value={transferStatus}
               onChange={(event) => {
                 setTransferStatus(
-                  event.target.value as AccountingTransferStatus | typeof allValue,
+                  event.target.value as AccountingApprovedPayrollTransferStatus | typeof allValue,
                 );
                 setPage(1);
               }}

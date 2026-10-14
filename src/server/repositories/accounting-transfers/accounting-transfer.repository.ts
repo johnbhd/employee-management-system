@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
+import { payrollResultStatuses, type PayrollResultStatus } from "@/types/payroll-results";
 import type {
   AccountingAcknowledgementStatus,
   AccountingTransferActor,
@@ -106,7 +107,11 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
   const period = parsePeriod(data.period);
   const externalPayrollReference = getString(data, "externalPayrollReference");
   const employeeCount = getNumber(data, "employeeCount");
-  const payrollResultStatus = getString(data, "payrollResultStatus");
+  const rawPayrollResultStatus = getString(data, "payrollResultStatus");
+  const payrollResultStatus = rawPayrollResultStatus
+    && payrollResultStatuses.includes(rawPayrollResultStatus as PayrollResultStatus)
+    ? rawPayrollResultStatus as PayrollResultStatus
+    : null;
   const submittedBy = parseActor(data.submittedBy);
   const submittedAt = getTimestamp(data.submittedAt);
   const acknowledgedAt = getTimestamp(data.acknowledgedAt, true);
@@ -267,7 +272,7 @@ export async function claimAccountingTransfer(input: {
   period: PayrollBatchPeriod;
   externalPayrollReference: string;
   employeeCount: number;
-  payrollResultStatus: string;
+  payrollResultStatus: PayrollResultStatus;
   actor: TransferActor;
 }) {
   const db = getFirebaseAdminDb();

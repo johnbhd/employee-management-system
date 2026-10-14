@@ -13,6 +13,7 @@ import type {
   PayrollBatchRecord,
   PayrollBatchStatus,
 } from "@/types/payroll-batches";
+import { payrollBatchStatuses } from "@/types/payroll-batches";
 
 const batchCollection = "payrollBatches";
 const membershipCollection = "payrollBatchMembership";
@@ -171,7 +172,10 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
   if (!data) return null;
 
   const period = parsePeriod(data.period);
-  const status = data.status as PayrollBatchStatus;
+  const rawStatus = data.status;
+  const status = payrollBatchStatuses.includes(rawStatus as PayrollBatchStatus)
+    ? rawStatus as PayrollBatchStatus
+    : null;
   const createdBy = parseActor(data.createdBy);
   const createdAt = getTimestamp(data.createdAt);
   const updatedAt = getTimestamp(data.updatedAt);
@@ -190,7 +194,7 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
 
   if (
     !period
-    || !["Draft", "Ready", "Submitted", "Acknowledged", "Blocked", "Failed"].includes(status)
+    || status === null
     || !createdBy
     || !createdAt
     || !updatedAt

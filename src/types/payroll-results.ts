@@ -1,20 +1,16 @@
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
+import {
+  payrollExternalResultStatuses,
+} from "@/types/payroll-handoff";
 import type {
   PayrollExternalPayslipStatus,
   PayrollExternalProcessingStatus,
   PayrollExternalResultStatus,
 } from "@/types/payroll-handoff";
 
-export const payrollResultStatuses = [
-  "processing",
-  "completed",
-  "completed_with_issues",
-  "partially_completed",
-  "rejected",
-  "failed",
-] as const;
+export const payrollResultStatuses = payrollExternalResultStatuses;
 
-export type PayrollResultStatus = (typeof payrollResultStatuses)[number];
+export type PayrollResultStatus = PayrollExternalResultStatus;
 export type PayrollResultProcessingStatus = PayrollExternalProcessingStatus;
 export type PayrollResultPayslipStatus = PayrollExternalPayslipStatus;
 

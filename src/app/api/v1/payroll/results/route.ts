@@ -13,7 +13,11 @@ import {
   PayrollResultValidationError,
 } from "@/server/payroll/payroll-result.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
-import type { PayrollResultProcessingStatus, PayrollResultsData } from "@/types/payroll-results";
+import {
+  payrollExternalProcessingStatuses,
+  type PayrollExternalProcessingStatus,
+} from "@/types/payroll-handoff";
+import type { PayrollResultsData } from "@/types/payroll-results";
 
 export const runtime = "nodejs";
 
@@ -44,12 +48,10 @@ export async function GET(request: Request) {
     const rawPageSize = Number(params.get("pageSize") ?? defaults.pageSize);
     const rawStatus = params.get("status");
     const rawPeriodStart = params.get("periodStart")?.trim() || null;
-    const statuses: PayrollResultProcessingStatus[] = ["processed", "pending", "rejected", "failed"];
-
     if (!Number.isInteger(rawPage) || rawPage < 1 || !Number.isInteger(rawPageSize) || rawPageSize < 1 || rawPageSize > 50) {
       return errorResponse("PAYROLL_RESULTS_QUERY_INVALID", "The payroll result pagination values are invalid.", 400);
     }
-    if (rawStatus && !statuses.includes(rawStatus as PayrollResultProcessingStatus)) {
+    if (rawStatus && !payrollExternalProcessingStatuses.includes(rawStatus as PayrollExternalProcessingStatus)) {
       return errorResponse("PAYROLL_RESULTS_QUERY_INVALID", "The payroll result status filter is invalid.", 400);
     }
     if (rawPeriodStart && !isPayrollDateKey(rawPeriodStart)) {
@@ -59,7 +61,7 @@ export async function GET(request: Request) {
     const data = await getPayrollResultsData({
       search: params.get("search")?.trim() ?? "",
       periodStart: rawPeriodStart,
-      status: rawStatus as PayrollResultProcessingStatus | null,
+      status: rawStatus as PayrollExternalProcessingStatus | null,
       department: params.get("department")?.trim() || null,
       page: rawPage,
       pageSize: rawPageSize,

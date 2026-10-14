@@ -1,21 +1,26 @@
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import type { PayrollResultStatus } from "@/types/payroll-results";
+import {
+  accountingAcknowledgementStatuses,
+  accountingApprovedPayrollTransferStatuses,
+} from "@/types/accounting-transfers";
+import type {
+  AccountingAcknowledgementStatus,
+  AccountingApprovedPayrollTransferStatus,
+} from "@/types/accounting-transfers";
 
+export {
+  accountingAcknowledgementStatuses,
+  accountingApprovedPayrollTransferStatuses,
+};
+export type {
+  AccountingAcknowledgementStatus,
+  AccountingApprovedPayrollTransferStatus,
+};
 export const accountingReadinessStatuses = ["ready", "blocked"] as const;
 
 export type AccountingReadinessStatus =
   (typeof accountingReadinessStatuses)[number];
-
-export const accountingTransferStatuses = [
-  "not_transferred",
-  "preparing",
-  "submitting",
-  "submitted",
-  "failed",
-] as const;
-
-export type AccountingTransferStatus =
-  (typeof accountingTransferStatuses)[number];
 
 export type AccountingApprovedPayrollItem = {
   payrollResultId: string;
@@ -42,7 +47,7 @@ export type AccountingApprovedPayrollItem = {
     reasons: string[];
   };
   accountingTransfer: {
-    status: AccountingTransferStatus;
+    status: AccountingApprovedPayrollTransferStatus;
     transferId: string | null;
     acknowledgementStatus: AccountingAcknowledgementStatus | null;
     externalReference: string | null;
@@ -54,16 +59,6 @@ export type AccountingApprovedPayrollItem = {
   completedAt: string | null;
   updatedAt: string;
 };
-
-export const accountingAcknowledgementStatuses = [
-  "pending",
-  "accepted",
-  "rejected",
-  "not_received",
-] as const;
-
-export type AccountingAcknowledgementStatus =
-  (typeof accountingAcknowledgementStatuses)[number];
 
 export type AccountingApprovedPayrollSummary = {
   approvedPayroll: number;
@@ -77,7 +72,7 @@ export type AccountingApprovedPayrollQuery = {
   periodStart: string | null;
   resultStatus: PayrollResultStatus | null;
   readinessStatus: AccountingReadinessStatus | null;
-  transferStatus: AccountingTransferStatus | null;
+  transferStatus: AccountingApprovedPayrollTransferStatus | null;
   page: number;
   pageSize: number;
 };
@@ -93,6 +88,6 @@ export type AccountingApprovedPayrollData = {
   periodOptions: PayrollBatchPeriod[];
   resultStatusOptions: PayrollResultStatus[];
   readinessStatusOptions: AccountingReadinessStatus[];
-  transferStatusOptions: AccountingTransferStatus[];
+  transferStatusOptions: AccountingApprovedPayrollTransferStatus[];
   providerNote: string;
 };

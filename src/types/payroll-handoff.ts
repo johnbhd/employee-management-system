@@ -1,4 +1,8 @@
-import type { PayrollBatchItemSnapshot, PayrollBatchPeriod } from "@/types/payroll-batches";
+import type {
+  PayrollBatchItemSnapshot,
+  PayrollBatchPeriod,
+  PayrollBatchStatus,
+} from "@/types/payroll-batches";
 
 export const payrollTransferStatuses = [
   "preparing",
@@ -18,6 +22,37 @@ export const payrollAcknowledgementStatuses = [
 
 export type PayrollAcknowledgementStatus = (typeof payrollAcknowledgementStatuses)[number];
 
+export const payrollExternalProcessingStatuses = [
+  "processed",
+  "pending",
+  "rejected",
+  "failed",
+] as const;
+
+export type PayrollExternalProcessingStatus =
+  (typeof payrollExternalProcessingStatuses)[number];
+
+export const payrollExternalPayslipStatuses = [
+  "available",
+  "not_yet_available",
+  "unavailable",
+] as const;
+
+export type PayrollExternalPayslipStatus =
+  (typeof payrollExternalPayslipStatuses)[number];
+
+export const payrollExternalResultStatuses = [
+  "processing",
+  "completed",
+  "completed_with_issues",
+  "partially_completed",
+  "rejected",
+  "failed",
+] as const;
+
+export type PayrollExternalResultStatus =
+  (typeof payrollExternalResultStatuses)[number];
+
 export type PayrollHandoffActor = {
   uid: string;
   username: string;
@@ -36,7 +71,7 @@ export type PayrollHandoffBatchSummary = {
   includedRecordCount: number;
   blockedRecordCount: number;
   departmentCount: number;
-  batchStatus: string;
+  batchStatus: PayrollBatchStatus;
 };
 
 export type PayrollHandoffRecord = {
@@ -109,18 +144,6 @@ export type PayrollHandoffSubmissionPayload = {
   period: PayrollBatchPeriod;
   records: PayrollBatchItemSnapshot[];
 };
-
-export type PayrollExternalProcessingStatus = "processed" | "pending" | "rejected" | "failed";
-
-export type PayrollExternalPayslipStatus = "available" | "not_yet_available" | "unavailable";
-
-export type PayrollExternalResultStatus =
-  | "processing"
-  | "completed"
-  | "completed_with_issues"
-  | "partially_completed"
-  | "rejected"
-  | "failed";
 
 export type PayrollExternalResultItem = {
   employeeId: string;

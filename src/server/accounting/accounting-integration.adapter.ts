@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AccountingAcknowledgementStatus } from "@/types/accounting-transfers";
+import type { PayrollResultStatus } from "@/types/payroll-results";
 
 export type AccountingSubmissionPayload = {
   transferId: string;
@@ -10,7 +11,7 @@ export type AccountingSubmissionPayload = {
   period: { start: string; end: string; label: string };
   externalPayrollReference: string;
   employeeCount: number;
-  payrollResultStatus: string;
+  payrollResultStatus: PayrollResultStatus;
 };
 
 export type AccountingIntegrationResponse = {
