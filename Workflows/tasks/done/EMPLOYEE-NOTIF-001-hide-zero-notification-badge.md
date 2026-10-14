@@ -51,4 +51,4 @@ notification source when that feature is implemented.
 
 ## Git Reference
 
-Not committed yet.
+`b3112b1` (`fix: hide zero employee notification count`)
