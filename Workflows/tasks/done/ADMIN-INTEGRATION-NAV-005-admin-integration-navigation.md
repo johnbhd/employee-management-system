@@ -125,7 +125,7 @@ synchronization workflow within the prepared technical page boundary.
 
 ## Git Reference
 
-Not committed yet.
+`6ccae76` (`feat: add admin integration detail pages`)
 
 ## Final Source-of-Truth Summary
 
