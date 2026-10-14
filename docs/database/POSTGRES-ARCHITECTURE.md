@@ -171,32 +171,34 @@ the current full-table/in-memory filtering behavior as a SQL design.
 
 ## Supabase connection boundary
 
-The future connection foundation should:
+The application connection foundation uses:
 
 1. use a server-only `DATABASE_URL` or equivalent secret;
 2. use SSL and a Supabase pooler appropriate for serverless request lifetimes;
 3. keep credentials out of `NEXT_PUBLIC_*`, client components, logs, and API
    responses;
-4. expose a repository-owned connection helper rather than importing a DB
+4. expose a server-only Prisma Client helper rather than importing a database
    client throughout UI code;
-5. provide explicit transaction and timeout handling;
-6. use parameterized SQL or a query library with bound parameters;
+5. provide explicit transaction support through Prisma `$transaction`;
+6. use Prisma's typed query API, with tagged parameterized SQL only for the
+   minimal health probe;
 7. document a separate DBeaver connection method without reusing application
    secrets in source control.
 
-The connection foundation selects the small typed `pg` package. The server-only
-module at `src/lib/postgres/server.ts` uses a lazy `Pool` with SSL, a bounded
-connection pool, connection/query timeouts, parameterized query support, and a
-transaction helper. The pool is cached on `globalThis` so local development
-does not create a new pool during every hot reload and deployed serverless
-instances can reuse a warm pool.
+The selected access layer is Prisma 6.19.0. The server-only module at
+`src/lib/prisma/server.ts` creates a development-safe `PrismaClient` singleton,
+validates the server-only `DATABASE_URL`, exposes future transaction support,
+and does not create any browser database bundle. The empty foundation schema at
+`prisma/schema.prisma` defines only the PostgreSQL datasource and client
+generator; DB-SCHEMA-008 owns the business models and first migration.
 
-`DATABASE_URL` is the only application connection variable and must remain
-server-only. `GET /api/health/postgres` runs only `SELECT 1` and reports safe
-`configured`/`connected` state without returning the URL or raw driver errors.
-An ORM remains unnecessary unless a later schema task shows that it preserves
-explicit transactions, migrations, and query visibility; the database client
-must not become a browser database client.
+`DATABASE_URL` is the only application connection variable currently used and
+must remain server-only. `GET /api/health/postgres` runs only a static tagged
+`SELECT 1` query and reports safe `configured`/`connected` state without
+returning the URL, raw Prisma errors, or Supabase metadata. The current
+runtime/CLI foundation uses the same reachable Supabase pooler URL; a separate
+direct migration URL remains a DB-SCHEMA-008 decision because no migration is
+executed here.
 
 ## RLS and authorization decision
 
@@ -209,6 +211,6 @@ server/admin-only.
 
 ## Non-goals
 
-This document does not install a driver, create tables, replace repositories,
-migrate data, migrate Firebase Authentication, implement HRPS/Bundy import,
-add Payroll calculations, or delete Firestore.
+This document does not create tables, replace repositories, migrate data,
+migrate Firebase Authentication, implement HRPS/Bundy import, add Payroll
+calculations, or delete Firestore.

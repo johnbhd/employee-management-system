@@ -9,8 +9,9 @@ PostgreSQL for business persistence. Direct browser-to-PostgreSQL access is
 not part of the architecture, and Docker is not required.
 
 The repository audit found real Firestore repositories, lifecycle transactions,
-and server-owned authorization. It found no PostgreSQL driver/schema/migration
-implementation. This task therefore produced planning documents only.
+and server-owned authorization. The architecture work was followed by a
+server-only PostgreSQL foundation; the application business schema and data
+migration remain deferred.
 
 ## Documents
 
@@ -49,8 +50,8 @@ Local Payroll calculation: Not allowed
 - Live Firestore counts and sample exports were not collected because the
   configured project currently returns `8 RESOURCE_EXHAUSTED: Quota exceeded`
   for a targeted Firestore health read.
-- No production PostgreSQL credentials, schema, driver, or migration runner
-  are present in the repository.
+- No application PostgreSQL business schema or migration history is present in
+  the repository yet.
 - External HRPS, Bundy, Payroll, and Accounting contracts are not available;
   simulated Payroll/Accounting adapters remain explicitly simulated.
 - Exact retention, effective schedule history, multi-role assignment, and
@@ -58,24 +59,30 @@ Local Payroll calculation: Not allowed
 
 ## Recommended next task
 
-`DB-SUPABASE-007 - Supabase PostgreSQL Connection Foundation`.
+`DB-SCHEMA-008 - PostgreSQL Schema, Constraints, Relationships, Indexes &
+Migration Foundation`.
 
-## DB-SUPABASE-007 implementation
+## DB-SUPABASE-007 and DB-PRISMA-007A implementation
 
-The initial connection foundation is now implemented with the server-only
-`pg` package. `src/lib/postgres/server.ts` owns lazy pool creation, SSL,
-connection/query timeouts, parameterized query execution, transaction support,
-safe error normalization, and the minimal `SELECT 1` health probe. The pool is
-cached on `globalThis` for local hot reload reuse and serverless instance reuse.
+The connection foundation is now implemented with Prisma 6.19.0. The
+server-only `src/lib/prisma/server.ts` owns a development-safe Prisma Client
+singleton, configuration validation, transaction support, and the minimal
+tagged `SELECT 1` health probe. No Prisma Client import is used in browser code.
 
-The `DATABASE_URL` environment variable is server-only and should point to the
-Supabase pooler for deployed/serverless use. `GET /api/health/postgres` reports
-only configured/connected status and returns HTTP 503 when the database is not
-configured or cannot be reached. DBeaver may use a separate administrator
-connection; its credentials are not stored in this repository.
+The `DATABASE_URL` environment variable remains server-only and points to the
+Supabase pooler for the current runtime and CLI foundation. No `DIRECT_URL` was
+added because this task creates no migration and the configured runtime URL is
+currently reachable; DB-SCHEMA-008 must evaluate a direct migration URL before
+applying production migrations. `GET /api/health/postgres` reports only
+configured/connected status and returns HTTP 503 when the database is not
+configured or cannot be reached. DBeaver remains a separate administrator
+connection and its credentials are not stored in this repository.
 
-No PostgreSQL schema, business write, repository migration, Firebase Auth
-change, or Firestore change is part of this foundation.
+The foundation includes `prisma/schema.prisma` with only the PostgreSQL
+datasource and Prisma Client generator, plus `db:validate`, `db:generate`,
+`db:migrate:dev`, and `db:migrate:deploy` scripts. No PostgreSQL business
+schema, business write, repository migration, Firebase Auth change, or
+Firestore change is part of this foundation.
 
 Do not begin destructive migration or delete Firestore until the retirement
 criteria in `MIGRATION-PLAN.md` are satisfied.

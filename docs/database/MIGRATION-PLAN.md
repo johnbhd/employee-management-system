@@ -27,11 +27,14 @@ deletes are required for this phase.
 
 ## Phase 1 - Supabase connection foundation (`DB-SUPABASE-007`)
 
-Add a server-only PostgreSQL connection boundary without changing application
-repositories yet.
+Add a server-only Prisma PostgreSQL connection boundary without changing
+application repositories yet.
 
 - Use a secret `DATABASE_URL`/pooler configuration outside `NEXT_PUBLIC_*`.
-- Add SSL, connection timeout, query timeout, and transaction helpers.
+- Use Prisma 6.19.0 with a development-safe Client singleton and transaction
+  support.
+- Keep the current runtime pooler URL for the foundation; evaluate a separate
+  direct migration URL before DB-SCHEMA-008 applies versioned migrations.
 - Confirm local Next.js, Vercel/serverless, and DBeaver connection procedures.
 - Add a health check that returns safe status only and does not run broad data
   queries.

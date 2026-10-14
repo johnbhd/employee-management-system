@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { checkPostgresHealth } from "@/lib/postgres/server";
+import { checkPostgresHealth } from "@/lib/prisma/server";
 import type { ApiSuccessResponse } from "@/types/api/responses";
 
 export const runtime = "nodejs";
