@@ -229,7 +229,7 @@ configured. These are not caused by the namespace migration.
 ## V. Completion Record
 
 This record: `Workflows/tasks/done/SYSTEM-API-005-api-namespace-migration.md`.
-The implementation commit is recorded after completion documentation is staged.
+Git reference: `91540f1` (`refactor: migrate internal api routes to canonical namespace`).
 
 ## Final Source-of-Truth Summary
 
