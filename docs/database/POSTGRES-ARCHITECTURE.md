@@ -1,5 +1,14 @@
 # DB-ARCH-006 - Target PostgreSQL Architecture
 
+## DB-SCHEMA-008 implementation status
+
+The target relational schema is now implemented in `prisma/schema.prisma` and
+deployed by `prisma/migrations/20261014120000_initial_sia_schema`. The live
+schema contains the identity/RBAC, HRPS reference, attendance, correction,
+Payroll, payslip, Accounting, audit, and controlled settings tables described
+below. HRPS/Bundy import tables remain future work because their source
+contracts are not approved.
+
 ## Decision summary
 
 The recommended target is:
@@ -187,30 +196,31 @@ The application connection foundation uses:
 
 The selected access layer is Prisma 6.19.0. The server-only module at
 `src/lib/prisma/server.ts` creates a development-safe `PrismaClient` singleton,
-validates the server-only `DATABASE_URL`, exposes future transaction support,
-and does not create any browser database bundle. The empty foundation schema at
-`prisma/schema.prisma` defines only the PostgreSQL datasource and client
-generator; DB-SCHEMA-008 owns the business models and first migration.
+validates the server-only `DATABASE_URL`, exposes transaction support, and
+does not create any browser database bundle. `prisma/schema.prisma` now owns
+the implemented business models and `initial_sia_schema` is the first versioned
+migration.
 
 `DATABASE_URL` is the only application connection variable currently used and
 must remain server-only. `GET /api/health/postgres` runs only a static tagged
 `SELECT 1` query and reports safe `configured`/`connected` state without
 returning the URL, raw Prisma errors, or Supabase metadata. The current
-runtime/CLI foundation uses the same reachable Supabase pooler URL; a separate
-direct migration URL remains a DB-SCHEMA-008 decision because no migration is
-executed here.
+runtime/CLI foundation uses the same reachable Supabase pooler URL. The
+migration was applied through that configured pooler; a separate direct
+migration URL remains an operational option for future migrations.
 
 ## RLS and authorization decision
 
 The target runtime is browser -> Next.js -> PostgreSQL. Therefore business
-tables should be server-only and authorization should remain in the existing
-Next.js guards/services. Supabase Row Level Security can be enabled as a
-defense-in-depth layer, but the design must not rely on client claims or direct
-browser access. Database roles/credentials and migration credentials remain
-server/admin-only.
+tables are server-only and authorization remains in the existing Next.js
+guards/services. The initial migration enables Row Level Security on every
+application table without adding browser policies, so anonymous and
+authenticated PostgREST access receives no application data or write path.
+The server-side Prisma role is the only application data path; database and
+migration credentials remain server/admin-only.
 
 ## Non-goals
 
-This document does not create tables, replace repositories, migrate data,
-migrate Firebase Authentication, implement HRPS/Bundy import, add Payroll
-calculations, or delete Firestore.
+This document does not replace repositories, migrate data, migrate Firebase
+Authentication, implement HRPS/Bundy import, add Payroll calculations, or
+delete Firestore. Repository cutover and data migration remain later tasks.

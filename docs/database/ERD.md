@@ -1,8 +1,8 @@
-# DB-ARCH-006 - Proposed PostgreSQL ERD
+# DB-SCHEMA-008 - Implemented PostgreSQL ERD
 
-This Mermaid diagram is the proposed target domain shape. It is intentionally
-not a live schema and does not include future Bundy/HRPS import tables until
-their contracts are approved.
+This diagram reflects the Prisma 6.19.0 schema deployed by
+`20261014120000_initial_sia_schema`. It intentionally excludes future HRPS and
+Bundy import tables because those source contracts are not approved.
 
 ```mermaid
 erDiagram
@@ -12,32 +12,39 @@ erDiagram
     EMPLOYEES ||--o{ USERS : optionally_links
     EMPLOYEES ||--o{ EMPLOYEE_SCHEDULES : has
     EMPLOYEES ||--o{ ATTENDANCE_RECORDS : records
+    USERS ||--o{ ATTENDANCE_RECORDS : operates
     EMPLOYEES ||--o{ ATTENDANCE_CORRECTIONS : requests
     ATTENDANCE_RECORDS ||--o{ ATTENDANCE_CORRECTIONS : corrects
     PAYROLL_BATCHES ||--o{ PAYROLL_BATCH_ITEMS : contains
     EMPLOYEES ||--o{ PAYROLL_BATCH_ITEMS : snapshots
     PAYROLL_BATCHES ||--o| PAYROLL_HANDOFFS : hands_off
+    PAYROLL_BATCHES ||--o{ PAYROLL_RESULTS : groups
     PAYROLL_HANDOFFS ||--o| PAYROLL_RESULTS : returns
     PAYROLL_RESULTS ||--o{ PAYROLL_RESULT_ITEMS : contains
-    EMPLOYEES ||--o{ PAYROLL_RESULT_ITEMS : identifies
+    EMPLOYEES ||--o{ PAYROLL_RESULT_ITEMS : optionally_resolves
     EMPLOYEES ||--o{ PAYROLL_PAYSLIPS : receives
     PAYROLL_RESULT_ITEMS ||--o{ PAYROLL_PAYSLIPS : may_release
     PAYROLL_RESULTS ||--o| ACCOUNTING_TRANSFERS : transfers
+    PAYROLL_BATCHES ||--o{ ACCOUNTING_TRANSFERS : traces
+    PAYROLL_HANDOFFS ||--o{ ACCOUNTING_TRANSFERS : traces
     USERS ||--o{ AUDIT_EVENTS : acts
+    USERS ||--o{ SYSTEM_SETTINGS : updates
 
     APPLICATION_ROLES {
         uuid id PK
-        text code UK
+        enum code UK
         text label
+        text description
     }
     PERMISSIONS {
         uuid id PK
         text key UK
         text category
+        text description
     }
     ROLE_PERMISSIONS {
-        uuid role_id FK
-        uuid permission_id FK
+        uuid role_id PK_FK
+        uuid permission_id PK_FK
         integer version
         jsonb updated_by_snapshot
         timestamptz updated_at
@@ -46,12 +53,9 @@ erDiagram
         uuid id PK
         text firebase_uid UK
         text username UK
-        text display_name
         uuid role_id FK
         uuid employee_id FK
-        text status
-        timestamptz created_at
-        timestamptz updated_at
+        enum status
     }
     EMPLOYEES {
         uuid id PK
@@ -59,10 +63,9 @@ erDiagram
         text display_name
         text department
         text position
-        text employment_status
-        text source_system
-        text legacy_firestore_id
-        timestamptz synced_at
+        enum employment_status
+        enum source_system
+        text legacy_firestore_id UK
     }
     EMPLOYEE_SCHEDULES {
         uuid id PK
@@ -70,125 +73,84 @@ erDiagram
         text schedule_id
         time work_start
         time work_end
-        time break_start
-        time break_end
-        text shift_label
         jsonb work_days
         jsonb rest_days
-        text work_location
         date effective_from
         date effective_to
     }
     ATTENDANCE_RECORDS {
         uuid id PK
         uuid employee_id FK
-        date attendance_date
+        date attendance_date UK_PART
         timestamptz time_in
         timestamptz time_out
-        text time_in_source
-        text time_out_source
-        text status
-        jsonb time_in_actor_snapshot
-        jsonb time_out_actor_snapshot
-        jsonb correction_metadata
-        jsonb hr_verification
-        timestamptz updated_at
+        enum time_in_source
+        enum time_out_source
+        enum status
+        enum hr_verification_status
+        enum payroll_readiness_status
     }
     ATTENDANCE_CORRECTIONS {
         uuid id PK
         uuid employee_id FK
         uuid attendance_record_id FK
-        date attendance_date
-        text issue_type
-        text status
-        text reason
+        enum issue_type
+        enum status
         jsonb original_snapshot
         jsonb requested_changes
         jsonb resulting_snapshot
-        jsonb changed_fields
         jsonb evidence
         jsonb submitted_by_snapshot
         jsonb reviewed_by_snapshot
-        timestamptz submitted_at
-        timestamptz reviewed_at
     }
     PAYROLL_BATCHES {
         uuid id PK
         text batch_reference UK
         date period_start
         date period_end
-        text period_label
-        text status
+        enum status
         jsonb created_by_snapshot
-        jsonb submitted_by_snapshot
         integer record_count
         integer blocked_count
-        text notes
-        timestamptz created_at
-        timestamptz updated_at
     }
     PAYROLL_BATCH_ITEMS {
         uuid id PK
         uuid batch_id FK
         uuid employee_id FK
-        text employee_period_id UK
-        date period_start
-        date period_end
+        text employee_period_id
         text employee_id_snapshot
-        text employee_name_snapshot
-        text department_snapshot
-        integer present_days
-        integer late_count
-        integer late_minutes
-        integer undertime_minutes
         jsonb source_attendance_ids
-        timestamptz snapshot_created_at
+        enum hr_verification_status
+        enum payroll_readiness_status
     }
     PAYROLL_HANDOFFS {
         uuid id PK
-        uuid batch_id FK
-        text transfer_id UK
-        text transfer_status
-        text acknowledgement_status
+        uuid batch_id FK_UK
+        text transfer_reference UK
+        enum transfer_status
+        enum acknowledgement_status
         text provider
-        text external_reference
-        integer attempt_count
         jsonb batch_summary_snapshot
-        jsonb failure
-        timestamptz submitted_at
-        timestamptz acknowledged_at
-        timestamptz failed_at
+        integer attempt_count
     }
     PAYROLL_RESULTS {
         uuid id PK
         uuid batch_id FK
-        uuid handoff_id FK
+        uuid handoff_id FK_UK
         text result_reference UK
         text external_payroll_reference
-        text status
-        text provider
+        enum status
+        enum accounting_readiness_status
         integer employee_count
-        integer processed_count
-        integer pending_count
-        integer rejected_count
-        integer failed_count
-        integer payslip_available_count
-        timestamptz received_at
-        timestamptz completed_at
     }
     PAYROLL_RESULT_ITEMS {
         uuid id PK
         uuid result_id FK
         uuid employee_id FK
+        text employee_id_snapshot
         text external_employee_reference
-        text external_payroll_reference
-        text processing_status
-        text payslip_status
-        text payslip_id
-        text issue_code
-        text issue_summary
-        timestamptz processed_at
-        timestamptz released_at
+        enum processing_status
+        enum payslip_status
     }
     PAYROLL_PAYSLIPS {
         uuid id PK
@@ -196,47 +158,47 @@ erDiagram
         uuid result_item_id FK
         date period_start
         date period_end
-        text payroll_reference
-        text status
+        text payroll_reference UK
         numeric gross_pay
         numeric total_deductions
         numeric net_pay
-        jsonb deductions
-        jsonb monthly_summary_snapshot
-        timestamptz released_at
+        enum status
+        jsonb monthly_summary
     }
     ACCOUNTING_TRANSFERS {
         uuid id PK
-        uuid payroll_result_id FK
+        uuid payroll_result_id FK_UK
         uuid payroll_batch_id FK
         uuid payroll_handoff_id FK
         text transfer_reference UK
-        text transfer_status
-        text acknowledgement_status
-        text provider
+        enum transfer_status
+        enum acknowledgement_status
         text external_accounting_reference
-        integer attempt_count
-        jsonb failure
-        timestamptz submitted_at
-        timestamptz acknowledged_at
-        timestamptz failed_at
     }
     AUDIT_EVENTS {
         uuid id PK
-        text event_type
-        text action
-        text module
+        enum actor_type
         uuid actor_user_id FK
         jsonb actor_snapshot
-        jsonb target_snapshot
-        text outcome
+        text event_type
+        text target_type
+        text target_id
+        enum outcome
         jsonb metadata
-        text source_collection
-        text legacy_document_id
         timestamptz occurred_at
+    }
+    SYSTEM_SETTINGS {
+        uuid id PK
+        text setting_key UK
+        jsonb overrides
+        integer version
+        uuid updated_by_user_id FK
     }
 ```
 
-The diagram keeps important historical snapshots even where an FK also
-exists. The FK provides current integrity; the snapshot preserves what the
-external system or actor looked like at the time of the workflow event.
+The schema uses UUID primary keys and preserves `employees.employee_id` as
+text, including leading zeros. Historical actor and employee snapshots remain
+alongside nullable user/employee foreign keys. Business-history foreign keys
+use `RESTRICT` or `SET NULL`; only dependent Payroll batch/result children and
+RBAC join rows use `CASCADE`. All application tables have RLS enabled without
+browser policies, and no direct browser database access is part of the design.

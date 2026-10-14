@@ -1,9 +1,17 @@
 # DB-ARCH-006 - Firestore to PostgreSQL Mapping
 
+## DB-SCHEMA-008 status
+
+The target tables in this map are now implemented by Prisma 6.19.0 and the
+`20261014120000_initial_sia_schema` migration is applied to Supabase
+PostgreSQL. This document remains a future Firestore data-migration map: no
+Firestore records were copied, repositories were changed, or legacy
+collections were deleted.
+
 This map describes a safe target shape. It is not a migration script and does
 not authorize a destructive delete. Firestore document IDs and field names are
-the source compatibility evidence; PostgreSQL names are proposed canonical
-names for later schema/repository tasks.
+the source compatibility evidence; PostgreSQL names are the implemented
+canonical names for later schema/repository tasks.
 
 ## Identifier rules
 

@@ -46,6 +46,13 @@ credential redaction checks pass without changing user-facing behavior.
 
 ## Phase 2 - Schema and constraints (`DB-SCHEMA-008`)
 
+Status: **Completed**. The versioned migration
+`20261014120000_initial_sia_schema` is applied to the configured Supabase
+PostgreSQL pooler. Prisma metadata verification confirmed all application
+tables, the five canonical roles, 40 permissions, 40 role assignments, and
+zero migrated business rows. The remaining items in this phase description
+are the implemented scope and its documented safety boundaries.
+
 Create the relational schema in dependency order:
 
 1. roles, permissions, role permissions;
