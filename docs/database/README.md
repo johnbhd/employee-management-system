@@ -32,6 +32,9 @@ tasks.
 - [ERD.md](./ERD.md) - implemented Mermaid relational model.
 - [SCHEMA-INVENTORY.md](./SCHEMA-INVENTORY.md) - deployed model/table,
   relationship, constraint, index, and historical behavior inventory.
+- [REPOSITORY-MIGRATION-010.md](./REPOSITORY-MIGRATION-010.md) - parallel
+  Prisma repository layer, migration matrix, query strategy, transaction
+  boundaries, and cutover prerequisites.
 
 ## Source-of-truth summary
 
@@ -66,7 +69,7 @@ Local Payroll calculation: Not allowed
 
 ## Recommended next task
 
-`DB-REPO-MIGRATION-010 - Firestore Business Repositories -> Prisma/PostgreSQL`.
+`DB-DATA-MIGRATION-011 - Firestore Business Data -> Supabase PostgreSQL`.
 
 ## DB-SUPABASE-007 and DB-PRISMA-007A implementation
 
@@ -84,13 +87,28 @@ a direct migration URL remains a future operational choice. `GET
 a separate administrator connection and its credentials are not stored in this
 repository.
 
-`DB-SCHEMA-008` adds the Prisma 6.19.0 business schema, the reviewed
+`DB-SCHEMA-008` added the Prisma 6.19.0 business schema, the reviewed
 `initial_sia_schema` migration, server-only RLS without browser policies, and
 canonical role/permission reference seeds. Business tables were verified
 through Prisma with zero migrated employee, attendance, Payroll, or audit rows.
 The `db:validate`, `db:generate`, `db:migrate:dev`, and `db:migrate:deploy`
-scripts remain available. No repository migration, Firebase Auth change, or
-Firestore change is part of this task.
+scripts remain available. The repository layer was subsequently added by
+`DB-REPO-MIGRATION-010`; live business cutover remains intentionally deferred.
 
 Do not begin destructive migration or delete Firestore until the retirement
 criteria in `MIGRATION-PLAN.md` are satisfied.
+
+## DB-REPO-MIGRATION-010 implementation
+
+Server-only Prisma repositories now exist alongside the Firestore repositories
+for employees, effective schedules, attendance/QR, corrections, Payroll batch
+and handoff/result lifecycles, payslips, Accounting transfers, audit events,
+runtime settings, and dashboard/monitoring aggregates. They use indexed,
+filtered queries, database counts/grouping, deterministic bounded pagination,
+explicit DTO mapping, Prisma transactions, and decimal-safe serialization.
+
+Live business reads and writes were intentionally not switched. Firestore
+business data remains unchanged, Firestore was not deleted, and no permanent
+dual-write or silent fallback was introduced. See
+`REPOSITORY-MIGRATION-010.md` for the matrix and the exact handoff to the data
+migration task.

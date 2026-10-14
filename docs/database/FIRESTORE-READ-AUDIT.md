@@ -108,6 +108,23 @@ GROUP BY status;
 These are architecture examples only. They do not prescribe SQL migration
 syntax or authorize a schema implementation in DB-ARCH-006.
 
+## DB-REPO-MIGRATION-010 reconciliation
+
+Parallel Prisma repositories now implement the replacement query shapes:
+
+- dashboard and integration monitoring use `count`, `groupBy`, and latest-row
+  queries instead of collection scans;
+- attendance, corrections, Payroll, payslips, Accounting, employees, and
+  audit histories use server-side filters, stable ordering, and bounded pages;
+- Payroll result details load their child rows through one relational query;
+- audit pagination uses `occurred_at DESC, id DESC` and filters before paging;
+- no Firestore listener was found, so no Supabase Realtime replacement was
+  introduced.
+
+The live services still use Firestore until `DB-DATA-MIGRATION-011` imports and
+reconciles data. These repositories are readiness artifacts, not evidence that
+the PostgreSQL tables contain business data.
+
 ## Measurement plan for DB-SUPABASE-007 and later
 
 Before cutover, record per route/service:
