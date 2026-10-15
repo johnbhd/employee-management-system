@@ -17,6 +17,7 @@ export type PayrollVerifiedAttendanceReason = {
 };
 
 export type PayrollVerifiedAttendanceQuery = {
+  periodStart: string | null;
   search: string;
   department: string | null;
   readiness: PayrollReadinessStatus | null;
@@ -57,6 +58,7 @@ export type PayrollVerifiedAttendanceItem = {
 
 export type PayrollVerifiedAttendanceData = {
   period: PayrollDashboardPeriod;
+  periodOptions: PayrollDashboardPeriod[];
   summary: {
     verifiedRecords: number;
     ready: number;

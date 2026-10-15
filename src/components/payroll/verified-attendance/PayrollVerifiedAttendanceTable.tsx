@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type PayrollVerifiedAttendanceTableProps = {
   records: readonly PayrollVerifiedAttendanceItem[];
+  periodLabel: string;
   selectedIds: ReadonlySet<string>;
   allSelectableSelected: boolean;
   onToggleAll: (checked: boolean) => void;
@@ -34,6 +35,7 @@ function formatAttendanceSummary(item: PayrollVerifiedAttendanceItem) {
 
 export function PayrollVerifiedAttendanceTable({
   records,
+  periodLabel,
   selectedIds,
   allSelectableSelected,
   onToggleAll,
@@ -122,7 +124,7 @@ export function PayrollVerifiedAttendanceTable({
           )) : (
             <tr>
               <td colSpan={11} className="payroll-verified-attendance__empty">
-                <strong>No HR-final-verified attendance records match these filters.</strong>
+                <strong>No HR-final-verified attendance records were found for {periodLabel}.</strong>
                 <span>Records appear here only after HR final verification is persisted.</span>
               </td>
             </tr>

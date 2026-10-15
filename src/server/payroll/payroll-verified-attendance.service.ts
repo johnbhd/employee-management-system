@@ -23,7 +23,11 @@ import {
   evaluatePayrollEligibility,
   type PayrollEligibilityReason,
 } from "./payroll-eligibility";
-import { getCurrentPayrollPeriod } from "./payroll-dashboard.service";
+import {
+  getCurrentPayrollPeriod,
+  getPayrollPeriodForStart,
+  getPayrollPeriodOptions,
+} from "./payroll-dashboard.service";
 
 type EmployeePeriodGroup = {
   employeeInternalId: string;
@@ -275,7 +279,13 @@ export async function getPayrollVerifiedAttendanceData(
   query: PayrollVerifiedAttendanceQuery,
   now = new Date(),
 ): Promise<PayrollVerifiedAttendanceData> {
-  const period = getCurrentPayrollPeriod(now);
+  const period = query.periodStart
+    ? getPayrollPeriodForStart(query.periodStart) ?? getCurrentPayrollPeriod(now)
+    : getCurrentPayrollPeriod(now);
+  const periodOptions = getPayrollPeriodOptions(now);
+  if (!periodOptions.some((option) => option.start === period.start)) {
+    periodOptions.unshift(period);
+  }
   const sources = await getPayrollVerifiedAttendanceSourcesForPeriod(period);
   const allItems = sources.map(({ item }) => item);
   const departments = Array.from(new Set(allItems.map((item) => item.department))).sort();
@@ -292,6 +302,7 @@ export async function getPayrollVerifiedAttendanceData(
 
   return {
     period,
+    periodOptions,
     summary: {
       verifiedRecords: allItems.filter((item) => item.hrVerification.status === "verified").length,
       ready: allItems.filter((item) => item.payrollReadiness.status === "ready").length,
