@@ -1,0 +1,349 @@
+/*
+ * Accounting-scoped readability layer.
+ *
+ * Accounting keeps its existing role identity, terminology, layout, and
+ * semantic state colors while matching the readable hierarchy used by the
+ * refined Admin, HR, and Payroll portals.
+ */
+.accounting-shell {
+  --accounting-body-size: 0.875rem;
+  --accounting-small-size: 0.8125rem;
+  --accounting-meta-size: 0.75rem;
+  --accounting-caption-size: 0.6875rem;
+  --accounting-regular: 400;
+  --accounting-medium: 500;
+  --accounting-semibold: 600;
+  --accounting-bold: 700;
+  font-size: var(--accounting-body-size);
+}
+
+/* Accounting shell */
+.accounting-shell .accounting-brand strong {
+  font-size: 0.75rem;
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.1em;
+}
+
+.accounting-shell .accounting-brand small {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+}
+
+.accounting-shell .accounting-workspace-label {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+}
+
+.accounting-shell .accounting-role-pill {
+  font-size: var(--accounting-caption-size);
+  font-weight: var(--accounting-medium);
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-nav-link {
+  font-size: var(--accounting-body-size);
+  font-weight: var(--accounting-medium);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-nav-link.is-active {
+  font-weight: var(--accounting-semibold);
+}
+
+.accounting-shell .accounting-nav-copy small {
+  font-size: var(--accounting-caption-size);
+  font-weight: var(--accounting-medium);
+}
+
+.accounting-shell .accounting-sidebar-status > div {
+  font-size: var(--accounting-caption-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-sidebar-status strong {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-sidebar-status p {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.55;
+}
+
+.accounting-shell .accounting-sidebar-account strong {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-sidebar-account small,
+.accounting-shell .accounting-sidebar-logout {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.4;
+}
+
+.accounting-shell .accounting-sidebar-logout {
+  font-weight: var(--accounting-medium);
+}
+
+.accounting-shell .accounting-navbar-title strong {
+  font-size: 0.9375rem;
+  font-weight: var(--accounting-semibold);
+  line-height: 1.3;
+}
+
+.accounting-shell .accounting-navbar-title span,
+.accounting-shell .accounting-date,
+.accounting-shell .accounting-navbar-actions {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.4;
+}
+
+.accounting-shell .accounting-progress-badge {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-profile-copy strong,
+.accounting-shell .accounting-profile-menu strong {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell .accounting-profile-copy small,
+.accounting-shell .accounting-profile-menu small,
+.accounting-shell .accounting-profile-menu button,
+.accounting-shell .accounting-profile-menu a {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.4;
+}
+
+/* Page and panel hierarchy */
+.accounting-shell .page-eyebrow,
+.accounting-shell .section-kicker {
+  font-size: 0.72rem;
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+}
+
+.accounting-shell .page-title {
+  font-weight: var(--accounting-bold);
+  line-height: 1.15;
+}
+
+.accounting-shell .page-subtitle {
+  font-size: 0.9375rem;
+  font-weight: var(--accounting-regular);
+  line-height: 1.6;
+}
+
+.accounting-shell .panel-header h2,
+.accounting-shell [class*="__modal-header"] h2,
+.accounting-shell [class*="__modal-body"] h3 {
+  font-weight: var(--accounting-semibold);
+  line-height: 1.3;
+}
+
+.accounting-shell .panel-header h2 {
+  font-size: 1.05rem;
+}
+
+.accounting-shell [class*="__description"],
+.accounting-shell [class*="__boundary-note"],
+.accounting-shell [class*="__loading-message"],
+.accounting-shell [class*="__load-error"],
+.accounting-shell [class*="__health-copy"],
+.accounting-shell [class*="__modal-message"],
+.accounting-shell [class*="__failure"] {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.55;
+}
+
+/* Summary cards */
+.accounting-shell .metric-label {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-medium);
+  line-height: 1.4;
+}
+
+.accounting-shell .metric-value {
+  font-weight: var(--accounting-bold);
+  line-height: 1.2;
+}
+
+.accounting-shell .metric-note {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.45;
+}
+
+/* Tables, filters, actions, and status */
+.accounting-shell .data-table {
+  font-size: var(--accounting-body-size);
+  line-height: 1.45;
+}
+
+.accounting-shell .data-table th {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+}
+
+.accounting-shell .data-table td {
+  font-size: var(--accounting-body-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.45;
+}
+
+.accounting-shell .data-table td:first-child,
+.accounting-shell .data-table td strong,
+.accounting-shell [class*="__table"] td strong {
+  font-weight: var(--accounting-semibold);
+}
+
+.accounting-shell [class*="__table"] td strong {
+  font-size: var(--accounting-small-size);
+  line-height: 1.4;
+}
+
+.accounting-shell [class*="__reference"],
+.accounting-shell [class*="__secondary"],
+.accounting-shell [class*="__muted-cell"],
+.accounting-shell [class*="__table-reference"],
+.accounting-shell [class*="__result-meta"],
+.accounting-shell [class*="__pagination"] {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.45;
+}
+
+.accounting-shell .button-primary,
+.accounting-shell .button-secondary,
+.accounting-shell .button-link,
+.accounting-shell [class*="__page-button"],
+.accounting-shell [class*="__row-button"] {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell [class*="__filters"] label,
+.accounting-shell [class*="__history-tools"] label,
+.accounting-shell [class*="__search-field"],
+.accounting-shell [class*="__field"] {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.35;
+}
+
+.accounting-shell [class*="__filters"] input,
+.accounting-shell [class*="__filters"] select,
+.accounting-shell [class*="__search-input"] input,
+.accounting-shell [class*="__field"] select,
+.accounting-shell [class*="__history-tools"] input,
+.accounting-shell [class*="__history-tools"] select {
+  font-size: var(--accounting-body-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.4;
+}
+
+.accounting-shell .status-badge,
+.accounting-shell .inline-status {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.25;
+}
+
+.accounting-shell [class*="__empty"] {
+  font-size: var(--accounting-small-size);
+  line-height: 1.5;
+}
+
+.accounting-shell [class*="__empty"] strong {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.4;
+}
+
+.accounting-shell [class*="__empty"] span {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.5;
+}
+
+/* Accounting-specific flow and details */
+.accounting-shell [class*="__flow-step"] strong,
+.accounting-shell [class*="__flow-node"] strong,
+.accounting-shell [class*="__latest"] h3,
+.accounting-shell [class*="__health-row"] strong,
+.accounting-shell [class*="__activity-row"] strong {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-semibold);
+  line-height: 1.4;
+}
+
+.accounting-shell [class*="__flow-step"] > span:not(.accounting-integration-status__flow-icon):not(.status-badge),
+.accounting-shell [class*="__flow-node"] small,
+.accounting-shell [class*="__flow-node"] time,
+.accounting-shell [class*="__health-row"] p,
+.accounting-shell [class*="__health-row"] small,
+.accounting-shell [class*="__activity-row"] small {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-regular);
+  line-height: 1.45;
+}
+
+.accounting-shell [class*="__latest-label"] {
+  font-size: 0.72rem;
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+}
+
+.accounting-shell [class*="__details-grid"] dt,
+.accounting-shell [class*="__latest-details"] dt,
+.accounting-shell [class*="__modal-details"] dt {
+  font-size: var(--accounting-meta-size);
+  font-weight: var(--accounting-semibold);
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+}
+
+.accounting-shell [class*="__details-grid"] dd,
+.accounting-shell [class*="__latest-details"] dd,
+.accounting-shell [class*="__modal-details"] dd {
+  font-size: var(--accounting-small-size);
+  font-weight: var(--accounting-medium);
+  line-height: 1.45;
+}
+
+.accounting-shell [class*="__modal-body"] p,
+.accounting-shell [class*="__timeline"] li,
+.accounting-shell [class*="__timeline"] time {
+  font-size: var(--accounting-small-size);
+  line-height: 1.55;
+}
+
+@media (max-width: 700px) {
+  .accounting-shell .page-subtitle {
+    font-size: var(--accounting-small-size);
+  }
+
+  .accounting-shell .accounting-nav-link {
+    font-size: var(--accounting-small-size);
+  }
+}
