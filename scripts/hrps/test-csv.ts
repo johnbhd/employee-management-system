@@ -49,6 +49,7 @@ assert.equal(prototypeRow.input?.schedule?.scheduleId, "hrps:001");
 assert.deepEqual(prototypeRow.input?.schedule?.workDays, ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
 assert.deepEqual(prototypeRow.input?.schedule?.restDays, ["Saturday", "Sunday"]);
 assert.deepEqual(prototypeRows.map((row) => row.employeeId), ["001", "002", "003"]);
+assert.deepEqual(prototypeRows.map((row) => row.rowNumber), [1, 2, 3]);
 assert.deepEqual(prototypeRows.map((row) => row.errors), [[], [], []]);
 assert.deepEqual(prototypeRows.map((row) => row.input?.schedule?.shiftLabel), ["Early Day", "Day", "Day"]);
 assert.ok(prototypeRow.warnings.includes("sia_application_role is informational only and does not grant application access."));

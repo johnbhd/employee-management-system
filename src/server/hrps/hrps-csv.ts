@@ -438,7 +438,7 @@ function resolveDisplayName(row: string[], columns: Map<HrpsCanonicalField, numb
 
 export function parseHrpsRows(canonical: HrpsCanonicalHeaders, rows: string[][]): ParsedHrpsRow[] {
   return rows.map((row, index) => {
-    const rowNumber = index + 2;
+    const rowNumber = index + 1;
     const errors: string[] = [];
     const warnings: string[] = [];
     if (row.length > canonical.headerCount) {
