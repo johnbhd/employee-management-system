@@ -1,10 +1,12 @@
 import "server-only";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, type PrismaClient } from "@prisma/client";
 
 import { getPrismaClient } from "@/lib/prisma/server";
 
 export { Prisma };
+
+export type PrismaDbClient = PrismaClient | Prisma.TransactionClient;
 
 export function getRepositoryPrisma() {
     return getPrismaClient();
@@ -50,12 +52,13 @@ export function isUuid(value: string): boolean {
 
 export async function findUserIdByFirebaseUid(
     firebaseUid: string | null | undefined,
+    prisma: PrismaDbClient = getRepositoryPrisma(),
 ): Promise<string | null> {
     if (!firebaseUid) {
         return null;
     }
 
-    const user = await getRepositoryPrisma().user.findUnique({
+    const user = await prisma.user.findUnique({
         where: { firebaseUid },
         select: { id: true },
     });

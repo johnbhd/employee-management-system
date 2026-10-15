@@ -12,6 +12,7 @@ import {
   RepositoryTimestamp as Timestamp,
   type DocumentData,
 } from "@/server/repositories/prisma/prisma-compat";
+import type { PrismaDbClient } from "@/server/repositories/prisma/prisma-repository-helpers";
 
 const canonicalCollection = "auditEvents";
 const legacyCollections = [
@@ -197,8 +198,11 @@ function mapLegacy(id: string, collection: string, data: DocumentData): AuditSto
   };
 }
 
-export async function recordAuditEvent(input: AuditEventInput): Promise<void> {
-  await recordPrismaAuditEvent(input);
+export async function recordAuditEvent(
+  input: AuditEventInput,
+  prisma?: PrismaDbClient,
+): Promise<void> {
+  await recordPrismaAuditEvent(input, prisma);
   return;
 
   /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */

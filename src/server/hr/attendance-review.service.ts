@@ -11,6 +11,7 @@ import {
     listHrAttendanceReviewData,
 } from "@/server/repositories/attendance/hr-attendance-review.repository";
 import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
+import { getRepositoryPrisma } from "@/server/repositories/prisma/prisma-repository-helpers";
 import type { SessionUser } from "@/types/auth";
 import type { HrAttendanceReviewData } from "@/types/hr-attendance-review";
 import type { HrAttendanceReviewQuery } from "./attendance-review-query";
@@ -182,62 +183,23 @@ export async function createAttendanceReviewCorrection(input: {
 
     const reason = requiredText(input.payload.reason, "Reason", 500);
     const remarks = optionalText(input.payload.remarks, "Remarks", 1000);
-    const created = await createHrAttendanceCorrection({
-        attendanceRecordId: record.id,
-        issueType: issueType(input.payload.issueType),
-        reason,
-        remarks,
-        requestedChanges: {
-            ...(correctedTimeIn ? { timeIn: correctedTimeIn } : {}),
-            ...(correctedTimeOut ? { timeOut: correctedTimeOut } : {}),
-        },
-        submittedBy: actorSnapshot(input.actor),
-        evidence: record.evidence,
-    });
-
-    await recordAuditEvent({
-        id: `${created.id}:created`,
-        eventType: "hr.attendance.correction.created",
-        action: "ATTENDANCE_CORRECTION_CREATED",
-        module: "HR Attendance Review",
-        actor: {
-            type: "user",
-            uid: input.actor.uid,
-            displayName: input.actor.displayName,
-            role: input.actor.role,
-        },
-        target: {
-            type: "attendance_correction",
-            id: created.id,
-            reference: record.id,
-            label: `${record.employee.employeeId} · ${record.attendanceDate}`,
-        },
-        outcome: "Successful",
-        summary: "An HR attendance correction was created.",
-        metadata: {
+    return getRepositoryPrisma().$transaction(async (transaction) => {
+        const created = await createHrAttendanceCorrection({
             attendanceRecordId: record.id,
-            employeeId: record.employee.employeeId,
-            attendanceDate: record.attendanceDate,
-        },
-    });
+            issueType: issueType(input.payload.issueType),
+            reason,
+            remarks,
+            requestedChanges: {
+                ...(correctedTimeIn ? { timeIn: correctedTimeIn } : {}),
+                ...(correctedTimeOut ? { timeOut: correctedTimeOut } : {}),
+            },
+            submittedBy: actorSnapshot(input.actor),
+            evidence: record.evidence,
+        }, transaction);
 
-    return created;
-}
-
-export async function finalVerifyAttendanceReview(input: {
-    attendanceRecordId: string;
-    actor: HrAttendanceActor;
-}) {
-    const result = await finalVerifyHrAttendance({
-        attendanceRecordId: input.attendanceRecordId,
-        verifier: actorSnapshot(input.actor),
-    });
-
-    if (!result.alreadyVerified) {
         await recordAuditEvent({
-            id: `${result.id}:final-verified`,
-            eventType: "hr.attendance.final_verified",
-            action: "ATTENDANCE_FINAL_VERIFIED",
+            eventType: "hr.attendance.correction.created",
+            action: "ATTENDANCE_CORRECTION_CREATED",
             module: "HR Attendance Review",
             actor: {
                 type: "user",
@@ -246,24 +208,65 @@ export async function finalVerifyAttendanceReview(input: {
                 role: input.actor.role,
             },
             target: {
-                type: "attendance_record",
-                id: result.id,
-                reference: result.id,
-                label: `${result.employeeId} · ${result.attendanceDate}`,
+                type: "attendance_correction",
+                id: created.id,
+                reference: record.id,
+                label: `${record.employee.employeeId} · ${record.attendanceDate}`,
             },
             outcome: "Successful",
-            summary: "HR final-verified an attendance record for payroll readiness.",
+            summary: "An HR attendance correction was created.",
             metadata: {
-                attendanceRecordId: result.id,
-                employeeId: result.employeeId,
-                attendanceDate: result.attendanceDate,
-                effectiveTimeIn: result.effectiveTimeIn,
-                effectiveTimeOut: result.effectiveTimeOut,
+                attendanceRecordId: record.id,
+                employeeId: record.employee.employeeId,
+                attendanceDate: record.attendanceDate,
             },
-        });
-    }
+        }, transaction);
 
-    return result;
+        return created;
+    });
+}
+
+export async function finalVerifyAttendanceReview(input: {
+    attendanceRecordId: string;
+    actor: HrAttendanceActor;
+}) {
+    return getRepositoryPrisma().$transaction(async (transaction) => {
+        const result = await finalVerifyHrAttendance({
+            attendanceRecordId: input.attendanceRecordId,
+            verifier: actorSnapshot(input.actor),
+        }, transaction);
+
+        if (!result.alreadyVerified) {
+            await recordAuditEvent({
+                eventType: "hr.attendance.final_verified",
+                action: "ATTENDANCE_FINAL_VERIFIED",
+                module: "HR Attendance Review",
+                actor: {
+                    type: "user",
+                    uid: input.actor.uid,
+                    displayName: input.actor.displayName,
+                    role: input.actor.role,
+                },
+                target: {
+                    type: "attendance_record",
+                    id: result.id,
+                    reference: result.id,
+                    label: `${result.employeeId} · ${result.attendanceDate}`,
+                },
+                outcome: "Successful",
+                summary: "HR final-verified an attendance record for payroll readiness.",
+                metadata: {
+                    attendanceRecordId: result.id,
+                    employeeId: result.employeeId,
+                    attendanceDate: result.attendanceDate,
+                    effectiveTimeIn: result.effectiveTimeIn,
+                    effectiveTimeOut: result.effectiveTimeOut,
+                },
+            }, transaction);
+        }
+
+        return result;
+    });
 }
 
 export function mapHrAttendanceReviewError(error: unknown) {

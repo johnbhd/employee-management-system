@@ -434,9 +434,8 @@ export async function createHrAttendanceCorrection(input: {
     requestedChanges: { timeIn?: Date; timeOut?: Date };
     submittedBy: { uid: string; username: string; displayName: string; role: string };
     evidence: HrReviewEvidence[];
-}) {
-    const prisma = getRepositoryPrisma();
-    return prisma.$transaction(async (transaction) => {
+}, transaction?: Prisma.TransactionClient) {
+    const create = async (transaction: Prisma.TransactionClient) => {
         await transaction.$executeRaw(Prisma.sql`SELECT pg_advisory_xact_lock(2147483002)`);
         const record = await transaction.attendanceRecord.findUnique({
             where: { id: input.attendanceRecordId },
@@ -518,15 +517,18 @@ export async function createHrAttendanceCorrection(input: {
             },
             select: { id: true, attendanceRecordId: true },
         });
-    });
+    };
+
+    return transaction
+        ? create(transaction)
+        : getRepositoryPrisma().$transaction(create);
 }
 
 export async function finalVerifyHrAttendance(input: {
     attendanceRecordId: string;
     verifier: { uid: string; username: string; displayName: string; role: string };
-}) {
-    const prisma = getRepositoryPrisma();
-    return prisma.$transaction(async (transaction) => {
+}, transaction?: Prisma.TransactionClient) {
+    const verify = async (transaction: Prisma.TransactionClient) => {
         await transaction.$executeRaw(Prisma.sql`SELECT pg_advisory_xact_lock(2147483003)`);
         const record = await transaction.attendanceRecord.findUnique({
             where: { id: input.attendanceRecordId },
@@ -607,5 +609,9 @@ export async function finalVerifyHrAttendance(input: {
             effectiveTimeOut: effectiveTimeOut.toISOString(),
             verifiedAt: verifiedAt.toISOString(),
         };
-    });
+    };
+
+    return transaction
+        ? verify(transaction)
+        : getRepositoryPrisma().$transaction(verify);
 }
