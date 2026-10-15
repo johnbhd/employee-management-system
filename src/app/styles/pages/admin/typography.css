@@ -219,6 +219,19 @@
   font-weight: var(--admin-medium);
 }
 
+.admin-shell .admin-nav-link:hover,
+.admin-shell .admin-nav-link:focus-visible,
+.admin-shell .admin-nav-link.is-active {
+  background: #fff;
+  color: var(--au-navy);
+}
+
+.admin-shell .admin-nav-link:hover .ui-icon,
+.admin-shell .admin-nav-link:focus-visible .ui-icon,
+.admin-shell .admin-nav-link.is-active .ui-icon {
+  color: var(--au-blue);
+}
+
 .admin-shell .sidebar-status-card > div {
   font-size: var(--admin-small-size);
   font-weight: var(--admin-medium);
