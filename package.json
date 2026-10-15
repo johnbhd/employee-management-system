@@ -15,6 +15,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:firestore": "tsx scripts/migration/firestore-to-postgres/index.ts",
     "db:bootstrap-admin": "tsx scripts/auth/bootstrap-admin.ts",
+    "auth:assign-prototype-roles": "tsx scripts/auth/assign-prototype-roles.ts",
     "auth:bootstrap": "tsx scripts/auth/bootstrap-postgres-identity.ts",
     "test:hrps": "tsx scripts/hrps/test-csv.ts",
     "test:bundy": "node --experimental-strip-types scripts/bundy/test-csv.ts",
