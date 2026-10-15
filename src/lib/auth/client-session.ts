@@ -21,6 +21,8 @@ import type { AuthSessionSuccessResponse } from "@/types/auth";
 export type FirebaseAuthClientErrorCode =
     | "INVALID_CREDENTIALS"
     | "ACCOUNT_UNAVAILABLE"
+    | "PASSWORD_CHANGE_SYNC_REQUIRED"
+    | "PASSWORD_POLICY"
     | "AUTHENTICATION_CONFIGURATION"
     | "AUTHENTICATION_UNAVAILABLE";
 
@@ -76,6 +78,13 @@ function getFirebaseAuthError(error: unknown): FirebaseAuthClientError {
         return new FirebaseAuthClientError(
             "INVALID_CREDENTIALS",
             "Invalid username or password.",
+        );
+    }
+
+    if (code === "auth/weak-password") {
+        return new FirebaseAuthClientError(
+            "PASSWORD_POLICY",
+            "Choose a stronger password with at least 8 characters.",
         );
     }
 
@@ -202,11 +211,20 @@ export async function changeFirebasePassword(
         return response.data;
     } catch (error) {
         if (error instanceof FirebaseAuthClientError) throw error;
-        if (error instanceof ApiClientError && error.status === 403) {
-            throw new FirebaseAuthClientError(
-                "ACCOUNT_UNAVAILABLE",
-                "This account is not currently eligible for password setup.",
-            );
+        if (error instanceof ApiClientError) {
+            if (error.code === "PASSWORD_CHANGE_SYNC_REQUIRED") {
+                throw new FirebaseAuthClientError(
+                    "PASSWORD_CHANGE_SYNC_REQUIRED",
+                    error.message,
+                );
+            }
+
+            if (error.status === 403) {
+                throw new FirebaseAuthClientError(
+                    "ACCOUNT_UNAVAILABLE",
+                    "This account is not currently eligible to change its password.",
+                );
+            }
         }
         throw getFirebaseAuthError(error);
     } finally {

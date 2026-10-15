@@ -8,5 +8,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
   const context = await requireRoleContext("employee");
   const permissions = await getPermissionsForUser(context.user);
 
-  return <EmployeeLayout context={context} permissions={permissions}>{children}</EmployeeLayout>;
+  return (
+    <EmployeeLayout context={context} permissions={permissions}>
+      {children}
+    </EmployeeLayout>
+  );
 }

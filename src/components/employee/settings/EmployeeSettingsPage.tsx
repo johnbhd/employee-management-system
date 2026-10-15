@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
+import { ChangePasswordForm } from "@/components/auth/ChangePasswordForm";
 import { Icon } from "@/components/ui/Icon";
+import { getRoleLabel } from "@/lib/auth/roles";
+import type { SessionUser } from "@/types/auth";
+import type { EmployeeReference } from "@/types/employee";
 
 type EmployeeSettings = {
   attendanceReminders: boolean;
   announcementUpdates: boolean;
+};
+
+type EmployeeSettingsPageProps = {
+  user: SessionUser;
+  employee: EmployeeReference | null;
+  setupPassword: boolean;
 };
 
 const settingsStorageKey = "au-jsc-employee-settings";
@@ -50,11 +60,33 @@ function saveSettings(settings: EmployeeSettings) {
   }
 }
 
-export function EmployeeSettingsPage() {
+export function EmployeeSettingsPage({
+  user,
+  employee,
+  setupPassword,
+}: EmployeeSettingsPageProps) {
   const [settings, setSettings] = useState<EmployeeSettings>(() => (
     typeof window === "undefined" ? defaultSettings : readSavedSettings()
   ));
   const [feedback, setFeedback] = useState("");
+  const securitySectionRef = useRef<HTMLElement>(null);
+  const securityHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (!setupPassword) {
+      return;
+    }
+
+    const focusTimer = window.setTimeout(() => {
+      securitySectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      securityHeadingRef.current?.focus({ preventScroll: true });
+    }, 0);
+
+    return () => window.clearTimeout(focusTimer);
+  }, [setupPassword]);
 
   function updateSetting(key: keyof EmployeeSettings, value: boolean) {
     const nextSettings = { ...settings, [key]: value };
@@ -68,20 +100,93 @@ export function EmployeeSettingsPage() {
     setFeedback(saveSettings(defaultSettings));
   }
 
+  const accountDetails = [
+    ["Display name", user.displayName],
+    ["Username", user.username],
+    ["Employee ID", employee?.employeeId ?? user.employeeId ?? "Not linked"],
+    ["Department", employee?.department ?? "Not available"],
+    ["Position", employee?.position ?? "Not assigned"],
+    ["Role", getRoleLabel(user.role)],
+    ["Account status", "Active"],
+  ] as const;
+
   return (
     <div className="employee-settings-page">
       <div className="employee-settings-intro">
-        <span className="employee-settings-kicker">Personal preferences</span>
+        <span className="employee-settings-kicker">Personal settings</span>
         <p>
-          Manage the employee portal preferences saved for this device. Official
-          employee information remains managed by the HR Office.
+          Review your official account information, update your password, and
+          manage the employee portal preferences saved for this device.
         </p>
       </div>
 
-      <section className="employee-settings-section" aria-labelledby="employee-settings-notifications-heading">
+      {user.mustChangePassword ? (
+        <div className="employee-settings-required-notice" role="status">
+          <strong>Password setup required</strong>
+          <p>
+            You are currently using the temporary password generated during
+            account provisioning. Create a new password before accessing the
+            rest of the Employee portal.
+          </p>
+        </div>
+      ) : null}
+
+      <section
+        className="employee-settings-section"
+        aria-labelledby="employee-settings-account-heading"
+      >
         <div className="employee-settings-section-heading">
           <div>
-            <span className="employee-settings-kicker">Notifications</span>
+            <span className="employee-settings-kicker">Account</span>
+            <h2 id="employee-settings-account-heading">Account information</h2>
+          </div>
+          <p>Official employee information is managed through HRPS.</p>
+        </div>
+
+        <dl className="employee-settings-account-details">
+          {accountDetails.map(([label, value]) => (
+            <div className="employee-settings-account-item" key={label}>
+              <dt>{label}</dt>
+              <dd>{value}</dd>
+            </div>
+          ))}
+        </dl>
+
+        <div className="employee-settings-link-grid">
+          <Link href="/employee/profile" className="employee-settings-link">
+            <span className="employee-settings-link-icon" aria-hidden="true">
+              <Icon name="user" />
+            </span>
+            <span>
+              <strong>View profile</strong>
+              <small>Review your official employee information.</small>
+            </span>
+            <Icon name="arrow" />
+          </Link>
+          <Link href="/employee/help-support" className="employee-settings-link">
+            <span className="employee-settings-link-icon" aria-hidden="true">
+              <Icon name="help" />
+            </span>
+            <span>
+              <strong>Help and support</strong>
+              <small>Contact support or review attendance guidance.</small>
+            </span>
+            <Icon name="arrow" />
+          </Link>
+        </div>
+
+        <p className="employee-settings-note">
+          HRPS-owned employee details are read-only in this portal.
+        </p>
+      </section>
+
+      <section
+        className="employee-settings-section"
+        aria-labelledby="employee-settings-notifications-heading"
+      >
+        <div className="employee-settings-section-heading">
+          <div>
+            <span className="employee-settings-kicker">Preferences</span>
             <h2 id="employee-settings-notifications-heading">Stay informed</h2>
           </div>
           <p>Choose which updates you want the portal to keep ready for you.</p>
@@ -143,38 +248,32 @@ export function EmployeeSettingsPage() {
         </div>
       </section>
 
-      <section className="employee-settings-section" aria-labelledby="employee-settings-account-heading">
+      <section
+        ref={securitySectionRef}
+        className={`employee-settings-section employee-settings-security ${setupPassword ? "is-highlighted" : ""}`}
+        aria-labelledby="employee-settings-security-heading"
+      >
         <div className="employee-settings-section-heading">
           <div>
-            <span className="employee-settings-kicker">Account</span>
-            <h2 id="employee-settings-account-heading">Account and support</h2>
+            <span className="employee-settings-kicker">Security</span>
+            <h2
+              id="employee-settings-security-heading"
+              ref={securityHeadingRef}
+              tabIndex={-1}
+            >
+              Change password
+            </h2>
           </div>
-          <p>Review your account details or get help with attendance.</p>
+          <p>
+            {user.mustChangePassword
+              ? "Replace your temporary password to continue."
+              : "Update the password used to sign in to your Employee account."}
+          </p>
         </div>
 
-        <div className="employee-settings-link-grid">
-          <Link href="/employee/profile" className="employee-settings-link">
-            <span className="employee-settings-link-icon" aria-hidden="true"><Icon name="user" /></span>
-            <span>
-              <strong>View profile</strong>
-              <small>Review your official employee information.</small>
-            </span>
-            <Icon name="arrow" />
-          </Link>
-          <Link href="/employee/help-support" className="employee-settings-link">
-            <span className="employee-settings-link-icon" aria-hidden="true"><Icon name="help" /></span>
-            <span>
-              <strong>Help and support</strong>
-              <small>Contact support or review attendance guidance.</small>
-            </span>
-            <Icon name="arrow" />
-          </Link>
+        <div className="employee-settings-security-body">
+          <ChangePasswordForm user={user} />
         </div>
-
-        <p className="employee-settings-note">
-          Password and official profile changes are handled through the authorized
-          support process.
-        </p>
       </section>
     </div>
   );

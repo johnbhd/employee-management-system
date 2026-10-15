@@ -51,7 +51,7 @@ export async function requireRole(
     const user = await requireSessionUser();
 
     if (user.role === "employee" && user.mustChangePassword) {
-        redirect("/account/change-password");
+        redirect("/employee/settings?setup=password");
     }
 
     if (user.role !== requiredRole) {
@@ -63,11 +63,16 @@ export async function requireRole(
 
 export async function requireRoleContext(
     requiredRole: ApplicationRole,
+    options: { allowMustChangePassword?: boolean } = {},
 ): Promise<CurrentUserContext> {
     const context = await requireCurrentUserContext();
 
-    if (context.user.role === "employee" && context.user.mustChangePassword) {
-        redirect("/account/change-password");
+    if (
+        !options.allowMustChangePassword
+        && context.user.role === "employee"
+        && context.user.mustChangePassword
+    ) {
+        redirect("/employee/settings?setup=password");
     }
 
     if (context.user.role !== requiredRole) {

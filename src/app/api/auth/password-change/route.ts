@@ -45,8 +45,8 @@ export async function POST(request: Request) {
     if (!sessionUser) {
       throw new ApiAuthorizationError("UNAUTHENTICATED", 401, "Authentication is required.");
     }
-    if (sessionUser.role !== "employee" || !sessionUser.mustChangePassword) {
-      throw new ApiAuthorizationError("FORBIDDEN", 403, "This account does not require password setup.");
+    if (sessionUser.role !== "employee") {
+      throw new ApiAuthorizationError("FORBIDDEN", 403, "Only Employee accounts can change their password here.");
     }
 
     const decodedToken = await getFirebaseAdminAuth().verifyIdToken(body.idToken.trim());
@@ -55,31 +55,56 @@ export async function POST(request: Request) {
     }
 
     const actorUserId = await findUserIdByFirebaseUid(sessionUser.uid);
-    await getPrismaClient().$transaction(async (transaction) => {
-      await transaction.user.update({
-        where: { firebaseUid: sessionUser.uid },
-        data: { mustChangePassword: false },
+    try {
+      await getPrismaClient().$transaction(async (transaction) => {
+        if (sessionUser.mustChangePassword) {
+          await transaction.user.update({
+            where: { firebaseUid: sessionUser.uid },
+            data: { mustChangePassword: false },
+          });
+        }
+
+        await transaction.auditEvent.create({
+          data: {
+            eventType: sessionUser.mustChangePassword
+              ? "auth.employee.first_password_changed"
+              : "auth.employee.password_changed",
+            action: sessionUser.mustChangePassword
+              ? "Employee First Password Changed"
+              : "Employee Password Changed",
+            module: "Authentication",
+            actorType: "user",
+            actorUserId,
+            actorUid: sessionUser.uid,
+            actorSnapshot: toJson(toActorSnapshot(sessionUser)),
+            targetType: "user",
+            targetId: sessionUser.uid,
+            targetReference: sessionUser.username,
+            targetLabel: sessionUser.displayName,
+            outcome: "Successful",
+            summary: sessionUser.mustChangePassword
+              ? "An Employee completed the required first-login password change."
+              : "An Employee changed their password from Employee Settings.",
+            metadata: toJson({ firebaseUid: sessionUser.uid }),
+            occurredAt: new Date(),
+          },
+        });
       });
-      await transaction.auditEvent.create({
-        data: {
-          eventType: "auth.employee.first_password_changed",
-          action: "Employee First Password Changed",
-          module: "Authentication",
-          actorType: "user",
-          actorUserId,
-          actorUid: sessionUser.uid,
-          actorSnapshot: toJson(toActorSnapshot(sessionUser)),
-          targetType: "user",
-          targetId: sessionUser.uid,
-          targetReference: sessionUser.username,
-          targetLabel: sessionUser.displayName,
-          outcome: "Successful",
-          summary: "An Employee completed the required first-login password change.",
-          metadata: toJson({ firebaseUid: sessionUser.uid }),
-          occurredAt: new Date(),
-        },
-      });
-    });
+    } catch {
+      if (sessionUser.mustChangePassword) {
+        return errorResponse(
+          "PASSWORD_CHANGE_SYNC_REQUIRED",
+          "Your Firebase password was changed, but Employee setup could not finish. Sign in again with the new password to complete setup.",
+          503,
+        );
+      }
+
+      return errorResponse(
+        "PASSWORD_CHANGE_UNAVAILABLE",
+        "Your password could not be recorded completely. Please try again from Employee Settings.",
+        503,
+      );
+    }
 
     const user = await getApplicationUserByUid(sessionUser.uid);
     if (!user) {

@@ -20,7 +20,6 @@
 @import "./components/buttons.css";
 @import "./components/auth-toast.css";
 @import "./pages/login.css";
-@import "./pages/account/change-password.css";
 @import "./pages/employee/dashboard.css";
 @import "./pages/employee/my-attendance.css";
 @import "./pages/employee/attendance-qr.css";

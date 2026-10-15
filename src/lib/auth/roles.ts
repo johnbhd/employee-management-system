@@ -31,9 +31,9 @@ export function getRoleHomePath(role: ApplicationRole): RoleHomePath {
 
 export function getAuthenticatedHomePath(
     user: Pick<{ role: ApplicationRole; mustChangePassword: boolean }, "role" | "mustChangePassword">,
-): RoleHomePath | "/account/change-password" {
+): RoleHomePath | "/employee/settings?setup=password" {
     return user.role === "employee" && user.mustChangePassword
-        ? "/account/change-password"
+        ? "/employee/settings?setup=password"
         : getRoleHomePath(user.role);
 }
 
