@@ -196,9 +196,10 @@ export function AdminIntegrationDetailPage({
   initialData: AdminIntegrationMonitoringData | null;
   loadError: boolean;
 }) {
+  const resolvedConfig = config ?? adminIntegrationDetailConfigs.unified;
   const [data, setData] = useState(initialData);
   const [error, setError] = useState(
-    initialLoadError ? `${config.title} data could not be loaded.` : null,
+    initialLoadError ? `${resolvedConfig.title} data could not be loaded.` : null,
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -218,24 +219,24 @@ export function AdminIntegrationDetailPage({
       setError(
         refreshError instanceof Error
           ? refreshError.message
-          : `${config.title} data could not be loaded.`,
+          : `${resolvedConfig.title} data could not be loaded.`,
       );
     } finally {
       setIsRefreshing(false);
     }
-  }, [config.title, isRefreshing]);
+  }, [resolvedConfig.title, isRefreshing]);
 
   const statuses = useMemo(
-    () => data?.integrations.filter((integration) => config.integrationKeys.includes(integration.key)) ?? [],
-    [config.integrationKeys, data],
+    () => data?.integrations.filter((integration) => resolvedConfig.integrationKeys.includes(integration.key)) ?? [],
+    [resolvedConfig.integrationKeys, data],
   );
   const activities = useMemo(
-    () => data?.activities.filter((activity) => config.integrationKeys.includes(activity.integrationKey)) ?? [],
-    [config.integrationKeys, data],
+    () => data?.activities.filter((activity) => resolvedConfig.integrationKeys.includes(activity.integrationKey)) ?? [],
+    [resolvedConfig.integrationKeys, data],
   );
   const issues = useMemo(
-    () => data?.issues.filter((issue) => config.integrationKeys.includes(issue.integrationKey)) ?? [],
-    [config.integrationKeys, data],
+    () => data?.issues.filter((issue) => resolvedConfig.integrationKeys.includes(issue.integrationKey)) ?? [],
+    [resolvedConfig.integrationKeys, data],
   );
 
   return (
@@ -245,13 +246,13 @@ export function AdminIntegrationDetailPage({
     >
       <AdminPageHeader
         eyebrow="Integration control"
-        title={config.title}
-        description={config.description}
+        title={resolvedConfig.title}
+        description={resolvedConfig.description}
         actions={(
           <>
             <ActionButton
               icon="refresh"
-              action={`${config.title} data refreshed.`}
+              action={`${resolvedConfig.title} data refreshed.`}
               onAction={() => void refreshData()}
             >
               Refresh data
@@ -302,7 +303,7 @@ export function AdminIntegrationDetailPage({
             <dl className="integration-detail-list">
               <div>
                 <dt>Source boundary</dt>
-                <dd>{config.sourceLabel}</dd>
+                <dd>{resolvedConfig.sourceLabel}</dd>
               </div>
               <div>
                 <dt>Provider</dt>
@@ -317,16 +318,16 @@ export function AdminIntegrationDetailPage({
                 <dd>{data && statuses.length ? formatTimestamp(getLatestSuccess(statuses)) : "Unavailable"}</dd>
               </div>
             </dl>
-            <p className="integration-detail-description">{config.sourceDescription}</p>
+            <p className="integration-detail-description">{resolvedConfig.sourceDescription}</p>
           </div>
         </SectionCard>
       </div>
 
-      <SectionCard title={config.technicalSummaryTitle} eyebrow="Technical responsibilities">
+      <SectionCard title={resolvedConfig.technicalSummaryTitle} eyebrow="Technical responsibilities">
         <div className="panel-body">
-          <p className="integration-detail-description">{config.technicalSummaryDescription}</p>
+          <p className="integration-detail-description">{resolvedConfig.technicalSummaryDescription}</p>
           <div className="integration-detail-capability-grid">
-            {config.capabilities.map((capability) => (
+            {resolvedConfig.capabilities.map((capability) => (
               <div className="integration-detail-capability" key={capability.label}>
                 <strong>{capability.label}</strong>
                 <p>{capability.detail}</p>
@@ -336,14 +337,14 @@ export function AdminIntegrationDetailPage({
         </div>
       </SectionCard>
 
-      <SectionCard title={config.futureWorkflow.title} eyebrow="Scope boundary">
+      <SectionCard title={resolvedConfig.futureWorkflow.title} eyebrow="Scope boundary">
         <div className="panel-body">
           <div className="integration-detail-scope">
             <div>
-              <strong>{config.futureWorkflow.title}</strong>
-              <p>{config.futureWorkflow.description}</p>
+              <strong>{resolvedConfig.futureWorkflow.title}</strong>
+              <p>{resolvedConfig.futureWorkflow.description}</p>
             </div>
-            <StatusBadge tone="muted">{config.futureWorkflow.status}</StatusBadge>
+            <StatusBadge tone="muted">{resolvedConfig.futureWorkflow.status}</StatusBadge>
           </div>
         </div>
       </SectionCard>
@@ -351,7 +352,7 @@ export function AdminIntegrationDetailPage({
       <SectionCard title="Recent technical activity" eyebrow="Persisted operational records">
         <div className="table-wrap">
           <table className="data-table integration-detail-activity-table">
-            <caption className="sr-only">Recent technical activity for {config.title}</caption>
+            <caption className="sr-only">Recent technical activity for {resolvedConfig.title}</caption>
             <thead>
               <tr>
                 <th scope="col">Time</th>
@@ -364,14 +365,14 @@ export function AdminIntegrationDetailPage({
               {activities.map((activity) => <ActivityRow activity={activity} key={activity.id} />)}
             </tbody>
           </table>
-          {!activities.length ? <p className="empty-state">{config.emptyActivityMessage}</p> : null}
+          {!activities.length ? <p className="empty-state">{resolvedConfig.emptyActivityMessage}</p> : null}
         </div>
       </SectionCard>
 
       <SectionCard title="Technical issues" eyebrow="Persisted records requiring attention">
         <div className="panel-body issue-list">
           {issues.length ? issues.map((issue) => <IssueCard issue={issue} key={issue.id} />) : (
-            <p className="empty-state">{config.emptyIssueMessage}</p>
+            <p className="empty-state">{resolvedConfig.emptyIssueMessage}</p>
           )}
         </div>
       </SectionCard>
