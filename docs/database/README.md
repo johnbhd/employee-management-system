@@ -53,7 +53,7 @@ Firestore business runtime: legacy/inactive; not part of normal application comp
 Canonical integration identifier: employee_id
 Employee ID type: text/string; leading zeros preserved
 Raw Bundy data: Not implemented; future separate domain
-HRPS CSV importer: Not implemented by DB-ARCH-006
+HRPS CSV importer: Implemented by INTEGRATION-HRPS-013 at `/admin/hrps-integration`
 Local Payroll calculation: Not allowed
 ```
 

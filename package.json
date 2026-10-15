@@ -14,6 +14,7 @@
     "db:migrate:firestore": "tsx scripts/migration/firestore-to-postgres/index.ts",
     "db:bootstrap-admin": "tsx scripts/auth/bootstrap-admin.ts",
     "auth:bootstrap": "tsx scripts/auth/bootstrap-postgres-identity.ts",
+    "test:hrps": "tsx scripts/hrps/test-csv.ts",
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",
     "qr:attendance:verify": "tsx scripts/attendance/verify-qr-attendance.ts",
     "firebase:seed": "tsx scripts/firebase/seed.ts"

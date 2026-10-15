@@ -1,9 +1,9 @@
 import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
-import { AdminIntegrationDetailPage, adminIntegrationDetailConfigs } from "@/components/admin/integrations/AdminIntegrationDetailPage";
-import { getAdminIntegrationMonitoringData } from "@/server/admin/integration-monitoring.service";
+import { HrpsIntegrationPage } from "@/components/admin/integrations/HrpsIntegrationPage";
+import { listHrpsImportHistory } from "@/server/hrps/hrps-import.service";
 import { hasPermission } from "@/server/auth/permission.service";
 import { requireRoleContext } from "@/server/auth/guards";
-import type { AdminIntegrationMonitoringData } from "@/types/admin-integration-monitoring";
+import type { HrpsImportHistoryData } from "@/types/hrps-import";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +13,14 @@ export default async function Page() {
     return <PermissionDeniedPage title="HRPS Integration unavailable" backHref="/admin/dashboard" backLabel="Back to Admin Dashboard" />;
   }
 
-  let data: AdminIntegrationMonitoringData | null = null;
+  let history: HrpsImportHistoryData | null = null;
   let loadError = false;
 
   try {
-    data = await getAdminIntegrationMonitoringData();
+    history = await listHrpsImportHistory(1, 10);
   } catch {
     loadError = true;
   }
 
-  return <AdminIntegrationDetailPage config={adminIntegrationDetailConfigs.hrps} initialData={data} loadError={loadError} />;
+  return <HrpsIntegrationPage initialHistory={history} initialLoadError={loadError} canImport={await hasPermission(context.user, "admin.integration_monitoring.retry")} />;
 }

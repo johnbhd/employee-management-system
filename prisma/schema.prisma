@@ -30,6 +30,13 @@ enum EmployeeSourceSystem {
   HRPS
 }
 
+enum HrpsImportStatus {
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+}
+
 enum AttendanceSource {
   QR
   BUNDY
@@ -217,6 +224,7 @@ model User {
   payrollHandoffsSubmitted     PayrollHandoff[]       @relation("PayrollHandoffSubmittedBy")
   accountingTransfersSubmitted AccountingTransfer[]   @relation("AccountingTransferSubmittedBy")
   auditEvents                  AuditEvent[]           @relation("AuditActor")
+  hrpsImports                  HrpsImport[]           @relation("HrpsImportInitiatedBy")
 
   @@index([employeeId])
   @@map("users")
@@ -277,6 +285,45 @@ model EmployeeSchedule {
   @@unique([employeeId, scheduleId])
   @@index([employeeId, effectiveFrom])
   @@map("employee_schedules")
+}
+
+// HRPS import history stores safe operational metadata only. Raw CSV content
+// is intentionally not persisted; the preview is revalidated from the upload
+// before any business write is accepted.
+model HrpsImport {
+  id                  String               @id @default(uuid()) @db.Uuid
+  sourceSystem        EmployeeSourceSystem @default(HRPS) @map("source_system")
+  filename            String               @db.VarChar(255)
+  contentHash         String               @map("content_hash") @db.VarChar(64)
+  initiatedByUserId   String?              @map("initiated_by_user_id") @db.Uuid
+  initiatedBySnapshot Json                 @map("initiated_by_snapshot")
+  startedAt           DateTime             @map("started_at") @db.Timestamptz(3)
+  completedAt         DateTime?            @map("completed_at") @db.Timestamptz(3)
+  status              HrpsImportStatus
+  totalRows           Int                  @map("total_rows")
+  newCount            Int                  @map("new_count")
+  updatedCount        Int                  @map("updated_count")
+  unchangedCount      Int                  @map("unchanged_count")
+  invalidCount        Int                  @map("invalid_count")
+  duplicateCount      Int                  @map("duplicate_count")
+  needsReviewCount    Int                  @map("needs_review_count")
+  createdEmployees    Int                  @default(0) @map("created_employees")
+  updatedEmployees    Int                  @default(0) @map("updated_employees")
+  schedulesCreated    Int                  @default(0) @map("schedules_created")
+  schedulesUpdated    Int                  @default(0) @map("schedules_updated")
+  accountsProvisioned Int                  @default(0) @map("accounts_provisioned")
+  accountsPending     Int                  @default(0) @map("accounts_pending")
+  accountsFailed      Int                  @default(0) @map("accounts_failed")
+  errorSummary        String?              @map("error_summary") @db.Text
+  createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  initiatedBy User? @relation("HrpsImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([startedAt, id])
+  @@index([status, startedAt])
+  @@index([contentHash])
+  @@map("hrps_imports")
 }
 
 // Attendance keeps source provenance and actor snapshots separate from the
