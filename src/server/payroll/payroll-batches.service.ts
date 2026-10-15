@@ -74,6 +74,9 @@ export function toPayrollBatchSnapshot(
     hrVerificationStatus: item.hrVerification.status,
     payrollReadiness: item.payrollReadiness.status,
     sourceAttendanceIds: source.sourceAttendanceIds,
+    attendanceSnapshot: null,
+    scheduleSnapshot: null,
+    verificationSnapshot: null,
     snapshotCreatedAt: snapshotCreatedAt.toISOString(),
   };
 }

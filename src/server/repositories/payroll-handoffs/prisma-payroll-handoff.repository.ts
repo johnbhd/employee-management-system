@@ -13,6 +13,11 @@ import type {
     PayrollHandoffTimelineEvent,
 } from "@/types/payroll-handoff";
 import {
+    parseAttendanceSnapshot,
+    parseScheduleSnapshot,
+    parseVerificationSnapshot,
+} from "@/server/repositories/payroll-batches/prisma-payroll-batch.repository";
+import {
     findUserIdByFirebaseUid,
     getRepositoryPrisma,
     isUuid,
@@ -109,6 +114,9 @@ function itemSnapshot(item: HandoffRow["batch"]["items"][number]): PayrollBatchI
         sourceAttendanceIds: toJsonArray(item.sourceAttendanceIds).filter(
             (value): value is string => typeof value === "string",
         ),
+        attendanceSnapshot: parseAttendanceSnapshot(item.attendanceSnapshot),
+        scheduleSnapshot: parseScheduleSnapshot(item.scheduleSnapshot),
+        verificationSnapshot: parseVerificationSnapshot(item.verificationSnapshot),
         snapshotCreatedAt: item.snapshotCreatedAt.toISOString(),
     };
 }

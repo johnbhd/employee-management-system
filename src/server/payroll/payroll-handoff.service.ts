@@ -111,6 +111,8 @@ function isEligibleReadyBatch(
       && record.payrollPeriod.start === batch.period.start
       && record.payrollPeriod.end === batch.period.end
       && record.sourceAttendanceIds.length > 0
+      && record.attendanceSnapshot !== null
+      && record.verificationSnapshot !== null
     ))
     && !handoff;
 }

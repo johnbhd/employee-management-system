@@ -21,6 +21,24 @@ export type PayrollBatchActor = {
   role: string;
 };
 
+export type PayrollBatchAttendanceSnapshot = {
+  attendanceRecordId: string;
+  attendanceDate: string;
+  effectiveTimeIn: string | null;
+  effectiveTimeOut: string | null;
+  attendanceStatus: string;
+  timeInSource: string | null;
+  timeOutSource: string | null;
+  technicalState: string | null;
+  businessStatus: string | null;
+};
+
+export type PayrollBatchVerificationSnapshot = {
+  attendanceRecordId: string;
+  verifiedAt: string | null;
+  verifiedBy: unknown;
+};
+
 export type PayrollBatchItemSnapshot = {
   employeePeriodId: string;
   employeeId: string;
@@ -34,6 +52,9 @@ export type PayrollBatchItemSnapshot = {
   hrVerificationStatus: "verified";
   payrollReadiness: "ready";
   sourceAttendanceIds: string[];
+  attendanceSnapshot: PayrollBatchAttendanceSnapshot[] | null;
+  scheduleSnapshot: Record<string, unknown> | null;
+  verificationSnapshot: PayrollBatchVerificationSnapshot[] | null;
   snapshotCreatedAt: string;
 };
 
@@ -44,6 +65,8 @@ export type PayrollBatchRecord = {
   createdBy: PayrollBatchActor;
   createdAt: string;
   updatedAt: string;
+  frozenBy: PayrollBatchActor | null;
+  frozenAt: string | null;
   submittedBy: PayrollBatchActor | null;
   submittedAt: string | null;
   recordCount: number;
@@ -70,4 +93,35 @@ export type PayrollBatchesData = {
     recordsInDrafts: number;
     blockedRecords: number;
   };
+};
+
+export type PayrollBatchReadinessReason = {
+  code: "EMPTY_BATCH" | "BATCH_NOT_DRAFT";
+  owner: "PAYROLL" | "SYSTEM";
+  label: string;
+};
+
+export type PayrollBatchItemReadiness = {
+  itemId: string;
+  employeePeriodId: string;
+  employeeName: string;
+  employeeId: string;
+  ready: boolean;
+  sourceAttendanceIds: string[];
+  reasons: Array<{
+    code: string;
+    owner: "HR" | "PAYROLL" | "SYSTEM";
+    label: string;
+  }>;
+};
+
+export type PayrollBatchReadiness = {
+  batchId: string;
+  status: PayrollBatchStatus;
+  ready: boolean;
+  totalItems: number;
+  eligibleItems: number;
+  blockedItems: number;
+  reasons: PayrollBatchReadinessReason[];
+  items: PayrollBatchItemReadiness[];
 };

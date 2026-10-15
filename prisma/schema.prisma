@@ -306,6 +306,7 @@ model User {
   correctionsReviewed          AttendanceCorrection[]           @relation("CorrectionReviewedBy")
   payrollBatchesCreated        PayrollBatch[]                   @relation("PayrollBatchCreatedBy")
   payrollBatchesSubmitted      PayrollBatch[]                   @relation("PayrollBatchSubmittedBy")
+  payrollBatchesFrozen         PayrollBatch[]                   @relation("PayrollBatchFrozenBy")
   payrollHandoffsSubmitted     PayrollHandoff[]                 @relation("PayrollHandoffSubmittedBy")
   accountingTransfersSubmitted AccountingTransfer[]             @relation("AccountingTransferSubmittedBy")
   auditEvents                  AuditEvent[]                     @relation("AuditActor")
@@ -726,6 +727,9 @@ model PayrollBatch {
   submittedByUserId   String?            @map("submitted_by_user_id") @db.Uuid
   submittedBySnapshot Json?              @map("submitted_by_snapshot")
   submittedAt         DateTime?          @map("submitted_at") @db.Timestamptz(3)
+  frozenByUserId      String?            @map("frozen_by_user_id") @db.Uuid
+  frozenBySnapshot    Json?              @map("frozen_by_snapshot")
+  frozenAt            DateTime?          @map("frozen_at") @db.Timestamptz(3)
   recordCount         Int                @map("record_count")
   blockedCount        Int                @map("blocked_count")
   notes               String?            @db.Text
@@ -733,6 +737,7 @@ model PayrollBatch {
 
   createdBy           User?                @relation("PayrollBatchCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   submittedBy         User?                @relation("PayrollBatchSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  frozenBy            User?                @relation("PayrollBatchFrozenBy", fields: [frozenByUserId], references: [id], onDelete: SetNull)
   items               PayrollBatchItem[]
   handoff             PayrollHandoff?
   results             PayrollResult[]
@@ -760,6 +765,9 @@ model PayrollBatchItem {
   hrVerificationStatus   HrVerificationStatus   @default(verified) @map("hr_verification_status")
   payrollReadinessStatus PayrollReadinessStatus @default(ready) @map("payroll_readiness_status")
   sourceAttendanceIds    Json                   @map("source_attendance_ids")
+  attendanceSnapshot     Json?                  @map("attendance_snapshot")
+  scheduleSnapshot       Json?                  @map("schedule_snapshot")
+  verificationSnapshot   Json?                  @map("verification_snapshot")
   snapshotCreatedAt      DateTime               @map("snapshot_created_at") @db.Timestamptz(3)
   legacyFirestoreId      String?                @unique @map("legacy_firestore_id") @db.VarChar(160)
 

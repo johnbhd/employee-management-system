@@ -7,6 +7,7 @@ export const payrollEligibilityReasonCodes = [
   "MISSING_EFFECTIVE_TIME",
   "MISSING_REQUIRED_IDENTIFIER",
   "ALREADY_IN_PAYROLL_BATCH",
+  "OUTSIDE_BATCH_PERIOD",
 ] as const;
 
 export type PayrollEligibilityReasonCode = typeof payrollEligibilityReasonCodes[number];
@@ -64,27 +65,33 @@ const reasonDefinitions: Record<PayrollEligibilityReasonCode, Omit<PayrollEligib
     owner: "PAYROLL",
     label: "This employee-period is already owned by a Payroll batch.",
   },
+  OUTSIDE_BATCH_PERIOD: {
+    owner: "SYSTEM",
+    label: "The attendance record is outside the Payroll batch period.",
+  },
 };
 
-function reason(code: PayrollEligibilityReasonCode): PayrollEligibilityReason {
+export function getPayrollEligibilityReason(
+  code: PayrollEligibilityReasonCode,
+): PayrollEligibilityReason {
   return { code, ...reasonDefinitions[code] };
 }
 
 export function evaluatePayrollEligibility(input: PayrollEligibilityInput) {
   const reasons: PayrollEligibilityReason[] = [];
 
-  if (!input.attendanceExists) reasons.push(reason("ATTENDANCE_NOT_FOUND"));
-  if (!input.employeeExists) reasons.push(reason("EMPLOYEE_NOT_FOUND"));
-  if (!input.processingComplete) reasons.push(reason("PROCESSING_INCOMPLETE"));
+  if (!input.attendanceExists) reasons.push(getPayrollEligibilityReason("ATTENDANCE_NOT_FOUND"));
+  if (!input.employeeExists) reasons.push(getPayrollEligibilityReason("EMPLOYEE_NOT_FOUND"));
+  if (!input.processingComplete) reasons.push(getPayrollEligibilityReason("PROCESSING_INCOMPLETE"));
   if (input.finalVerificationStatus !== "verified" || !input.hasFinalVerificationTimestamp) {
-    reasons.push(reason("NOT_FINAL_VERIFIED"));
+    reasons.push(getPayrollEligibilityReason("NOT_FINAL_VERIFIED"));
   }
-  if (input.pendingCorrection) reasons.push(reason("PENDING_CORRECTION"));
+  if (input.pendingCorrection) reasons.push(getPayrollEligibilityReason("PENDING_CORRECTION"));
   if (!input.hasEffectiveTimeIn || !input.hasEffectiveTimeOut) {
-    reasons.push(reason("MISSING_EFFECTIVE_TIME"));
+    reasons.push(getPayrollEligibilityReason("MISSING_EFFECTIVE_TIME"));
   }
-  if (!input.hasRequiredIdentifier) reasons.push(reason("MISSING_REQUIRED_IDENTIFIER"));
-  if (input.existingBatchReference) reasons.push(reason("ALREADY_IN_PAYROLL_BATCH"));
+  if (!input.hasRequiredIdentifier) reasons.push(getPayrollEligibilityReason("MISSING_REQUIRED_IDENTIFIER"));
+  if (input.existingBatchReference) reasons.push(getPayrollEligibilityReason("ALREADY_IN_PAYROLL_BATCH"));
 
   return {
     eligible: reasons.length === 0,
