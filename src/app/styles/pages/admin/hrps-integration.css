@@ -120,6 +120,10 @@
   overflow-wrap: anywhere;
 }
 
+.hrps-undo-import-button {
+  white-space: nowrap;
+}
+
 .hrps-row-messages {
   display: grid;
   gap: 0.25rem;

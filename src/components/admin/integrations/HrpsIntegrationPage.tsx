@@ -101,7 +101,7 @@ function HistoryTable({ history, canRollback, onRollback }: { history: HrpsImpor
               <td><StatusBadge tone={statusTone(item.status)}>{item.status.replaceAll("_", " ")}</StatusBadge></td>
               <td>
                 {canRollback && ["COMPLETED", "COMPLETED_WITH_ERRORS", "ROLLBACK_FAILED"].includes(item.status) ? (
-                  <button type="button" className="button-tertiary" onClick={() => onRollback(item)}>Undo import</button>
+                  <button type="button" className="button-secondary hrps-undo-import-button" onClick={() => onRollback(item)}>Undo import</button>
                 ) : null}
               </td>
             </tr>
@@ -354,7 +354,6 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
                 <h2 id="hrps-rollback-title">Undo HRPS import</h2>
                 <p>{rollbackTarget.filename}</p>
               </div>
-              <button type="button" className="button-tertiary" onClick={() => { setRollbackTarget(null); setRollbackPreview(null); }} disabled={rollbackState !== "idle"}>Cancel</button>
             </div>
             {rollbackState === "loading" ? <p className="hrps-rollback-loading" role="status">Checking ownership, later imports, and downstream dependencies…</p> : null}
             {rollbackPreview ? (
