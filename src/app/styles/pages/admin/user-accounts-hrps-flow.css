@@ -47,6 +47,11 @@
   padding: 0.65rem 0.75rem;
 }
 
+.user-accounts-hrps-page .user-accounts-edit-form input,
+.user-accounts-hrps-page .user-accounts-edit-form select {
+  font-weight: 400;
+}
+
 .user-accounts-hrps-page .user-accounts-search {
   position: relative;
 }
