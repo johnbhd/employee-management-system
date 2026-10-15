@@ -59,7 +59,6 @@ export function AdminSidebar({ user, employee, permissions, isOpen, onClose }: A
 
           <div className="admin-sidebar-scroll">
             <div className="workspace-label">
-              <span>IT Administrator</span>
               <span className="role-pill">{getRoleLabel(user.role)}</span>
             </div>
             <nav className="admin-sidebar-nav" aria-label="Primary navigation">
