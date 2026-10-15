@@ -1,11 +1,17 @@
 import "server-only";
 
 import { createHash } from "node:crypto";
-import type { EmployeeEmploymentStatus, Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 
 import { checkPostgresHealth, getPrismaClient } from "@/lib/prisma/server";
 import { findUserIdByFirebaseUid, toJson, toActorSnapshot } from "@/server/repositories/prisma/prisma-repository-helpers";
-import { parseCsv, HrpsCsvError, normalizeHeader } from "./hrps-csv";
+import {
+  canonicalizeHrpsHeaders,
+  HrpsCsvError,
+  parseCsv,
+  parseHrpsRows,
+  type ParsedHrpsRow,
+} from "./hrps-csv";
 import type { SessionUser } from "@/types/auth";
 import type {
   HrpsEmployeeInput,
@@ -23,68 +29,6 @@ import type {
 
 export const HRPS_MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const HRPS_MAX_ROWS = 10000;
-
-const headerAliases: Record<string, string> = {
-  employeeid: "employeeId",
-  employeeidentifier: "employeeId",
-  name: "displayName",
-  displayname: "displayName",
-  employeename: "displayName",
-  department: "department",
-  dept: "department",
-  position: "position",
-  jobtitle: "position",
-  employmentstatus: "employmentStatus",
-  status: "employmentStatus",
-  scheduleid: "scheduleId",
-  workdays: "workDays",
-  restdays: "restDays",
-  workstart: "workStart",
-  starttime: "workStart",
-  workend: "workEnd",
-  endtime: "workEnd",
-  breakstart: "breakStart",
-  breakend: "breakEnd",
-  shiftlabel: "shiftLabel",
-  worklocation: "workLocation",
-  effectivefrom: "effectiveFrom",
-  effectiveto: "effectiveTo",
-};
-
-const requiredFields = ["employeeId", "displayName", "department", "employmentStatus"] as const;
-const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-const weekdayAliases: Record<string, string> = {
-  mon: "Monday",
-  monday: "Monday",
-  tue: "Tuesday",
-  tues: "Tuesday",
-  tuesday: "Tuesday",
-  wed: "Wednesday",
-  wednesday: "Wednesday",
-  thu: "Thursday",
-  thurs: "Thursday",
-  thursday: "Thursday",
-  fri: "Friday",
-  friday: "Friday",
-  sat: "Saturday",
-  saturday: "Saturday",
-  sun: "Sunday",
-  sunday: "Sunday",
-};
-
-type CanonicalHeaders = {
-  columns: Map<string, number>;
-  supported: string[];
-  ignored: string[];
-};
-
-type ParsedHrpsRow = {
-  rowNumber: number;
-  employeeId: string | null;
-  input: HrpsEmployeeInput | null;
-  errors: string[];
-  warnings: string[];
-};
 
 type ExistingEmployee = Prisma.EmployeeGetPayload<{
   include: {
@@ -151,180 +95,6 @@ function safeFilename(filename: string): string {
 
 function hashContent(content: string): string {
   return createHash("sha256").update(content, "utf8").digest("hex");
-}
-
-function cleanValue(value: string | undefined, maxLength: number): string {
-  const result = value?.trim() ?? "";
-  if (result.length > maxLength || result.includes("\u0000")) return "";
-  return result;
-}
-
-function canonicalizeHeaders(headers: string[]): CanonicalHeaders {
-  const columns = new Map<string, number>();
-  const supported: string[] = [];
-  const ignored: string[] = [];
-
-  headers.forEach((header, index) => {
-    const canonical = headerAliases[normalizeHeader(header)];
-    if (!canonical) {
-      ignored.push(header);
-      return;
-    }
-    if (columns.has(canonical)) {
-      throw new HrpsImportError("DUPLICATE_HEADERS", `The CSV maps more than one header to ${canonical}.`);
-    }
-    columns.set(canonical, index);
-    supported.push(header);
-  });
-
-  const missing = requiredFields.filter((field) => !columns.has(field));
-  if (missing.length) {
-    throw new HrpsImportError("MISSING_REQUIRED_HEADERS", `Missing required CSV columns: ${missing.join(", ")}.`);
-  }
-
-  return { columns, supported, ignored };
-}
-
-function valueAt(row: string[], columns: Map<string, number>, key: string): string {
-  const index = columns.get(key);
-  return index === undefined ? "" : row[index] ?? "";
-}
-
-function parseEmploymentStatus(value: string): EmployeeEmploymentStatus | null {
-  const normalized = value.trim().toLowerCase();
-  return normalized === "active" || normalized === "inactive" ? normalized : null;
-}
-
-function parseDate(value: string, field: string, errors: string[]): string | null {
-  if (!value) return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    errors.push(`${field} must use YYYY-MM-DD format.`);
-    return null;
-  }
-  const date = new Date(`${value}T00:00:00.000Z`);
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
-    errors.push(`${field} is not a valid calendar date.`);
-    return null;
-  }
-  return value;
-}
-
-function parseTime(value: string, field: string, errors: string[], required: boolean): string | null {
-  if (!value) {
-    if (required) errors.push(`${field} is required when a schedule is supplied.`);
-    return null;
-  }
-  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(value)) {
-    errors.push(`${field} must use HH:mm format.`);
-    return null;
-  }
-  return value;
-}
-
-function parseDays(value: string, field: string, errors: string[]): string[] {
-  if (!value) {
-    errors.push(`${field} is required when a schedule is supplied.`);
-    return [];
-  }
-  const values = value.split(/[;,|]/).map((item) => weekdayAliases[item.trim().toLowerCase()]).filter(Boolean);
-  if (!values.length || values.length !== value.split(/[;,|]/).filter((item) => item.trim()).length) {
-    errors.push(`${field} contains an unsupported weekday.`);
-    return [];
-  }
-  return [...new Set(values)];
-}
-
-function parseSchedule(row: string[], columns: Map<string, number>, errors: string[]): HrpsScheduleInput | null {
-  const rawKeys = ["scheduleId", "workDays", "restDays", "workStart", "workEnd", "breakStart", "breakEnd", "shiftLabel", "workLocation", "effectiveFrom", "effectiveTo"];
-  const hasSchedule = rawKeys.some((key) => valueAt(row, columns, key).trim());
-  if (!hasSchedule) return null;
-
-  const scheduleId = cleanValue(valueAt(row, columns, "scheduleId"), 120);
-  if (!scheduleId) errors.push("schedule_id is required when schedule data is supplied.");
-
-  const workDays = parseDays(cleanValue(valueAt(row, columns, "workDays"), 200), "work_days", errors);
-  const suppliedRestDays = cleanValue(valueAt(row, columns, "restDays"), 200);
-  const restDays = suppliedRestDays
-    ? parseDays(suppliedRestDays, "rest_days", errors)
-    : weekdays.filter((day) => !workDays.includes(day));
-  const workStart = parseTime(cleanValue(valueAt(row, columns, "workStart"), 5), "work_start", errors, true);
-  const workEnd = parseTime(cleanValue(valueAt(row, columns, "workEnd"), 5), "work_end", errors, true);
-  const breakStart = parseTime(cleanValue(valueAt(row, columns, "breakStart"), 5), "break_start", errors, false);
-  const breakEnd = parseTime(cleanValue(valueAt(row, columns, "breakEnd"), 5), "break_end", errors, false);
-
-  if ((breakStart && !breakEnd) || (!breakStart && breakEnd)) {
-    errors.push("break_start and break_end must be supplied together.");
-  }
-  if (workStart && workEnd && workEnd <= workStart) {
-    errors.push("work_end must be later than work_start.");
-  }
-
-  const effectiveFrom = parseDate(cleanValue(valueAt(row, columns, "effectiveFrom"), 10), "effective_from", errors);
-  const effectiveTo = parseDate(cleanValue(valueAt(row, columns, "effectiveTo"), 10), "effective_to", errors);
-  if (effectiveFrom && effectiveTo && effectiveTo < effectiveFrom) {
-    errors.push("effective_to cannot be earlier than effective_from.");
-  }
-
-  return {
-    scheduleId,
-    workStart: workStart ?? "",
-    workEnd: workEnd ?? "",
-    breakStart,
-    breakEnd,
-    shiftLabel: cleanValue(valueAt(row, columns, "shiftLabel"), 120) || null,
-    workDays,
-    restDays,
-    workLocation: cleanValue(valueAt(row, columns, "workLocation"), 200) || null,
-    effectiveFrom,
-    effectiveTo,
-  };
-}
-
-function parseRows(headers: string[], rows: string[][]): ParsedHrpsRow[] {
-  const { columns } = canonicalizeHeaders(headers);
-
-  return rows.map((row, index) => {
-    const rowNumber = index + 2;
-    const errors: string[] = [];
-    const warnings: string[] = [];
-    if (row.length > headers.length) errors.push("The row contains more values than the header row.");
-
-    const employeeId = cleanValue(valueAt(row, columns, "employeeId"), 64) || null;
-    if (!employeeId) {
-      errors.push("Employee ID is required.");
-    } else if (!/^[A-Za-z0-9][A-Za-z0-9._/-]{0,63}$/.test(employeeId)) {
-      errors.push("Employee ID contains unsupported characters.");
-    }
-
-    const displayName = cleanValue(valueAt(row, columns, "displayName"), 160);
-    const department = cleanValue(valueAt(row, columns, "department"), 160);
-    const position = cleanValue(valueAt(row, columns, "position"), 160) || null;
-    const employmentStatusValue = cleanValue(valueAt(row, columns, "employmentStatus"), 40);
-    const employmentStatus = parseEmploymentStatus(employmentStatusValue);
-    if (!displayName) errors.push("Name is required.");
-    if (!department) errors.push("Department is required.");
-    if (!employmentStatus) errors.push("Employment status must be active or inactive.");
-
-    const schedule = parseSchedule(row, columns, errors);
-    const input: HrpsEmployeeInput = {
-      employeeId: employeeId ?? "",
-      displayName,
-      department,
-      position,
-      employmentStatus: employmentStatus ?? "inactive",
-      schedule,
-    };
-
-    if (!schedule) warnings.push("No schedule fields were supplied; existing schedule history will remain unchanged.");
-
-    return {
-      rowNumber,
-      employeeId,
-      input,
-      errors,
-      warnings,
-    };
-  });
 }
 
 function dateKey(value: Date | null): string | null {
@@ -532,16 +302,18 @@ export async function buildHrpsImportPreview(content: string, filename: string):
     throw new HrpsImportError("FILE_TOO_LARGE", "The CSV must be 5 MB or smaller.");
   }
   let parsed;
+  let canonical;
+  let parsedRows: ParsedHrpsRow[];
   try {
     parsed = parseCsv(content, HRPS_MAX_ROWS);
+    canonical = canonicalizeHrpsHeaders(parsed.headers);
+    parsedRows = parseHrpsRows(canonical, parsed.rows);
   } catch (error) {
     if (error instanceof HrpsImportError) throw error;
     if (error instanceof HrpsCsvError) throw new HrpsImportError(error.code, error.message);
     throw new HrpsImportError("CSV_INVALID", "The CSV could not be read safely.");
   }
 
-  const canonical = canonicalizeHeaders(parsed.headers);
-  const parsedRows = parseRows(parsed.headers, parsed.rows);
   const ids = [...new Set(parsedRows.map((row) => row.employeeId).filter((id): id is string => Boolean(id)))];
   const existing = await getExistingEmployees(ids);
   const duplicateIds = new Set<string>();

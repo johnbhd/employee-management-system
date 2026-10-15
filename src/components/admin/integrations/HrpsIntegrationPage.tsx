@@ -282,8 +282,10 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
 
         <SectionCard title="CSV contract" eyebrow="Supported source fields">
           <div className="panel-body hrps-contract-panel">
-            <p><strong>Required:</strong> employee_id, name, department, employment_status.</p>
-            <p><strong>Optional:</strong> position and structured schedule fields: schedule_id, work_days, rest_days, work_start, work_end, break_start, break_end, shift_label, work_location, effective_from, effective_to.</p>
+            <p><strong>Required:</strong> employee_id, department, employment_status, and either full_name or first_name plus last_name.</p>
+            <p><strong>Employee fields:</strong> employee_number, middle_name, suffix, work_email, office_unit, position, employee_category, employment_type, date_hired, assigned_office, and work_location are supported when supplied.</p>
+            <p><strong>Schedule fields:</strong> work_days, rest_day, shift, work_start_time, work_end_time, break_start_time, break_end_time, work_location, schedule_effective_from, and schedule_effective_to. An optional schedule_id is accepted; otherwise it is derived from employee_id.</p>
+            <p><strong>Role safety:</strong> sia_application_role is informational only. CSV values never grant application roles or permissions.</p>
             <p><strong>Identity rule:</strong> employee_id remains text, including leading zeros. Names, email, department, and position are never used as the matching key.</p>
             <p><strong>Account policy:</strong> imported employees without an existing linked account remain pending until an approved email and secure Firebase onboarding policy are supplied. No predictable password or fabricated Firebase UID is created.</p>
           </div>

@@ -15,17 +15,26 @@ short, sequential Prisma transactions synchronize eligible rows.
 
 ## CSV contract
 
-Required headers are `employee_id`, `name`, `department`, and
-`employment_status`. `position` is optional. Structured schedule columns are
-optional as a group: `schedule_id`, `work_days`, `rest_days`, `work_start`,
-`work_end`, `break_start`, `break_end`, `shift_label`, `work_location`,
-`effective_from`, and `effective_to`.
+Required headers are `employee_id`, `department`, and `employment_status`, plus
+either `full_name` or both `first_name` and `last_name`. `employee_number`,
+`middle_name`, `suffix`, `work_email`, `office_unit`, `position`,
+`employee_category`, `employment_type`, `date_hired`, `assigned_office`, and
+`work_location` are supported optional employee fields. Structured schedule
+fields are optional as a group: `work_days`, `rest_day`, `shift`,
+`work_start_time`, `work_end_time`, `break_start_time`, `break_end_time`,
+`work_location`, `schedule_effective_from`, and `schedule_effective_to`.
+`schedule_id` remains a supported optional field; when omitted, the importer
+derives a stable schedule ID from the Employee ID.
+
+`sia_application_role` is accepted as informational source data only. It never
+grants an application role or permission.
 
 Header aliases are centralized in
-`src/server/hrps/hrps-import.service.ts`; aliases include `employee id`,
-`display_name`, `employee_name`, `dept`, `job_title`, `status`, `start_time`,
-and `end_time`. Employee IDs remain strings, so values such as `001` retain
-their leading zeros.
+`src/server/hrps/hrps-csv.ts`; aliases include `employee id`, `name`,
+`display_name`, `employee_name`, `dept`, `job_title`, `status`, the legacy
+schedule names, and the prototype's `*_time`/`schedule_effective_*` names.
+Employee IDs remain strings, so values such as `001` retain their leading
+zeros.
 
 ## Synchronization behavior
 
