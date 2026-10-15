@@ -1,9 +1,9 @@
 import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
-import { AdminIntegrationDetailPage, adminIntegrationDetailConfigs } from "@/components/admin/integrations/AdminIntegrationDetailPage";
-import { getAdminIntegrationMonitoringData } from "@/server/admin/integration-monitoring.service";
+import { BundyIntegrationPage } from "@/components/admin/integrations/BundyIntegrationPage";
+import { getBundyPageData } from "@/server/bundy/bundy-import.service";
 import { hasPermission } from "@/server/auth/permission.service";
 import { requireRoleContext } from "@/server/auth/guards";
-import type { AdminIntegrationMonitoringData } from "@/types/admin-integration-monitoring";
+import type { BundyPageData } from "@/types/bundy-import";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +13,14 @@ export default async function Page() {
     return <PermissionDeniedPage title="Bundy / Biometric ETL unavailable" backHref="/admin/dashboard" backLabel="Back to Admin Dashboard" />;
   }
 
-  let data: AdminIntegrationMonitoringData | null = null;
+  let data: BundyPageData | null = null;
   let loadError = false;
 
   try {
-    data = await getAdminIntegrationMonitoringData();
+    data = await getBundyPageData();
   } catch {
     loadError = true;
   }
 
-  return <AdminIntegrationDetailPage config={adminIntegrationDetailConfigs.bundy} initialData={data} loadError={loadError} />;
+  return <BundyIntegrationPage initialData={data} initialLoadError={loadError} canImport={await hasPermission(context.user, "admin.integration_monitoring.retry")} />;
 }

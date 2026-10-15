@@ -40,6 +40,7 @@
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/integration-detail.css";
 @import "./pages/admin/hrps-integration.css";
+@import "./pages/admin/bundy-integration.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
 @import "./pages/admin/roles-permissions.css";
 @import "./pages/admin/audit-logs.css";

@@ -30,6 +30,8 @@ export const auditEventRegistry: readonly AuditEventDefinition[] = [
   { eventType: "admin.user.deleted", action: "User Account Deleted", module: "User Accounts", defaultOutcome: "Successful" },
   { eventType: "admin.role_permissions.updated", action: "Role Permissions Updated", module: "Roles & Permissions", defaultOutcome: "Successful" },
   { eventType: "admin.settings.updated", action: "System Settings Updated", module: "System Settings", defaultOutcome: "Successful" },
+  { eventType: "bundy.import.completed", action: "Bundy Import Completed", module: "Bundy Integration", defaultOutcome: "Successful" },
+  { eventType: "bundy.import.failed", action: "Bundy Import Failed", module: "Bundy Integration", defaultOutcome: "Failed" },
 ];
 
 export function getAuditEventDefinition(eventType: string) {

@@ -1,0 +1,189 @@
+.bundy-integration-page {
+  gap: 1.25rem;
+}
+
+.bundy-import-top-grid {
+  align-items: start;
+}
+
+.bundy-upload-panel,
+.bundy-contract-panel,
+.bundy-preview-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.bundy-file-field {
+  display: grid;
+  gap: 0.45rem;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.bundy-file-field input[type="file"] {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px dashed #b8c7dc;
+  border-radius: 0.7rem;
+  background: #fbfdff;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.bundy-file-field small,
+.bundy-contract-panel p,
+.bundy-permission-note,
+.bundy-preview-meta,
+.bundy-cell-meta,
+.bundy-row-messages {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.bundy-upload-actions {
+  justify-content: flex-start;
+}
+
+.bundy-permission-note {
+  margin: 0;
+  color: #8a5700;
+}
+
+.bundy-boundary-note,
+.bundy-account-policy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #d5e3f7;
+  border-radius: 0.75rem;
+  background: #f7fbff;
+  color: #174a7a;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.bundy-boundary-note strong {
+  flex: 0 0 auto;
+}
+
+.bundy-boundary-note span,
+.bundy-account-policy p,
+.bundy-contract-panel p {
+  margin: 0;
+}
+
+.bundy-contract-panel strong {
+  color: #334155;
+}
+
+.bundy-import-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bundy-preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.bundy-preview-meta strong {
+  color: #334155;
+}
+
+.bundy-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.bundy-filter-button {
+  padding: 0.42rem 0.7rem;
+  border: 1px solid #d4dfec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.bundy-filter-button:hover,
+.bundy-filter-button:focus-visible,
+.bundy-filter-button.is-active {
+  border-color: var(--au-blue);
+  background: var(--info-soft);
+  color: var(--au-navy);
+}
+
+.bundy-preview-table,
+.bundy-history-table,
+.bundy-events-table {
+  min-width: 78rem;
+}
+
+.bundy-preview-table td,
+.bundy-history-table td,
+.bundy-events-table td {
+  vertical-align: top;
+}
+
+.bundy-preview-table td > strong,
+.bundy-history-table td > strong,
+.bundy-events-table td > strong {
+  display: block;
+  color: #334155;
+}
+
+.bundy-cell-meta {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.bundy-row-messages {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 15rem;
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}
+
+.bundy-row-messages.is-error {
+  color: var(--error);
+}
+
+.bundy-error {
+  border-color: #f1cdca;
+  background: #fff8f7;
+  color: #8f211b;
+}
+
+.bundy-error .ui-icon {
+  color: var(--error);
+}
+
+.bundy-history-count {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+@media (max-width: 1100px) {
+  .bundy-import-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .bundy-boundary-note,
+  .bundy-account-policy {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 440px) {
+  .bundy-import-metrics {
+    grid-template-columns: 1fr;
+  }
+}

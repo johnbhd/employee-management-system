@@ -26,6 +26,15 @@ const safeMetadataKeys = new Set([
   "attemptNumber",
   "version",
   "changes",
+  "importId",
+  "filename",
+  "status",
+  "totalRows",
+  "importedCount",
+  "unmatchedCount",
+  "duplicateScanCount",
+  "invalidCount",
+  "sourceConflictCount",
 ]);
 
 function roleLabel(role: string | null) {
