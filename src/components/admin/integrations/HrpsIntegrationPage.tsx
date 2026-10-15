@@ -14,6 +14,8 @@ import type {
   HrpsImportHistoryItem,
   HrpsImportPreview,
   HrpsImportResult,
+  HrpsRollbackPreview,
+  HrpsRollbackResult,
 } from "@/types/hrps-import";
 import type { Metric, StatusTone } from "@/types/ui";
 
@@ -40,7 +42,8 @@ function formatClassification(classification: string): string {
 
 function statusTone(status: HrpsImportHistoryItem["status"]): StatusTone {
   if (status === "COMPLETED") return "success";
-  if (status === "FAILED") return "danger";
+  if (status === "ROLLED_BACK") return "muted";
+  if (status === "FAILED" || status === "ROLLBACK_FAILED") return "danger";
   if (status === "COMPLETED_WITH_ERRORS") return "warning";
   return "info";
 }
@@ -67,7 +70,7 @@ function getResultMetrics(result: HrpsImportResult): Metric[] {
   ];
 }
 
-function HistoryTable({ history }: { history: HrpsImportHistoryData }) {
+function HistoryTable({ history, canRollback, onRollback }: { history: HrpsImportHistoryData; canRollback: boolean; onRollback: (item: HrpsImportHistoryItem) => void }) {
   if (!history.items.length) {
     return <p className="empty-state">No HRPS imports have been confirmed yet.</p>;
   }
@@ -82,6 +85,7 @@ function HistoryTable({ history }: { history: HrpsImportHistoryData }) {
             <th scope="col">Initiated by</th>
             <th scope="col">Rows</th>
             <th scope="col">Result</th>
+            <th scope="col"><span className="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody>
@@ -95,6 +99,11 @@ function HistoryTable({ history }: { history: HrpsImportHistoryData }) {
                 <small>{item.summary.createdEmployees} new · {item.summary.updatedEmployees} updated</small>
               </td>
               <td><StatusBadge tone={statusTone(item.status)}>{item.status.replaceAll("_", " ")}</StatusBadge></td>
+              <td>
+                {canRollback && ["COMPLETED", "COMPLETED_WITH_ERRORS", "ROLLBACK_FAILED"].includes(item.status) ? (
+                  <button type="button" className="button-tertiary" onClick={() => onRollback(item)}>Undo import</button>
+                ) : null}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -111,6 +120,9 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
   const [state, setState] = useState<ImportState>("idle");
   const [feedback, setFeedback] = useState(initialLoadError ? "Import history could not be loaded." : "");
   const [error, setError] = useState("");
+  const [rollbackPreview, setRollbackPreview] = useState<HrpsRollbackPreview | null>(null);
+  const [rollbackTarget, setRollbackTarget] = useState<HrpsImportHistoryItem | null>(null);
+  const [rollbackState, setRollbackState] = useState<"idle" | "loading" | "rolling_back">("idle");
 
   const refreshHistory = useCallback(async () => {
     try {
@@ -171,6 +183,45 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
       setError(importError instanceof Error ? importError.message : "The HRPS synchronization failed.");
     } finally {
       setState("idle");
+    }
+  }
+
+  async function openRollback(item: HrpsImportHistoryItem) {
+    setRollbackTarget(item);
+    setRollbackPreview(null);
+    setError("");
+    setRollbackState("loading");
+    try {
+      const response = await apiRequest<ApiSuccessResponse<HrpsRollbackPreview>>(
+        `/api/admin/hrps/imports/${item.id}/rollback-preview`,
+        { cache: "no-store" },
+      );
+      setRollbackPreview(response.data);
+    } catch (previewError) {
+      setRollbackTarget(null);
+      setError(previewError instanceof Error ? previewError.message : "The rollback preview failed.");
+    } finally {
+      setRollbackState("idle");
+    }
+  }
+
+  async function confirmRollback() {
+    if (!rollbackTarget || !rollbackPreview?.rollbackAllowed) return;
+    setRollbackState("rolling_back");
+    setError("");
+    try {
+      const response = await apiRequest<ApiSuccessResponse<HrpsRollbackResult>>(
+        `/api/admin/hrps/imports/${rollbackTarget.id}/rollback`,
+        { method: "POST" },
+      );
+      setRollbackTarget(null);
+      setRollbackPreview(null);
+      setFeedback(`Import ${response.data.importId} was rolled back. No global database reset was performed.`);
+      await refreshHistory();
+    } catch (rollbackError) {
+      setError(rollbackError instanceof Error ? rollbackError.message : "The rollback failed safely without completing.");
+    } finally {
+      setRollbackState("idle");
     }
   }
 
@@ -282,9 +333,50 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
 
       <SectionCard title="Import history" eyebrow="Persisted PostgreSQL metadata" actions={<span className="hrps-history-count">{history?.total ?? 0} recorded</span>}>
         <div className="panel-body">
-          {history ? <HistoryTable history={history} /> : <p className="empty-state">Import history is temporarily unavailable.</p>}
+          {history ? <HistoryTable history={history} canRollback={canImport} onRollback={(item) => void openRollback(item)} /> : <p className="empty-state">Import history is temporarily unavailable.</p>}
         </div>
       </SectionCard>
+
+      {rollbackTarget ? (
+        <div className="hrps-rollback-backdrop" role="presentation">
+          <section className="hrps-rollback-dialog" role="dialog" aria-modal="true" aria-labelledby="hrps-rollback-title">
+            <div className="hrps-rollback-dialog-header">
+              <div>
+                <span className="section-eyebrow">Safety preview</span>
+                <h2 id="hrps-rollback-title">Undo HRPS import</h2>
+                <p>{rollbackTarget.filename}</p>
+              </div>
+              <button type="button" className="button-tertiary" onClick={() => { setRollbackTarget(null); setRollbackPreview(null); }} disabled={rollbackState !== "idle"}>Cancel</button>
+            </div>
+            {rollbackState === "loading" ? <p className="hrps-rollback-loading" role="status">Checking ownership, later imports, and downstream dependencies…</p> : null}
+            {rollbackPreview ? (
+              <>
+                <div className="hrps-rollback-metrics">
+                  <div><strong>{rollbackPreview.employeesToDelete}</strong><span>Employees to remove</span></div>
+                  <div><strong>{rollbackPreview.employeesToRestore}</strong><span>Employees to restore</span></div>
+                  <div><strong>{rollbackPreview.schedulesToDelete}</strong><span>Schedules to remove</span></div>
+                  <div><strong>{rollbackPreview.schedulesToRestore}</strong><span>Schedules to restore</span></div>
+                  <div><strong>{rollbackPreview.applicationUsersToDelete}</strong><span>Application users</span></div>
+                  <div><strong>{rollbackPreview.firebaseUsersToDelete}</strong><span>Firebase accounts</span></div>
+                </div>
+                {rollbackPreview.warnings.map((warning) => <p className="hrps-rollback-warning" key={warning}>{warning}</p>)}
+                {rollbackPreview.blockedRecords.length ? (
+                  <div className="hrps-rollback-blocked" role="alert">
+                    <strong>Rollback blocked</strong>
+                    <ul>{rollbackPreview.blockedRecords.map((record) => <li key={`${record.rowNumber}-${record.employeeId}-${record.reason}`}>{record.employeeId ?? "Unknown row"}: {record.reason}</li>)}</ul>
+                  </div>
+                ) : <p className="hrps-rollback-safe" role="status">All targeted changes passed the server-side safety checks. Confirm to restore the previous state.</p>}
+                <div className="button-row hrps-rollback-actions">
+                  <button type="button" className="button-secondary" onClick={() => { setRollbackTarget(null); setRollbackPreview(null); }} disabled={rollbackState !== "idle"}>Cancel</button>
+                  <button type="button" className="button-primary" onClick={() => void confirmRollback()} disabled={!rollbackPreview.rollbackAllowed || rollbackState !== "idle"}>
+                    {rollbackState === "rolling_back" ? "Rolling back…" : "Confirm rollback"}
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

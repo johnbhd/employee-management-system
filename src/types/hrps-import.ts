@@ -78,12 +78,17 @@ export type HrpsImportPreview = {
 export type HrpsImportHistoryItem = {
   id: string;
   filename: string;
-  status: "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED";
+  status: "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "ROLLING_BACK" | "ROLLED_BACK" | "ROLLBACK_FAILED";
   startedAt: string;
   completedAt: string | null;
+  rollbackStartedAt: string | null;
+  rolledBackAt: string | null;
   initiatedBy: { displayName: string; username: string } | null;
+  rolledBackBy: { displayName: string; username: string; role: string } | null;
   summary: HrpsImportSummary;
   errorSummary: string | null;
+  rollbackErrorSummary: string | null;
+  rollbackSummary: HrpsRollbackSummary | null;
 };
 
 export type HrpsImportHistoryData = {
@@ -100,4 +105,42 @@ export type HrpsImportResult = {
   preview: HrpsImportPreview;
   summary: HrpsImportSummary;
   accountPolicy: string;
+};
+
+export type HrpsRollbackSummary = {
+  employeesDeleted: number;
+  employeesRestored: number;
+  schedulesDeleted: number;
+  schedulesRestored: number;
+  applicationUsersDeleted: number;
+  firebaseAccountsDeleted: number;
+};
+
+export type HrpsRollbackBlockedRecord = {
+  employeeId: string | null;
+  rowNumber: number | null;
+  reason: string;
+};
+
+export type HrpsRollbackPreview = {
+  importId: string;
+  filename: string;
+  status: HrpsImportHistoryItem["status"];
+  employeesToDelete: number;
+  employeesToRestore: number;
+  schedulesToDelete: number;
+  schedulesToRestore: number;
+  applicationUsersToDelete: number;
+  firebaseUsersToDelete: number;
+  blockedRecords: HrpsRollbackBlockedRecord[];
+  warnings: string[];
+  rollbackAllowed: boolean;
+  alreadyRolledBack: boolean;
+};
+
+export type HrpsRollbackResult = {
+  importId: string;
+  status: HrpsImportHistoryItem["status"];
+  summary: HrpsRollbackSummary;
+  firebaseCleanup: "not_required" | "completed" | "failed";
 };

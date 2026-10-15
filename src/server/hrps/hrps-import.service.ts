@@ -17,6 +17,7 @@ import type {
   HrpsImportPreviewRow,
   HrpsImportResult,
   HrpsImportSummary,
+  HrpsRollbackSummary,
   HrpsScheduleInput,
 } from "@/types/hrps-import";
 
@@ -104,6 +105,32 @@ type ExistingEmployee = Prisma.EmployeeGetPayload<{
     } };
   };
 }>;
+
+type HrpsEmployeeOwnershipSnapshot = {
+  displayName: string;
+  department: string;
+  position: string | null;
+  employmentStatus: "active" | "inactive";
+  sourceSystem: "HRPS";
+  dataSource: string | null;
+  sourceUpdatedAt: string | null;
+  syncedAt: string | null;
+};
+
+type HrpsScheduleOwnershipSnapshot = {
+  id: string;
+  sourceSystem: "HRPS";
+  dataSource: string | null;
+  schedule: HrpsScheduleInput;
+};
+
+type HrpsScheduleOwnership = {
+  createdSchedules: HrpsScheduleOwnershipSnapshot[];
+  updatedSchedules: Array<{
+    before: HrpsScheduleOwnershipSnapshot;
+    after: HrpsScheduleOwnershipSnapshot;
+  }>;
+};
 
 export class HrpsImportError extends Error {
   readonly code: string;
@@ -326,6 +353,56 @@ function scheduleSnapshot(schedule: ExistingEmployee["schedules"][number]): Hrps
     effectiveFrom: dateKey(schedule.effectiveFrom),
     effectiveTo: dateKey(schedule.effectiveTo),
   };
+}
+
+function employeeOwnershipSnapshot(employee: {
+  displayName: string;
+  department: string;
+  position: string | null;
+  employmentStatus: "active" | "inactive";
+  sourceSystem: "HRPS";
+  dataSource: string | null;
+  sourceUpdatedAt: Date | null;
+  syncedAt: Date | null;
+}): HrpsEmployeeOwnershipSnapshot {
+  return {
+    displayName: employee.displayName,
+    department: employee.department,
+    position: employee.position,
+    employmentStatus: employee.employmentStatus,
+    sourceSystem: employee.sourceSystem,
+    dataSource: employee.dataSource,
+    sourceUpdatedAt: employee.sourceUpdatedAt?.toISOString() ?? null,
+    syncedAt: employee.syncedAt?.toISOString() ?? null,
+  };
+}
+
+function scheduleOwnershipSnapshot(schedule: {
+  id: string;
+  scheduleId: string;
+  workStart: Date | null;
+  workEnd: Date | null;
+  breakStart: Date | null;
+  breakEnd: Date | null;
+  shiftLabel: string | null;
+  workDays: Prisma.JsonValue;
+  restDays: Prisma.JsonValue;
+  workLocation: string | null;
+  sourceSystem: "HRPS";
+  dataSource: string | null;
+  effectiveFrom: Date | null;
+  effectiveTo: Date | null;
+}): HrpsScheduleOwnershipSnapshot {
+  return {
+    id: schedule.id,
+    sourceSystem: schedule.sourceSystem,
+    dataSource: schedule.dataSource,
+    schedule: scheduleSnapshot(schedule),
+  };
+}
+
+function emptyScheduleOwnership(): HrpsScheduleOwnership {
+  return { createdSchedules: [], updatedSchedules: [] };
 }
 
 function scheduleEqual(left: HrpsScheduleInput, right: HrpsScheduleInput): boolean {
@@ -608,6 +685,15 @@ export async function synchronizeHrpsImport(input: {
     },
   });
 
+  await prisma.hrpsImportRow.createMany({
+    data: preview.rows.map((row) => ({
+      importId: history.id,
+      rowNumber: row.rowNumber,
+      employeeId: row.employeeId,
+      classification: row.classification,
+    })),
+  });
+
   let createdEmployees = 0;
   let updatedEmployees = 0;
   let schedulesCreated = 0;
@@ -624,7 +710,17 @@ export async function synchronizeHrpsImport(input: {
       const result = await prisma.$transaction(async (transaction) => {
         const existingEmployee = await transaction.employee.findUnique({
           where: { employeeId: row.employeeId! },
-          select: { id: true },
+          select: {
+            id: true,
+            displayName: true,
+            department: true,
+            position: true,
+            employmentStatus: true,
+            sourceSystem: true,
+            dataSource: true,
+            sourceUpdatedAt: true,
+            syncedAt: true,
+          },
         });
         const employee = existingEmployee
           ? await transaction.employee.update({
@@ -654,6 +750,7 @@ export async function synchronizeHrpsImport(input: {
             },
           });
 
+        const scheduleOwnership = emptyScheduleOwnership();
         let scheduleAction: "created" | "updated" | "unchanged" = "unchanged";
         if (row.input!.schedule) {
           const schedule = row.input!.schedule;
@@ -672,7 +769,8 @@ export async function synchronizeHrpsImport(input: {
           )) ?? schedules.find((item) => item.scheduleId === schedule.scheduleId);
           const data = scheduleWriteData(schedule);
           if (!existingSchedule) {
-            await transaction.employeeSchedule.create({ data: { ...data, employee: { connect: { id: employee.id } } } });
+            const createdSchedule = await transaction.employeeSchedule.create({ data: { ...data, employee: { connect: { id: employee.id } } } });
+            scheduleOwnership.createdSchedules.push(scheduleOwnershipSnapshot(createdSchedule));
             scheduleAction = "created";
           } else if (!scheduleEqual(scheduleSnapshot(existingSchedule), schedule)) {
             const hasNewEffectivePeriod = Boolean(
@@ -681,21 +779,27 @@ export async function synchronizeHrpsImport(input: {
             );
             if (hasNewEffectivePeriod) {
               const closeAt = previousDate(schedule.effectiveFrom!);
+              const before = scheduleOwnershipSnapshot(existingSchedule);
+              let closedSchedule = existingSchedule;
               if (!existingSchedule.effectiveTo || existingSchedule.effectiveTo > closeAt) {
-                await transaction.employeeSchedule.update({
+                closedSchedule = await transaction.employeeSchedule.update({
                   where: { id: existingSchedule.id },
                   data: { effectiveTo: closeAt },
                 });
               }
-              await transaction.employeeSchedule.create({
+              const createdSchedule = await transaction.employeeSchedule.create({
                 data: {
                   ...scheduleWriteData(schedule, versionedScheduleId(schedule.scheduleId, schedule.effectiveFrom!)),
                   employee: { connect: { id: employee.id } },
                 },
               });
+              scheduleOwnership.createdSchedules.push(scheduleOwnershipSnapshot(createdSchedule));
+              scheduleOwnership.updatedSchedules.push({ before, after: scheduleOwnershipSnapshot(closedSchedule) });
               scheduleAction = "created";
             } else {
-              await transaction.employeeSchedule.update({ where: { id: existingSchedule.id }, data });
+              const before = scheduleOwnershipSnapshot(existingSchedule);
+              const updatedSchedule = await transaction.employeeSchedule.update({ where: { id: existingSchedule.id }, data });
+              scheduleOwnership.updatedSchedules.push({ before, after: scheduleOwnershipSnapshot(updatedSchedule) });
               scheduleAction = "updated";
             }
           }
@@ -706,6 +810,19 @@ export async function synchronizeHrpsImport(input: {
           select: { id: true },
         });
         const accountAction = linkedUsers.length === 1 ? "existing" : "pending";
+
+        await transaction.hrpsImportRow.update({
+          where: { importId_rowNumber: { importId: history.id, rowNumber: row.rowNumber } },
+          data: {
+            employeeRecordId: employee.id,
+            employeeCreated: !existingEmployee,
+            employeeBefore: existingEmployee ? toJson(employeeOwnershipSnapshot(existingEmployee)) : undefined,
+            employeeAfter: toJson(employeeOwnershipSnapshot(employee)),
+            scheduleOwnership: toJson(scheduleOwnership),
+            applicationUserId: linkedUsers.length === 1 ? linkedUsers[0].id : null,
+            applicationUserCreated: false,
+          },
+        });
 
         await transaction.auditEvent.create({
           data: {
@@ -804,9 +921,11 @@ export async function synchronizeHrpsImport(input: {
 function mapHistory(row: {
   id: string;
   filename: string;
-  status: "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED";
+  status: "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "ROLLING_BACK" | "ROLLED_BACK" | "ROLLBACK_FAILED";
   startedAt: Date;
   completedAt: Date | null;
+  rollbackStartedAt: Date | null;
+  rolledBackAt: Date | null;
   totalRows: number;
   newCount: number;
   updatedCount: number;
@@ -822,16 +941,29 @@ function mapHistory(row: {
   accountsPending: number;
   accountsFailed: number;
   errorSummary: string | null;
+  rollbackErrorSummary: string | null;
+  rollbackSummary: Prisma.JsonValue | null;
+  rolledBackBySnapshot: Prisma.JsonValue | null;
   initiatedBy: { displayName: string; username: string } | null;
 }): HrpsImportHistoryItem {
+  const rolledBackBy = row.rolledBackBySnapshot && typeof row.rolledBackBySnapshot === "object" && !Array.isArray(row.rolledBackBySnapshot)
+    ? row.rolledBackBySnapshot as { displayName?: unknown; username?: unknown; role?: unknown }
+    : null;
   return {
     id: row.id,
     filename: row.filename,
     status: row.status,
     startedAt: row.startedAt.toISOString(),
     completedAt: row.completedAt?.toISOString() ?? null,
+    rollbackStartedAt: row.rollbackStartedAt?.toISOString() ?? null,
+    rolledBackAt: row.rolledBackAt?.toISOString() ?? null,
     initiatedBy: row.initiatedBy,
+    rolledBackBy: rolledBackBy && typeof rolledBackBy.displayName === "string" && typeof rolledBackBy.username === "string" && typeof rolledBackBy.role === "string"
+      ? { displayName: rolledBackBy.displayName, username: rolledBackBy.username, role: rolledBackBy.role }
+      : null,
     errorSummary: row.errorSummary,
+    rollbackErrorSummary: row.rollbackErrorSummary,
+    rollbackSummary: row.rollbackSummary as HrpsRollbackSummary | null,
     summary: {
       totalRows: row.totalRows,
       newCount: row.newCount,
@@ -857,6 +989,8 @@ const historySelect = {
   status: true,
   startedAt: true,
   completedAt: true,
+  rollbackStartedAt: true,
+  rolledBackAt: true,
   totalRows: true,
   newCount: true,
   updatedCount: true,
@@ -872,6 +1006,9 @@ const historySelect = {
   accountsPending: true,
   accountsFailed: true,
   errorSummary: true,
+  rollbackErrorSummary: true,
+  rollbackSummary: true,
+  rolledBackBySnapshot: true,
   initiatedBy: { select: { displayName: true, username: true } },
 } satisfies Prisma.HrpsImportSelect;
 

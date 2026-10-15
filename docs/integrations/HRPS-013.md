@@ -40,6 +40,30 @@ Import history is stored in the PostgreSQL `hrps_imports` table. Raw CSV
 content is not persisted. Confirmed imports and Employee row changes create
 Prisma audit events with minimized metadata.
 
+## Safe rollback
+
+Confirmed imports also create `hrps_import_rows` ownership records. Each
+changed row records its classification, Employee ID/database ID, whether the
+Employee was created, minimal HRPS-owned before/after values, schedule
+created/updated snapshots, and explicit Application User/Firebase ownership
+flags. The importer currently creates neither new Application Users nor
+Firebase identities, so existing linked identities are never rollback targets.
+
+`GET /api/admin/hrps/imports/:id/rollback-preview` is read-only and checks
+ownership, downstream Employee relationships, later HRPS rows, schedule
+state, and protected account activity. `POST /api/admin/hrps/imports/:id/rollback`
+re-runs those checks, claims the import with a conditional status transition,
+and then performs a bounded PostgreSQL transaction. A successful rollback
+preserves the import and original audit events, marks it `ROLLED_BACK`, and
+appends a rollback audit event. Attendance, corrections, Payroll, payslips,
+and account activity block deletion of import-created Employees. A later HRPS
+import or changed owned state also blocks rollback. Firebase cleanup is kept
+outside the PostgreSQL transaction and any external/database failure is
+recorded as `ROLLBACK_FAILED`; credentials and raw CSV data are never stored.
+
+The rollback migration is
+`prisma/migrations/20261015113000_hrps_import_rollback/migration.sql`.
+
 ## Account provisioning policy
 
 Existing Employee-to-Application User links are preserved and reported. The

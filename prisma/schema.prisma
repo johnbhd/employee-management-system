@@ -35,6 +35,15 @@ enum HrpsImportStatus {
   COMPLETED
   COMPLETED_WITH_ERRORS
   FAILED
+  ROLLING_BACK
+  ROLLED_BACK
+  ROLLBACK_FAILED
+}
+
+enum HrpsImportRowStatus {
+  PENDING
+  ROLLED_BACK
+  BLOCKED
 }
 
 enum AttendanceSource {
@@ -315,15 +324,53 @@ model HrpsImport {
   accountsPending     Int                  @default(0) @map("accounts_pending")
   accountsFailed      Int                  @default(0) @map("accounts_failed")
   errorSummary        String?              @map("error_summary") @db.Text
+  rollbackStartedAt   DateTime?            @map("rollback_started_at") @db.Timestamptz(3)
+  rolledBackAt        DateTime?            @map("rolled_back_at") @db.Timestamptz(3)
+  rolledBackByUserId  String?              @map("rolled_back_by_user_id") @db.Uuid
+  rolledBackBySnapshot Json?               @map("rolled_back_by_snapshot")
+  rollbackErrorSummary String?             @map("rollback_error_summary") @db.Text
+  rollbackSummary     Json?                @map("rollback_summary")
   createdAt           DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   initiatedBy User? @relation("HrpsImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+  rows        HrpsImportRow[]
 
   @@index([startedAt, id])
   @@index([status, startedAt])
   @@index([contentHash])
   @@map("hrps_imports")
+}
+
+// Each processed HRPS row keeps explicit ownership and minimal before/after
+// snapshots so rollback never has to infer ownership from timestamps.
+model HrpsImportRow {
+  id                    String             @id @default(uuid()) @db.Uuid
+  importId              String             @map("import_id") @db.Uuid
+  rowNumber             Int                @map("row_number")
+  employeeId            String?            @map("employee_id") @db.VarChar(64)
+  classification        String             @db.VarChar(40)
+  employeeRecordId      String?            @map("employee_record_id") @db.Uuid
+  employeeCreated       Boolean            @default(false) @map("employee_created")
+  employeeBefore        Json?              @map("employee_before")
+  employeeAfter         Json?              @map("employee_after")
+  scheduleOwnership     Json               @default("{}") @map("schedule_ownership")
+  applicationUserId     String?            @map("application_user_id") @db.Uuid
+  applicationUserCreated Boolean           @default(false) @map("application_user_created")
+  firebaseUid           String?            @map("firebase_uid") @db.VarChar(128)
+  firebaseCreated       Boolean            @default(false) @map("firebase_created")
+  rollbackStatus        HrpsImportRowStatus @default(PENDING) @map("rollback_status")
+  rollbackMessage       String?            @map("rollback_message") @db.Text
+  createdAt             DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  import HrpsImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@unique([importId, rowNumber])
+  @@index([employeeId])
+  @@index([employeeRecordId])
+  @@index([rollbackStatus])
+  @@map("hrps_import_rows")
 }
 
 // Attendance keeps source provenance and actor snapshots separate from the
