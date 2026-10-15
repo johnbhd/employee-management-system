@@ -12,8 +12,8 @@ export type AttendanceMonitoringItem = {
     dateLabel: string;
     timeIn: string;
     timeOut: string | null;
-    timeInSource: "QR";
-    timeOutSource: "QR" | null;
+    timeInSource: "QR" | "BUNDY";
+    timeOutSource: "QR" | "BUNDY" | null;
     status: AttendanceMonitoringStatus;
     statusLabel: "Present" | "Completed";
     statusTone: StatusTone;

@@ -23,6 +23,9 @@ export type PrismaAttendanceView = {
     timeOutSource: AttendanceSource | null;
     timeInSourceReference: string | null;
     timeOutSourceReference: string | null;
+    timeInActorSnapshot: unknown;
+    timeOutActorSnapshot: unknown;
+    hrVerifiedBySnapshot: unknown;
     status: AttendanceStatus;
     hrVerificationStatus: HrVerificationStatus;
     hrVerifiedAt: string | null;
@@ -57,6 +60,9 @@ const attendanceSelect = {
     timeOutSource: true,
     timeInSourceReference: true,
     timeOutSourceReference: true,
+    timeInActorSnapshot: true,
+    timeOutActorSnapshot: true,
+    hrVerifiedBySnapshot: true,
     status: true,
     hrVerificationStatus: true,
     hrVerifiedAt: true,
@@ -94,6 +100,9 @@ function mapAttendance(row: AttendanceRow): PrismaAttendanceView {
         timeOutSource: row.timeOutSource,
         timeInSourceReference: row.timeInSourceReference,
         timeOutSourceReference: row.timeOutSourceReference,
+        timeInActorSnapshot: row.timeInActorSnapshot,
+        timeOutActorSnapshot: row.timeOutActorSnapshot,
+        hrVerifiedBySnapshot: row.hrVerifiedBySnapshot,
         status: row.status,
         hrVerificationStatus: row.hrVerificationStatus,
         hrVerifiedAt: toIso(row.hrVerifiedAt),

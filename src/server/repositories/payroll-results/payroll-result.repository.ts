@@ -14,6 +14,17 @@ import {
   payrollExternalProcessingStatuses,
 } from "@/types/payroll-handoff";
 import { payrollResultStatuses } from "@/types/payroll-results";
+import {
+  getPrismaPayrollResultById,
+  getPrismaPayrollResultByTransferId,
+  getPrismaPayrollResultDetail,
+  listPrismaPayrollResultItems,
+  listPrismaPayrollResults,
+  upsertPrismaPayrollResult,
+  writePrismaPayrollResultAuditEvents,
+  PrismaPayrollResultConflictError,
+  PrismaPayrollResultDataError,
+} from "@/server/repositories/payroll-results/prisma-payroll-result.repository";
 
 const resultCollection = "payrollResults";
 const itemCollection = "items";
@@ -35,6 +46,12 @@ export class PayrollResultConflictError extends Error {
     super(message);
     this.name = "PayrollResultConflictError";
   }
+}
+
+function mapPrismaResultError(error: unknown): never {
+  if (error instanceof PrismaPayrollResultDataError) throw new PayrollResultDataError(error.message);
+  if (error instanceof PrismaPayrollResultConflictError) throw new PayrollResultConflictError(error.message);
+  throw error;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -241,6 +258,10 @@ function itemDocumentId(employeeId: string): string {
 }
 
 export async function listPayrollResults(): Promise<PayrollResultRecord[]> {
+  const result = await listPrismaPayrollResults({ page: 1, pageSize: 100 });
+  return result.rows;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb().collection(resultCollection).get();
   return snapshots.docs
     .map((snapshot) => {
@@ -252,6 +273,9 @@ export async function listPayrollResults(): Promise<PayrollResultRecord[]> {
 }
 
 export async function getPayrollResultById(resultId: string): Promise<PayrollResultRecord | null> {
+  return getPrismaPayrollResultById(resultId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshot = await getFirebaseAdminDb().collection(resultCollection).doc(resultId).get();
   if (!snapshot.exists) return null;
   const result = parseResult(snapshot.id, snapshot.data());
@@ -260,6 +284,9 @@ export async function getPayrollResultById(resultId: string): Promise<PayrollRes
 }
 
 export async function getPayrollResultByTransferId(transferId: string): Promise<PayrollResultRecord | null> {
+  return getPrismaPayrollResultByTransferId(transferId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(resultCollection)
     .where("transferId", "==", transferId)
@@ -273,6 +300,9 @@ export async function getPayrollResultByTransferId(transferId: string): Promise<
 }
 
 export async function listPayrollResultItems(resultId: string): Promise<PayrollResultItem[]> {
+  return listPrismaPayrollResultItems(resultId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(resultCollection)
     .doc(resultId)
@@ -288,6 +318,9 @@ export async function listPayrollResultItems(resultId: string): Promise<PayrollR
 }
 
 export async function getPayrollResultDetail(resultId: string) {
+  return getPrismaPayrollResultDetail(resultId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const result = await getPayrollResultById(resultId);
   if (!result) return null;
   return { result, items: await listPayrollResultItems(resultId) };
@@ -297,6 +330,14 @@ export async function upsertPayrollResult(input: {
   result: PayrollResultRecord;
   items: PayrollResultItem[];
 }): Promise<void> {
+  try {
+    await upsertPrismaPayrollResult(input);
+    return;
+  } catch (error) {
+    return mapPrismaResultError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const resultReference = db.collection(resultCollection).doc(input.result.resultId);
 
@@ -335,6 +376,10 @@ export async function writePayrollResultAuditEvents(input: {
   items: PayrollResultItem[];
   receivedAt: string;
 }) {
+  await writePrismaPayrollResultAuditEvents(input);
+  return;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const events: Array<{ id: string; action: string; employeeId?: string; payslipId?: string | null }> = [
     { id: `${input.result.resultId}:received`, action: "Payroll result received" },

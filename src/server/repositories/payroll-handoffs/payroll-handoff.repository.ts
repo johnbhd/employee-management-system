@@ -25,6 +25,15 @@ import {
   type PayrollBatchStatus,
 } from "@/types/payroll-batches";
 import { parsePayrollBatchItemSnapshot } from "@/server/repositories/payroll-batches/payroll-batch.repository";
+import {
+  claimPrismaPayrollHandoff,
+  getPrismaPayrollHandoffByBatchId,
+  getPrismaPayrollHandoffByTransferId,
+  listPrismaPayrollHandoffs,
+  updatePrismaPayrollHandoffResult,
+  PrismaPayrollHandoffConflictError,
+  PrismaPayrollHandoffNotFoundError,
+} from "@/server/repositories/payroll-handoffs/prisma-payroll-handoff.repository";
 
 const handoffCollection = "payrollHandoffs";
 
@@ -55,6 +64,12 @@ export class PayrollHandoffConflictError extends Error {
     super(message);
     this.name = "PayrollHandoffConflictError";
   }
+}
+
+function mapPrismaHandoffError(error: unknown): never {
+  if (error instanceof PrismaPayrollHandoffNotFoundError) throw new PayrollHandoffNotFoundError();
+  if (error instanceof PrismaPayrollHandoffConflictError) throw new PayrollHandoffConflictError(error.message);
+  throw error;
 }
 
 export type PayrollStoredHandoff = PayrollHandoffRecord & {
@@ -247,6 +262,10 @@ export function parsePayrollHandoff(
 }
 
 export async function listPayrollHandoffs(): Promise<PayrollStoredHandoff[]> {
+  const result = await listPrismaPayrollHandoffs({ page: 1, pageSize: 100 });
+  return result.rows as PayrollStoredHandoff[];
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb().collection(handoffCollection).get();
 
   return snapshots.docs
@@ -259,6 +278,9 @@ export async function listPayrollHandoffs(): Promise<PayrollStoredHandoff[]> {
 }
 
 export async function getPayrollHandoffByBatchId(batchId: string) {
+  return getPrismaPayrollHandoffByBatchId(batchId) as Promise<PayrollStoredHandoff | null>;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshot = await getFirebaseAdminDb().collection(handoffCollection).doc(batchId).get();
   if (!snapshot.exists) return null;
 
@@ -268,6 +290,9 @@ export async function getPayrollHandoffByBatchId(batchId: string) {
 }
 
 export async function getPayrollHandoffByTransferId(transferId: string) {
+  return getPrismaPayrollHandoffByTransferId(transferId) as Promise<PayrollStoredHandoff | null>;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(handoffCollection)
     .where("transferId", "==", transferId)
@@ -289,6 +314,13 @@ export async function claimPayrollHandoff(input: {
   batchSnapshot: PayrollBatchItemSnapshot[];
   batchSummary: PayrollHandoffBatchSummary;
 }) {
+  try {
+    return await claimPrismaPayrollHandoff(input) as PayrollStoredHandoff;
+  } catch (error) {
+    return mapPrismaHandoffError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const handoffReference = db.collection(handoffCollection).doc(input.batchId);
   const transferId = createTransferId(input.batchId);
@@ -401,6 +433,13 @@ export async function updatePayrollHandoffResult(input: {
   failureCode?: string | null;
   failureSummary?: string | null;
 }) {
+  try {
+    return await updatePrismaPayrollHandoffResult(input) as PayrollStoredHandoff;
+  } catch (error) {
+    return mapPrismaHandoffError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const handoffReference = db.collection(handoffCollection).doc(input.batchId);
 

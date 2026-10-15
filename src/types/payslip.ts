@@ -2,9 +2,11 @@ import type { IconName, StatusTone } from "@/types/ui";
 
 export type PayslipStatus = "released" | "in-progress";
 
+export type MoneyValue = number | string;
+
 export type EmployeePayslipDeduction = {
   label: string;
-  amount: number;
+  amount: MoneyValue;
 };
 
 export type EmployeePayslip = {
@@ -14,16 +16,16 @@ export type EmployeePayslip = {
   payrollMonthKey: string;
   dateReleased: string | null;
   payFrequency: string;
-  monthlyBasicSalary: number | null;
-  cutoffBasicPay: number | null;
-  referenceDailyRate: number | null;
+  monthlyBasicSalary: MoneyValue | null;
+  cutoffBasicPay: MoneyValue | null;
+  referenceDailyRate: MoneyValue | null;
   earnings: {
-    basicPay: number | null;
-    totalEarnings: number | null;
+    basicPay: MoneyValue | null;
+    totalEarnings: MoneyValue | null;
   };
   deductions: readonly EmployeePayslipDeduction[];
-  totalDeductions: number | null;
-  netPay: number | null;
+  totalDeductions: MoneyValue | null;
+  netPay: MoneyValue | null;
   status: PayslipStatus;
   statusLabel: string;
   statusTone: StatusTone;
@@ -37,11 +39,11 @@ export type EmployeeMonthlyPayslip = {
   monthLabel: string;
   releasedCutoffCount: number;
   totalCutoffCount: number;
-  monthlyBasicSalary: number | null;
-  referenceDailyRate: number | null;
-  totalEarnings: number | null;
-  totalDeductions: number | null;
-  netPay: number | null;
+  monthlyBasicSalary: MoneyValue | null;
+  referenceDailyRate: MoneyValue | null;
+  totalEarnings: MoneyValue | null;
+  totalDeductions: MoneyValue | null;
+  netPay: MoneyValue | null;
   status: EmployeeMonthlyPayslipStatus;
   statusLabel: string;
   statusTone: StatusTone;

@@ -9,6 +9,7 @@ import { listEmployeeScheduleReferences } from "@/server/repositories/employee-s
 import { listAccountingTransfers } from "@/server/repositories/accounting-transfers/accounting-transfer.repository";
 import { listPayrollHandoffs } from "@/server/repositories/payroll-handoffs/payroll-handoff.repository";
 import { listPayrollResults } from "@/server/repositories/payroll-results/payroll-result.repository";
+import { getPrismaIntegrationMonitoringSnapshot } from "@/server/repositories/dashboard/prisma-dashboard.repository";
 import { accountingIntegrationProviderNote } from "@/server/accounting/accounting-integration.adapter";
 import { payrollIntegrationProviderNote } from "@/server/payroll/integration/payroll-integration-adapter";
 import type { AccountingTransferRecord } from "@/types/accounting-transfers";
@@ -395,18 +396,21 @@ function statusForOperationalRecords(input: {
 }
 
 export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrationMonitoringData> {
-  const [employees, schedules, attendance, handoffs, results, transfers] = await Promise.all([
+  const [employees, schedules, attendance, handoffs, results, transfers, databaseSnapshot] = await Promise.all([
     listEmployees(),
     listEmployeeScheduleReferences(),
     listAttendanceForMonitoring(),
     listPayrollHandoffs(),
     listPayrollResults(),
     listAccountingTransfers(),
+    getPrismaIntegrationMonitoringSnapshot(),
   ]);
 
   const qrAttendance = attendance.filter(({ record }) => record.timeInSource === "QR");
-  const qrLatest = latestTimestamp(qrAttendance.map(({ record }) => attendanceTimestamp(record)));
-  const attendanceLatest = latestTimestamp(attendance.map(({ record }) => attendanceTimestamp(record)));
+  const qrLatest = databaseSnapshot.attendance.lastActivityAt
+    ?? latestTimestamp(qrAttendance.map(({ record }) => attendanceTimestamp(record)));
+  const attendanceLatest = databaseSnapshot.attendance.lastActivityAt
+    ?? latestTimestamp(attendance.map(({ record }) => attendanceTimestamp(record)));
 
   const handoffPending = handoffs.filter(hasPayrollHandoffPending).length;
   const handoffIssues = handoffs.filter(hasPayrollHandoffFailure).length;
@@ -448,7 +452,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       icon: "hrps",
       health: employees.length > 0 ? "healthy" : "unknown",
       mode: "local",
-      provider: "Firestore employee and schedule repositories",
+      provider: "Prisma employee and schedule repositories",
       detail: employees.length > 0
         ? `${employees.length} employee reference${employees.length === 1 ? "" : "s"} and ${schedules.length} schedule reference${schedules.length === 1 ? "" : "s"} loaded.`
         : "No employee reference records are available.",
@@ -473,7 +477,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       icon: "qr",
       health: qrAttendance.length > 0 ? "healthy" : "unknown",
       mode: "local",
-      provider: "Firestore attendance repository",
+      provider: "Prisma attendance repository",
       detail: qrAttendance.length > 0
         ? `${qrAttendance.length} persisted QR attendance write${qrAttendance.length === 1 ? "" : "s"} available.`
         : "No QR attendance write has been recorded; no failure is inferred.",
@@ -487,7 +491,7 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       icon: "unified",
       health: attendance.length > 0 ? "healthy" : "unknown",
       mode: "local",
-      provider: "Firestore attendance repository",
+      provider: "Prisma attendance repository",
       detail: attendance.length > 0
         ? `${attendance.length} persisted attendance record${attendance.length === 1 ? "" : "s"} available.`
         : "No attendance record is available; no failure is inferred.",

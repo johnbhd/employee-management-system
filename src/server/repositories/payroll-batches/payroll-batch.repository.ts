@@ -14,6 +14,18 @@ import type {
   PayrollBatchStatus,
 } from "@/types/payroll-batches";
 import { payrollBatchStatuses } from "@/types/payroll-batches";
+import {
+  addPrismaPayrollBatchItem,
+  createPrismaPayrollBatch,
+  getPrismaPayrollBatchById,
+  listPrismaPayrollBatches,
+  markPrismaPayrollBatchSubmittedFromHandoff,
+  removePrismaPayrollBatchItem,
+  updatePrismaPayrollBatchStatus,
+  PrismaPayrollBatchConflictError,
+  PrismaPayrollBatchNotFoundError,
+  PrismaPayrollBatchValidationError,
+} from "@/server/repositories/payroll-batches/prisma-payroll-batch.repository";
 
 const batchCollection = "payrollBatches";
 const membershipCollection = "payrollBatchMembership";
@@ -63,6 +75,13 @@ export class PayrollBatchEligibilityError extends Error {
     super(message);
     this.name = "PayrollBatchEligibilityError";
   }
+}
+
+function mapPrismaBatchError(error: unknown): never {
+  if (error instanceof PrismaPayrollBatchNotFoundError) throw new PayrollBatchNotFoundError();
+  if (error instanceof PrismaPayrollBatchConflictError) throw new PayrollBatchConflictError(error.message);
+  if (error instanceof PrismaPayrollBatchValidationError) throw new PayrollBatchValidationError(error.message);
+  throw error;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -273,6 +292,13 @@ export function parsePayrollBatch(
 }
 
 export async function listPayrollBatches(): Promise<PayrollBatchRecord[]> {
+  const result = await listPrismaPayrollBatches({ page: 1, pageSize: 100 });
+  return result.rows.map((row) => {
+    if (!row.createdBy) throw new PayrollBatchDataError();
+    return row as PayrollBatchRecord;
+  });
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb().collection(batchCollection).get();
 
   return snapshots.docs
@@ -287,12 +313,18 @@ export async function listPayrollBatches(): Promise<PayrollBatchRecord[]> {
 export async function getPayrollBatchById(
   batchId: string,
 ): Promise<PayrollBatchRecord | null> {
+  const prismaBatch = await getPrismaPayrollBatchById(batchId);
+  return prismaBatch && prismaBatch.createdBy
+    ? prismaBatch as PayrollBatchRecord
+    : null;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshot = await getFirebaseAdminDb().collection(batchCollection).doc(batchId).get();
   if (!snapshot.exists) return null;
 
-  const batch = parseBatch(snapshot.id, snapshot.data());
-  if (!batch) throw new PayrollBatchDataError();
-  return batch;
+  const legacyBatch = parseBatch(snapshot.id, snapshot.data());
+  if (!legacyBatch) throw new PayrollBatchDataError();
+  return legacyBatch;
 }
 
 export async function createPayrollBatch(input: {
@@ -301,6 +333,13 @@ export async function createPayrollBatch(input: {
   notes?: string | null;
   blockedCount?: number;
 }): Promise<PayrollBatchRecord> {
+  try {
+    return await createPrismaPayrollBatch(input) as PayrollBatchRecord;
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const now = Timestamp.now();
   const batchReference = db.collection(batchCollection).doc(`PAY-${input.period.start.replaceAll("-", "")}-${randomUUID().slice(0, 8).toUpperCase()}`);
@@ -320,8 +359,7 @@ export async function createPayrollBatch(input: {
     notes: input.notes?.trim() || null,
   });
 
-  const batch = parseBatch(batchReference.id, (await batchReference.get()).data());
-  if (!batch) throw new PayrollBatchDataError();
+  const batch = parseBatch(batchReference.id, (await batchReference.get()).data()) as PayrollBatchRecord;
   await writeBatchAuditEvent(batch, "payroll.batch.created", input.actor, "A Payroll batch was created.");
   return batch;
 }
@@ -331,6 +369,13 @@ export async function addPayrollBatchItem(input: {
   snapshot: PayrollBatchItemSnapshot;
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
+  try {
+    return await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
   const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.snapshot.employeePeriodId));
@@ -399,6 +444,13 @@ export async function removePayrollBatchItem(input: {
   employeePeriodId: string;
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
+  try {
+    return await removePrismaPayrollBatchItem(input) as PayrollBatchRecord;
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
   const membershipReference = db.collection(membershipCollection).doc(membershipDocumentId(input.employeePeriodId));
@@ -454,6 +506,13 @@ export async function updatePayrollBatchStatus(input: {
   status: "Ready" | "Submitted";
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
+  try {
+    return await updatePrismaPayrollBatchStatus(input) as PayrollBatchRecord;
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
 
@@ -502,6 +561,13 @@ export async function markPayrollBatchSubmittedFromHandoff(input: {
   batchId: string;
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
+  try {
+    return await markPrismaPayrollBatchSubmittedFromHandoff(input) as PayrollBatchRecord;
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const batchReference = db.collection(batchCollection).doc(input.batchId);
 

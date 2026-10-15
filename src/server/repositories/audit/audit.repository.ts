@@ -3,6 +3,11 @@ import "server-only";
 import { FieldValue, Timestamp, type DocumentData } from "firebase-admin/firestore";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import {
+  getPrismaAuditEventById,
+  listPrismaAuditEvents,
+  recordPrismaAuditEvent,
+} from "@/server/repositories/audit/prisma-audit.repository";
 import type { AdminAuditActorType, AdminAuditOutcome } from "@/types/admin-audit-logs";
 
 const canonicalCollection = "auditEvents";
@@ -190,6 +195,10 @@ function mapLegacy(id: string, collection: string, data: DocumentData): AuditSto
 }
 
 export async function recordAuditEvent(input: AuditEventInput): Promise<void> {
+  await recordPrismaAuditEvent(input);
+  return;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const eventId = input.id ?? db.collection(canonicalCollection).doc().id;
   await db.collection(canonicalCollection).doc(eventId).set({
@@ -207,6 +216,10 @@ export async function recordAuditEvent(input: AuditEventInput): Promise<void> {
 }
 
 export async function listAuditEvents(limitPerCollection = 250): Promise<AuditStoredEvent[]> {
+  const result = await listPrismaAuditEvents({ page: 1, pageSize: Math.min(200, Math.max(1, limitPerCollection)) });
+  return result.rows;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const snapshots = await Promise.all(collectionsForRead.map((collection) => (
     db.collection(collection).orderBy("occurredAt", "desc").limit(limitPerCollection).get()
@@ -215,8 +228,8 @@ export async function listAuditEvents(limitPerCollection = 250): Promise<AuditSt
     const raw = doc.data();
     if (!raw) return [];
     const event = index === 0
-      ? mapCanonical(doc.id, raw)
-      : mapLegacy(doc.id, collectionsForRead[index], raw);
+      ? mapCanonical(doc.id, raw as DocumentData)
+      : mapLegacy(doc.id, collectionsForRead[index]!, raw as DocumentData);
     return event ? [event] : [];
   }));
   const unique = new Map(events.map((event) => [event.id, event]));
@@ -224,18 +237,22 @@ export async function listAuditEvents(limitPerCollection = 250): Promise<AuditSt
 }
 
 export async function getAuditEventById(id: string): Promise<AuditStoredEvent | null> {
+  return getPrismaAuditEventById(id);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const canonicalSnapshot = await db.collection(canonicalCollection).doc(id).get();
   if (canonicalSnapshot.exists) {
     const raw = canonicalSnapshot.data();
-    return raw ? mapCanonical(canonicalSnapshot.id, raw) : null;
+    return raw ? mapCanonical(canonicalSnapshot.id, raw as DocumentData) : null;
   }
 
-  const legacyCollection = legacyCollections.find((collection) => id.startsWith(`${collection}:`));
-  if (!legacyCollection) return null;
+  const legacyCollectionCandidate = legacyCollections.find((collection) => id.startsWith(`${collection}:`));
+  if (!legacyCollectionCandidate) return null;
+  const legacyCollection = legacyCollectionCandidate!;
   const documentId = id.slice(legacyCollection.length + 1);
   const snapshot = await db.collection(legacyCollection).doc(documentId).get();
   if (!snapshot.exists) return null;
   const raw = snapshot.data();
-  return raw ? mapLegacy(snapshot.id, legacyCollection, raw) : null;
+  return raw ? mapLegacy(snapshot.id, legacyCollection, raw as DocumentData) : null;
 }

@@ -4,6 +4,13 @@ import type { DocumentData } from "firebase-admin/firestore";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import {
+  listPrismaPayslipsByEmployee,
+  upsertPrismaPayslipFromResult,
+  type PrismaPayslipView,
+} from "@/server/repositories/payroll/prisma-payslip.repository";
+import { toRepositoryTimestamp, toRepositoryRecord } from "@/server/repositories/prisma/prisma-compat";
+import type { MoneyValue } from "@/types/payslip";
 
 const payslipCollection = "payrollPayslips";
 
@@ -11,7 +18,7 @@ export type StoredPayslipStatus = "released" | "in-progress";
 
 export type StoredPayslipDeduction = {
   label: string;
-  amount: number;
+  amount: MoneyValue;
 };
 
 export type StoredPayrollMonthlySummary = {
@@ -20,11 +27,11 @@ export type StoredPayrollMonthlySummary = {
   monthLabel: string;
   releasedCutoffCount: number;
   totalCutoffCount: number;
-  monthlyBasicSalary: number | null;
-  referenceDailyRate: number | null;
-  totalEarnings: number | null;
-  totalDeductions: number | null;
-  netPay: number | null;
+  monthlyBasicSalary: MoneyValue | null;
+  referenceDailyRate: MoneyValue | null;
+  totalEarnings: MoneyValue | null;
+  totalDeductions: MoneyValue | null;
+  netPay: MoneyValue | null;
   status: "complete" | "in-progress";
   includedPayslipIds: string[];
 };
@@ -35,14 +42,14 @@ export type StoredPayrollPayslip = {
   periodStart: string;
   periodEnd: string;
   payFrequency: string;
-  monthlyBasicSalary: number | null;
-  cutoffBasicPay: number | null;
-  referenceDailyRate: number | null;
-  basicPay: number | null;
-  grossPay: number | null;
+  monthlyBasicSalary: MoneyValue | null;
+  cutoffBasicPay: MoneyValue | null;
+  referenceDailyRate: MoneyValue | null;
+  basicPay: MoneyValue | null;
+  grossPay: MoneyValue | null;
   deductions: StoredPayslipDeduction[];
-  totalDeductions: number | null;
-  netPay: number | null;
+  totalDeductions: MoneyValue | null;
+  netPay: MoneyValue | null;
   status: StoredPayslipStatus;
   releasedAt: Timestamp | null;
   source: "PAYROLL_SYSTEM";
@@ -57,14 +64,14 @@ export type PayrollResultPayslipUpsert = {
   periodEnd: string;
   payrollReference: string;
   releasedAt: string;
-  monthlyBasicSalary?: number | null;
-  cutoffBasicPay?: number | null;
-  referenceDailyRate?: number | null;
-  basicPay?: number | null;
-  grossPay?: number | null;
+  monthlyBasicSalary?: MoneyValue | null;
+  cutoffBasicPay?: MoneyValue | null;
+  referenceDailyRate?: MoneyValue | null;
+  basicPay?: MoneyValue | null;
+  grossPay?: MoneyValue | null;
   deductions?: StoredPayslipDeduction[];
-  totalDeductions?: number | null;
-  netPay?: number | null;
+  totalDeductions?: MoneyValue | null;
+  netPay?: MoneyValue | null;
 };
 
 export class PayslipDataError extends Error {
@@ -74,6 +81,61 @@ export class PayslipDataError extends Error {
     super("The payroll payslip record has an invalid shape.");
     this.name = "PayslipDataError";
   }
+}
+
+function toMoneyValue(value: unknown): MoneyValue | null {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string" && /^-?\d+(?:\.\d+)?$/.test(value.trim())) {
+    return value.trim();
+  }
+  return null;
+}
+
+function toStoredPrismaPayslip(record: PrismaPayslipView): StoredPayrollPayslip {
+  const monthly = toRepositoryRecord(record.monthlySummary);
+  const monthKey = record.periodStart.slice(0, 7);
+  return {
+    id: record.legacyId ?? record.internalId,
+    employeeId: record.employeeId,
+    periodStart: record.periodStart,
+    periodEnd: record.periodEnd,
+    payFrequency: record.payFrequency,
+    monthlyBasicSalary: toMoneyValue(record.monthlyBasicSalary),
+    cutoffBasicPay: toMoneyValue(record.cutoffBasicPay),
+    referenceDailyRate: toMoneyValue(record.referenceDailyRate),
+    basicPay: toMoneyValue(record.basicPay),
+    grossPay: toMoneyValue(record.grossPay),
+    deductions: record.deductions.flatMap((value) => {
+      const deduction = toRepositoryRecord(value);
+      const amount = toMoneyValue(deduction.amount);
+      return typeof deduction.label === "string" && amount !== null
+        ? [{ label: deduction.label, amount }]
+        : [];
+    }),
+    totalDeductions: toMoneyValue(record.totalDeductions),
+    netPay: toMoneyValue(record.netPay),
+    status: record.status,
+    releasedAt: toRepositoryTimestamp(record.releasedAt),
+    source: "PAYROLL_SYSTEM",
+    payrollReference: record.payrollReference,
+    monthlySummary: {
+      id: typeof monthly.id === "string" ? monthly.id : `monthly-${record.employeeId}-${monthKey}`,
+      monthKey: typeof monthly.monthKey === "string" ? monthly.monthKey : monthKey,
+      monthLabel: typeof monthly.monthLabel === "string" ? monthly.monthLabel : formatResultMonthLabel(monthKey),
+      releasedCutoffCount: typeof monthly.releasedCutoffCount === "number" ? monthly.releasedCutoffCount : 1,
+      totalCutoffCount: typeof monthly.totalCutoffCount === "number" ? monthly.totalCutoffCount : 1,
+      monthlyBasicSalary: toMoneyValue(monthly.monthlyBasicSalary ?? record.monthlyBasicSalary),
+      referenceDailyRate: toMoneyValue(monthly.referenceDailyRate ?? record.referenceDailyRate),
+      totalEarnings: toMoneyValue(monthly.totalEarnings ?? record.grossPay),
+      totalDeductions: toMoneyValue(monthly.totalDeductions ?? record.totalDeductions),
+      netPay: toMoneyValue(monthly.netPay ?? record.netPay),
+      status: monthly.status === "in-progress" ? "in-progress" : "complete",
+      includedPayslipIds: Array.isArray(monthly.includedPayslipIds)
+        ? monthly.includedPayslipIds.filter((value): value is string => typeof value === "string")
+        : [record.legacyId ?? record.internalId],
+    },
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -87,19 +149,6 @@ function getRequiredString(
   const value = data[field];
 
   return typeof value === "string" && value.trim() ? value : null;
-}
-
-function getNullableString(
-  data: Record<string, unknown>,
-  field: string,
-): string | null | undefined {
-  const value = data[field];
-
-  if (value === null || value === undefined) {
-    return null;
-  }
-
-  return typeof value === "string" && value.trim() ? value : undefined;
 }
 
 function getFiniteNumber(
@@ -144,7 +193,7 @@ function parseDeductions(value: unknown): StoredPayslipDeduction[] | null {
     return null;
   }
 
-  const deductions = value.map((item) => {
+  const deductions: Array<StoredPayslipDeduction | null> = value.map((item) => {
     if (!isRecord(item)) {
       return null;
     }
@@ -290,6 +339,10 @@ function parsePayslipRecord(
 export async function listPayslipsByEmployee(
   employeeId: string,
 ): Promise<StoredPayrollPayslip[]> {
+  const result = await listPrismaPayslipsByEmployee({ employeeId, page: 1, pageSize: 100 });
+  return result.rows.map(toStoredPrismaPayslip);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(payslipCollection)
     .where("employeeId", "==", employeeId)
@@ -324,6 +377,10 @@ function formatResultMonthLabel(monthKey: string): string {
 export async function upsertPayrollPayslipFromResult(
   input: PayrollResultPayslipUpsert,
 ): Promise<void> {
+  await upsertPrismaPayslipFromResult(input);
+  return;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const reference = getFirebaseAdminDb().collection(payslipCollection).doc(input.id);
   const releasedAt = Timestamp.fromDate(new Date(input.releasedAt));
   const monthKey = input.periodStart.slice(0, 7);

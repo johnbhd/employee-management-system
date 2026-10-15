@@ -3,6 +3,12 @@ import "server-only";
 import { FieldValue, Timestamp, type DocumentData } from "firebase-admin/firestore";
 
 import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import {
+  getPrismaRuntimeSettings,
+  PrismaSettingsConflictError,
+  PrismaSettingsDataError,
+  updatePrismaRuntimeSettings,
+} from "@/server/repositories/settings/prisma-settings.repository";
 
 const settingsCollection = "systemSettings";
 const runtimeDocumentId = "runtime";
@@ -64,6 +70,9 @@ function parseRuntimeSettings(data: DocumentData | undefined): RuntimeSettingsSn
 }
 
 export async function getRuntimeSettings(): Promise<RuntimeSettingsSnapshot> {
+  return getPrismaRuntimeSettings();
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshot = await getFirebaseAdminDb().collection(settingsCollection).doc(runtimeDocumentId).get();
   return parseRuntimeSettings(snapshot.exists ? snapshot.data() : undefined);
 }
@@ -73,6 +82,19 @@ export async function updateRuntimeSettings(input: {
   expectedVersion: number;
   updatedBy: { uid: string; displayName: string };
 }): Promise<RuntimeSettingsSnapshot> {
+  try {
+    return await updatePrismaRuntimeSettings(input);
+  } catch (error) {
+    if (error instanceof PrismaSettingsConflictError) {
+      throw new SettingsRepositoryConflictError();
+    }
+    if (error instanceof PrismaSettingsDataError) {
+      throw new SettingsRepositoryDataError(error.message);
+    }
+    throw error;
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const reference = db.collection(settingsCollection).doc(runtimeDocumentId);
 

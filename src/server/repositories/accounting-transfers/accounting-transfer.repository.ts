@@ -7,6 +7,17 @@ import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import { payrollResultStatuses, type PayrollResultStatus } from "@/types/payroll-results";
+import {
+  claimPrismaAccountingTransfer,
+  getPrismaAccountingTransferById,
+  getPrismaAccountingTransferByPayrollResultId,
+  listPrismaAccountingTransferAuditEvents,
+  listPrismaAccountingTransfers,
+  updatePrismaAccountingTransferResult,
+  PrismaAccountingTransferConflictError,
+  PrismaAccountingTransferNotFoundError,
+} from "@/server/repositories/accounting-transfers/prisma-accounting-transfer.repository";
+import { recordPrismaAuditEvent } from "@/server/repositories/audit/prisma-audit.repository";
 import type {
   AccountingAcknowledgementStatus,
   AccountingTransferActor,
@@ -47,6 +58,12 @@ export class AccountingTransferConflictError extends Error {
     super(message);
     this.name = "AccountingTransferConflictError";
   }
+}
+
+function mapPrismaAccountingError(error: unknown): never {
+  if (error instanceof PrismaAccountingTransferNotFoundError) throw new AccountingTransferNotFoundError();
+  if (error instanceof PrismaAccountingTransferConflictError) throw new AccountingTransferConflictError(error.message);
+  throw error;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -228,6 +245,10 @@ function transferDocument(record: AccountingTransferRecord): DocumentData {
 }
 
 export async function listAccountingTransfers(): Promise<AccountingTransferRecord[]> {
+  const result = await listPrismaAccountingTransfers({ page: 1, pageSize: 100 });
+  return result.rows;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb().collection(transferCollection).get();
   return snapshots.docs
     .map((snapshot) => {
@@ -239,6 +260,9 @@ export async function listAccountingTransfers(): Promise<AccountingTransferRecor
 }
 
 export async function getAccountingTransferById(transferId: string) {
+  return getPrismaAccountingTransferById(transferId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshot = await getFirebaseAdminDb().collection(transferCollection).doc(transferId).get();
   if (!snapshot.exists) return null;
   const transfer = parseTransfer(snapshot.id, snapshot.data());
@@ -247,6 +271,9 @@ export async function getAccountingTransferById(transferId: string) {
 }
 
 export async function getAccountingTransferByPayrollResultId(payrollResultId: string) {
+  return getPrismaAccountingTransferByPayrollResultId(payrollResultId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const membership = await db.collection(membershipCollection).doc(membershipId(payrollResultId)).get();
   if (membership.exists) {
@@ -275,6 +302,13 @@ export async function claimAccountingTransfer(input: {
   payrollResultStatus: PayrollResultStatus;
   actor: TransferActor;
 }) {
+  try {
+    return await claimPrismaAccountingTransfer(input);
+  } catch (error) {
+    return mapPrismaAccountingError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const membershipReference = db.collection(membershipCollection).doc(membershipId(input.payrollResultId));
   const actor = toActor(input.actor);
@@ -378,6 +412,13 @@ export async function updateAccountingTransferResult(input: {
   failureCode?: string | null;
   failureSummary?: string | null;
 }) {
+  try {
+    return await updatePrismaAccountingTransferResult(input);
+  } catch (error) {
+    return mapPrismaAccountingError(error);
+  }
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const db = getFirebaseAdminDb();
   const reference = db.collection(transferCollection).doc(input.transferId);
 
@@ -429,8 +470,26 @@ export async function writeAccountingTransferAuditEvent(input: {
   action: "Transfer Created" | "Submitted" | "Acknowledged" | "Rejected" | "Failed";
   occurredAt: string;
 }) {
+  const prismaAutomatic = input.action === "Acknowledged" || input.action === "Rejected" || input.action === "Failed";
+  await recordPrismaAuditEvent({
+    id: `${input.transfer.transferId}:${input.action.toLowerCase().replaceAll(" ", "-")}:${input.occurredAt}`,
+    eventType: `accounting.transfer.${input.action.toLowerCase().replaceAll(" ", "_")}`,
+    action: input.action,
+    module: "Accounting Integration",
+    actor: prismaAutomatic
+      ? { type: "integration", uid: `integration:${input.transfer.provider}`, displayName: "Accounting Integration", role: "system" }
+      : { type: "user", uid: input.transfer.submittedBy.uid, displayName: input.transfer.submittedBy.displayName, role: input.transfer.submittedBy.role },
+    target: { type: "accounting_transfer", id: input.transfer.transferId, reference: input.transfer.externalAccountingReference ?? input.transfer.transferId, label: input.transfer.transferId },
+    outcome: input.action === "Failed" || input.action === "Rejected" ? "Failed" : "Successful",
+    summary: input.action,
+    metadata: { transferId: input.transfer.transferId, payrollResultId: input.transfer.payrollResultId },
+    occurredAt: new Date(input.occurredAt),
+  });
+  return;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const id = `${input.transfer.transferId}:${input.action.toLowerCase().replaceAll(" ", "-")}:${input.occurredAt}`;
-  const automatic = input.action === "Acknowledged" || input.action === "Rejected" || input.action === "Failed";
+  const legacyAutomatic = input.action === "Acknowledged" || input.action === "Rejected" || input.action === "Failed";
   await getFirebaseAdminDb().collection(auditCollection).doc(id).set({
     eventId: id,
     action: input.action,
@@ -440,7 +499,7 @@ export async function writeAccountingTransferAuditEvent(input: {
     payrollHandoffId: input.transfer.payrollHandoffId,
     externalPayrollReference: input.transfer.externalPayrollReference,
     externalAccountingReference: input.transfer.externalAccountingReference,
-    actor: automatic
+    actor: legacyAutomatic
       ? {
         uid: `integration:${input.transfer.provider}`,
         username: input.transfer.provider,
@@ -463,6 +522,9 @@ export type AccountingTransferAuditEventRecord = {
 export async function listAccountingTransferAuditEvents(
   transferId: string,
 ): Promise<AccountingTransferAuditEventRecord[]> {
+  return listPrismaAccountingTransferAuditEvents(transferId);
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(auditCollection)
     .where("transferId", "==", transferId)

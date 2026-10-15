@@ -41,14 +41,15 @@ tasks.
 ## Source-of-truth summary
 
 ```text
-Current business database: Cloud Firestore (migration in progress)
+Current business database: Supabase PostgreSQL via Prisma
 Application identity/RBAC database: Supabase PostgreSQL via Prisma
-Target business database: Supabase PostgreSQL
+Target business database: Supabase PostgreSQL via Prisma (cut over)
 Authentication: Firebase Authentication - retained
 Backend/API: Next.js - retained
 Direct browser PostgreSQL access: No
 Docker required: No
 DBeaver: Database administration only
+Firestore business runtime: legacy/inactive; not part of normal application composition
 Canonical integration identifier: employee_id
 Employee ID type: text/string; leading zeros preserved
 Raw Bundy data: Not implemented; future separate domain
@@ -96,10 +97,28 @@ canonical role/permission reference seeds. Business tables were verified
 through Prisma with zero migrated employee, attendance, Payroll, or audit rows.
 The `db:validate`, `db:generate`, `db:migrate:dev`, and `db:migrate:deploy`
 scripts remain available. The repository layer was subsequently added by
-`DB-REPO-MIGRATION-010`; live business cutover remains intentionally deferred.
+`DB-REPO-MIGRATION-010`; `DB-CUTOVER-012` now composes normal business
+services through the Prisma repositories. Firestore repositories remain only
+as inactive migration/reference implementations; Firebase Authentication and
+its Admin SDK remain required for credential and account operations.
+
+See [CUTOVER-012.md](./CUTOVER-012.md) for the provider matrix, retirement
+inventory, and verification limitations.
 
 Do not begin destructive migration or delete Firestore until the retirement
 criteria in `MIGRATION-PLAN.md` are satisfied.
+
+## DB-CUTOVER-012 implementation
+
+Normal Employees, schedules, attendance/QR, corrections, Payroll lifecycles,
+payslips, Accounting transfers, audit events, runtime settings, monitoring,
+and dashboard aggregate paths now use Prisma-backed repositories. The adapter
+layer preserves existing service DTOs and lifecycle/authorization contracts;
+PostgreSQL failure is propagated rather than falling back to Firestore.
+
+Historical Firestore business data remains untouched. The intentionally clean
+PostgreSQL business baseline remains valid, and the separate migration tooling
+is retained as inactive administrative tooling.
 
 ## DB-REPO-MIGRATION-010 implementation
 
@@ -110,8 +129,8 @@ runtime settings, and dashboard/monitoring aggregates. They use indexed,
 filtered queries, database counts/grouping, deterministic bounded pagination,
 explicit DTO mapping, Prisma transactions, and decimal-safe serialization.
 
-Live business reads and writes were intentionally not switched. Firestore
-business data remains unchanged, Firestore was not deleted, and no permanent
-dual-write or silent fallback was introduced. See
-`REPOSITORY-MIGRATION-010.md` for the matrix and the exact handoff to the data
-migration task.
+At the time of `DB-REPO-MIGRATION-010`, live business reads and writes were
+intentionally not switched. Firestore business data remains unchanged,
+Firestore was not deleted, and no permanent dual-write or silent fallback was
+introduced. The later cutover is documented in
+`REPOSITORY-MIGRATION-010.md` and `CUTOVER-012.md`.

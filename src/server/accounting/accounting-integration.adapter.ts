@@ -78,4 +78,4 @@ export function getAccountingIntegrationAdapter(): AccountingIntegrationAdapter 
 }
 
 export const accountingIntegrationProviderNote =
-  "Accounting transfers are persisted in Firestore and submitted through the deterministic simulated adapter. No live Accounting API credentials are configured.";
+  "Accounting transfers are persisted in PostgreSQL through Prisma and submitted through the deterministic simulated adapter. No live Accounting API credentials are configured.";

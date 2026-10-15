@@ -174,7 +174,7 @@ async function getIntegrationSettings(): Promise<{
       key: "hrps",
       name: "HRPS employee reference",
       mode: "local",
-      provider: "Firestore employee and schedule repositories",
+      provider: "Prisma employee and schedule repositories",
       status: "Configured",
       credentialsStatus: "Not applicable",
       detail: `${employees.length} employee reference${employees.length === 1 ? "" : "s"} and ${schedules.length} schedule reference${schedules.length === 1 ? "" : "s"} loaded from the local HRPS boundary.`,
@@ -194,7 +194,7 @@ async function getIntegrationSettings(): Promise<{
       key: "qr",
       name: "QR Attendance",
       mode: "local",
-      provider: "Server QR signing and Firestore attendance repository",
+      provider: "Server QR signing and Prisma attendance repository",
       status: qrConfigured ? "Configured" : "Not configured",
       credentialsStatus: "Not applicable",
       detail: qrConfigured

@@ -8,6 +8,7 @@ import type { ApplicationRole } from "@/lib/auth/roles";
 import type {
   AdminUserAccountAuditEvent,
 } from "@/types/admin-user-accounts";
+import { listPrismaAuditEvents, recordPrismaAuditEvent } from "@/server/repositories/audit/prisma-audit.repository";
 
 const auditCollection = "adminUserAccountAuditEvents";
 
@@ -93,6 +94,20 @@ export async function writeAdminUserAccountAuditEvent(input: {
   changes?: AuditChange[];
   occurredAt?: Date;
 }): Promise<void> {
+  await recordPrismaAuditEvent({
+    eventType: `admin.user.${input.action}`,
+    action: input.action,
+    module: "User Accounts",
+    actor: { type: "user", uid: input.actor.uid, displayName: input.actor.displayName, role: input.actor.role },
+    target: { type: "user_account", id: input.target.uid, reference: input.target.uid, label: input.target.displayName },
+    outcome: "Successful",
+    summary: "A user account was changed by an administrator.",
+    metadata: { changes: input.changes ?? [], targetUid: input.target.uid, targetDisplayName: input.target.displayName },
+    occurredAt: input.occurredAt,
+  });
+  return;
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   await getFirebaseAdminDb().collection(auditCollection).add({
     action: input.action,
     actorUid: input.actor.uid,
@@ -109,6 +124,36 @@ export async function writeAdminUserAccountAuditEvent(input: {
 export async function listAdminUserAccountAuditEvents(
   limit = 20,
 ): Promise<AdminUserAccountAuditEvent[]> {
+  const result = await listPrismaAuditEvents({ page: 1, pageSize: Math.min(200, Math.max(1, limit)), module: "User Accounts" });
+  return result.rows.map((event) => {
+    const metadata = event.metadata;
+    const changes = Array.isArray(metadata.changes)
+      ? metadata.changes.flatMap((change) => {
+        if (!change || typeof change !== "object") return [];
+        const item = change as Record<string, unknown>;
+        return typeof item.field === "string"
+          && (item.from === null || typeof item.from === "string")
+          && (item.to === null || typeof item.to === "string")
+          ? [{ field: item.field, from: item.from as string | null, to: item.to as string | null }]
+          : [];
+      })
+      : [];
+    const action = event.eventType.replace(/^admin\.user\./, "");
+    return {
+      id: event.id,
+      action: action === "role_changed" || action === "profile_updated" || action === "created" || action === "enabled" || action === "disabled" || action === "deleted"
+        ? action
+        : "profile_updated",
+      actorUid: event.actor.uid ?? "system",
+      actorDisplayName: event.actor.displayName,
+      targetUid: event.target.id ?? "unknown",
+      targetDisplayName: event.target.label,
+      changes,
+      occurredAt: event.occurredAt,
+    };
+  });
+
+  /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
   const snapshots = await getFirebaseAdminDb()
     .collection(auditCollection)
     .orderBy("occurredAt", "desc")

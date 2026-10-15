@@ -33,8 +33,8 @@ export type AttendanceCorrectionAttendance = {
     attendanceDate: string;
     timeIn: string | null;
     timeOut: string | null;
-    timeInSource: "QR";
-    timeOutSource: "QR" | null;
+    timeInSource: "QR" | "BUNDY";
+    timeOutSource: "QR" | "BUNDY" | null;
     status: "present" | "completed";
 };
 
