@@ -5,6 +5,7 @@ import {
     setPersistence,
     signInWithEmailAndPassword,
     signOut,
+    updatePassword,
 } from "firebase/auth";
 
 import { setAuthFlashToast } from "@/lib/auth-flash-toast";
@@ -162,5 +163,53 @@ export async function logoutFromFirebaseSession(): Promise<void> {
         } catch {
             // The server session is the source of truth for logout.
         }
+    }
+}
+
+export async function changeFirebasePassword(
+    username: string,
+    currentPassword: string,
+    newPassword: string,
+): Promise<AuthSessionSuccessResponse["data"]> {
+    const authEmail = getFirebaseAuthEmail(username);
+
+    if (!authEmail) {
+        throw new FirebaseAuthClientError(
+            "INVALID_CREDENTIALS",
+            "The account identity mapping is unavailable.",
+        );
+    }
+
+    const firebaseAuth = getFirebaseAuth();
+
+    try {
+        await setPersistence(firebaseAuth, inMemoryPersistence);
+        const credential = await signInWithEmailAndPassword(
+            firebaseAuth,
+            authEmail,
+            getFirebaseAuthPassword(currentPassword),
+        );
+        await updatePassword(credential.user, newPassword);
+        const idToken = await credential.user.getIdToken(true);
+        const response = await apiRequest<AuthSessionSuccessResponse>(
+            "/api/auth/password-change",
+            {
+                method: "POST",
+                body: JSON.stringify({ idToken }),
+            },
+        );
+
+        return response.data;
+    } catch (error) {
+        if (error instanceof FirebaseAuthClientError) throw error;
+        if (error instanceof ApiClientError && error.status === 403) {
+            throw new FirebaseAuthClientError(
+                "ACCOUNT_UNAVAILABLE",
+                "This account is not currently eligible for password setup.",
+            );
+        }
+        throw getFirebaseAuthError(error);
+    } finally {
+        await signOut(firebaseAuth).catch(() => undefined);
     }
 }

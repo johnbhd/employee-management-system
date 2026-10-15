@@ -7,6 +7,12 @@ import {
   parseCsv,
   parseHrpsRows,
 } from "../../src/server/hrps/hrps-csv";
+import {
+  getHrpsEmployeeUsername,
+  getHrpsTemporaryPassword,
+  normalizeDepartmentSlug,
+} from "../../src/server/hrps/hrps-account-policy";
+import { getFirebaseAuthEmail } from "../../src/lib/auth/firebase-credential-adapter";
 
 const parsed = parseCsv(`\uFEFFemployee_id,name,department\r\n001,"Doe, Jane",Admissions\r\n002,"O""Neil",Registrar\r\n003,"Line 1\nLine 2",Library\r\n`);
 
@@ -50,6 +56,12 @@ assert.deepEqual(prototypeRow.input?.schedule?.workDays, ["Monday", "Tuesday", "
 assert.deepEqual(prototypeRow.input?.schedule?.restDays, ["Saturday", "Sunday"]);
 assert.deepEqual(prototypeRows.map((row) => row.employeeId), ["001", "002", "003"]);
 assert.deepEqual(prototypeRows.map((row) => row.rowNumber), [1, 2, 3]);
+assert.equal(normalizeDepartmentSlug("Student Affairs"), "studentaffairs");
+assert.equal(getHrpsEmployeeUsername("Registrar", "001"), "aujsc.registrar.001");
+assert.equal(getHrpsEmployeeUsername("Admissions", "003"), "aujsc.admissions.003");
+assert.equal(getHrpsEmployeeUsername("Student Affairs", "007"), "aujsc.studentaffairs.007");
+assert.equal(getHrpsTemporaryPassword("001"), "aujsc.001");
+assert.equal(getFirebaseAuthEmail("aujsc.registrar.001"), "aujsc.registrar.001@auth.aujsc.local");
 assert.deepEqual(prototypeRows.map((row) => row.errors), [[], [], []]);
 assert.deepEqual(prototypeRows.map((row) => row.input?.schedule?.shiftLabel), ["Early Day", "Day", "Day"]);
 assert.ok(prototypeRow.warnings.includes("sia_application_role is informational only and does not grant application access."));

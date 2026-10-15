@@ -65,7 +65,7 @@ function getResultMetrics(result: HrpsImportResult): Metric[] {
     { label: "Employees updated", value: String(result.summary.updatedEmployees), note: "HRPS-owned fields only", icon: "refresh", tone: "info" },
     { label: "Schedules changed", value: String(result.summary.schedulesCreated + result.summary.schedulesUpdated), note: "Structured schedule rows", icon: "calendar", tone: "info" },
     { label: "Accounts ready", value: String(result.summary.accountsProvisioned), note: "Existing linked identities retained", icon: "check", tone: "success" },
-    { label: "Accounts pending", value: String(result.summary.accountsPending), note: "Requires approved onboarding policy", icon: "clock", tone: "warning" },
+    { label: "Accounts failed", value: String(result.summary.accountsFailed), note: "Requires safe retry or review", icon: "warning", tone: result.summary.accountsFailed ? "danger" : "success" },
     { label: "Rejected/review", value: String(result.summary.invalidCount + result.summary.duplicateCount + result.summary.needsReviewCount), note: "No automatic synchronization", icon: "warning", tone: "danger" },
   ];
 }
@@ -267,7 +267,7 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
                 <Icon name="file" /> {state === "previewing" ? "Reading CSV…" : "Preview CSV"}
               </button>
               {preview ? (
-                <button type="button" className="button-primary" onClick={() => void confirmImport()} disabled={!canImport || state !== "idle" || !preview.rows.some((row) => row.classification === "NEW" || row.classification === "UPDATED")}>
+                <button type="button" className="button-primary" onClick={() => void confirmImport()} disabled={!canImport || state !== "idle" || !preview.rows.some((row) => row.classification === "NEW" || row.classification === "UPDATED" || row.accountStatus === "will_create")}>
                   <Icon name="check" /> {state === "importing" ? "Synchronizing…" : "Confirm sync"}
                 </button>
               ) : null}
@@ -287,7 +287,7 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
             <p><strong>Schedule fields:</strong> work_days, rest_day, shift, work_start_time, work_end_time, break_start_time, break_end_time, work_location, schedule_effective_from, and schedule_effective_to. Weekdays may be supplied as single values, explicit lists, or ordered ranges such as Monday-Friday and Saturday-Sunday; ranges are normalized before validation. An optional schedule_id is accepted; otherwise it is derived from employee_id.</p>
             <p><strong>Role safety:</strong> sia_application_role is informational only. CSV values never grant application roles or permissions.</p>
             <p><strong>Identity rule:</strong> employee_id remains text, including leading zeros. Names, email, department, and position are never used as the matching key.</p>
-            <p><strong>Account policy:</strong> imported employees without an existing linked account remain pending until an approved email and secure Firebase onboarding policy are supplied. No predictable password or fabricated Firebase UID is created.</p>
+            <p><strong>Account policy:</strong> new Employee accounts use the approved AU-JSC username mapping, receive the Employee role, and must change their temporary Firebase credential on first login. Credentials and Firebase IDs are never shown here.</p>
           </div>
         </SectionCard>
       </div>
@@ -307,7 +307,7 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
               {result ? <div className="hrps-account-policy"><Icon name="info" /><p>{result.accountPolicy}</p></div> : null}
               <div className="table-scroll">
                 <table className="data-table hrps-preview-table">
-                  <thead><tr><th scope="col">Row</th><th scope="col">Employee ID</th><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Status</th><th scope="col">Schedule</th><th scope="col">Classification</th><th scope="col">Issues / changes</th></tr></thead>
+                  <thead><tr><th scope="col">Row</th><th scope="col">Employee ID</th><th scope="col">Name</th><th scope="col">Department</th><th scope="col">Status</th><th scope="col">Account</th><th scope="col">Schedule</th><th scope="col">Classification</th><th scope="col">Issues / changes</th></tr></thead>
                   <tbody>
                     {preview.rows.map((row) => (
                       <tr key={row.rowNumber}>
@@ -316,6 +316,12 @@ export function HrpsIntegrationPage({ initialHistory, initialLoadError, canImpor
                         <td>{row.input?.displayName ?? "—"}</td>
                         <td>{row.input?.department ?? "—"}</td>
                         <td>{row.input?.employmentStatus ?? "—"}</td>
+                        <td>
+                          {row.accountStatus === "existing" ? <StatusBadge tone="success">Account ready</StatusBadge> : null}
+                          {row.accountStatus === "will_create" ? <StatusBadge tone="info">Create Employee account</StatusBadge> : null}
+                          {row.accountStatus === "needs_review" ? <StatusBadge tone="warning">Needs review</StatusBadge> : null}
+                          {row.accountStatus === "not_applicable" ? <span>—</span> : null}
+                        </td>
                         <td>{row.input?.schedule ? `${row.input.schedule.workStart}–${row.input.schedule.workEnd}` : "Not supplied"}</td>
                         <td><StatusBadge tone={row.classification === "INVALID" || row.classification === "DUPLICATE" ? "danger" : row.classification === "NEEDS_REVIEW" ? "warning" : row.classification === "UNCHANGED" ? "muted" : "success"}>{formatClassification(row.classification)}</StatusBadge></td>
                         <td>

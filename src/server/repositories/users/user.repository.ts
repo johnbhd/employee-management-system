@@ -18,6 +18,7 @@ type ApplicationUserWithIdentity = {
     employee: {
         employeeId: string;
     } | null;
+    mustChangePassword: boolean;
 };
 
 export type ApplicationUserProfileInput = {
@@ -25,6 +26,7 @@ export type ApplicationUserProfileInput = {
     displayName: string;
     role: ApplicationUser["role"];
     employeeId: string | null;
+    mustChangePassword?: boolean;
 };
 
 function toApplicationUser(user: ApplicationUserWithIdentity): ApplicationUser {
@@ -35,6 +37,7 @@ function toApplicationUser(user: ApplicationUserWithIdentity): ApplicationUser {
         role: user.role.code,
         employeeId: user.employee?.employeeId ?? null,
         status: user.status,
+        mustChangePassword: user.mustChangePassword,
     };
 }
 
@@ -126,6 +129,7 @@ export async function createApplicationUserProfile(
             status: "active",
             role: { connect: { id: roleId } },
             employee: employeeId ? { connect: { id: employeeId } } : undefined,
+            mustChangePassword: input.mustChangePassword ?? false,
         },
         include: {
             role: { select: { code: true } },

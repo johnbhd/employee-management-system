@@ -16,13 +16,14 @@ export type ApplicationUser = {
     role: ApplicationRole;
     employeeId: string | null;
     status: ApplicationUserStatus;
+    mustChangePassword: boolean;
 };
 
 export type SessionUser = Omit<ApplicationUser, "status">;
 
 export type AuthSessionData = {
     user: SessionUser;
-    redirectTo: RoleHomePath;
+    redirectTo: RoleHomePath | "/account/change-password";
 };
 
 export type AuthSessionSuccessResponse =

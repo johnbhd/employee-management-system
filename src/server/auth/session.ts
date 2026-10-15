@@ -46,6 +46,7 @@ function toSessionUser(user: ApplicationUser): SessionUser {
         displayName: user.displayName,
         role: user.role,
         employeeId: user.employeeId,
+        mustChangePassword: user.mustChangePassword,
     };
 }
 

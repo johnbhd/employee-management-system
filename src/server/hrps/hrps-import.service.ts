@@ -12,6 +12,10 @@ import {
   parseHrpsRows,
   type ParsedHrpsRow,
 } from "./hrps-csv";
+import {
+  HrpsAccountProvisioningError,
+  provisionHrpsEmployeeAccount,
+} from "./hrps-account-provisioning.service";
 import type { SessionUser } from "@/types/auth";
 import type {
   HrpsEmployeeInput,
@@ -227,11 +231,11 @@ function employeeChanges(existing: ExistingEmployee, input: HrpsEmployeeInput): 
 }
 
 function accountStatus(existing: ExistingEmployee | null): HrpsImportPreviewRow["accountStatus"] {
-  if (!existing) return "pending_onboarding";
+  if (!existing) return "will_create";
   if (existing.users.some((user) => user.username === "aujsc.admin" || user.role.code === "admin") || existing.users.length > 1) {
     return "needs_review";
   }
-  return existing.users.length === 1 ? "existing" : "pending_onboarding";
+  return existing.users.length === 1 ? "existing" : "will_create";
 }
 
 async function getExistingEmployees(employeeIds: string[]): Promise<Map<string, ExistingEmployee>> {
@@ -292,7 +296,6 @@ function summaryForRows(rows: HrpsImportPreviewRow[]): HrpsImportSummary {
     if (row.classification === "DUPLICATE") summary.duplicateCount += 1;
     if (row.classification === "NEEDS_REVIEW") summary.needsReviewCount += 1;
     if (row.accountStatus === "existing") summary.accountsProvisioned += 1;
-    if (row.accountStatus === "pending_onboarding") summary.accountsPending += 1;
   });
   return summary;
 }
@@ -342,8 +345,8 @@ export async function buildHrpsImportPreview(content: string, filename: string):
     const changes = employee ? employeeChanges(employee, row.input!) : [];
     const currentAccountStatus = accountStatus(employee);
     const warnings = [...row.warnings];
-    if (currentAccountStatus === "pending_onboarding") {
-      warnings.push("No approved HRPS email and Firebase onboarding credential policy are available; account provisioning remains pending.");
+    if (currentAccountStatus === "will_create") {
+      warnings.push("A Firebase Employee account will be created with the approved AU-JSC username and mandatory first-login password change.");
     }
     if (currentAccountStatus === "needs_review") {
       warnings.push("The employee has an ambiguous or privileged application-account link and requires Admin review.");
@@ -412,7 +415,7 @@ function versionedScheduleId(scheduleId: string, effectiveFrom: string): string 
 }
 
 function safeFailureMessage(error: unknown): string {
-  if (error instanceof HrpsImportError) return error.message;
+  if (error instanceof HrpsImportError || error instanceof HrpsAccountProvisioningError) return error.message;
   if (error && typeof error === "object" && "code" in error && typeof error.code === "string") {
     return `Database operation failed (${error.code}).`;
   }
@@ -471,11 +474,13 @@ export async function synchronizeHrpsImport(input: {
   let schedulesCreated = 0;
   let schedulesUpdated = 0;
   let accountsProvisioned = 0;
-  let accountsPending = 0;
+  const accountsPending = 0;
+  let accountsFailed = 0;
   const failures: string[] = [];
 
   for (const row of preview.rows) {
-    if (row.classification !== "NEW" && row.classification !== "UPDATED") continue;
+    const needsAccountProvisioning = row.accountStatus === "will_create";
+    if (row.classification !== "NEW" && row.classification !== "UPDATED" && !needsAccountProvisioning) continue;
     if (!row.input || !row.employeeId) continue;
 
     try {
@@ -579,9 +584,9 @@ export async function synchronizeHrpsImport(input: {
 
         const linkedUsers = await transaction.user.findMany({
           where: { employeeId: employee.id },
-          select: { id: true },
+          select: { id: true, firebaseUid: true },
         });
-        const accountAction = linkedUsers.length === 1 ? "existing" : "pending";
+        const accountAction = linkedUsers.length === 1 ? "existing" : "provision";
 
         await transaction.hrpsImportRow.update({
           where: { importId_rowNumber: { importId: history.id, rowNumber: row.rowNumber } },
@@ -593,6 +598,8 @@ export async function synchronizeHrpsImport(input: {
             scheduleOwnership: toJson(scheduleOwnership),
             applicationUserId: linkedUsers.length === 1 ? linkedUsers[0].id : null,
             applicationUserCreated: false,
+            firebaseUid: linkedUsers.length === 1 ? linkedUsers[0].firebaseUid : null,
+            firebaseCreated: false,
           },
         });
 
@@ -616,15 +623,110 @@ export async function synchronizeHrpsImport(input: {
           },
         });
 
-        return { created: !existingEmployee, scheduleAction, accountAction };
+        return {
+          created: !existingEmployee,
+          scheduleAction,
+          accountAction,
+          employee: {
+            id: employee.id,
+            employeeId: employee.employeeId,
+            department: employee.department,
+            displayName: employee.displayName,
+          },
+        };
       });
 
       if (result.created) createdEmployees += 1;
       else updatedEmployees += 1;
       if (result.scheduleAction === "created") schedulesCreated += 1;
       if (result.scheduleAction === "updated") schedulesUpdated += 1;
-      if (result.accountAction === "existing") accountsProvisioned += 1;
-      else accountsPending += 1;
+
+      if (result.accountAction === "existing") {
+        accountsProvisioned += 1;
+        continue;
+      }
+
+      let account;
+      try {
+        account = await provisionHrpsEmployeeAccount(result.employee);
+      } catch (error) {
+        const provisioningError = error instanceof HrpsAccountProvisioningError
+          ? error
+          : new HrpsAccountProvisioningError("ACCOUNT_PROVISIONING_FAILED", safeFailureMessage(error));
+        accountsFailed += 1;
+        failures.push(`Row ${row.rowNumber} (${row.employeeId}): ${provisioningError.message}`);
+
+        await prisma.$transaction(async (transaction) => {
+          await transaction.hrpsImportRow.update({
+            where: { importId_rowNumber: { importId: history.id, rowNumber: row.rowNumber } },
+            data: {
+              firebaseUid: provisioningError.firebaseUid,
+              firebaseCreated: provisioningError.firebaseCreated,
+            },
+          });
+          await transaction.auditEvent.create({
+            data: {
+              eventType: "hrps.employee.account_provisioning_failed",
+              action: "Employee Account Provisioning Failed",
+              module: "HRPS Integration",
+              actorType: "user",
+              actorUserId,
+              actorUid: input.actor.uid,
+              actorSnapshot: toJson(toActorSnapshot(input.actor)),
+              targetType: "employee",
+              targetId: result.employee.id,
+              targetReference: result.employee.employeeId,
+              targetLabel: result.employee.displayName,
+              outcome: "Failed",
+              summary: provisioningError.message,
+              metadata: toJson({ importId: history.id, rowNumber: row.rowNumber, code: provisioningError.code }),
+              occurredAt: new Date(),
+            },
+          });
+        });
+        continue;
+      }
+
+      accountsProvisioned += 1;
+      await prisma.$transaction(async (transaction) => {
+        await transaction.hrpsImportRow.update({
+          where: { importId_rowNumber: { importId: history.id, rowNumber: row.rowNumber } },
+          data: {
+            applicationUserId: account.applicationUserId,
+            applicationUserCreated: account.applicationUserCreated,
+            firebaseUid: account.firebaseUid,
+            firebaseCreated: account.firebaseCreated,
+          },
+        });
+        await transaction.auditEvent.create({
+          data: {
+            eventType: "hrps.employee.account_provisioned",
+            action: "Employee Account Provisioned",
+            module: "HRPS Integration",
+            actorType: "user",
+            actorUserId,
+            actorUid: input.actor.uid,
+            actorSnapshot: toJson(toActorSnapshot(input.actor)),
+            targetType: "employee",
+            targetId: result.employee.id,
+            targetReference: result.employee.employeeId,
+            targetLabel: result.employee.displayName,
+            outcome: "Successful",
+            summary: account.action === "created"
+              ? "A Firebase Employee account was created with mandatory first-login password change."
+              : "The existing Employee application account was reused.",
+            metadata: toJson({
+              importId: history.id,
+              rowNumber: row.rowNumber,
+              applicationUserId: account.applicationUserId,
+              firebaseUid: account.firebaseUid,
+              accountAction: account.action,
+              mustChangePassword: account.action === "created",
+            }),
+            occurredAt: new Date(),
+          },
+        });
+      });
     } catch (error) {
       failures.push(`Row ${row.rowNumber} (${row.employeeId}): ${safeFailureMessage(error)}`);
     }
@@ -638,9 +740,9 @@ export async function synchronizeHrpsImport(input: {
     schedulesUpdated,
     accountsProvisioned,
     accountsPending,
-    accountsFailed: 0,
+    accountsFailed,
   };
-  const status = failures.length || summary.invalidCount || summary.duplicateCount || summary.needsReviewCount
+  const status = failures.length || summary.invalidCount || summary.duplicateCount || summary.needsReviewCount || accountsFailed
     ? "COMPLETED_WITH_ERRORS"
     : "COMPLETED";
   const errorSummary = failures.length ? failures.slice(0, 10).join(" ") : null;
@@ -656,7 +758,7 @@ export async function synchronizeHrpsImport(input: {
       schedulesUpdated,
       accountsProvisioned,
       accountsPending,
-      accountsFailed: 0,
+      accountsFailed,
       errorSummary,
     },
   });
@@ -681,12 +783,14 @@ export async function synchronizeHrpsImport(input: {
     },
   });
 
+  const completedPreview = await buildHrpsImportPreview(input.content, input.filename);
+
   return {
     importId: history.id,
     status,
-    preview,
+    preview: completedPreview,
     summary,
-    accountPolicy: "Firebase account provisioning remains pending until an approved HRPS email and secure onboarding policy are provided. No password or fabricated Firebase UID is created.",
+    accountPolicy: "New HRPS Employees receive a Firebase account using aujsc.<department>.<employee_id>, the temporary aujsc.<employee_id> onboarding credential, the Employee role, and mandatory first-login password change. Credentials are never stored or returned.",
   };
 }
 

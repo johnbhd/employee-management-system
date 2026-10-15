@@ -46,7 +46,7 @@ export type HrpsImportPreviewRow = {
   errors: string[];
   warnings: string[];
   changes: HrpsImportChange[];
-  accountStatus: "existing" | "pending_onboarding" | "needs_review" | "not_applicable";
+  accountStatus: "existing" | "will_create" | "needs_review" | "not_applicable";
 };
 
 export type HrpsImportSummary = {

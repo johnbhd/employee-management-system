@@ -80,13 +80,38 @@ The rollback migration is
 
 ## Account provisioning policy
 
-Existing Employee-to-Application User links are preserved and reported. The
-current HRPS contract does not provide an approved unique email field or a
-secure initial credential/onboarding policy. Therefore a new imported Employee
-is marked `pending_onboarding`; the importer does not create a Firebase user,
-invent a Firebase UID, assign a privileged role, or generate a predictable
-password. Account creation remains available through the existing Admin User
-Accounts workflow after an approved onboarding policy is supplied.
+Existing Employee-to-Application User links are preserved and reported. A new
+or previously unlinked Employee is provisioned only during confirmed HRPS sync,
+using the existing Firebase internal identity bridge:
+
+```text
+username: aujsc.<department-slug>.<employee_id>
+temporary Firebase credential: aujsc.<employee_id>
+role: Employee
+first login: must change password
+```
+
+Department slugs are lowercase and deterministic with spaces and unsupported
+punctuation removed. The source Employee ID remains text, including leading
+zeros. Existing usernames remain stable when HRPS later changes department.
+The CSV `sia_application_role` field remains informational and cannot grant
+privileged access. Temporary credentials are generated only in server memory,
+sent to Firebase Authentication, and never stored in PostgreSQL, audit events,
+import history, logs, or API responses.
+
+If Firebase creation succeeds but PostgreSQL profile creation fails, the
+provisioner compensates by deleting the new Firebase identity. If compensation
+also fails, the actual Firebase UID is recorded as import-owned so rollback can
+clean up that identity safely; the row is reported as failed rather than ready.
+
+The `/account/change-password` route re-authenticates the Employee with the
+temporary credential, changes the Firebase password, and clears the
+PostgreSQL `must_change_password` flag only after Firebase confirms success.
+Employee pages and Employee APIs enforce this state server-side. Existing
+accounts default to `false` and are not reset on re-import.
+
+The onboarding flag migration is
+`prisma/migrations/20261015150000_hrps_employee_onboarding/migration.sql`.
 
 ## Verification limitations
 

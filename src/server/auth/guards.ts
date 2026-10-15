@@ -50,6 +50,10 @@ export async function requireRole(
 ): Promise<SessionUser> {
     const user = await requireSessionUser();
 
+    if (user.role === "employee" && user.mustChangePassword) {
+        redirect("/account/change-password");
+    }
+
     if (user.role !== requiredRole) {
         redirect(getRoleHomePath(user.role));
     }
@@ -61,6 +65,10 @@ export async function requireRoleContext(
     requiredRole: ApplicationRole,
 ): Promise<CurrentUserContext> {
     const context = await requireCurrentUserContext();
+
+    if (context.user.role === "employee" && context.user.mustChangePassword) {
+        redirect("/account/change-password");
+    }
 
     if (context.user.role !== requiredRole) {
         redirect(getRoleHomePath(context.user.role));
@@ -103,6 +111,14 @@ export async function requireApiSessionUser(): Promise<SessionUser> {
             "UNAUTHENTICATED",
             401,
             "Authentication is required.",
+        );
+    }
+
+    if (user.role === "employee" && user.mustChangePassword) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "Password change is required before using the employee portal.",
         );
     }
 
@@ -159,6 +175,14 @@ export async function requireApiRoleContext(
             "FORBIDDEN",
             403,
             "You do not have permission to access this resource.",
+        );
+    }
+
+    if (context.user.role === "employee" && context.user.mustChangePassword) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "Password change is required before using the employee portal.",
         );
     }
 

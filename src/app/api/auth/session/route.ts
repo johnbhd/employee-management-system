@@ -4,7 +4,7 @@ import {
     AUTH_SESSION_COOKIE_NAME,
     AUTH_SESSION_MAX_AGE_SECONDS,
 } from "@/lib/auth/constants";
-import { getRoleHomePath } from "@/lib/auth/roles";
+import { getAuthenticatedHomePath } from "@/lib/auth/roles";
 import {
     FirebaseAdminConfigurationError,
     FirebaseAdminInitializationError,
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
             success: true,
             data: {
                 user: session.user,
-                redirectTo: getRoleHomePath(session.user.role),
+                redirectTo: getAuthenticatedHomePath(session.user),
             },
         };
         const nextResponse = NextResponse.json(response, { status: 200 });
@@ -164,7 +164,7 @@ export async function GET() {
         success: true,
         data: {
             user,
-            redirectTo: getRoleHomePath(user.role),
+            redirectTo: getAuthenticatedHomePath(user),
         },
     };
 
