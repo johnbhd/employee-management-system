@@ -23,7 +23,7 @@ export type SessionUser = Omit<ApplicationUser, "status">;
 
 export type AuthSessionData = {
     user: SessionUser;
-    redirectTo: RoleHomePath | "/employee/settings?setup=password";
+    redirectTo: RoleHomePath;
 };
 
 export type AuthSessionSuccessResponse =

@@ -10,9 +10,5 @@ export default async function Page() {
     redirect(getRoleHomePath(user.role));
   }
 
-  redirect(
-    user.mustChangePassword
-      ? "/employee/settings?setup=password"
-      : "/employee/settings",
-  );
+  redirect("/employee/settings");
 }

@@ -6,7 +6,6 @@ import { type FormEvent, useState } from "react";
 import {
   changeFirebasePassword,
   FirebaseAuthClientError,
-  logoutFromFirebaseSession,
 } from "@/lib/auth/client-session";
 import type { SessionUser } from "@/types/auth";
 
@@ -16,7 +15,6 @@ type ChangePasswordFormProps = {
 
 export function ChangePasswordForm({ user }: ChangePasswordFormProps) {
   const router = useRouter();
-  const isRequiredSetup = user.mustChangePassword;
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -52,23 +50,17 @@ export function ChangePasswordForm({ user }: ChangePasswordFormProps) {
     setIsSubmitting(true);
 
     try {
-      const session = await changeFirebasePassword(
+      await changeFirebasePassword(
         user.username,
         currentPassword,
         newPassword,
       );
 
-      if (isRequiredSetup) {
-        setFeedback("Password changed. Redirecting to your Employee dashboard...");
-        router.replace(session.redirectTo);
-        router.refresh();
-      } else {
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setFeedback("Your password was changed successfully.");
-        router.refresh();
-      }
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setFeedback("Your password was changed successfully.");
+      router.refresh();
     } catch (error) {
       if (
         error instanceof FirebaseAuthClientError
@@ -78,11 +70,6 @@ export function ChangePasswordForm({ user }: ChangePasswordFormProps) {
       } else if (
         error instanceof FirebaseAuthClientError
         && error.code === "PASSWORD_POLICY"
-      ) {
-        setErrorMessage(error.message);
-      } else if (
-        error instanceof FirebaseAuthClientError
-        && error.code === "PASSWORD_CHANGE_SYNC_REQUIRED"
       ) {
         setErrorMessage(error.message);
       } else if (
@@ -98,16 +85,11 @@ export function ChangePasswordForm({ user }: ChangePasswordFormProps) {
     }
   }
 
-  async function handleLogout() {
-    await logoutFromFirebaseSession();
-    router.replace("/");
-  }
-
   return (
     <div className="employee-password-form-wrap">
       <form className="employee-password-form" onSubmit={handleSubmit} noValidate>
         <label htmlFor="employee-current-password">
-          <span>{isRequiredSetup ? "Current temporary password" : "Current password"}</span>
+          <span>Current password</span>
           <input
             id="employee-current-password"
             type="password"
@@ -161,15 +143,6 @@ export function ChangePasswordForm({ user }: ChangePasswordFormProps) {
           {isSubmitting ? "Changing password..." : "Change password"}
         </button>
       </form>
-
-      <button
-        type="button"
-        className="button-secondary employee-password-logout"
-        onClick={() => void handleLogout()}
-        disabled={isSubmitting}
-      >
-        Log out
-      </button>
 
       <p className="employee-password-note">
         Only Firebase Authentication receives the password. It is not stored in

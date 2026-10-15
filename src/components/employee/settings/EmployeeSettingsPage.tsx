@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { ChangePasswordForm } from "@/components/auth/ChangePasswordForm";
 import { Icon } from "@/components/ui/Icon";
@@ -17,7 +17,6 @@ type EmployeeSettings = {
 type EmployeeSettingsPageProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
-  setupPassword: boolean;
 };
 
 const settingsStorageKey = "au-jsc-employee-settings";
@@ -63,30 +62,11 @@ function saveSettings(settings: EmployeeSettings) {
 export function EmployeeSettingsPage({
   user,
   employee,
-  setupPassword,
 }: EmployeeSettingsPageProps) {
   const [settings, setSettings] = useState<EmployeeSettings>(() => (
     typeof window === "undefined" ? defaultSettings : readSavedSettings()
   ));
   const [feedback, setFeedback] = useState("");
-  const securitySectionRef = useRef<HTMLElement>(null);
-  const securityHeadingRef = useRef<HTMLHeadingElement>(null);
-
-  useEffect(() => {
-    if (!setupPassword) {
-      return;
-    }
-
-    const focusTimer = window.setTimeout(() => {
-      securitySectionRef.current?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      securityHeadingRef.current?.focus({ preventScroll: true });
-    }, 0);
-
-    return () => window.clearTimeout(focusTimer);
-  }, [setupPassword]);
 
   function updateSetting(key: keyof EmployeeSettings, value: boolean) {
     const nextSettings = { ...settings, [key]: value };
@@ -119,17 +99,6 @@ export function EmployeeSettingsPage({
           manage the employee portal preferences saved for this device.
         </p>
       </div>
-
-      {user.mustChangePassword ? (
-        <div className="employee-settings-required-notice" role="status">
-          <strong>Password setup required</strong>
-          <p>
-            You are currently using the temporary password generated during
-            account provisioning. Create a new password before accessing the
-            rest of the Employee portal.
-          </p>
-        </div>
-      ) : null}
 
       <section
         className="employee-settings-section"
@@ -249,26 +218,15 @@ export function EmployeeSettingsPage({
       </section>
 
       <section
-        ref={securitySectionRef}
-        className={`employee-settings-section employee-settings-security ${setupPassword ? "is-highlighted" : ""}`}
+        className="employee-settings-section employee-settings-security"
         aria-labelledby="employee-settings-security-heading"
       >
         <div className="employee-settings-section-heading">
           <div>
             <span className="employee-settings-kicker">Security</span>
-            <h2
-              id="employee-settings-security-heading"
-              ref={securityHeadingRef}
-              tabIndex={-1}
-            >
-              Change password
-            </h2>
+            <h2 id="employee-settings-security-heading">Change password</h2>
           </div>
-          <p>
-            {user.mustChangePassword
-              ? "Replace your temporary password to continue."
-              : "Update the password used to sign in to your Employee account."}
-          </p>
+          <p>Update the password used to sign in to your Employee account.</p>
         </div>
 
         <div className="employee-settings-security-body">

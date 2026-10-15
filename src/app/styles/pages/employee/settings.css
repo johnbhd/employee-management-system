@@ -28,27 +28,6 @@
   line-height: 1.55;
 }
 
-.employee-settings-required-notice {
-  border: 1px solid #ecd9b0;
-  border-radius: 0.75rem;
-  padding: 0.9rem 1.1rem;
-  background: #fffaf0;
-  color: #795518;
-}
-
-.employee-settings-required-notice strong {
-  display: block;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.employee-settings-required-notice p {
-  max-width: 52rem;
-  margin: 0.25rem 0 0;
-  font-size: 0.7rem;
-  line-height: 1.5;
-}
-
 .employee-settings-section {
   min-width: 0;
   overflow: hidden;
@@ -318,11 +297,6 @@
   font-weight: 500;
 }
 
-.employee-settings-security.is-highlighted {
-  border-color: #c7d5f0;
-  box-shadow: 0 0 0 3px rgba(49, 84, 156, 0.1), 0 8px 22px rgba(26, 35, 70, 0.05);
-}
-
 .employee-settings-security-body {
   padding: 1.15rem 1.25rem 1.25rem;
 }
@@ -361,8 +335,7 @@
   outline-offset: 1px;
 }
 
-.employee-password-submit,
-.employee-password-logout {
+.employee-password-submit {
   width: 100%;
 }
 
@@ -370,12 +343,7 @@
   margin-top: 0.2rem;
 }
 
-.employee-password-logout {
-  margin-top: 0.65rem;
-}
-
-.employee-password-form button:disabled,
-.employee-password-logout:disabled {
+.employee-password-form button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
   transform: none;

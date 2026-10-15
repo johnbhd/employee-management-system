@@ -346,7 +346,7 @@ export async function buildHrpsImportPreview(content: string, filename: string):
     const currentAccountStatus = accountStatus(employee);
     const warnings = [...row.warnings];
     if (currentAccountStatus === "will_create") {
-      warnings.push("A Firebase Employee account will be created with the approved AU-JSC username and mandatory first-login password change.");
+      warnings.push("A Firebase Employee account will be created with the approved AU-JSC username and initial sign-in credential.");
     }
     if (currentAccountStatus === "needs_review") {
       warnings.push("The employee has an ambiguous or privileged application-account link and requires Admin review.");
@@ -713,7 +713,7 @@ export async function synchronizeHrpsImport(input: {
             targetLabel: result.employee.displayName,
             outcome: "Successful",
             summary: account.action === "created"
-              ? "A Firebase Employee account was created with mandatory first-login password change."
+              ? "A Firebase Employee account was created."
               : "The existing Employee application account was reused.",
             metadata: toJson({
               importId: history.id,
@@ -721,7 +721,6 @@ export async function synchronizeHrpsImport(input: {
               applicationUserId: account.applicationUserId,
               firebaseUid: account.firebaseUid,
               accountAction: account.action,
-              mustChangePassword: account.action === "created",
             }),
             occurredAt: new Date(),
           },
@@ -790,7 +789,7 @@ export async function synchronizeHrpsImport(input: {
     status,
     preview: completedPreview,
     summary,
-    accountPolicy: "New HRPS Employees receive a Firebase account using aujsc.<department>.<employee_id>, the temporary aujsc.<employee_id> onboarding credential, the Employee role, and mandatory first-login password change. Credentials are never stored or returned.",
+    accountPolicy: "New HRPS Employees receive a Firebase account using aujsc.<department>.<employee_id>, the initial aujsc.<employee_id> sign-in credential, and the Employee role. Password changes remain optional in Employee Settings. Credentials are never stored or returned.",
   };
 }
 

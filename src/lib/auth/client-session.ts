@@ -21,7 +21,6 @@ import type { AuthSessionSuccessResponse } from "@/types/auth";
 export type FirebaseAuthClientErrorCode =
     | "INVALID_CREDENTIALS"
     | "ACCOUNT_UNAVAILABLE"
-    | "PASSWORD_CHANGE_SYNC_REQUIRED"
     | "PASSWORD_POLICY"
     | "AUTHENTICATION_CONFIGURATION"
     | "AUTHENTICATION_UNAVAILABLE";
@@ -212,13 +211,6 @@ export async function changeFirebasePassword(
     } catch (error) {
         if (error instanceof FirebaseAuthClientError) throw error;
         if (error instanceof ApiClientError) {
-            if (error.code === "PASSWORD_CHANGE_SYNC_REQUIRED") {
-                throw new FirebaseAuthClientError(
-                    "PASSWORD_CHANGE_SYNC_REQUIRED",
-                    error.message,
-                );
-            }
-
             if (error.status === 403) {
                 throw new FirebaseAuthClientError(
                     "ACCOUNT_UNAVAILABLE",
