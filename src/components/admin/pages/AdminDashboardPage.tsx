@@ -324,7 +324,7 @@ export function AdminDashboardPage({
                   {event.actor.name} · {event.actor.role ?? event.actor.type} · {event.target.label}
                 </p>
               </div>
-              <small>{formatTimestamp(event.occurredAt)}</small>
+              <small>{formatTimestamp(event.occurredAtTimestamp)}</small>
             </div>
           )) : (
             <p className="empty-state">No meaningful audit activity has been recorded.</p>
@@ -550,12 +550,15 @@ function getConfigurationTone(mode: string): StatusTone {
   return "success";
 }
 
-function formatTimestamp(value: string | null) {
-  if (!value) return "—";
+function formatTimestamp(value: string | number | null) {
+  if (value === null || value === "") return "—";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
 
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
     timeZone: "Asia/Manila",
-  }).format(new Date(value));
+  }).format(date);
 }
