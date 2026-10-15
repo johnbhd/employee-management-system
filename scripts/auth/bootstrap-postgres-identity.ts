@@ -3,7 +3,8 @@ import { Prisma, PrismaClient, type PrismaClient as PrismaClientType } from "@pr
 import type { UserRecord } from "firebase-admin/auth";
 import type { DocumentData } from "firebase-admin/firestore";
 
-import { getFirebaseAdminAuth, getFirebaseAdminDb } from "../../src/lib/firebase/server/runtime";
+import { getFirebaseAdminAuth } from "../../src/lib/firebase/server/runtime";
+import { getFirebaseAdminDb } from "../../src/lib/firebase/server/legacy-firestore";
 import { isApplicationRole, type ApplicationRole } from "../../src/lib/auth/roles";
 
 loadEnvConfig(process.cwd());

@@ -1,14 +1,5 @@
 import "server-only";
 
-import {
-    FieldValue,
-    Timestamp,
-    type DocumentData,
-} from "firebase-admin/firestore";
-
-import {
-    getFirebaseAdminDb,
-} from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type {
     AttendanceCorrectionDecision,
@@ -27,6 +18,10 @@ import {
     type PrismaAttendanceCorrectionView,
 } from "@/server/repositories/attendance-corrections/prisma-attendance-correction.repository";
 import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    legacyFieldValue as FieldValue,
+    RepositoryTimestamp as Timestamp,
+    type DocumentData,
     toRepositoryOperator,
     toRepositoryRecord,
     toRepositoryTimestamp,

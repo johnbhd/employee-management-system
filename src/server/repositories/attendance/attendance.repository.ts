@@ -1,9 +1,5 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { Timestamp } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type {
     QrAttendanceAction,
@@ -19,6 +15,9 @@ import {
     type PrismaAttendanceView,
 } from "@/server/repositories/attendance/prisma-attendance.repository";
 import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    RepositoryTimestamp as Timestamp,
+    type DocumentData,
     toRepositoryOperator,
     toRepositoryRecord,
     toRepositoryTimestamp,

@@ -1,11 +1,13 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { Timestamp } from "firebase-admin/firestore";
 import { randomUUID } from "node:crypto";
 
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  RepositoryTimestamp as Timestamp,
+  type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
 import type { SessionUser } from "@/types/auth";
 import type {
   PayrollBatchActor,

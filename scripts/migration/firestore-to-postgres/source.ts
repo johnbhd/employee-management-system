@@ -1,6 +1,6 @@
 import { Timestamp, type Firestore } from "firebase-admin/firestore";
 
-import { getFirebaseAdminDb } from "../../../src/lib/firebase/server/runtime";
+import { getFirebaseAdminDb } from "../../../src/lib/firebase/server/legacy-firestore";
 
 import type { MigrationDomain, SourceRecord, SourceSnapshot } from "./types";
 import { compactError, errorMessage, isQuotaError } from "./utils";

@@ -1,15 +1,18 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import {
   listPrismaPayslipsByEmployee,
   upsertPrismaPayslipFromResult,
   type PrismaPayslipView,
 } from "@/server/repositories/payroll/prisma-payslip.repository";
-import { toRepositoryTimestamp, toRepositoryRecord } from "@/server/repositories/prisma/prisma-compat";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  legacyFieldValue as FieldValue,
+  RepositoryTimestamp as Timestamp,
+  type DocumentData,
+  toRepositoryTimestamp,
+  toRepositoryRecord,
+} from "@/server/repositories/prisma/prisma-compat";
 import type { MoneyValue } from "@/types/payslip";
 
 const payslipCollection = "payrollPayslips";

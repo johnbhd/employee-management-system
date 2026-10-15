@@ -131,7 +131,7 @@ function toAccount(
     uid: authRecord?.uid ?? profile?.uid ?? "",
     email: authRecord?.email ?? null,
     emailVerified: authRecord?.emailVerified ?? false,
-    displayName: profile?.displayName ?? authRecord?.displayName ?? "Unnamed account",
+    displayName: profile?.displayName ?? "Profile missing",
     username: profile?.username ?? null,
     role: profile?.role ?? null,
     employeeId: profile?.employeeId ?? null,
@@ -405,7 +405,7 @@ export async function updateAdminUserAccount(
   const currentProfile = target.profile;
   const nextRole = input.role === undefined ? currentProfile?.role : validateRole(input.role);
   const nextDisplayName = input.displayName === undefined
-    ? currentProfile?.displayName ?? target.authRecord?.displayName ?? "Unnamed account"
+    ? currentProfile?.displayName ?? "Profile missing"
     : cleanString(input.displayName, "Display name");
   const nextUsername = input.username === undefined
     ? currentProfile?.username ?? ""
@@ -505,7 +505,7 @@ export async function setAdminUserAccountDisabled(
   await writeAdminUserAccountAuditEvent({
     action: disabled ? "disabled" : "enabled",
     actor,
-    target: { uid, displayName: target.profile?.displayName ?? target.authRecord.displayName ?? "Unnamed account" },
+    target: { uid, displayName: target.profile?.displayName ?? "Profile missing" },
     changes: [{ field: "disabled", from: String(wasDisabled), to: String(disabled) }],
   });
 
@@ -521,7 +521,7 @@ export async function deleteAdminUserAccount(actor: Actor, uid: string): Promise
     throw new AdminUserAccountError("LAST_ADMIN_PROTECTION", "The final IT Administrator account cannot be deleted.", 409);
   }
 
-  const targetDisplayName = target.profile?.displayName ?? target.authRecord?.displayName ?? "Unnamed account";
+  const targetDisplayName = target.profile?.displayName ?? "Profile missing";
   const profile = target.profile;
 
   if (profile) {

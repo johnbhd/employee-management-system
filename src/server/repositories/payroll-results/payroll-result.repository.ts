@@ -1,14 +1,16 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type {
   PayrollResultItem,
   PayrollResultRecord,
   PayrollResultStatus,
 } from "@/types/payroll-results";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  legacyFieldValue as FieldValue,
+  RepositoryTimestamp as Timestamp,
+  type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
 import {
   payrollExternalPayslipStatuses,
   payrollExternalProcessingStatuses,

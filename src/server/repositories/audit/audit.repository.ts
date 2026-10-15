@@ -1,14 +1,17 @@
 import "server-only";
 
-import { FieldValue, Timestamp, type DocumentData } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import {
   getPrismaAuditEventById,
   listPrismaAuditEvents,
   recordPrismaAuditEvent,
 } from "@/server/repositories/audit/prisma-audit.repository";
 import type { AdminAuditActorType, AdminAuditOutcome } from "@/types/admin-audit-logs";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  legacyFieldValue as FieldValue,
+  RepositoryTimestamp as Timestamp,
+  type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
 
 const canonicalCollection = "auditEvents";
 const legacyCollections = [

@@ -1,10 +1,14 @@
 import "server-only";
 
-import { FieldValue, Timestamp, type DocumentData } from "firebase-admin/firestore";
 import { randomUUID } from "node:crypto";
 
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  legacyFieldValue as FieldValue,
+  RepositoryTimestamp as Timestamp,
+  type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
 import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import { payrollResultStatuses, type PayrollResultStatus } from "@/types/payroll-results";
 import {

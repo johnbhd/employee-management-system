@@ -97,8 +97,8 @@ export const adminIntegrationDetailConfigs = {
     title: "QR Attendance",
     description: "Review the technical QR attendance write boundary and persisted source activity.",
     integrationKeys: ["qr-attendance"],
-    sourceLabel: "Server QR signing and Firestore attendance repository",
-    sourceDescription: "QR tokens are validated server-side and accepted attendance writes are persisted through the existing attendance boundary.",
+    sourceLabel: "Server QR signing and PostgreSQL attendance repository",
+    sourceDescription: "QR tokens are validated server-side and accepted attendance writes are persisted through the Prisma/PostgreSQL attendance boundary.",
     technicalSummaryTitle: "Scanner and write boundary",
     technicalSummaryDescription: "This workspace reports QR attendance activity and technical status. It does not add file import or HR approval controls.",
     futureWorkflow: {
@@ -120,8 +120,8 @@ export const adminIntegrationDetailConfigs = {
     title: "Unified Attendance",
     description: "Inspect the technical convergence of attendance records from the supported source boundaries.",
     integrationKeys: ["unified-attendance"],
-    sourceLabel: "Firestore attendance repository",
-    sourceDescription: "Unified attendance is represented by the existing persisted attendance read model that preserves source information.",
+    sourceLabel: "PostgreSQL attendance repository",
+    sourceDescription: "Unified attendance is represented by the PostgreSQL persisted attendance read model that preserves source information.",
     technicalSummaryTitle: "Standardized attendance boundary",
     technicalSummaryDescription: "This page is a technical convergence view. It does not perform HR final verification or replace source-specific attendance workflows.",
     futureWorkflow: {

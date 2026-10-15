@@ -1,9 +1,10 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { EmployeeScheduleReference } from "@/types/hr-employee-schedule";
+import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
 import {
     getPrismaEmployeeScheduleById,
     listPrismaEmployeeScheduleReferences,

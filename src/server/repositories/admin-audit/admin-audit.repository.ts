@@ -1,8 +1,10 @@
 import "server-only";
 
-import { FieldValue, Timestamp } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
+import {
+  getDisabledLegacyStore as getFirebaseAdminDb,
+  legacyFieldValue as FieldValue,
+  RepositoryTimestamp as Timestamp,
+} from "@/server/repositories/prisma/prisma-compat";
 import type { ApplicationRole } from "@/lib/auth/roles";
 import { recordPrismaAuditEvent } from "@/server/repositories/audit/prisma-audit.repository";
 

@@ -4,7 +4,6 @@ import {
     FirebaseAdminConfigurationError,
     FirebaseAdminInitializationError,
     getFirebaseAdminAuth,
-    getFirebaseAdminDb,
 } from "@/lib/firebase/server";
 import type {
     ApiErrorResponse,
@@ -17,7 +16,6 @@ type FirebaseHealthData = {
     status: "ok";
     services: {
         firebase: "connected";
-        firestore: "reachable";
     };
 };
 
@@ -45,19 +43,15 @@ function getFirebaseHealthError(error: unknown): ApiErrorResponse {
     return {
         success: false,
         error: {
-            code: "FIRESTORE_CONNECTIVITY_ERROR",
-            message: "Firestore could not be reached.",
+            code: "FIREBASE_CONNECTIVITY_ERROR",
+            message: "Firebase Authentication could not be reached.",
         },
     };
 }
 
 export async function GET() {
     try {
-        getFirebaseAdminAuth();
-
-        const database = getFirebaseAdminDb();
-
-        await database.collection("_system").doc("health").get();
+        await getFirebaseAdminAuth().listUsers(1);
 
         const response: ApiSuccessResponse<FirebaseHealthData> = {
             success: true,
@@ -65,7 +59,6 @@ export async function GET() {
                 status: "ok",
                 services: {
                     firebase: "connected",
-                    firestore: "reachable",
                 },
             },
         };
