@@ -1,6 +1,13 @@
 import "server-only";
 
-import type { AttendanceSource, AttendanceStatus, HrVerificationStatus, PayrollReadinessStatus, Prisma } from "@prisma/client";
+import type {
+    AttendanceSource,
+    AttendanceStatus,
+    HrVerificationStatus,
+    PayrollReadinessStatus,
+    Prisma,
+    UnifiedAttendanceTechnicalState,
+} from "@prisma/client";
 
 import { determineQrAttendanceAction } from "@/server/attendance/qr/qr-attendance-state";
 import {
@@ -29,6 +36,10 @@ export type PrismaAttendanceView = {
     status: AttendanceStatus;
     hrVerificationStatus: HrVerificationStatus;
     hrVerifiedAt: string | null;
+    technicalState: UnifiedAttendanceTechnicalState;
+    processedAt: string | null;
+    requiresReview: boolean;
+    reviewReasonCode: string | null;
     payrollReadinessStatus: PayrollReadinessStatus;
     payrollReadinessReasons: unknown[];
     correctionMetadata: Record<string, unknown>;
@@ -66,6 +77,10 @@ const attendanceSelect = {
     status: true,
     hrVerificationStatus: true,
     hrVerifiedAt: true,
+    technicalState: true,
+    processedAt: true,
+    requiresReview: true,
+    reviewReasonCode: true,
     payrollReadinessStatus: true,
     payrollReadinessReasons: true,
     correctionMetadata: true,
@@ -110,6 +125,10 @@ function mapAttendance(row: AttendanceRow): PrismaAttendanceView {
         status: row.status,
         hrVerificationStatus: row.hrVerificationStatus,
         hrVerifiedAt: toIso(row.hrVerifiedAt),
+        technicalState: row.technicalState,
+        processedAt: toIso(row.processedAt),
+        requiresReview: row.requiresReview,
+        reviewReasonCode: row.reviewReasonCode,
         payrollReadinessStatus: row.payrollReadinessStatus,
         payrollReadinessReasons: Array.isArray(row.payrollReadinessReasons)
             ? row.payrollReadinessReasons

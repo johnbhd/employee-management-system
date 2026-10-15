@@ -46,7 +46,7 @@ export function PayrollVerifiedAttendanceTable({
   return (
     <div className="payroll-verified-attendance__table-wrap">
       <table className="data-table payroll-verified-attendance__table">
-        <caption className="sr-only">HR-final-verified attendance records for the selected payroll period</caption>
+        <caption className="sr-only">Attendance records evaluated for Payroll readiness in the selected period</caption>
         <thead>
           <tr>
             <th scope="col">
@@ -81,7 +81,7 @@ export function PayrollVerifiedAttendanceTable({
                   disabled={!record.selectable}
                   title={record.selectable
                     ? "Select this record for a future batch"
-                    : record.payrollReadiness.reasons.join("; ") || "This record is not ready for batching"}
+                    : record.payrollReadiness.reasons.map((reason) => `${reason.owner}: ${reason.label}`).join("; ") || "This record is not ready for batching"}
                   aria-label={`Select ${record.employeeName}`}
                 />
               </td>
@@ -91,7 +91,9 @@ export function PayrollVerifiedAttendanceTable({
               <td>{record.payrollPeriod.label}</td>
               <td>{record.attendanceSummary.presentDays}</td>
               <td>{formatAttendanceSummary(record)}</td>
-              <td><StatusBadge tone="success">Verified</StatusBadge></td>
+              <td><StatusBadge tone={record.hrVerification.status === "verified" ? "success" : "warning"}>
+                {record.hrVerification.status === "verified" ? "Verified" : "Pending HR verification"}
+              </StatusBadge></td>
               <td>
                 <StatusBadge tone={record.payrollReadiness.tone}>
                   {record.payrollReadiness.status === "ready" ? "Ready" : "Blocked"}

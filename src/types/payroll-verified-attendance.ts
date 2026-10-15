@@ -1,10 +1,20 @@
 import type { PayrollDashboardPeriod } from "@/types/payroll-dashboard";
 import type { PayrollBatchStatus } from "@/types/payroll-batches";
 import type { StatusTone } from "@/types/ui";
+import type {
+  PayrollEligibilityOwner,
+  PayrollEligibilityReasonCode,
+} from "@/server/payroll/payroll-eligibility";
 
 export type PayrollReadinessStatus = "ready" | "blocked";
 
 export type PayrollVerifiedAttendanceBatchStatus = PayrollBatchStatus | "not-added";
+
+export type PayrollVerifiedAttendanceReason = {
+  code: PayrollEligibilityReasonCode;
+  owner: PayrollEligibilityOwner;
+  label: string;
+};
 
 export type PayrollVerifiedAttendanceQuery = {
   search: string;
@@ -28,13 +38,13 @@ export type PayrollVerifiedAttendanceItem = {
     undertimeMinutes: number | null;
   };
   hrVerification: {
-    status: "verified";
+    status: "pending" | "verified";
     verifiedAt: string | null;
   };
   payrollReadiness: {
     status: PayrollReadinessStatus;
     tone: StatusTone;
-    reasons: string[];
+    reasons: PayrollVerifiedAttendanceReason[];
   };
   batch: {
     status: PayrollVerifiedAttendanceBatchStatus;

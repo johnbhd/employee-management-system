@@ -57,6 +57,10 @@ export function toPayrollBatchSnapshot(
 ): PayrollBatchItemSnapshot {
   const { item } = source;
 
+  if (item.hrVerification.status !== "verified" || item.payrollReadiness.status !== "ready") {
+    throw new Error("Only final-verified, Ready for Payroll records can be snapshotted.");
+  }
+
   return {
     employeePeriodId: getEmployeePeriodId(item.employeeId, item.payrollPeriod.start),
     employeeId: item.employeeId,
@@ -68,7 +72,7 @@ export function toPayrollBatchSnapshot(
     lateMinutes: item.attendanceSummary.lateMinutes,
     undertimeMinutes: item.attendanceSummary.undertimeMinutes,
     hrVerificationStatus: item.hrVerification.status,
-    payrollReadiness: "ready",
+    payrollReadiness: item.payrollReadiness.status,
     sourceAttendanceIds: source.sourceAttendanceIds,
     snapshotCreatedAt: snapshotCreatedAt.toISOString(),
   };

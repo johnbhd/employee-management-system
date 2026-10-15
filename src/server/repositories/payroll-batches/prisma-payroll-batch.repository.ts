@@ -240,11 +240,71 @@ export async function addPrismaPayrollBatchItem(input: {
             || toDateKey(batch.periodEnd) !== input.snapshot.payrollPeriod.end) {
             throw new PrismaPayrollBatchValidationError("The record belongs to a different payroll period.");
         }
+        if (input.snapshot.employeePeriodId !== getPrismaEmployeePeriodId(
+            input.snapshot.employeeId,
+            input.snapshot.payrollPeriod.start,
+        )) {
+            throw new PrismaPayrollBatchValidationError("The employee-period identifier does not match the snapshot.");
+        }
         const employee = await transaction.employee.findUnique({
             where: { employeeId: input.snapshot.employeeId },
             select: { id: true },
         });
         if (!employee) throw new PrismaPayrollBatchValidationError("The employee reference was not found.");
+        const periodStart = new Date(`${input.snapshot.payrollPeriod.start}T00:00:00.000Z`);
+        const existingOwner = await transaction.payrollBatchItem.findUnique({
+            where: {
+                employeeId_periodStart: {
+                    employeeId: employee.id,
+                    periodStart,
+                },
+            },
+            select: { batchId: true },
+        });
+        if (existingOwner && existingOwner.batchId !== batch.id) {
+            throw new PrismaPayrollBatchConflictError("This employee-period record is already included in another payroll batch.");
+        }
+        const sourceAttendanceIds = Array.from(new Set(input.snapshot.sourceAttendanceIds));
+        if (sourceAttendanceIds.length === 0) {
+            throw new PrismaPayrollBatchValidationError("The batch item has no attendance source records.");
+        }
+        const attendanceRecords = await transaction.attendanceRecord.findMany({
+            where: {
+                id: { in: sourceAttendanceIds },
+                employeeId: employee.id,
+            },
+            select: {
+                id: true,
+                timeIn: true,
+                timeOut: true,
+                hrVerificationStatus: true,
+                hrVerifiedAt: true,
+                technicalState: true,
+                processedAt: true,
+                requiresReview: true,
+            },
+        });
+        const pendingCorrections = await transaction.attendanceCorrection.count({
+            where: {
+                attendanceRecordId: { in: sourceAttendanceIds },
+                status: "pending",
+            },
+        });
+        const sourceIdsAreCurrent = attendanceRecords.length === sourceAttendanceIds.length;
+        const allSourcesEligible = sourceIdsAreCurrent
+            && pendingCorrections === 0
+            && attendanceRecords.every((record) => (
+                record.timeIn !== null
+                && record.timeOut !== null
+                && record.hrVerificationStatus === "verified"
+                && record.hrVerifiedAt !== null
+                && record.technicalState === "COMPLETE"
+                && record.processedAt !== null
+                && !record.requiresReview
+            ));
+        if (!allSourcesEligible) {
+            throw new PrismaPayrollBatchConflictError("Payroll eligibility changed. Refresh verified attendance before adding this record.");
+        }
         const existing = await transaction.payrollBatchItem.findUnique({
             where: { batchId_employeePeriodId: { batchId: batch.id, employeePeriodId: input.snapshot.employeePeriodId } },
         });
@@ -255,7 +315,7 @@ export async function addPrismaPayrollBatchItem(input: {
                 batchId: batch.id,
                 employeeId: employee.id,
                 employeePeriodId: input.snapshot.employeePeriodId,
-                periodStart: new Date(`${input.snapshot.payrollPeriod.start}T00:00:00.000Z`),
+                periodStart,
                 periodEnd: new Date(`${input.snapshot.payrollPeriod.end}T00:00:00.000Z`),
                 employeeIdSnapshot: input.snapshot.employeeId,
                 employeeNameSnapshot: input.snapshot.employeeName,

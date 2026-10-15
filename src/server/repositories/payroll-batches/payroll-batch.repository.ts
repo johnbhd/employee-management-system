@@ -265,7 +265,6 @@ async function writeBatchAuditEvent(
   summary: string,
 ) {
   await recordAuditEvent({
-    id: `${batch.id}:${eventType}:${batch.updatedAt}`,
     eventType,
     action: eventType === "payroll.batch.created" ? "Payroll Batch Created" : "Payroll Batch Updated",
     module: "Payroll Batches",
@@ -336,7 +335,9 @@ export async function createPayrollBatch(input: {
   blockedCount?: number;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await createPrismaPayrollBatch(input) as PayrollBatchRecord;
+    const batch = await createPrismaPayrollBatch(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.created", input.actor, "A Payroll batch was created.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -372,7 +373,9 @@ export async function addPayrollBatchItem(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    const batch = await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "A final-verified attendance record was added to a Payroll batch.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -447,7 +450,9 @@ export async function removePayrollBatchItem(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await removePrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    const batch = await removePrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "An attendance record was removed from a Draft Payroll batch.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -509,7 +514,9 @@ export async function updatePayrollBatchStatus(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await updatePrismaPayrollBatchStatus(input) as PayrollBatchRecord;
+    const batch = await updatePrismaPayrollBatchStatus(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, `Payroll batch status changed to ${input.status}.`);
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -564,7 +571,9 @@ export async function markPayrollBatchSubmittedFromHandoff(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await markPrismaPayrollBatchSubmittedFromHandoff(input) as PayrollBatchRecord;
+    const batch = await markPrismaPayrollBatchSubmittedFromHandoff(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "A Payroll batch was submitted from the handoff workflow.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
