@@ -652,8 +652,8 @@ model UnifiedAttendanceProcessingItem {
   attendanceRecordId String?                               @map("attendance_record_id") @db.Uuid
   status             UnifiedAttendanceProcessingItemStatus
   operation          UnifiedAttendanceProcessingOperation?
-  technicalState     UnifiedAttendanceTechnicalState?
-  businessStatus     UnifiedAttendanceBusinessStatus?
+  technicalState     UnifiedAttendanceTechnicalState?      @map("technical_state")
+  businessStatus     UnifiedAttendanceBusinessStatus?      @map("business_status")
   requiresReview     Boolean                               @default(false) @map("requires_review")
   attemptCount       Int                                   @default(0) @map("attempt_count")
   errorCode          String?                               @map("error_code") @db.VarChar(80)
