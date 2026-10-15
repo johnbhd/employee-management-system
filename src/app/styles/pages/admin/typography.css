@@ -1,0 +1,338 @@
+/*
+ * Admin typography refinement
+ *
+ * This layer is intentionally scoped to .admin-shell and loaded after the
+ * existing Admin page styles. It keeps the current layout and component
+ * classes while providing a readable, consistent type hierarchy across every
+ * /admin route.
+ */
+
+.admin-shell {
+  --admin-body-size: 0.875rem;
+  --admin-small-size: 0.8125rem;
+  --admin-meta-size: 0.75rem;
+  --admin-caption-size: 0.6875rem;
+  --admin-regular: 400;
+  --admin-medium: 500;
+  --admin-semibold: 600;
+  --admin-bold: 700;
+}
+
+.admin-shell .page-eyebrow,
+.admin-shell .section-kicker {
+  font-size: 0.72rem;
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.35;
+}
+
+.admin-shell .page-title {
+  font-weight: var(--admin-bold);
+}
+
+.admin-shell .page-subtitle {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.admin-shell .page-feedback,
+.admin-shell .table-meta {
+  color: var(--text-muted);
+  font-size: var(--admin-meta-size);
+  line-height: 1.45;
+}
+
+.admin-shell .notice,
+.admin-shell .data-flow-note {
+  font-size: var(--admin-body-size);
+  line-height: 1.55;
+}
+
+.admin-shell .panel-header h2,
+.admin-shell .page-heading h2 {
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .field span {
+  color: var(--text-muted);
+  font-size: var(--admin-meta-size);
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.05em;
+}
+
+.admin-shell .field input,
+.admin-shell .field select {
+  color: var(--text);
+  font-size: var(--admin-body-size);
+}
+
+.admin-shell .empty-state {
+  font-size: var(--admin-body-size);
+  line-height: 1.55;
+}
+
+.admin-shell .admin-page p:not(.page-eyebrow):not(.section-kicker):not(.page-subtitle):not(.page-feedback) {
+  font-size: var(--admin-small-size);
+  line-height: 1.55;
+}
+
+.admin-shell .admin-page small {
+  font-size: var(--admin-meta-size);
+  line-height: 1.45;
+}
+
+.admin-shell .admin-page strong {
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .data-table {
+  font-size: var(--admin-small-size);
+}
+
+.admin-shell .data-table th {
+  color: var(--text-muted);
+  font-size: var(--admin-meta-size);
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.07em;
+}
+
+.admin-shell .data-table td {
+  color: var(--text);
+  font-size: var(--admin-body-size);
+  line-height: 1.45;
+}
+
+.admin-shell .data-table td:first-child {
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .button-primary,
+.admin-shell .button-secondary,
+.admin-shell .button-link {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .status-badge,
+.admin-shell .inline-status {
+  font-size: var(--admin-caption-size);
+  font-weight: var(--admin-semibold);
+  line-height: 1.2;
+}
+
+.admin-shell .metric-label {
+  font-size: var(--admin-meta-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .metric-note {
+  font-size: var(--admin-meta-size);
+  line-height: 1.45;
+}
+
+.admin-shell .list-row strong,
+.admin-shell .issue-card h3,
+.admin-shell .timeline-item strong,
+.admin-shell .flow-node strong,
+.admin-shell .system-health-card strong,
+.admin-shell .station-card strong,
+.admin-shell .source-summary-heading strong {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .list-row p,
+.admin-shell .issue-card p,
+.admin-shell .timeline-item p,
+.admin-shell .source-summary-heading p,
+.admin-shell .system-health-card p,
+.admin-shell .station-card p,
+.admin-shell .guide-grid p,
+.admin-shell .rule-item small {
+  font-size: var(--admin-small-size);
+  line-height: 1.55;
+}
+
+.admin-shell .list-row small,
+.admin-shell .timeline-item small,
+.admin-shell .flow-node small,
+.admin-shell .system-health-card small,
+.admin-shell .station-card small {
+  font-size: var(--admin-meta-size);
+  line-height: 1.45;
+}
+
+.admin-shell .progress-line > div:first-child,
+.admin-shell .quick-action-link,
+.admin-shell .mapping-row {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-medium);
+}
+
+.admin-shell .detail-list dt,
+.admin-shell .detail-list dd,
+.admin-shell .standard-output-grid span {
+  font-size: var(--admin-small-size);
+}
+
+.admin-shell .detail-list dd {
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .standard-output-grid strong,
+.admin-shell .guide-grid strong {
+  font-size: var(--admin-caption-size);
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.08em;
+}
+
+.admin-shell .admin-brand strong {
+  font-size: 0.72rem;
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.1em;
+}
+
+.admin-shell .admin-brand small {
+  font-size: var(--admin-meta-size);
+}
+
+.admin-shell .workspace-label {
+  font-size: var(--admin-meta-size);
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.1em;
+}
+
+.admin-shell .role-pill {
+  font-size: var(--admin-caption-size);
+  letter-spacing: 0.06em;
+}
+
+.admin-shell .admin-nav-section-label {
+  font-size: var(--admin-caption-size);
+  font-weight: var(--admin-semibold);
+  letter-spacing: 0.1em;
+}
+
+.admin-shell .admin-nav-link {
+  color: rgba(219, 234, 254, 0.84);
+  font-size: var(--admin-body-size);
+  font-weight: var(--admin-medium);
+}
+
+.admin-shell .sidebar-status-card > div {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-medium);
+}
+
+.admin-shell .sidebar-status-card strong {
+  font-size: var(--admin-caption-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .sidebar-status-card p {
+  font-size: var(--admin-meta-size);
+  line-height: 1.5;
+}
+
+.admin-shell .sidebar-account strong {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .sidebar-account small,
+.admin-shell .sidebar-logout {
+  font-size: var(--admin-meta-size);
+}
+
+.admin-shell .sidebar-logout {
+  font-weight: var(--admin-medium);
+}
+
+.admin-shell .navbar-title strong {
+  font-size: 1rem;
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .navbar-title span {
+  font-size: var(--admin-meta-size);
+  font-weight: var(--admin-medium);
+}
+
+.admin-shell .notification-button > span {
+  font-size: 0.6rem;
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .profile-copy strong,
+.admin-shell .profile-menu strong {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .profile-copy small,
+.admin-shell .profile-menu small,
+.admin-shell .profile-menu button,
+.admin-shell .profile-menu a {
+  font-size: var(--admin-meta-size);
+}
+
+.admin-shell .profile-menu button,
+.admin-shell .profile-menu a {
+  font-weight: var(--admin-medium);
+}
+
+/* Page-specific metadata and helper copy should stay secondary, not tiny. */
+.admin-shell .dashboard-card p,
+.admin-shell .dashboard-card small,
+.admin-shell .dashboard-card code,
+.admin-shell .user-accounts-modal p,
+.admin-shell .user-accounts-modal small,
+.admin-shell .user-accounts-modal code {
+  line-height: 1.5;
+}
+
+.admin-shell .dashboard-card p,
+.admin-shell .user-accounts-modal p {
+  font-size: var(--admin-small-size);
+}
+
+.admin-shell .dashboard-card small,
+.admin-shell .user-accounts-modal small,
+.admin-shell .dashboard-card code,
+.admin-shell .user-accounts-modal code {
+  font-size: var(--admin-meta-size);
+}
+
+.admin-shell .user-account-identity strong,
+.admin-shell .user-account-invalid-link {
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .user-accounts-pagination,
+.admin-shell .user-accounts-form-note,
+.admin-shell .user-accounts-confirmation-list,
+.admin-shell .user-accounts-linked-employee p,
+.admin-shell .user-accounts-linked-employee small {
+  font-size: var(--admin-meta-size);
+}
+
+.admin-shell .user-accounts-confirmation-copy strong,
+.admin-shell .user-accounts-danger-note strong {
+  font-size: var(--admin-small-size);
+  font-weight: var(--admin-semibold);
+}
+
+.admin-shell .user-accounts-confirmation-copy span,
+.admin-shell .user-accounts-danger-note span {
+  font-size: var(--admin-meta-size);
+}
+
+@media (max-width: 700px) {
+  .admin-shell .page-subtitle {
+    font-size: var(--admin-body-size);
+  }
+
+  .admin-shell .data-table td {
+    font-size: var(--admin-small-size);
+  }
+}
