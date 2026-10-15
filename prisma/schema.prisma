@@ -104,6 +104,32 @@ enum UnifiedAttendanceBusinessStatus {
   ABSENT
 }
 
+enum UnifiedAttendanceProcessingRunStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+}
+
+enum UnifiedAttendanceProcessingItemStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum UnifiedAttendanceProcessingRunType {
+  INITIAL
+  REPROCESS
+}
+
+enum UnifiedAttendanceProcessingOperation {
+  CREATED
+  UPDATED
+  UNCHANGED
+}
+
 enum HrVerificationStatus {
   pending
   verified
@@ -268,23 +294,24 @@ model User {
   createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  role                         ApplicationRole        @relation(fields: [roleId], references: [id], onDelete: Restrict)
-  employee                     Employee?              @relation(fields: [employeeId], references: [id], onDelete: SetNull)
-  rolePermissionUpdates        RolePermission[]       @relation("RolePermissionUpdatedBy")
-  settingUpdates               SystemSetting[]        @relation("SystemSettingUpdatedBy")
-  attendanceTimeIn             AttendanceRecord[]     @relation("AttendanceTimeInOperator")
-  attendanceTimeOut            AttendanceRecord[]     @relation("AttendanceTimeOutOperator")
-  attendanceVerifications      AttendanceRecord[]     @relation("AttendanceHrVerifier")
-  correctionsSubmitted         AttendanceCorrection[] @relation("CorrectionSubmittedBy")
-  correctionsReviewed          AttendanceCorrection[] @relation("CorrectionReviewedBy")
-  payrollBatchesCreated        PayrollBatch[]         @relation("PayrollBatchCreatedBy")
-  payrollBatchesSubmitted      PayrollBatch[]         @relation("PayrollBatchSubmittedBy")
-  payrollHandoffsSubmitted     PayrollHandoff[]       @relation("PayrollHandoffSubmittedBy")
-  accountingTransfersSubmitted AccountingTransfer[]   @relation("AccountingTransferSubmittedBy")
-  auditEvents                  AuditEvent[]           @relation("AuditActor")
-  hrpsImports                  HrpsImport[]           @relation("HrpsImportInitiatedBy")
-  bundyImports                 BundyImport[]          @relation("BundyImportInitiatedBy")
-  bundyRollbacks               BundyImport[]          @relation("BundyImportRolledBackBy")
+  role                         ApplicationRole                  @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  employee                     Employee?                        @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  rolePermissionUpdates        RolePermission[]                 @relation("RolePermissionUpdatedBy")
+  settingUpdates               SystemSetting[]                  @relation("SystemSettingUpdatedBy")
+  attendanceTimeIn             AttendanceRecord[]               @relation("AttendanceTimeInOperator")
+  attendanceTimeOut            AttendanceRecord[]               @relation("AttendanceTimeOutOperator")
+  attendanceVerifications      AttendanceRecord[]               @relation("AttendanceHrVerifier")
+  correctionsSubmitted         AttendanceCorrection[]           @relation("CorrectionSubmittedBy")
+  correctionsReviewed          AttendanceCorrection[]           @relation("CorrectionReviewedBy")
+  payrollBatchesCreated        PayrollBatch[]                   @relation("PayrollBatchCreatedBy")
+  payrollBatchesSubmitted      PayrollBatch[]                   @relation("PayrollBatchSubmittedBy")
+  payrollHandoffsSubmitted     PayrollHandoff[]                 @relation("PayrollHandoffSubmittedBy")
+  accountingTransfersSubmitted AccountingTransfer[]             @relation("AccountingTransferSubmittedBy")
+  auditEvents                  AuditEvent[]                     @relation("AuditActor")
+  hrpsImports                  HrpsImport[]                     @relation("HrpsImportInitiatedBy")
+  bundyImports                 BundyImport[]                    @relation("BundyImportInitiatedBy")
+  bundyRollbacks               BundyImport[]                    @relation("BundyImportRolledBackBy")
+  unifiedAttendanceRuns        UnifiedAttendanceProcessingRun[] @relation("UnifiedAttendanceRunInitiatedBy")
 
   @@index([employeeId])
   @@map("users")
@@ -307,14 +334,15 @@ model Employee {
   createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  users              User[]
-  schedules          EmployeeSchedule[]
-  attendanceRecords  AttendanceRecord[]
-  corrections        AttendanceCorrection[]
-  payrollBatchItems  PayrollBatchItem[]
-  payrollResultItems PayrollResultItem[]
-  payslips           PayrollPayslip[]
-  bundyEvents        BundyRawEvent[]
+  users                            User[]
+  schedules                        EmployeeSchedule[]
+  attendanceRecords                AttendanceRecord[]
+  corrections                      AttendanceCorrection[]
+  payrollBatchItems                PayrollBatchItem[]
+  payrollResultItems               PayrollResultItem[]
+  payslips                         PayrollPayslip[]
+  bundyEvents                      BundyRawEvent[]
+  unifiedAttendanceProcessingItems UnifiedAttendanceProcessingItem[]
 
   @@index([department])
   @@index([employmentStatus])
@@ -544,13 +572,14 @@ model AttendanceRecord {
   requiresReview          Boolean                         @default(false) @map("requires_review")
   reviewReasonCode        String?                         @map("review_reason_code") @db.VarChar(80)
 
-  employee        Employee                  @relation(fields: [employeeId], references: [id], onDelete: Restrict)
-  schedule        EmployeeSchedule?         @relation(fields: [employeeScheduleId], references: [id], onDelete: Restrict)
-  timeInOperator  User?                     @relation("AttendanceTimeInOperator", fields: [timeInOperatorUserId], references: [id], onDelete: SetNull)
-  timeOutOperator User?                     @relation("AttendanceTimeOutOperator", fields: [timeOutOperatorUserId], references: [id], onDelete: SetNull)
-  hrVerifiedBy    User?                     @relation("AttendanceHrVerifier", fields: [hrVerifiedByUserId], references: [id], onDelete: SetNull)
-  corrections     AttendanceCorrection[]
-  bundyEvidence   AttendanceBundyEvidence[]
+  employee                         Employee                          @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  schedule                         EmployeeSchedule?                 @relation(fields: [employeeScheduleId], references: [id], onDelete: Restrict)
+  timeInOperator                   User?                             @relation("AttendanceTimeInOperator", fields: [timeInOperatorUserId], references: [id], onDelete: SetNull)
+  timeOutOperator                  User?                             @relation("AttendanceTimeOutOperator", fields: [timeOutOperatorUserId], references: [id], onDelete: SetNull)
+  hrVerifiedBy                     User?                             @relation("AttendanceHrVerifier", fields: [hrVerifiedByUserId], references: [id], onDelete: SetNull)
+  corrections                      AttendanceCorrection[]
+  bundyEvidence                    AttendanceBundyEvidence[]
+  unifiedAttendanceProcessingItems UnifiedAttendanceProcessingItem[]
 
   @@unique([employeeId, attendanceDate])
   @@index([attendanceDate, status])
@@ -577,6 +606,71 @@ model AttendanceBundyEvidence {
   @@unique([attendanceRecordId, bundyRawEventId])
   @@index([bundyRawEventId])
   @@map("attendance_bundy_evidence")
+}
+
+// A processing run records the bounded, auditable execution of the existing
+// Unified Attendance employee/date processor. It never stores raw evidence.
+model UnifiedAttendanceProcessingRun {
+  id                  String                               @id @default(uuid()) @db.Uuid
+  runType             UnifiedAttendanceProcessingRunType   @default(INITIAL) @map("run_type")
+  dateFrom            DateTime                             @map("date_from") @db.Date
+  dateTo              DateTime                             @map("date_to") @db.Date
+  status              UnifiedAttendanceProcessingRunStatus
+  initiatedByUserId   String?                              @map("initiated_by_user_id") @db.Uuid
+  initiatedBySnapshot Json                                 @map("initiated_by_snapshot")
+  startedAt           DateTime                             @map("started_at") @db.Timestamptz(3)
+  completedAt         DateTime?                            @map("completed_at") @db.Timestamptz(3)
+  totalItems          Int                                  @map("total_items")
+  pendingItems        Int                                  @default(0) @map("pending_items")
+  processingItems     Int                                  @default(0) @map("processing_items")
+  completedItems      Int                                  @default(0) @map("completed_items")
+  failedItems         Int                                  @default(0) @map("failed_items")
+  createdCount        Int                                  @default(0) @map("created_count")
+  updatedCount        Int                                  @default(0) @map("updated_count")
+  unchangedCount      Int                                  @default(0) @map("unchanged_count")
+  needsReviewCount    Int                                  @default(0) @map("needs_review_count")
+  errorSummary        String?                              @map("error_summary") @db.Text
+  createdAt           DateTime                             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime                             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  initiatedBy User?                             @relation("UnifiedAttendanceRunInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+  items       UnifiedAttendanceProcessingItem[]
+
+  @@index([startedAt, id])
+  @@index([status, startedAt])
+  @@map("unified_attendance_processing_runs")
+}
+
+model UnifiedAttendanceProcessingItem {
+  id                 String                                @id @default(uuid()) @db.Uuid
+  runId              String                                @map("run_id") @db.Uuid
+  employeeId         String                                @map("employee_id") @db.Uuid
+  employeeReference  String                                @map("employee_reference") @db.VarChar(64)
+  employeeName       String                                @map("employee_name") @db.VarChar(160)
+  attendanceDate     DateTime                              @map("attendance_date") @db.Date
+  attendanceRecordId String?                               @map("attendance_record_id") @db.Uuid
+  status             UnifiedAttendanceProcessingItemStatus
+  operation          UnifiedAttendanceProcessingOperation?
+  technicalState     UnifiedAttendanceTechnicalState?
+  businessStatus     UnifiedAttendanceBusinessStatus?
+  requiresReview     Boolean                               @default(false) @map("requires_review")
+  attemptCount       Int                                   @default(0) @map("attempt_count")
+  errorCode          String?                               @map("error_code") @db.VarChar(80)
+  errorMessage       String?                               @map("error_message") @db.Text
+  startedAt          DateTime?                             @map("started_at") @db.Timestamptz(3)
+  completedAt        DateTime?                             @map("completed_at") @db.Timestamptz(3)
+  createdAt          DateTime                              @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime                              @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  run              UnifiedAttendanceProcessingRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  employee         Employee                       @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  attendanceRecord AttendanceRecord?              @relation(fields: [attendanceRecordId], references: [id], onDelete: SetNull)
+
+  @@unique([runId, employeeId, attendanceDate])
+  @@index([runId, status, attendanceDate])
+  @@index([employeeId, attendanceDate])
+  @@index([attendanceRecordId])
+  @@map("unified_attendance_processing_items")
 }
 
 model AttendanceCorrection {

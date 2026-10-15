@@ -11,6 +11,7 @@ import { listPayrollHandoffs } from "@/server/repositories/payroll-handoffs/payr
 import { listPayrollResults } from "@/server/repositories/payroll-results/payroll-result.repository";
 import { getPrismaIntegrationMonitoringSnapshot } from "@/server/repositories/dashboard/prisma-dashboard.repository";
 import { listBundyImports } from "@/server/repositories/bundy/bundy.repository";
+import { getUnifiedAttendanceProcessingMonitoringSnapshot } from "@/server/attendance/unified-attendance-processing.service";
 import { accountingIntegrationProviderNote } from "@/server/accounting/accounting-integration.adapter";
 import { payrollIntegrationProviderNote } from "@/server/payroll/integration/payroll-integration-adapter";
 import type { AccountingTransferRecord } from "@/types/accounting-transfers";
@@ -490,7 +491,7 @@ function buildBundyIssues(history: Awaited<ReturnType<typeof listBundyImports>>)
 }
 
 export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrationMonitoringData> {
-  const [employees, schedules, attendance, handoffs, results, transfers, databaseSnapshot, bundyHistory] = await Promise.all([
+  const [employees, schedules, attendance, handoffs, results, transfers, databaseSnapshot, bundyHistory, unifiedProcessing] = await Promise.all([
     listEmployees(),
     listEmployeeScheduleReferences(),
     listAttendanceForMonitoring(),
@@ -499,14 +500,12 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
     listAccountingTransfers(),
     getPrismaIntegrationMonitoringSnapshot(),
     listBundyImports(1, 30),
+    getUnifiedAttendanceProcessingMonitoringSnapshot(),
   ]);
 
   const qrAttendance = attendance.filter(({ record }) => record.timeInSource === "QR");
   const qrLatest = databaseSnapshot.attendance.lastActivityAt
     ?? latestTimestamp(qrAttendance.map(({ record }) => attendanceTimestamp(record)));
-  const attendanceLatest = databaseSnapshot.attendance.lastActivityAt
-    ?? latestTimestamp(attendance.map(({ record }) => attendanceTimestamp(record)));
-
   const handoffPending = handoffs.filter(hasPayrollHandoffPending).length;
   const handoffIssues = handoffs.filter(hasPayrollHandoffFailure).length;
   const handoffSuccesses = handoffs.filter(hasPayrollHandoffSuccess);
@@ -539,6 +538,24 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
     noActivityDetail: "No Accounting transfer has been persisted; no failure is inferred.",
   });
   const bundy = bundyStatus(bundyHistory);
+  const unifiedProcessingPending = unifiedProcessing.activeRun
+    ? unifiedProcessing.activeRun.pendingItems + unifiedProcessing.activeRun.processingItems
+    : 0;
+  const unifiedProcessingIssues = unifiedProcessing.failedItems.length + (unifiedProcessing.latestFailure ? 1 : 0);
+  const unifiedProcessingHealth = unifiedProcessingIssues > 0
+    ? "failed" as const
+    : unifiedProcessingPending > 0
+      ? "pending" as const
+      : unifiedProcessing.latestSuccessfulAt
+        ? "healthy" as const
+        : "unknown" as const;
+  const unifiedProcessingDetail = unifiedProcessingIssues > 0
+    ? "One or more persisted processing items failed and require retry."
+    : unifiedProcessingPending > 0
+      ? "A Unified Attendance processing run is still in progress."
+      : unifiedProcessing.latestSuccessfulAt
+        ? "The latest Unified Attendance processing run completed successfully."
+        : "No Unified Attendance processing run has been completed; no failure is inferred.";
 
   const integrations = [
     integrationStatus({
@@ -589,14 +606,18 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
       name: "Unified Attendance",
       category: "attendance",
       icon: "unified",
-      health: attendance.length > 0 ? "healthy" : "unknown",
+      health: unifiedProcessingHealth,
       mode: "local",
-      provider: "Prisma attendance repository",
-      detail: attendance.length > 0
-        ? `${attendance.length} persisted attendance record${attendance.length === 1 ? "" : "s"} available.`
-        : "No attendance record is available; no failure is inferred.",
-      lastSuccessfulAt: attendanceLatest,
-      detailHref: "/admin/accounting-integration",
+      provider: "Unified Attendance processing run service",
+      detail: unifiedProcessingDetail,
+      pendingCount: unifiedProcessingPending,
+      issueCount: unifiedProcessingIssues,
+      lastSuccessfulAt: unifiedProcessing.latestSuccessfulAt,
+      lastFailureAt: latestTimestamp([
+        unifiedProcessing.latestFailure?.detectedAt,
+        ...unifiedProcessing.failedItems.map((item) => item.detectedAt),
+      ]),
+      detailHref: "/admin/unified-attendance",
     }),
     integrationStatus({
       key: "payroll-handoff",
@@ -647,6 +668,36 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
 
   const issues = [
     ...buildBundyIssues(bundyHistory),
+    ...(unifiedProcessing.latestFailure ? [{
+      id: `unified-attendance:run:${unifiedProcessing.latestFailure.id}`,
+      integrationKey: "unified-attendance",
+      integrationName: "Unified Attendance",
+      affectedRecordType: "Processing run",
+      affectedRecordId: unifiedProcessing.latestFailure.id,
+      reference: unifiedProcessing.latestFailure.id,
+      severity: "critical" as const,
+      status: "open" as const,
+      summary: unifiedProcessing.latestFailure.summary ?? "A Unified Attendance processing run failed.",
+      detectedAt: unifiedProcessing.latestFailure.detectedAt,
+      lastAttemptAt: unifiedProcessing.latestFailure.detectedAt,
+      retrySupported: true,
+      detailHref: "/admin/unified-attendance",
+    } satisfies AdminIntegrationIssue] : []),
+    ...unifiedProcessing.failedItems.map((item) => ({
+      id: `unified-attendance:${item.id}`,
+      integrationKey: "unified-attendance",
+      integrationName: "Unified Attendance",
+      affectedRecordType: "Employee/date processing item",
+      affectedRecordId: item.employeeReference,
+      reference: `${item.employeeReference} / ${item.attendanceDate}`,
+      severity: "error" as const,
+      status: "open" as const,
+      summary: item.errorMessage ?? "Unified Attendance processing failed for this employee/date.",
+      detectedAt: item.detectedAt,
+      lastAttemptAt: item.detectedAt,
+      retrySupported: true,
+      detailHref: "/admin/unified-attendance",
+    } satisfies AdminIntegrationIssue)),
     ...buildPayrollHandoffIssues(handoffs),
     ...buildPayrollResultIssues(results),
     ...buildAccountingIssues(transfers),
@@ -655,6 +706,23 @@ export async function getAdminIntegrationMonitoringData(): Promise<AdminIntegrat
     .slice(0, issueLimit);
   const activities = [
     ...buildBundyActivities(bundyHistory),
+    ...(unifiedProcessing.latestRun ? [{
+      id: `unified-attendance:${unifiedProcessing.latestRun.id}`,
+      integrationKey: "unified-attendance",
+      integrationName: "Unified Attendance",
+      summary: unifiedProcessing.latestRun.status === "COMPLETED"
+        ? "Unified Attendance processing completed"
+        : unifiedProcessing.latestRun.status === "COMPLETED_WITH_ERRORS"
+          ? "Unified Attendance processing completed with errors"
+          : `Unified Attendance processing is ${unifiedProcessing.latestRun.status.toLowerCase()}`,
+      reference: unifiedProcessing.latestRun.id,
+      status: unifiedProcessing.latestRun.status === "COMPLETED"
+        ? "success" as const
+        : unifiedProcessing.latestRun.status === "COMPLETED_WITH_ERRORS" || unifiedProcessing.latestRun.status === "FAILED"
+          ? "failed" as const
+          : "pending" as const,
+      occurredAt: unifiedProcessing.latestRun.completedAt ?? unifiedProcessing.latestRun.startedAt,
+    } satisfies AdminIntegrationActivity] : []),
     ...buildPayrollActivities(handoffs, results),
     ...buildAccountingActivities(transfers),
     ...buildAttendanceActivities(attendance),

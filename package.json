@@ -22,6 +22,7 @@
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",
     "qr:attendance:verify": "tsx scripts/attendance/verify-qr-attendance.ts",
     "test:unified-attendance": "node --experimental-strip-types scripts/attendance/test-unified-attendance.mjs",
+    "test:unified-attendance-processing": "node --experimental-strip-types scripts/attendance/test-unified-attendance-processing.mjs",
     "firebase:seed": "tsx scripts/firebase/seed.ts"
   },
   "resolutions": {
