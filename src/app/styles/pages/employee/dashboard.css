@@ -168,7 +168,7 @@
 
 .employee-bottom-grid {
   display: grid;
-  grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 1.25rem;
 }
 

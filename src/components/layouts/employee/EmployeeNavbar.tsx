@@ -33,10 +33,6 @@ function getEmployeePageTitle(pathname: string) {
       return "My Profile";
     case "/employee/settings":
       return "Settings";
-    case "/employee/announcements":
-      return "Announcements";
-    case "/employee/help-support":
-      return "Help & Support";
     default:
       return "Employee Dashboard";
   }
@@ -187,11 +183,7 @@ export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbar
               </div>
               {latestNotifications.length > 0 ? (
                 latestNotifications.map((announcement) => (
-                  <Link
-                    href={{
-                      pathname: "/employee/announcements",
-                      query: { announcement: announcement.id },
-                    }}
+                  <div
                     className="employee-notification-item"
                     key={announcement.id}
                     onClick={closeMenus}
@@ -214,20 +206,11 @@ export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbar
                         {announcement.message}
                       </small>
                     </span>
-                  </Link>
+                  </div>
                 ))
               ) : (
                 <p className="employee-notification-empty">No notifications available.</p>
               )}
-              <Link
-                href="/employee/announcements"
-                className="employee-notification-view-all"
-                onClick={closeMenus}
-                role="menuitem"
-              >
-                View all
-                <Icon name="arrow" />
-              </Link>
             </div>
           ) : null}
         </div>

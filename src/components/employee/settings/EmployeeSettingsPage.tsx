@@ -11,7 +11,6 @@ import type { EmployeeReference } from "@/types/employee";
 
 type EmployeeSettings = {
   attendanceReminders: boolean;
-  announcementUpdates: boolean;
 };
 
 type EmployeeSettingsPageProps = {
@@ -22,7 +21,6 @@ type EmployeeSettingsPageProps = {
 const settingsStorageKey = "au-jsc-employee-settings";
 const defaultSettings: EmployeeSettings = {
   attendanceReminders: true,
-  announcementUpdates: true,
 };
 
 function readSavedSettings(): EmployeeSettings {
@@ -40,10 +38,6 @@ function readSavedSettings(): EmployeeSettings {
         typeof parsedValue.attendanceReminders === "boolean"
           ? parsedValue.attendanceReminders
           : defaultSettings.attendanceReminders,
-      announcementUpdates:
-        typeof parsedValue.announcementUpdates === "boolean"
-          ? parsedValue.announcementUpdates
-          : defaultSettings.announcementUpdates,
     };
   } catch {
     return defaultSettings;
@@ -132,16 +126,6 @@ export function EmployeeSettingsPage({
             </span>
             <Icon name="arrow" />
           </Link>
-          <Link href="/employee/help-support" className="employee-settings-link">
-            <span className="employee-settings-link-icon" aria-hidden="true">
-              <Icon name="help" />
-            </span>
-            <span>
-              <strong>Help and support</strong>
-              <small>Contact support or review attendance guidance.</small>
-            </span>
-            <Icon name="arrow" />
-          </Link>
         </div>
 
         <p className="employee-settings-note">
@@ -184,27 +168,6 @@ export function EmployeeSettingsPage({
             </label>
           </div>
 
-          <div className="employee-settings-row">
-            <div className="employee-settings-row-copy">
-              <h3 id="announcement-updates-label">Announcement updates</h3>
-              <p id="announcement-updates-description">
-                Keep new campus announcements available in your employee portal.
-              </p>
-            </div>
-            <label className="employee-settings-switch">
-              <input
-                type="checkbox"
-                checked={settings.announcementUpdates}
-                onChange={(event) => updateSetting("announcementUpdates", event.target.checked)}
-                aria-labelledby="announcement-updates-label"
-                aria-describedby="announcement-updates-description"
-              />
-              <span className="employee-settings-switch-track" aria-hidden="true" />
-              <span className="employee-settings-switch-state" aria-hidden="true">
-                {settings.announcementUpdates ? "On" : "Off"}
-              </span>
-            </label>
-          </div>
         </div>
 
         <div className="employee-settings-footer">

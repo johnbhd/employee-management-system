@@ -186,15 +186,6 @@ export async function EmployeeDashboardPage({
           </Link>
         </section>
 
-        <section className="employee-panel announcements-card">
-          <div className="employee-panel-heading">
-            <div><p className="employee-section-kicker">Campus updates</p><h2>Announcements</h2></div>
-            <Link href="/employee/announcements" className="employee-text-button">View all <Icon name="arrow" /></Link>
-          </div>
-          <p className="payroll-empty-state">
-            No announcements are available for this account.
-          </p>
-        </section>
       </div>
     </div>
   );
