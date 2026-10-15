@@ -398,8 +398,8 @@ function statusForOperationalRecords(input: {
 
 function bundyStatus(history: Awaited<ReturnType<typeof listBundyImports>>) {
   const latest = history.items[0];
-  const failed = history.items.filter((item) => item.status === "FAILED").length;
-  const pending = history.items.filter((item) => item.status === "PROCESSING").length;
+  const failed = history.items.filter((item) => item.status === "FAILED" || item.status === "ROLLBACK_FAILED").length;
+  const pending = history.items.filter((item) => item.status === "PROCESSING" || item.status === "ROLLING_BACK").length;
   const successful = history.items.filter((item) => item.status === "COMPLETED").length;
   const withErrors = history.items.filter((item) => item.status === "COMPLETED_WITH_ERRORS").length;
 
@@ -452,20 +452,24 @@ function buildBundyActivities(history: Awaited<ReturnType<typeof listBundyImport
     id: `bundy:${item.id}`,
     integrationKey: "bundy",
     integrationName: "Bundy / Biometric ETL",
-    summary: item.status === "FAILED"
+    summary: item.status === "FAILED" || item.status === "ROLLBACK_FAILED"
       ? "Bundy CSV import failed"
-      : item.status === "PROCESSING"
+      : item.status === "ROLLING_BACK"
+        ? "Bundy import rollback is processing"
+        : item.status === "ROLLED_BACK"
+          ? "Bundy import was rolled back"
+          : item.status === "PROCESSING"
         ? "Bundy CSV import is processing"
         : `Bundy import stored ${item.summary.importedCount} raw event${item.summary.importedCount === 1 ? "" : "s"}`,
     reference: item.id,
-    status: item.status === "FAILED" ? "failed" as const : item.status === "PROCESSING" ? "pending" as const : "success" as const,
+    status: item.status === "FAILED" || item.status === "ROLLBACK_FAILED" ? "failed" as const : item.status === "PROCESSING" || item.status === "ROLLING_BACK" ? "pending" as const : "success" as const,
     occurredAt: item.completedAt ?? item.startedAt,
   } satisfies AdminIntegrationActivity));
 }
 
 function buildBundyIssues(history: Awaited<ReturnType<typeof listBundyImports>>) {
   return history.items
-    .filter((item) => item.status === "FAILED" || item.status === "COMPLETED_WITH_ERRORS")
+    .filter((item) => item.status === "FAILED" || item.status === "ROLLBACK_FAILED" || item.status === "ROLLING_BACK" || item.status === "COMPLETED_WITH_ERRORS")
     .map((item) => ({
       id: `bundy:${item.id}`,
       integrationKey: "bundy",
@@ -473,9 +477,11 @@ function buildBundyIssues(history: Awaited<ReturnType<typeof listBundyImports>>)
       affectedRecordType: "Bundy import",
       affectedRecordId: item.id,
       reference: item.filename,
-      severity: item.status === "FAILED" ? "critical" as const : "warning" as const,
+      severity: item.status === "FAILED" || item.status === "ROLLBACK_FAILED" ? "critical" as const : "warning" as const,
       status: "open" as const,
-      summary: item.errorSummary ?? `Bundy import completed with ${item.summary.invalidCount + item.summary.sourceConflictCount} row-level issue(s).`,
+      summary: item.rollbackErrorSummary ?? item.errorSummary ?? (item.status === "ROLLING_BACK"
+        ? "Bundy import rollback is in progress or needs recovery review."
+        : `Bundy import completed with ${item.summary.invalidCount + item.summary.sourceConflictCount} row-level issue(s).`),
       detectedAt: item.completedAt ?? item.startedAt,
       lastAttemptAt: item.completedAt,
       retrySupported: true,

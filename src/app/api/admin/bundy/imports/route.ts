@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     const historyPage = numberParam(url.searchParams.get("page"), 1);
     const historyPageSize = numberParam(url.searchParams.get("pageSize"), 10);
     const eventPage = numberParam(url.searchParams.get("eventPage"), 1);
-    const eventPageSize = numberParam(url.searchParams.get("eventPageSize"), 50);
+    const eventPageSize = numberParam(url.searchParams.get("eventPageSize"), 25);
     const data: ApiSuccessResponse<BundyPageData> = {
       success: true,
       data: {

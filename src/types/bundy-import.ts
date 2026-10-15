@@ -19,7 +19,7 @@ export type BundyMatchStatus = "MATCHED" | "UNMATCHED" | "EMPLOYEE_INACTIVE";
 export type BundyValidationStatus = "VALID" | "INVALID";
 export type BundyDuplicateStatus = "UNIQUE" | "DUPLICATE_SCAN";
 export type BundyImportAction = "IMPORT" | "ALREADY_IMPORTED" | "SOURCE_CONFLICT" | "INVALID";
-export type BundyImportStatus = "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED";
+export type BundyImportStatus = "PROCESSING" | "COMPLETED" | "COMPLETED_WITH_ERRORS" | "FAILED" | "ROLLING_BACK" | "ROLLED_BACK" | "ROLLBACK_FAILED";
 
 export type BundyEmployeeMatch = {
   employeeId: string;
@@ -86,6 +86,7 @@ export type BundyImportHistoryItem = {
   devices: string[];
   sourceBatches: string[];
   errorSummary: string | null;
+  rollbackErrorSummary: string | null;
 };
 
 export type BundyImportHistoryData = {
@@ -127,6 +128,39 @@ export type BundyImportResult = {
   preview: BundyImportPreview;
   summary: BundyImportSummary;
   accountBoundary: string;
+};
+
+export type BundyRollbackSummary = {
+  rawEventsDeleted: number;
+  matchedDeleted: number;
+  unmatchedDeleted: number;
+  inactiveDeleted: number;
+  duplicateScansDeleted: number;
+  remainingEvents: number;
+};
+
+export type BundyRollbackPreview = {
+  importId: string;
+  filename: string;
+  status: BundyImportStatus;
+  canRollback: boolean;
+  alreadyRolledBack: boolean;
+  rawEventsOwned: number;
+  matchedEvents: number;
+  unmatchedEvents: number;
+  inactiveEvents: number;
+  duplicateScans: number;
+  devices: string[];
+  sourceBatches: string[];
+  downstreamDependencies: number;
+  blockingReasons: string[];
+  warnings: string[];
+};
+
+export type BundyRollbackResult = {
+  importId: string;
+  status: BundyImportStatus;
+  summary: BundyRollbackSummary;
 };
 
 export type BundyPageData = {

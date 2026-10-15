@@ -52,6 +52,9 @@ enum BundyImportStatus {
   COMPLETED
   COMPLETED_WITH_ERRORS
   FAILED
+  ROLLING_BACK
+  ROLLED_BACK
+  ROLLBACK_FAILED
 }
 
 enum BundyEventType {
@@ -265,6 +268,7 @@ model User {
   auditEvents                  AuditEvent[]           @relation("AuditActor")
   hrpsImports                  HrpsImport[]           @relation("HrpsImportInitiatedBy")
   bundyImports                 BundyImport[]          @relation("BundyImportInitiatedBy")
+  bundyRollbacks               BundyImport[]          @relation("BundyImportRolledBackBy")
 
   @@index([employeeId])
   @@map("users")
@@ -430,14 +434,22 @@ model BundyImport {
   devices              Json
   sourceBatches        Json              @map("source_batches")
   errorSummary         String?           @map("error_summary") @db.Text
+  rollbackStartedAt    DateTime?         @map("rollback_started_at") @db.Timestamptz(3)
+  rolledBackAt         DateTime?         @map("rolled_back_at") @db.Timestamptz(3)
+  rolledBackByUserId   String?           @map("rolled_back_by_user_id") @db.Uuid
+  rolledBackBySnapshot Json?             @map("rolled_back_by_snapshot")
+  rollbackErrorSummary String?           @map("rollback_error_summary") @db.Text
+  rollbackSummary      Json?             @map("rollback_summary")
   createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  initiatedBy User?           @relation("BundyImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
-  events      BundyRawEvent[]
+  initiatedBy  User?           @relation("BundyImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+  rolledBackBy User?           @relation("BundyImportRolledBackBy", fields: [rolledBackByUserId], references: [id], onDelete: SetNull)
+  events       BundyRawEvent[]
 
   @@index([startedAt, id])
   @@index([status, startedAt])
+  @@index([status, rollbackStartedAt])
   @@index([contentHash])
   @@map("bundy_imports")
 }

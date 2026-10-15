@@ -17,6 +17,8 @@ import type {
   BundyPageData,
   BundyPreviewRow,
   BundyRawEventItem,
+  BundyRollbackPreview,
+  BundyRollbackResult,
 } from "@/types/bundy-import";
 import type { Metric, StatusTone } from "@/types/ui";
 
@@ -41,8 +43,9 @@ function formatTimestamp(value: string | null) {
 function statusTone(status: string): StatusTone {
   if (["COMPLETED", "MATCHED", "VALID", "UNIQUE", "IMPORT"].includes(status)) return "success";
   if (["COMPLETED_WITH_ERRORS", "DUPLICATE_SCAN", "EMPLOYEE_INACTIVE"].includes(status)) return "warning";
-  if (["FAILED", "INVALID", "SOURCE_CONFLICT"].includes(status)) return "danger";
+  if (["FAILED", "ROLLBACK_FAILED", "INVALID", "SOURCE_CONFLICT"].includes(status)) return "danger";
   if (["UNMATCHED", "ALREADY_IMPORTED"].includes(status)) return "info";
+  if (["ROLLING_BACK"].includes(status)) return "info";
   return "muted";
 }
 
@@ -72,15 +75,47 @@ function rowMatchesFilter(row: BundyPreviewRow, filter: PreviewFilter) {
   return row.event === filter;
 }
 
-function PreviewTable({ rows }: { rows: BundyPreviewRow[] }) {
+function PaginationControls({
+  page,
+  pageSize,
+  total,
+  hasNext,
+  label,
+  onPageChange,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  hasNext: boolean;
+  label: string;
+  onPageChange: (page: number) => void;
+}) {
+  if (total <= pageSize && page === 1) return null;
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  return (
+    <footer className="bundy-pagination">
+      <span>Page {page} of {totalPages} · {total} {label}</span>
+      <nav aria-label={`${label} pages`}>
+        <button type="button" className="button-secondary" onClick={() => onPageChange(Math.max(1, page - 1))} disabled={page <= 1} aria-label={`Previous ${label} page`}>Previous</button>
+        <button type="button" className="button-secondary" onClick={() => onPageChange(Math.min(totalPages, page + 1))} disabled={!hasNext} aria-label={`Next ${label} page`}>Next</button>
+      </nav>
+    </footer>
+  );
+}
+
+function PreviewTable({ rows, page, pageSize, onPageChange }: { rows: BundyPreviewRow[]; page: number; pageSize: number; onPageChange: (page: number) => void }) {
   if (!rows.length) return <p className="empty-state">No preview rows match this filter.</p>;
 
+  const pageRows = rows.slice((page - 1) * pageSize, page * pageSize);
+  const hasNext = page * pageSize < rows.length;
+
   return (
-    <div className="table-scroll">
-      <table className="data-table bundy-preview-table">
-        <caption className="sr-only">Bundy CSV preview rows</caption>
-        <thead>
-          <tr>
+    <>
+      <div className="table-scroll">
+        <table className="data-table bundy-preview-table">
+          <caption className="sr-only">Bundy CSV preview rows</caption>
+          <thead>
+            <tr>
             <th scope="col">Row</th>
             <th scope="col">Bundy log</th>
             <th scope="col">Employee ID</th>
@@ -90,10 +125,10 @@ function PreviewTable({ rows }: { rows: BundyPreviewRow[] }) {
             <th scope="col">Device</th>
             <th scope="col">Match</th>
             <th scope="col">Action / issues</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.map((row) => (
             <tr key={`${row.rowNumber}-${row.bundyLogId ?? "invalid"}`}>
               <td>{row.rowNumber}</td>
               <td><strong>{row.bundyLogId ?? "—"}</strong></td>
@@ -110,18 +145,21 @@ function PreviewTable({ rows }: { rows: BundyPreviewRow[] }) {
                 {row.warnings.length ? <ul className="bundy-row-messages">{row.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul> : null}
               </td>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <PaginationControls page={page} pageSize={pageSize} total={rows.length} hasNext={hasNext} label="preview rows" onPageChange={onPageChange} />
+    </>
   );
 }
 
-function HistoryTable({ history }: { history: BundyImportHistoryData }) {
+function HistoryTable({ history, canRollback, onRollback, onPageChange }: { history: BundyImportHistoryData; canRollback: boolean; onRollback: (item: BundyImportHistoryItem) => void; onPageChange: (page: number) => void }) {
   if (!history.items.length) return <p className="empty-state">No Bundy imports have been confirmed yet.</p>;
   return (
-    <div className="table-scroll">
-      <table className="data-table bundy-history-table">
+    <>
+      <div className="table-scroll">
+        <table className="data-table bundy-history-table">
         <caption className="sr-only">Bundy import history</caption>
         <thead>
           <tr>
@@ -130,6 +168,7 @@ function HistoryTable({ history }: { history: BundyImportHistoryData }) {
             <th scope="col">Imported by</th>
             <th scope="col">Rows</th>
             <th scope="col">Result</th>
+            <th scope="col"><span className="sr-only">Actions</span></th>
           </tr>
         </thead>
         <tbody>
@@ -145,20 +184,29 @@ function HistoryTable({ history }: { history: BundyImportHistoryData }) {
               <td>
                 <StatusBadge tone={historyStatusTone(item.status)}>{item.status.replaceAll("_", " ")}</StatusBadge>
                 {item.errorSummary ? <small className="bundy-cell-meta">{item.errorSummary}</small> : null}
+                {item.rollbackErrorSummary ? <small className="bundy-cell-meta">{item.rollbackErrorSummary}</small> : null}
+              </td>
+              <td>
+                {canRollback && ["COMPLETED", "COMPLETED_WITH_ERRORS", "ROLLBACK_FAILED"].includes(item.status) ? (
+                  <button type="button" className="button-secondary bundy-undo-import-button" onClick={() => onRollback(item)}>Undo import</button>
+                ) : null}
               </td>
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+      <PaginationControls page={history.page} pageSize={history.pageSize} total={history.total} hasNext={history.hasNext} label="imports" onPageChange={onPageChange} />
+    </>
   );
 }
 
-function RawEventsTable({ data }: { data: BundyPageData["events"] }) {
+function RawEventsTable({ data, onPageChange }: { data: BundyPageData["events"]; onPageChange: (page: number) => void }) {
   if (!data.items.length) return <p className="empty-state">No raw Bundy events have been persisted yet.</p>;
   return (
-    <div className="table-scroll">
-      <table className="data-table bundy-events-table">
+    <>
+      <div className="table-scroll">
+        <table className="data-table bundy-events-table">
         <caption className="sr-only">Persisted raw Bundy events</caption>
         <thead>
           <tr>
@@ -186,8 +234,10 @@ function RawEventsTable({ data }: { data: BundyPageData["events"] }) {
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+        </table>
+      </div>
+      <PaginationControls page={data.page} pageSize={data.pageSize} total={data.total} hasNext={data.hasNext} label="raw events" onPageChange={onPageChange} />
+    </>
   );
 }
 
@@ -198,22 +248,30 @@ export function BundyIntegrationPage({ initialData, initialLoadError, canImport 
   const [data, setData] = useState(initialData);
   const [state, setState] = useState<ImportState>("idle");
   const [filter, setFilter] = useState<PreviewFilter>("all");
+  const [previewPage, setPreviewPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(initialData?.history.page ?? 1);
+  const [eventPage, setEventPage] = useState(initialData?.events.page ?? 1);
   const [feedback, setFeedback] = useState(initialLoadError ? "Bundy history could not be loaded." : "");
   const [error, setError] = useState("");
+  const [rollbackPreview, setRollbackPreview] = useState<BundyRollbackPreview | null>(null);
+  const [rollbackTarget, setRollbackTarget] = useState<BundyImportHistoryItem | null>(null);
+  const [rollbackState, setRollbackState] = useState<"idle" | "loading" | "rolling_back">("idle");
 
-  const refreshData = useCallback(async () => {
+  const refreshData = useCallback(async (requestedHistoryPage = historyPage, requestedEventPage = eventPage) => {
     try {
       const response = await apiRequest<ApiSuccessResponse<BundyPageData>>(
-        "/api/admin/bundy/imports?page=1&pageSize=10&eventPage=1&eventPageSize=50",
+        `/api/admin/bundy/imports?page=${requestedHistoryPage}&pageSize=10&eventPage=${requestedEventPage}&eventPageSize=25`,
         { cache: "no-store" },
       );
       setData(response.data);
+      setHistoryPage(response.data.history.page);
+      setEventPage(response.data.events.page);
       setFeedback("Bundy import history and raw-event records refreshed.");
       setError("");
     } catch (refreshError) {
       setError(refreshError instanceof Error ? refreshError.message : "Bundy data could not be refreshed.");
     }
-  }, []);
+  }, [eventPage, historyPage]);
 
   async function previewFile() {
     if (!file) {
@@ -233,6 +291,7 @@ export function BundyIntegrationPage({ initialData, initialLoadError, canImport 
       );
       setPreview(response.data);
       setFilter("all");
+      setPreviewPage(1);
       setFeedback("Preview ready. No raw event, Employee, schedule, unified attendance, Payroll, or Accounting write occurred.");
     } catch (previewError) {
       setPreview(null);
@@ -266,6 +325,45 @@ export function BundyIntegrationPage({ initialData, initialLoadError, canImport 
     }
   }
 
+  async function openRollback(item: BundyImportHistoryItem) {
+    setRollbackTarget(item);
+    setRollbackPreview(null);
+    setError("");
+    setRollbackState("loading");
+    try {
+      const response = await apiRequest<ApiSuccessResponse<BundyRollbackPreview>>(
+        `/api/admin/bundy/imports/${item.id}/rollback-preview`,
+        { cache: "no-store" },
+      );
+      setRollbackPreview(response.data);
+    } catch (previewError) {
+      setRollbackTarget(null);
+      setError(previewError instanceof Error ? previewError.message : "The Bundy rollback preview failed.");
+    } finally {
+      setRollbackState("idle");
+    }
+  }
+
+  async function confirmRollback() {
+    if (!rollbackTarget || !rollbackPreview?.canRollback) return;
+    setRollbackState("rolling_back");
+    setError("");
+    try {
+      const response = await apiRequest<ApiSuccessResponse<BundyRollbackResult>>(
+        `/api/admin/bundy/imports/${rollbackTarget.id}/rollback`,
+        { method: "POST", body: JSON.stringify({ confirmation: "UNDO_IMPORT" }) },
+      );
+      setRollbackTarget(null);
+      setRollbackPreview(null);
+      setFeedback(`Bundy import ${response.data.importId} was rolled back. Only its owned raw source events were removed.`);
+      await refreshData();
+    } catch (rollbackError) {
+      setError(rollbackError instanceof Error ? rollbackError.message : "The Bundy rollback failed safely without completing.");
+    } finally {
+      setRollbackState("idle");
+    }
+  }
+
   const filteredRows = useMemo(
     () => preview?.rows.filter((row) => rowMatchesFilter(row, filter)) ?? [],
     [filter, preview],
@@ -274,7 +372,7 @@ export function BundyIntegrationPage({ initialData, initialLoadError, canImport 
   const canConfirm = Boolean(preview?.rows.some((row) => row.importAction === "IMPORT")) && canImport;
 
   return (
-    <div className="admin-page bundy-integration-page" aria-busy={state !== "idle"}>
+    <div className="admin-page bundy-integration-page" aria-busy={state !== "idle" || rollbackState !== "idle"}>
       <AdminPageHeader
         eyebrow="Integration control"
         title="Bundy / Biometric ETL"
@@ -320,21 +418,63 @@ export function BundyIntegrationPage({ initialData, initialLoadError, canImport 
               <div className="bundy-preview-meta"><span><strong>File:</strong> {preview.filename}</span><span><strong>HRPS Employees available:</strong> {preview.employeesAvailable}</span><span><strong>Devices:</strong> {preview.devices.join(", ") || "—"}</span><span><strong>Source batches:</strong> {preview.sourceBatches.join(", ") || "—"}</span></div>
               {result ? <div className="bundy-account-policy"><Icon name="info" /><p>{result.accountBoundary}</p></div> : null}
               <div className="bundy-filter-row" role="group" aria-label="Preview filters">
-                {(["all", "matched", "unmatched", "duplicate", "invalid", "IN", "OUT"] as PreviewFilter[]).map((option) => <button key={option} type="button" className={`bundy-filter-button ${filter === option ? "is-active" : ""}`} onClick={() => setFilter(option)}>{option === "all" ? "All" : option.replaceAll("_", " ")}</button>)}
+                {(["all", "matched", "unmatched", "duplicate", "invalid", "IN", "OUT"] as PreviewFilter[]).map((option) => <button key={option} type="button" className={`bundy-filter-button ${filter === option ? "is-active" : ""}`} onClick={() => { setFilter(option); setPreviewPage(1); }}>{option === "all" ? "All" : option.replaceAll("_", " ")}</button>)}
               </div>
-              <PreviewTable rows={filteredRows} />
+              <PreviewTable rows={filteredRows} page={previewPage} pageSize={25} onPageChange={setPreviewPage} />
             </div>
           </SectionCard>
         </>
       ) : null}
 
       <SectionCard title="Import history" eyebrow="Persisted PostgreSQL metadata" actions={<span className="bundy-history-count">{data?.history.total ?? 0} recorded</span>}>
-        <div className="panel-body">{data ? <HistoryTable history={data.history} /> : <p className="empty-state">Import history is temporarily unavailable.</p>}</div>
+        <div className="panel-body">{data ? <HistoryTable history={data.history} canRollback={canImport} onRollback={(item) => void openRollback(item)} onPageChange={(page) => void refreshData(page, eventPage)} /> : <p className="empty-state">Import history is temporarily unavailable.</p>}</div>
       </SectionCard>
 
       <SectionCard title="Raw Bundy events" eyebrow="Immutable source evidence · unmatched rows remain reviewable">
-        <div className="panel-body"><RawEventsTable data={data?.events ?? { items: [], page: 1, pageSize: 50, total: 0, hasNext: false }} /></div>
+        <div className="panel-body"><RawEventsTable data={data?.events ?? { items: [], page: 1, pageSize: 25, total: 0, hasNext: false }} onPageChange={(page) => void refreshData(historyPage, page)} /></div>
       </SectionCard>
+
+      {rollbackTarget ? (
+        <div className="bundy-rollback-backdrop" role="presentation">
+          <section className="bundy-rollback-dialog" role="dialog" aria-modal="true" aria-labelledby="bundy-rollback-title" aria-describedby="bundy-rollback-description">
+            <div className="bundy-rollback-dialog-header">
+              <div>
+                <span className="section-eyebrow">Safety preview</span>
+                <h2 id="bundy-rollback-title">Undo Bundy import</h2>
+                <p>{rollbackTarget.filename}</p>
+              </div>
+            </div>
+            {rollbackState === "loading" ? <p className="bundy-rollback-loading" role="status">Checking raw-event ownership and downstream dependencies…</p> : null}
+            {rollbackPreview ? (
+              <>
+                <p id="bundy-rollback-description" className="bundy-rollback-description">This removes only the persisted raw Bundy source events owned by this import. It does not remove Employees, schedules, user accounts, Firebase accounts, HRPS data, QR attendance, Payroll, or Accounting data.</p>
+                <div className="bundy-rollback-metrics">
+                  <div><strong>{rollbackPreview.rawEventsOwned}</strong><span>Raw events to remove</span></div>
+                  <div><strong>{rollbackPreview.matchedEvents}</strong><span>Matched events</span></div>
+                  <div><strong>{rollbackPreview.unmatchedEvents}</strong><span>Unmatched events</span></div>
+                  <div><strong>{rollbackPreview.inactiveEvents}</strong><span>Inactive Employee events</span></div>
+                  <div><strong>{rollbackPreview.duplicateScans}</strong><span>Duplicate scans</span></div>
+                  <div><strong>{rollbackPreview.downstreamDependencies}</strong><span>Downstream dependencies</span></div>
+                </div>
+                <div className="bundy-rollback-meta"><span><strong>Import ID:</strong> {rollbackPreview.importId}</span><span><strong>Devices:</strong> {rollbackPreview.devices.join(", ") || "None"}</span><span><strong>Source batches:</strong> {rollbackPreview.sourceBatches.join(", ") || "None"}</span></div>
+                {rollbackPreview.warnings.map((warning) => <p className="bundy-rollback-warning" key={warning}>{warning}</p>)}
+                {rollbackPreview.blockingReasons.length ? (
+                  <div className="bundy-rollback-blocked" role="alert">
+                    <strong>Undo is blocked</strong>
+                    <ul>{rollbackPreview.blockingReasons.map((reason) => <li key={reason}>{reason}</li>)}</ul>
+                  </div>
+                ) : <p className="bundy-rollback-safe" role="status">Server-side ownership and dependency checks passed. Confirm to remove this import&apos;s raw events.</p>}
+                <div className="button-row bundy-rollback-actions">
+                  <button type="button" className="button-secondary" onClick={() => { setRollbackTarget(null); setRollbackPreview(null); }} disabled={rollbackState !== "idle"}>Cancel</button>
+                  <button type="button" className="button-primary" onClick={() => void confirmRollback()} disabled={!rollbackPreview.canRollback || rollbackState !== "idle"}>
+                    {rollbackState === "rolling_back" ? "Undoing import…" : "Confirm undo import"}
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </section>
+        </div>
+      ) : null}
 
       <p className="page-feedback"><Icon name="info" /> Duplicate scan window: {BUNDY_DUPLICATE_SCAN_WINDOW_SECONDS} seconds, same device Employee ID, event direction, and device. This is technical ETL metadata, not a late or attendance policy.</p>
     </div>

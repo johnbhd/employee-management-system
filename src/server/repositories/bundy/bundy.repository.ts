@@ -101,6 +101,7 @@ function mapHistory(row: {
   devices: Prisma.JsonValue;
   sourceBatches: Prisma.JsonValue;
   errorSummary: string | null;
+  rollbackErrorSummary: string | null;
 }): BundyImportHistoryItem {
   return {
     id: row.id,
@@ -113,6 +114,7 @@ function mapHistory(row: {
     devices: toJsonArray(row.devices).filter((value): value is string => typeof value === "string"),
     sourceBatches: toJsonArray(row.sourceBatches).filter((value): value is string => typeof value === "string"),
     errorSummary: row.errorSummary,
+    rollbackErrorSummary: row.rollbackErrorSummary,
   };
 }
 
@@ -302,6 +304,7 @@ export async function listBundyImports(
         devices: true,
         sourceBatches: true,
         errorSummary: true,
+        rollbackErrorSummary: true,
       },
     }),
     getRepositoryPrisma().bundyImport.count({ where }),

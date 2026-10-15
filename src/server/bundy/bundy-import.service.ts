@@ -292,7 +292,7 @@ export async function synchronizeBundyImport(input: {
 export async function getBundyPageData(): Promise<BundyPageData> {
   const [history, events] = await Promise.all([
     listBundyImports(1, 10),
-    listBundyRawEvents(1, 50),
+    listBundyRawEvents(1, 25),
   ]);
   return { history, events };
 }

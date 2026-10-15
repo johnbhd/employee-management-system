@@ -32,6 +32,9 @@ export const auditEventRegistry: readonly AuditEventDefinition[] = [
   { eventType: "admin.settings.updated", action: "System Settings Updated", module: "System Settings", defaultOutcome: "Successful" },
   { eventType: "bundy.import.completed", action: "Bundy Import Completed", module: "Bundy Integration", defaultOutcome: "Successful" },
   { eventType: "bundy.import.failed", action: "Bundy Import Failed", module: "Bundy Integration", defaultOutcome: "Failed" },
+  { eventType: "bundy.import.rolled_back", action: "Bundy Import Rolled Back", module: "Bundy Integration", defaultOutcome: "Successful" },
+  { eventType: "bundy.import.rollback_blocked", action: "Bundy Import Rollback Blocked", module: "Bundy Integration", defaultOutcome: "Blocked" },
+  { eventType: "bundy.import.rollback_failed", action: "Bundy Import Rollback Failed", module: "Bundy Integration", defaultOutcome: "Failed" },
 ];
 
 export function getAuditEventDefinition(eventType: string) {
