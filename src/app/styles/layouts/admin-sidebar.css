@@ -170,14 +170,21 @@
 }
 
 .admin-nav-link:hover,
+.admin-nav-link:focus-visible,
 .admin-nav-link.is-active {
   background: #fff;
   color: var(--au-navy);
 }
 
 .admin-nav-link:hover .ui-icon,
+.admin-nav-link:focus-visible .ui-icon,
 .admin-nav-link.is-active .ui-icon {
   color: var(--au-blue);
+}
+
+.admin-nav-link:focus-visible {
+  outline: 3px solid rgba(219, 234, 254, 0.72);
+  outline-offset: -3px;
 }
 
 .admin-nav-placeholder {
