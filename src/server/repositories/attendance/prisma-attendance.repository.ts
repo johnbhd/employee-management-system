@@ -299,6 +299,8 @@ export async function recordPrismaQrAttendance(input: {
                     timeInSource: "QR",
                     timeInActorSnapshot: input.scannerOperator,
                     status: "present",
+                    technicalState: "MISSING_OUT",
+                    processedAt: new Date(),
                     timeInOperatorUserId: operatorUser?.id,
                     sourceMetadata: { source: "QR" },
                 },
@@ -326,6 +328,8 @@ export async function recordPrismaQrAttendance(input: {
                 timeOutOperatorUserId: operatorUser?.id,
                 timeOutActorSnapshot: input.scannerOperator,
                 status: "completed",
+                technicalState: "COMPLETE",
+                processedAt: new Date(),
             },
             select: attendanceSelect,
         });

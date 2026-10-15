@@ -88,6 +88,22 @@ enum AttendanceStatus {
   completed
 }
 
+enum UnifiedAttendanceTechnicalState {
+  NO_EVENTS
+  IN_PROGRESS
+  COMPLETE
+  MISSING_IN
+  MISSING_OUT
+  NEEDS_REVIEW
+}
+
+enum UnifiedAttendanceBusinessStatus {
+  UNCLASSIFIED
+  PRESENT
+  LATE
+  ABSENT
+}
+
 enum HrVerificationStatus {
   pending
   verified
@@ -325,7 +341,8 @@ model EmployeeSchedule {
   createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  employee          Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  attendanceRecords AttendanceRecord[]
 
   @@unique([employeeId, scheduleId])
   @@index([employeeId, effectiveFrom])
@@ -454,8 +471,8 @@ model BundyImport {
   @@map("bundy_imports")
 }
 
-// Bundy rows are immutable source evidence. They are deliberately separate
-// from AttendanceRecord, which belongs to later unified attendance work.
+// Bundy rows are immutable source evidence. Unified Attendance references them
+// through AttendanceBundyEvidence without consuming or mutating raw rows.
 model BundyRawEvent {
   id                          String                @id @default(uuid()) @db.Uuid
   importId                    String                @map("import_id") @db.Uuid
@@ -476,8 +493,9 @@ model BundyRawEvent {
   importedAt                  DateTime              @default(now()) @map("imported_at") @db.Timestamptz(3)
   createdAt                   DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
 
-  import   BundyImport @relation(fields: [importId], references: [id], onDelete: Restrict)
-  employee Employee?   @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  import             BundyImport               @relation(fields: [importId], references: [id], onDelete: Restrict)
+  employee           Employee?                 @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  attendanceEvidence AttendanceBundyEvidence[]
 
   @@index([deviceEmployeeId, occurredAt])
   @@index([employeeId, occurredAt])
@@ -487,46 +505,78 @@ model BundyRawEvent {
   @@map("bundy_raw_events")
 }
 
-// Attendance keeps source provenance and actor snapshots separate from the
-// correction, HR verification, and Payroll readiness lifecycles.
+// AttendanceRecord is the existing canonical attendance model. Its legacy QR
+// lifecycle status remains for compatibility while Unified Attendance adds
+// separate technical and business state fields below.
 model AttendanceRecord {
-  id                      String                 @id @default(uuid()) @db.Uuid
-  employeeId              String                 @map("employee_id") @db.Uuid
-  attendanceDate          DateTime               @map("attendance_date") @db.Date
-  timeIn                  DateTime               @map("time_in") @db.Timestamptz(3)
-  timeOut                 DateTime?              @map("time_out") @db.Timestamptz(3)
-  timeInSource            AttendanceSource       @map("time_in_source")
-  timeOutSource           AttendanceSource?      @map("time_out_source")
-  timeInSourceReference   String?                @map("time_in_source_reference") @db.VarChar(160)
-  timeOutSourceReference  String?                @map("time_out_source_reference") @db.VarChar(160)
+  id                      String                          @id @default(uuid()) @db.Uuid
+  employeeId              String                          @map("employee_id") @db.Uuid
+  attendanceDate          DateTime                        @map("attendance_date") @db.Date
+  timeIn                  DateTime                        @map("time_in") @db.Timestamptz(3)
+  timeOut                 DateTime?                       @map("time_out") @db.Timestamptz(3)
+  timeInSource            AttendanceSource                @map("time_in_source")
+  timeOutSource           AttendanceSource?               @map("time_out_source")
+  timeInSourceReference   String?                         @map("time_in_source_reference") @db.VarChar(160)
+  timeOutSourceReference  String?                         @map("time_out_source_reference") @db.VarChar(160)
   status                  AttendanceStatus
-  timeInOperatorUserId    String?                @map("time_in_operator_user_id") @db.Uuid
-  timeOutOperatorUserId   String?                @map("time_out_operator_user_id") @db.Uuid
-  timeInActorSnapshot     Json                   @map("time_in_actor_snapshot")
-  timeOutActorSnapshot    Json?                  @map("time_out_actor_snapshot")
-  hrVerificationStatus    HrVerificationStatus   @default(pending) @map("hr_verification_status")
-  hrVerifiedAt            DateTime?              @map("hr_verified_at") @db.Timestamptz(3)
-  hrVerifiedByUserId      String?                @map("hr_verified_by_user_id") @db.Uuid
-  hrVerifiedBySnapshot    Json?                  @map("hr_verified_by_snapshot")
-  payrollReadinessStatus  PayrollReadinessStatus @default(blocked) @map("payroll_readiness_status")
-  payrollReadinessReasons Json?                  @map("payroll_readiness_reasons")
-  correctionMetadata      Json?                  @map("correction_metadata")
-  sourceMetadata          Json?                  @map("source_metadata")
-  legacyFirestoreId       String?                @unique @map("legacy_firestore_id") @db.VarChar(160)
-  createdAt               DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt               DateTime               @updatedAt @map("updated_at") @db.Timestamptz(3)
+  timeInOperatorUserId    String?                         @map("time_in_operator_user_id") @db.Uuid
+  timeOutOperatorUserId   String?                         @map("time_out_operator_user_id") @db.Uuid
+  timeInActorSnapshot     Json                            @map("time_in_actor_snapshot")
+  timeOutActorSnapshot    Json?                           @map("time_out_actor_snapshot")
+  hrVerificationStatus    HrVerificationStatus            @default(pending) @map("hr_verification_status")
+  hrVerifiedAt            DateTime?                       @map("hr_verified_at") @db.Timestamptz(3)
+  hrVerifiedByUserId      String?                         @map("hr_verified_by_user_id") @db.Uuid
+  hrVerifiedBySnapshot    Json?                           @map("hr_verified_by_snapshot")
+  payrollReadinessStatus  PayrollReadinessStatus          @default(blocked) @map("payroll_readiness_status")
+  payrollReadinessReasons Json?                           @map("payroll_readiness_reasons")
+  correctionMetadata      Json?                           @map("correction_metadata")
+  sourceMetadata          Json?                           @map("source_metadata")
+  legacyFirestoreId       String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt               DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  employeeScheduleId      String?                         @map("employee_schedule_id") @db.Uuid
+  scheduleSnapshot        Json?                           @map("schedule_snapshot")
+  technicalState          UnifiedAttendanceTechnicalState @default(IN_PROGRESS) @map("technical_state")
+  businessStatus          UnifiedAttendanceBusinessStatus @default(UNCLASSIFIED) @map("business_status")
+  processedAt             DateTime?                       @map("processed_at") @db.Timestamptz(3)
+  processingVersion       String?                         @map("processing_version") @db.VarChar(80)
+  lastReprocessedAt       DateTime?                       @map("last_reprocessed_at") @db.Timestamptz(3)
+  requiresReview          Boolean                         @default(false) @map("requires_review")
+  reviewReasonCode        String?                         @map("review_reason_code") @db.VarChar(80)
 
-  employee        Employee               @relation(fields: [employeeId], references: [id], onDelete: Restrict)
-  timeInOperator  User?                  @relation("AttendanceTimeInOperator", fields: [timeInOperatorUserId], references: [id], onDelete: SetNull)
-  timeOutOperator User?                  @relation("AttendanceTimeOutOperator", fields: [timeOutOperatorUserId], references: [id], onDelete: SetNull)
-  hrVerifiedBy    User?                  @relation("AttendanceHrVerifier", fields: [hrVerifiedByUserId], references: [id], onDelete: SetNull)
+  employee        Employee                  @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  schedule        EmployeeSchedule?         @relation(fields: [employeeScheduleId], references: [id], onDelete: Restrict)
+  timeInOperator  User?                     @relation("AttendanceTimeInOperator", fields: [timeInOperatorUserId], references: [id], onDelete: SetNull)
+  timeOutOperator User?                     @relation("AttendanceTimeOutOperator", fields: [timeOutOperatorUserId], references: [id], onDelete: SetNull)
+  hrVerifiedBy    User?                     @relation("AttendanceHrVerifier", fields: [hrVerifiedByUserId], references: [id], onDelete: SetNull)
   corrections     AttendanceCorrection[]
+  bundyEvidence   AttendanceBundyEvidence[]
 
   @@unique([employeeId, attendanceDate])
   @@index([attendanceDate, status])
   @@index([attendanceDate, timeInSource])
   @@index([hrVerificationStatus, payrollReadinessStatus, attendanceDate])
+  @@index([technicalState, attendanceDate])
+  @@index([businessStatus, attendanceDate])
+  @@index([requiresReview, attendanceDate])
+  @@index([employeeScheduleId])
   @@map("attendance_records")
+}
+
+// Bundy rows are immutable source evidence. Link rows may be replaced during
+// controlled reprocessing, but the raw source rows themselves are preserved.
+model AttendanceBundyEvidence {
+  id                 String   @id @default(uuid()) @db.Uuid
+  attendanceRecordId String   @map("attendance_record_id") @db.Uuid
+  bundyRawEventId    String   @map("bundy_raw_event_id") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  attendanceRecord AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
+  bundyRawEvent    BundyRawEvent    @relation(fields: [bundyRawEventId], references: [id], onDelete: Restrict)
+
+  @@unique([attendanceRecordId, bundyRawEventId])
+  @@index([bundyRawEventId])
+  @@map("attendance_bundy_evidence")
 }
 
 model AttendanceCorrection {

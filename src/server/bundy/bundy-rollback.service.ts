@@ -3,6 +3,7 @@ import "server-only";
 import type { BundyImportStatus, Prisma } from "@prisma/client";
 
 import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
+import { countBundyRawEventDependenciesForImport } from "@/server/repositories/attendance/unified-attendance.repository";
 import { getRepositoryPrisma, findUserIdByFirebaseUid, toActorSnapshot, toJson } from "@/server/repositories/prisma/prisma-repository-helpers";
 import type { SessionUser } from "@/types/auth";
 import type {
@@ -107,14 +108,21 @@ export type BundyRollbackDependencyReport = {
   blockingReasons: string[];
 };
 
-/**
- * Unified Attendance does not yet persist a relation to BundyRawEvent. Keep
- * this check explicit so the future relation can be enforced here without
- * guessing ownership from employee, device, or timestamp fields.
- */
 export async function inspectBundyRollbackDependencies(importId: string): Promise<BundyRollbackDependencyReport> {
-  const rawEventsOwned = await getRepositoryPrisma().bundyRawEvent.count({ where: { importId } });
-  return { rawEventsOwned, downstreamDependencies: 0, blockingReasons: [] };
+  const [rawEventsOwned, downstreamDependencies] = await Promise.all([
+    getRepositoryPrisma().bundyRawEvent.count({ where: { importId } }),
+    countBundyRawEventDependenciesForImport(importId),
+  ]);
+
+  return {
+    rawEventsOwned,
+    downstreamDependencies,
+    blockingReasons: downstreamDependencies > 0
+      ? [
+        `Rollback is blocked because ${downstreamDependencies} Unified Attendance evidence link${downstreamDependencies === 1 ? "" : "s"} reference this import.`,
+      ]
+      : [],
+  };
 }
 
 function statusBlockingReason(status: BundyImportStatus): string | null {
