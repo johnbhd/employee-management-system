@@ -25,7 +25,7 @@ type HrNavigationItem = {
 
 const hrNavigation: HrNavigationItem[] = [
   { id: "dashboard", label: "Dashboard", icon: "dashboard" as const, href: "/hr/dashboard", permission: "hr.dashboard.view" },
-  { id: "attendance-monitoring", label: "Attendance Monitoring", icon: "clock" as const, href: "/hr/attendance-monitoring", permission: "hr.attendance.view" },
+  { id: "attendance-monitoring", label: "Attendance Review", icon: "clock" as const, href: "/hr/attendance-monitoring", permission: "hr.attendance.view" },
   { id: "correction-requests", label: "Correction Requests", icon: "comment" as const, href: "/hr/correction-requests", permission: "hr.correction.view" },
   { id: "employee-schedules", label: "Employee Schedules", icon: "calendar" as const, href: "/hr/employee-schedules", permission: "hr.schedule.view" },
   { id: "employee-directory", label: "Employee Directory", icon: "users" as const, href: "/hr/employee-directory", permission: "hr.employee_directory.view" },

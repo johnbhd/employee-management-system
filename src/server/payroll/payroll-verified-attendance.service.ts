@@ -5,36 +5,49 @@ import {
   formatCampusDateTime,
 } from "@/lib/campus-time";
 import {
-  listAttendanceForReport,
-  type StoredQrAttendanceRecord,
-} from "@/server/repositories/attendance/attendance.repository";
-import { listAttendanceCorrectionRequests } from "@/server/repositories/attendance-corrections/attendance-correction.repository";
-import { listEmployees } from "@/server/repositories/employees/employee.repository";
+  listPrismaAttendance,
+  type PrismaAttendanceView,
+} from "@/server/repositories/attendance/prisma-attendance.repository";
+import { listPrismaAttendanceCorrections } from "@/server/repositories/attendance-corrections/prisma-attendance-correction.repository";
 import { listPayrollBatches } from "@/server/repositories/payroll-batches/payroll-batch.repository";
-import type { EmployeeReference } from "@/types/employee";
 import type { PayrollDashboardPeriod } from "@/types/payroll-dashboard";
 import type {
   PayrollVerifiedAttendanceData,
   PayrollVerifiedAttendanceItem,
   PayrollVerifiedAttendanceQuery,
+  PayrollVerifiedAttendanceReason,
 } from "@/types/payroll-verified-attendance";
 import type { PayrollBatchStatus } from "@/types/payroll-batches";
 
-import { getCurrentPayrollPeriod } from "./payroll-dashboard.service";
-
-type AttendanceDocument = Awaited<ReturnType<typeof listAttendanceForReport>>[number];
+import {
+  evaluatePayrollEligibility,
+  type PayrollEligibilityReason,
+} from "./payroll-eligibility";
+import {
+  getCurrentPayrollPeriod,
+  getPayrollPeriodForStart,
+  getPayrollPeriodOptions,
+} from "./payroll-dashboard.service";
 
 type EmployeePeriodGroup = {
-  employee: EmployeeReference;
-  records: StoredQrAttendanceRecord[];
+  employeeInternalId: string;
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  records: PrismaAttendanceView[];
   sourceAttendanceIds: string[];
   attendanceDates: Set<string>;
-  verifiedAt: Date | null;
 };
+
+type BatchOwnership = {
+  id: string;
+  status: PayrollBatchStatus;
+} | null;
 
 export type PayrollVerifiedAttendanceSource = {
   item: PayrollVerifiedAttendanceItem;
   sourceAttendanceIds: string[];
+  employeeInternalId: string;
 };
 
 function isWithinPeriod(date: string, period: PayrollDashboardPeriod) {
@@ -47,162 +60,51 @@ function matchesSearch(
   department: string,
   search: string,
 ) {
-  if (!search) {
-    return true;
-  }
-
+  if (!search) return true;
   const normalizedSearch = search.toLowerCase();
-
   return [employeeName, employeeId, department]
     .some((value) => value.toLowerCase().includes(normalizedSearch));
 }
 
-function getReadinessReasons(
-  records: readonly StoredQrAttendanceRecord[],
-  pendingCorrectionDates: ReadonlySet<string>,
-) {
-  const reasons = new Set<string>();
+async function listAttendanceForPeriod(period: PayrollDashboardPeriod) {
+  const rows: PrismaAttendanceView[] = [];
+  let page = 1;
+  let hasNext = true;
 
-  records.forEach((record) => {
-    if (record.timeOut === null) {
-      reasons.add(`Missing Time-Out on ${formatCampusDateKeyLabel(record.attendanceDate)}`);
-    }
-
-    if (pendingCorrectionDates.has(record.attendanceDate)) {
-      reasons.add(`Pending correction on ${formatCampusDateKeyLabel(record.attendanceDate)}`);
-    }
-  });
-
-  return Array.from(reasons);
-}
-
-function toVerifiedAttendanceItem(
-  group: EmployeePeriodGroup,
-  period: PayrollDashboardPeriod,
-  pendingCorrectionDates: ReadonlySet<string>,
-): PayrollVerifiedAttendanceItem {
-  const reasons = getReadinessReasons(group.records, pendingCorrectionDates);
-  const readinessStatus = reasons.length > 0 ? "blocked" : "ready";
-
-  return {
-    id: `${group.employee.employeeId}:${period.start}`,
-    employeeName: group.employee.displayName,
-    employeeId: group.employee.employeeId,
-    department: group.employee.department,
-    payrollPeriod: period,
-    attendanceSummary: {
-      presentDays: group.attendanceDates.size,
-      lateCount: null,
-      lateMinutes: null,
-      undertimeMinutes: null,
-    },
-    hrVerification: {
-      status: "verified",
-      verifiedAt: group.verifiedAt ? formatCampusDateTime(group.verifiedAt) : null,
-    },
-    payrollReadiness: {
-      status: readinessStatus,
-      tone: readinessStatus === "ready" ? "success" : "warning",
-      reasons,
-    },
-    batch: {
-      status: "not-added",
-      label: "Not added",
-      tone: "muted",
-      batchId: null,
-    },
-    selectable: readinessStatus === "ready",
-  };
-}
-function getVerifiedAttendanceDocuments(
-  documents: readonly AttendanceDocument[],
-  period: PayrollDashboardPeriod,
-) {
-  return documents.filter(({ record }) => (
-    isWithinPeriod(record.attendanceDate, period)
-    && record.hrVerification?.status === "verified"
-  ));
-}
-
-function groupVerifiedAttendance(
-  documents: readonly AttendanceDocument[],
-  employeesById: ReadonlyMap<string, EmployeeReference>,
-) {
-  const groups = new Map<string, EmployeePeriodGroup>();
-
-  documents.forEach(({ id, record }) => {
-    const employee = employeesById.get(record.employeeId);
-
-    if (!employee) {
-      return;
-    }
-
-    const current = groups.get(employee.employeeId) ?? {
-      employee,
-      records: [],
-      sourceAttendanceIds: [],
-      attendanceDates: new Set<string>(),
-      verifiedAt: null,
-    } satisfies EmployeePeriodGroup;
-
-    current.records.push(record);
-    current.sourceAttendanceIds.push(id);
-    current.attendanceDates.add(record.attendanceDate);
-
-    if (
-      record.hrVerification
-      && (!current.verifiedAt
-        || record.hrVerification.verifiedAt.toMillis() > current.verifiedAt.getTime())
-    ) {
-      current.verifiedAt = record.hrVerification.verifiedAt.toDate();
-    }
-
-    groups.set(employee.employeeId, current);
-  });
-
-  return Array.from(groups.values());
-}
-
-export async function getPayrollVerifiedAttendanceSourcesForPeriod(
-  period: PayrollDashboardPeriod,
-): Promise<PayrollVerifiedAttendanceSource[]> {
-  const [employees, attendanceDocuments, correctionRequests] = await Promise.all([
-    listEmployees(),
-    listAttendanceForReport({
-      attendanceMonth: period.start.slice(0, 7),
-    }),
-    listAttendanceCorrectionRequests(),
-  ]);
-  const employeesById = new Map(
-    employees.map((employee) => [employee.employeeId, employee]),
-  );
-  const pendingCorrectionsByEmployee = new Map<string, Set<string>>();
-
-  correctionRequests
-    .filter((request) => request.status === "pending")
-    .filter((request) => isWithinPeriod(request.attendanceDate, period))
-    .forEach((request) => {
-      const dates = pendingCorrectionsByEmployee.get(request.employeeId) ?? new Set<string>();
-
-      dates.add(request.attendanceDate);
-      pendingCorrectionsByEmployee.set(request.employeeId, dates);
+  while (hasNext) {
+    const result = await listPrismaAttendance({
+      fromDate: period.start,
+      toDate: period.end,
+      page,
+      pageSize: 200,
     });
+    rows.push(...result.rows);
+    hasNext = result.hasNext;
+    page += 1;
+  }
 
-  const verifiedDocuments = getVerifiedAttendanceDocuments(
-    attendanceDocuments,
-    period,
-  );
+  return rows.filter((row) => isWithinPeriod(row.attendanceDate, period));
+}
 
-  return groupVerifiedAttendance(verifiedDocuments, employeesById)
-    .sort((left, right) => left.employee.displayName.localeCompare(right.employee.displayName))
-    .map((group) => ({
-      item: toVerifiedAttendanceItem(
-        group,
-        period,
-        pendingCorrectionsByEmployee.get(group.employee.employeeId) ?? new Set<string>(),
-      ),
-      sourceAttendanceIds: group.sourceAttendanceIds,
-    }));
+async function listPendingCorrectionIds(period: PayrollDashboardPeriod) {
+  const ids = new Set<string>();
+  let page = 1;
+  let hasNext = true;
+
+  while (hasNext) {
+    const result = await listPrismaAttendanceCorrections({
+      status: "pending",
+      page,
+      pageSize: 100,
+    });
+    result.rows
+      .filter((row) => isWithinPeriod(row.attendanceDate, period))
+      .forEach((row) => ids.add(row.attendanceRecordId));
+    hasNext = result.hasNext;
+    page += 1;
+  }
+
+  return ids;
 }
 
 function getBatchPresentation(status: PayrollBatchStatus) {
@@ -224,54 +126,171 @@ function getBatchPresentation(status: PayrollBatchStatus) {
   }
 }
 
-export async function getPayrollVerifiedAttendanceData(
-  query: PayrollVerifiedAttendanceQuery,
-  now = new Date(),
-): Promise<PayrollVerifiedAttendanceData> {
-  const period = getCurrentPayrollPeriod(now);
-  const [sources, batches] = await Promise.all([
-    getPayrollVerifiedAttendanceSourcesForPeriod(period),
+function withDateContext(
+  reason: PayrollEligibilityReason,
+  attendanceDate: string,
+): PayrollVerifiedAttendanceReason {
+  const needsDateContext = reason.code === "PENDING_CORRECTION"
+    || reason.code === "MISSING_EFFECTIVE_TIME"
+    || reason.code === "PROCESSING_INCOMPLETE"
+    || reason.code === "NOT_FINAL_VERIFIED";
+
+  return {
+    ...reason,
+    label: needsDateContext
+      ? `${reason.label} (${formatCampusDateKeyLabel(attendanceDate)})`
+      : reason.label,
+  };
+}
+
+function toVerifiedAttendanceItem(
+  group: EmployeePeriodGroup,
+  period: PayrollDashboardPeriod,
+  pendingCorrectionIds: ReadonlySet<string>,
+  ownership: BatchOwnership,
+): PayrollVerifiedAttendanceItem {
+  const reasonsByKey = new Map<string, PayrollVerifiedAttendanceReason>();
+
+  group.records.forEach((record) => {
+    const evaluated = evaluatePayrollEligibility({
+      attendanceExists: Boolean(record.id),
+      employeeExists: Boolean(record.employeeInternalId && record.employeeId),
+      processingComplete: record.technicalState === "COMPLETE"
+        && record.processedAt !== null
+        && !record.requiresReview,
+      finalVerificationStatus: record.hrVerificationStatus,
+      hasFinalVerificationTimestamp: record.hrVerifiedAt !== null,
+      pendingCorrection: pendingCorrectionIds.has(record.id),
+      hasEffectiveTimeIn: Boolean(record.timeIn),
+      hasEffectiveTimeOut: Boolean(record.timeOut),
+      hasRequiredIdentifier: Boolean(record.id && record.employeeId && record.employeeInternalId),
+      existingBatchReference: ownership?.id ?? null,
+    });
+
+    evaluated.reasons.forEach((reason) => {
+      const contextualReason = withDateContext(reason, record.attendanceDate);
+      reasonsByKey.set(`${contextualReason.code}:${record.attendanceDate}`, contextualReason);
+    });
+  });
+
+  const reasons = Array.from(reasonsByKey.values());
+  const readinessStatus = reasons.length > 0 ? "blocked" : "ready";
+  const verifiedRecords = group.records.filter((record) => (
+    record.hrVerificationStatus === "verified" && record.hrVerifiedAt
+  ));
+  const latestVerifiedAt = verifiedRecords.reduce<string | null>((latest, record) => (
+    !latest || (record.hrVerifiedAt && record.hrVerifiedAt > latest)
+      ? record.hrVerifiedAt
+      : latest
+  ), null);
+  const verificationStatus = group.records.every((record) => record.hrVerificationStatus === "verified")
+    ? "verified"
+    : "pending";
+  const batch = ownership
+    ? {
+      ...getBatchPresentation(ownership.status),
+      status: ownership.status as PayrollVerifiedAttendanceItem["batch"]["status"],
+      batchId: ownership.id,
+    }
+    : {
+      label: "Not added",
+      tone: "muted" as const,
+      status: "not-added" as const,
+      batchId: null,
+    };
+
+  return {
+    id: `${group.employeeId}:${period.start}`,
+    employeeName: group.employeeName,
+    employeeId: group.employeeId,
+    department: group.department,
+    payrollPeriod: period,
+    attendanceSummary: {
+      presentDays: group.attendanceDates.size,
+      lateCount: null,
+      lateMinutes: null,
+      undertimeMinutes: null,
+    },
+    hrVerification: {
+      status: verificationStatus,
+      verifiedAt: latestVerifiedAt ? formatCampusDateTime(new Date(latestVerifiedAt)) : null,
+    },
+    payrollReadiness: {
+      status: readinessStatus,
+      tone: readinessStatus === "ready" ? "success" : "warning",
+      reasons,
+    },
+    batch,
+    selectable: readinessStatus === "ready" && !ownership,
+  };
+}
+
+export async function getPayrollVerifiedAttendanceSourcesForPeriod(
+  period: PayrollDashboardPeriod,
+): Promise<PayrollVerifiedAttendanceSource[]> {
+  const [attendance, pendingCorrectionIds, batches] = await Promise.all([
+    listAttendanceForPeriod(period),
+    listPendingCorrectionIds(period),
     listPayrollBatches(),
   ]);
-  const batchByEmployeePeriodId = new Map<string, { id: string; status: PayrollBatchStatus }>();
+  const ownershipByEmployeePeriod = new Map<string, BatchOwnership>();
 
   batches.forEach((batch) => {
     batch.includedRecords.forEach((record) => {
-      batchByEmployeePeriodId.set(record.employeePeriodId, {
+      ownershipByEmployeePeriod.set(record.employeePeriodId, {
         id: batch.id,
         status: batch.status,
       });
     });
   });
 
-  const allItems = sources.map(({ item }) => {
-    const batch = batchByEmployeePeriodId.get(item.id);
+  const groups = new Map<string, EmployeePeriodGroup>();
+  attendance.forEach((record) => {
+    const current = groups.get(record.employeeId) ?? {
+      employeeInternalId: record.employeeInternalId,
+      employeeId: record.employeeId,
+      employeeName: record.employeeName,
+      department: record.department,
+      records: [],
+      sourceAttendanceIds: [],
+      attendanceDates: new Set<string>(),
+    } satisfies EmployeePeriodGroup;
 
-    if (!batch) {
-      return item;
-    }
-
-    const presentation = getBatchPresentation(batch.status);
-
-    return {
-      ...item,
-      batch: {
-        status: batch.status,
-        label: presentation.label,
-        tone: presentation.tone,
-        batchId: batch.id,
-      },
-      selectable: false,
-    };
+    current.records.push(record);
+    current.sourceAttendanceIds.push(record.id);
+    current.attendanceDates.add(record.attendanceDate);
+    groups.set(record.employeeId, current);
   });
+
+  return Array.from(groups.values())
+    .sort((left, right) => left.employeeName.localeCompare(right.employeeName))
+    .map((group) => {
+      const employeePeriodId = `${group.employeeId}:${period.start}`;
+      const ownership = ownershipByEmployeePeriod.get(employeePeriodId) ?? null;
+      return {
+        item: toVerifiedAttendanceItem(group, period, pendingCorrectionIds, ownership),
+        sourceAttendanceIds: group.sourceAttendanceIds,
+        employeeInternalId: group.employeeInternalId,
+      };
+    });
+}
+
+export async function getPayrollVerifiedAttendanceData(
+  query: PayrollVerifiedAttendanceQuery,
+  now = new Date(),
+): Promise<PayrollVerifiedAttendanceData> {
+  const period = query.periodStart
+    ? getPayrollPeriodForStart(query.periodStart) ?? getCurrentPayrollPeriod(now)
+    : getCurrentPayrollPeriod(now);
+  const periodOptions = getPayrollPeriodOptions(now);
+  if (!periodOptions.some((option) => option.start === period.start)) {
+    periodOptions.unshift(period);
+  }
+  const sources = await getPayrollVerifiedAttendanceSourcesForPeriod(period);
+  const allItems = sources.map(({ item }) => item);
   const departments = Array.from(new Set(allItems.map((item) => item.department))).sort();
   const filteredItems = allItems.filter((item) => (
-    matchesSearch(
-      item.employeeName,
-      item.employeeId,
-      item.department,
-      query.search,
-    )
+    matchesSearch(item.employeeName, item.employeeId, item.department, query.search)
     && (!query.department || item.department === query.department)
     && (!query.readiness || item.payrollReadiness.status === query.readiness)
     && (!query.batch || item.batch.status === query.batch)
@@ -283,8 +302,9 @@ export async function getPayrollVerifiedAttendanceData(
 
   return {
     period,
+    periodOptions,
     summary: {
-      verifiedRecords: allItems.length,
+      verifiedRecords: allItems.filter((item) => item.hrVerification.status === "verified").length,
       ready: allItems.filter((item) => item.payrollReadiness.status === "ready").length,
       includedInBatch: allItems.filter((item) => item.batch.status !== "not-added").length,
       blocked: allItems.filter((item) => item.payrollReadiness.status === "blocked").length,

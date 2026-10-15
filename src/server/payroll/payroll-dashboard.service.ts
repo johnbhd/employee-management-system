@@ -42,6 +42,41 @@ export function getCurrentPayrollPeriod(now = new Date()): PayrollPeriod {
   };
 }
 
+export function getPayrollPeriodForStart(start: string): PayrollPeriod | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(start)) {
+    return null;
+  }
+
+  const date = new Date(`${start}T12:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const period = getCurrentPayrollPeriod(date);
+  return period.start === start ? period : null;
+}
+
+export function getPayrollPeriodOptions(
+  now = new Date(),
+  count = 6,
+): PayrollPeriod[] {
+  const optionCount = Number.isInteger(count) && count > 0
+    ? Math.min(count, 24)
+    : 6;
+  const periods: PayrollPeriod[] = [];
+  let period = getCurrentPayrollPeriod(now);
+
+  for (let index = 0; index < optionCount; index += 1) {
+    periods.push(period);
+
+    const previousBoundary = new Date(`${period.start}T12:00:00.000Z`);
+    previousBoundary.setUTCDate(previousBoundary.getUTCDate() - 1);
+    period = getCurrentPayrollPeriod(previousBoundary);
+  }
+
+  return periods;
+}
+
 function isWithinPeriod(date: string, period: PayrollPeriod) {
   return date >= period.start && date <= period.end;
 }

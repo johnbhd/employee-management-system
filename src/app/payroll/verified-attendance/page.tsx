@@ -2,9 +2,14 @@ import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { PayrollVerifiedAttendancePage } from "@/components/payroll/verified-attendance/PayrollVerifiedAttendancePage";
 import { hasPermission } from "@/server/auth/permission.service";
 import { requireRoleContext } from "@/server/auth/guards";
-import { getCurrentPayrollPeriod } from "@/server/payroll/payroll-dashboard.service";
+import {
+  getCurrentPayrollPeriod,
+  getPayrollPeriodForStart,
+  getPayrollPeriodOptions,
+} from "@/server/payroll/payroll-dashboard.service";
 import { parsePayrollVerifiedAttendanceQuery } from "@/server/payroll/payroll-verified-attendance-query";
 import { getPayrollVerifiedAttendanceData } from "@/server/payroll/payroll-verified-attendance.service";
+import type { PayrollDashboardPeriod } from "@/types/payroll-dashboard";
 import type { PayrollVerifiedAttendanceData } from "@/types/payroll-verified-attendance";
 
 type PageProps = {
@@ -27,9 +32,14 @@ function toSearchParams(
   return params;
 }
 
-function getEmptyData(pageSize: number): PayrollVerifiedAttendanceData {
+function getEmptyData(
+  pageSize: number,
+  period: PayrollDashboardPeriod,
+  periodOptions: PayrollDashboardPeriod[],
+): PayrollVerifiedAttendanceData {
   return {
-    period: getCurrentPayrollPeriod(),
+    period,
+    periodOptions,
     summary: {
       verifiedRecords: 0,
       ready: 0,
@@ -57,10 +67,22 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   const resolvedSearchParams = searchParams ? await searchParams : {};
-  const query = parsePayrollVerifiedAttendanceQuery(
+  const parsedQuery = parsePayrollVerifiedAttendanceQuery(
     toSearchParams(resolvedSearchParams),
   );
-  let data = getEmptyData(query.pageSize);
+  const selectedPeriod = parsedQuery.periodStart
+    ? getPayrollPeriodForStart(parsedQuery.periodStart)
+    : null;
+  const query = {
+    ...parsedQuery,
+    periodStart: selectedPeriod?.start ?? null,
+  };
+  const period = selectedPeriod ?? getCurrentPayrollPeriod();
+  const periodOptions = getPayrollPeriodOptions();
+  if (!periodOptions.some((option) => option.start === period.start)) {
+    periodOptions.unshift(period);
+  }
+  let data = getEmptyData(query.pageSize, period, periodOptions);
   let loadError = false;
 
   try {

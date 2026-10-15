@@ -30,15 +30,18 @@
 @import "./pages/employee/help-support.css";
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
+@import "./pages/hr/attendance-review.css";
 @import "./pages/hr/correction-requests.css";
 @import "./pages/hr/employee-schedules.css";
 @import "./pages/hr/employee-directory.css";
 @import "./pages/hr/attendance-reports.css";
 @import "./pages/hr/audit-history.css";
 @import "./pages/hr/scanner.css";
+@import "./pages/hr/typography.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/integration-detail.css";
+@import "./pages/admin/unified-attendance.css";
 @import "./pages/admin/hrps-integration.css";
 @import "./pages/admin/bundy-integration.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
@@ -50,12 +53,14 @@
 @import "./pages/accounting/approved-payroll.css";
 @import "./pages/accounting/integration-status.css";
 @import "./pages/accounting/transaction-history.css";
+@import "./pages/accounting/typography.css";
 @import "./pages/payroll/dashboard.css";
 @import "./pages/payroll/verified-attendance.css";
 @import "./pages/payroll/batches.css";
 @import "./pages/payroll/handoff.css";
 @import "./pages/payroll/results.css";
 @import "./pages/payroll/history.css";
+@import "./pages/payroll/typography.css";
 
 *,
 *::before,

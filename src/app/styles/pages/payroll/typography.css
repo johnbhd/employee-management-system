@@ -1,0 +1,348 @@
+/*
+ * Payroll-scoped readability layer.
+ *
+ * The shared dashboard primitives are intentionally compact for the older
+ * portals. Keep those tokens unchanged and apply the Payroll refinement only
+ * inside the Payroll shell so role-specific typography cannot leak elsewhere.
+ */
+.payroll-shell {
+  --payroll-body-size: 0.875rem;
+  --payroll-small-size: 0.8125rem;
+  --payroll-meta-size: 0.75rem;
+  --payroll-caption-size: 0.6875rem;
+  --payroll-regular: 400;
+  --payroll-medium: 500;
+  --payroll-semibold: 600;
+  --payroll-bold: 700;
+  font-size: var(--payroll-body-size);
+}
+
+/* Payroll shell */
+.payroll-shell .payroll-brand strong {
+  font-size: 0.75rem;
+  font-weight: var(--payroll-semibold);
+  letter-spacing: 0.1em;
+}
+
+.payroll-shell .payroll-brand small {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+}
+
+.payroll-shell .payroll-workspace-label {
+  font-size: var(--payroll-caption-size);
+  font-weight: var(--payroll-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+}
+
+.payroll-shell .payroll-role-pill {
+  font-size: var(--payroll-caption-size);
+  font-weight: var(--payroll-medium);
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-nav-link {
+  font-size: var(--payroll-body-size);
+  font-weight: var(--payroll-medium);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-nav-link.is-active {
+  font-weight: var(--payroll-semibold);
+}
+
+.payroll-shell .payroll-nav-copy small {
+  font-size: var(--payroll-caption-size);
+  font-weight: var(--payroll-medium);
+}
+
+.payroll-shell .payroll-sidebar-status > div {
+  font-size: var(--payroll-caption-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-sidebar-status strong {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-sidebar-status p {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.55;
+}
+
+.payroll-shell .payroll-sidebar-account strong {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-sidebar-account small,
+.payroll-shell .payroll-sidebar-logout {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.4;
+}
+
+.payroll-shell .payroll-sidebar-logout {
+  font-weight: var(--payroll-medium);
+}
+
+.payroll-shell .payroll-navbar-title strong {
+  font-size: 0.9375rem;
+  font-weight: var(--payroll-semibold);
+  line-height: 1.3;
+}
+
+.payroll-shell .payroll-navbar-title span,
+.payroll-shell .payroll-date,
+.payroll-shell .payroll-navbar-actions {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.4;
+}
+
+.payroll-shell .payroll-progress-badge {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-profile-copy strong,
+.payroll-shell .payroll-profile-menu strong {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell .payroll-profile-copy small,
+.payroll-shell .payroll-profile-menu small,
+.payroll-shell .payroll-profile-menu button,
+.payroll-shell .payroll-profile-menu a {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.4;
+}
+
+/* Page and panel hierarchy */
+.payroll-shell .page-eyebrow,
+.payroll-shell .section-kicker {
+  font-size: 0.72rem;
+  font-weight: var(--payroll-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+}
+
+.payroll-shell .page-title {
+  font-weight: var(--payroll-bold);
+  line-height: 1.15;
+}
+
+.payroll-shell .page-subtitle {
+  font-size: 0.9375rem;
+  font-weight: var(--payroll-regular);
+  line-height: 1.6;
+}
+
+.payroll-shell .panel-header h2,
+.payroll-shell [class*="__modal-header"] h2,
+.payroll-shell [class*="__modal-section"] h3 {
+  font-weight: var(--payroll-semibold);
+  line-height: 1.3;
+}
+
+.payroll-shell .panel-header h2 {
+  font-size: 1.05rem;
+}
+
+.payroll-shell [class*="__panel-description"],
+.payroll-shell [class*="__section-note"],
+.payroll-shell [class*="__description"],
+.payroll-shell [class*="__boundary-note"],
+.payroll-shell [class*="__batch-note"],
+.payroll-shell [class*="__confirm-copy"],
+.payroll-shell [class*="__response"] {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.55;
+}
+
+/* Summary cards */
+.payroll-shell .metric-label {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-medium);
+  line-height: 1.4;
+}
+
+.payroll-shell .metric-value {
+  font-weight: var(--payroll-bold);
+  line-height: 1.2;
+}
+
+.payroll-shell .metric-note {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.45;
+}
+
+.payroll-shell [class*="__period"] {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-medium);
+  line-height: 1.35;
+}
+
+/* Tables, filters, actions, and status */
+.payroll-shell .data-table {
+  font-size: var(--payroll-body-size);
+  line-height: 1.45;
+}
+
+.payroll-shell .data-table th {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-semibold);
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+}
+
+.payroll-shell .data-table td {
+  font-size: var(--payroll-body-size);
+  line-height: 1.45;
+}
+
+.payroll-shell .data-table td:first-child,
+.payroll-shell .data-table td strong,
+.payroll-shell [class*="__table"] td strong {
+  font-weight: var(--payroll-semibold);
+}
+
+.payroll-shell [class*="__table"] td strong {
+  font-size: var(--payroll-body-size);
+  line-height: 1.4;
+}
+
+.payroll-shell [class*="__table-reference"],
+.payroll-shell [class*="__batch-id"] {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.45;
+}
+
+.payroll-shell .status-badge,
+.payroll-shell .inline-status {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.25;
+}
+
+.payroll-shell .button-primary,
+.payroll-shell .button-secondary,
+.payroll-shell .button-link,
+.payroll-shell [class*="__page-button"],
+.payroll-shell [class*="__row-menu"] button {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell [class*="__filters"] label,
+.payroll-shell [class*="__filter"] label,
+.payroll-shell [class*="__search-field"] > span:first-child,
+.payroll-shell [class*="__field"] > span:first-child {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.35;
+}
+
+.payroll-shell [class*="__filters"] input,
+.payroll-shell [class*="__filters"] select,
+.payroll-shell [class*="__search-input"] input,
+.payroll-shell [class*="__field"] select,
+.payroll-shell [class*="__page-size"] select {
+  font-size: var(--payroll-body-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.4;
+}
+
+.payroll-shell [class*="__result-meta"],
+.payroll-shell [class*="__pagination"],
+.payroll-shell [class*="__filter-error"] {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.45;
+}
+
+.payroll-shell [class*="__empty"] {
+  font-size: var(--payroll-body-size);
+  line-height: 1.5;
+}
+
+.payroll-shell [class*="__empty"] strong {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.4;
+}
+
+.payroll-shell [class*="__empty"] span {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.5;
+}
+
+.payroll-shell [class*="__notice-body"] strong,
+.payroll-shell [class*="__action-copy"] strong,
+.payroll-shell [class*="__issue-heading"] strong {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.4;
+}
+
+.payroll-shell [class*="__notice-body"] span,
+.payroll-shell [class*="__notice"] time,
+.payroll-shell [class*="__action-copy"] span,
+.payroll-shell [class*="__issue-heading"] span,
+.payroll-shell [class*="__issue-copy"] small {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.5;
+}
+
+/* Modal detail labels and values */
+.payroll-shell [class*="__modal-details"] dt,
+.payroll-shell [class*="__details-list"] dt {
+  font-size: var(--payroll-meta-size);
+  font-weight: var(--payroll-semibold);
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+}
+
+.payroll-shell [class*="__modal-details"] dd,
+.payroll-shell [class*="__details-list"] dd {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-semibold);
+  line-height: 1.5;
+}
+
+.payroll-shell [class*="__modal-header"] p:last-child,
+.payroll-shell [class*="__modal-description"],
+.payroll-shell [class*="__modal-empty"],
+.payroll-shell [class*="__timeline"],
+.payroll-shell [class*="__issues"] {
+  font-size: var(--payroll-small-size);
+  font-weight: var(--payroll-regular);
+  line-height: 1.55;
+}
+
+@media (max-width: 700px) {
+  .payroll-shell .payroll-navbar-title strong {
+    font-size: var(--payroll-small-size);
+  }
+
+  .payroll-shell .page-subtitle {
+    font-size: var(--payroll-body-size);
+  }
+}

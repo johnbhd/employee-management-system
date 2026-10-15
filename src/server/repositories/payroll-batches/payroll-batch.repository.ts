@@ -20,14 +20,17 @@ import {
   addPrismaPayrollBatchItem,
   createPrismaPayrollBatch,
   getPrismaPayrollBatchById,
+  getPrismaPayrollBatchReadiness,
   listPrismaPayrollBatches,
   markPrismaPayrollBatchSubmittedFromHandoff,
   removePrismaPayrollBatchItem,
   updatePrismaPayrollBatchStatus,
   PrismaPayrollBatchConflictError,
   PrismaPayrollBatchNotFoundError,
+  PrismaPayrollBatchReadinessError,
   PrismaPayrollBatchValidationError,
 } from "@/server/repositories/payroll-batches/prisma-payroll-batch.repository";
+import type { PayrollBatchReadiness } from "@/types/payroll-batches";
 
 const batchCollection = "payrollBatches";
 const membershipCollection = "payrollBatchMembership";
@@ -79,9 +82,21 @@ export class PayrollBatchEligibilityError extends Error {
   }
 }
 
+export class PayrollBatchReadinessError extends Error {
+  readonly code = "PAYROLL_BATCH_NOT_READY";
+  readonly readiness: PayrollBatchReadiness;
+
+  constructor(readiness: PayrollBatchReadiness) {
+    super("The Payroll batch is not ready to freeze.");
+    this.name = "PayrollBatchReadinessError";
+    this.readiness = readiness;
+  }
+}
+
 function mapPrismaBatchError(error: unknown): never {
   if (error instanceof PrismaPayrollBatchNotFoundError) throw new PayrollBatchNotFoundError();
   if (error instanceof PrismaPayrollBatchConflictError) throw new PayrollBatchConflictError(error.message);
+  if (error instanceof PrismaPayrollBatchReadinessError) throw new PayrollBatchReadinessError(error.readiness);
   if (error instanceof PrismaPayrollBatchValidationError) throw new PayrollBatchValidationError(error.message);
   throw error;
 }
@@ -185,6 +200,9 @@ export function parsePayrollBatchItemSnapshot(value: unknown): PayrollBatchItemS
     hrVerificationStatus: "verified",
     payrollReadiness: "ready",
     sourceAttendanceIds,
+    attendanceSnapshot: null,
+    scheduleSnapshot: null,
+    verificationSnapshot: null,
     snapshotCreatedAt: snapshotCreatedAt.toDate().toISOString(),
   };
 }
@@ -206,6 +224,12 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
   const submittedAt = data.submittedAt === null || data.submittedAt === undefined
     ? null
     : getTimestamp(data.submittedAt);
+  const frozenBy = data.frozenBy === null || data.frozenBy === undefined
+    ? null
+    : parseActor(data.frozenBy);
+  const frozenAt = data.frozenAt === null || data.frozenAt === undefined
+    ? null
+    : getTimestamp(data.frozenAt);
   const recordCount = getRequiredNumber(data, "recordCount");
   const blockedCount = getRequiredNumber(data, "blockedCount");
   const includedRecords = Array.isArray(data.includedRecords)
@@ -221,6 +245,8 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
     || !updatedAt
     || (data.submittedBy !== null && data.submittedBy !== undefined && !submittedBy)
     || (data.submittedAt !== null && data.submittedAt !== undefined && !submittedAt)
+    || (data.frozenBy !== null && data.frozenBy !== undefined && !frozenBy)
+    || (data.frozenAt !== null && data.frozenAt !== undefined && !frozenAt)
     || recordCount === null
     || blockedCount === null
     || !includedRecords
@@ -239,6 +265,8 @@ function parseBatch(id: string, data: DocumentData | undefined): PayrollBatchRec
     createdBy,
     createdAt: createdAt.toDate().toISOString(),
     updatedAt: updatedAt.toDate().toISOString(),
+    frozenBy,
+    frozenAt: frozenAt?.toDate().toISOString() ?? null,
     submittedBy,
     submittedAt: submittedAt?.toDate().toISOString() ?? null,
     recordCount,
@@ -265,7 +293,6 @@ async function writeBatchAuditEvent(
   summary: string,
 ) {
   await recordAuditEvent({
-    id: `${batch.id}:${eventType}:${batch.updatedAt}`,
     eventType,
     action: eventType === "payroll.batch.created" ? "Payroll Batch Created" : "Payroll Batch Updated",
     module: "Payroll Batches",
@@ -329,6 +356,16 @@ export async function getPayrollBatchById(
   return legacyBatch;
 }
 
+export async function getPayrollBatchReadiness(
+  batchId: string,
+): Promise<PayrollBatchReadiness> {
+  try {
+    return await getPrismaPayrollBatchReadiness(batchId);
+  } catch (error) {
+    return mapPrismaBatchError(error);
+  }
+}
+
 export async function createPayrollBatch(input: {
   period: PayrollBatchItemSnapshot["payrollPeriod"];
   actor: BatchActor;
@@ -336,7 +373,9 @@ export async function createPayrollBatch(input: {
   blockedCount?: number;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await createPrismaPayrollBatch(input) as PayrollBatchRecord;
+    const batch = await createPrismaPayrollBatch(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.created", input.actor, "A Payroll batch was created.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -372,7 +411,9 @@ export async function addPayrollBatchItem(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    const batch = await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "A final-verified attendance record was added to a Payroll batch.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -447,7 +488,9 @@ export async function removePayrollBatchItem(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await removePrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    const batch = await removePrismaPayrollBatchItem(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "An attendance record was removed from a Draft Payroll batch.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -509,7 +552,12 @@ export async function updatePayrollBatchStatus(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await updatePrismaPayrollBatchStatus(input) as PayrollBatchRecord;
+    const batch = await updatePrismaPayrollBatchStatus(input) as PayrollBatchRecord;
+    const summary = input.status === "Ready"
+      ? "A Payroll batch was revalidated, snapshotted, frozen, and marked Ready."
+      : `Payroll batch status changed to ${input.status}.`;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, summary);
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -564,7 +612,9 @@ export async function markPayrollBatchSubmittedFromHandoff(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    return await markPrismaPayrollBatchSubmittedFromHandoff(input) as PayrollBatchRecord;
+    const batch = await markPrismaPayrollBatchSubmittedFromHandoff(input) as PayrollBatchRecord;
+    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "A Payroll batch was submitted from the handoff workflow.");
+    return batch;
   } catch (error) {
     return mapPrismaBatchError(error);
   }

@@ -54,9 +54,13 @@ export async function reviewAttendanceCorrection(input: {
 
     await recordAuditEvent({
         id: `${input.requestId}:review:${input.decision}`,
-        eventType: input.decision === "approve" ? "hr.correction.approved" : "hr.correction.rejected",
-        action: input.decision === "approve" ? "Attendance Correction Approved" : "Attendance Correction Rejected",
-        module: "Correction Requests",
+        eventType: input.decision === "approve"
+            ? "hr.attendance.correction.approved"
+            : "hr.attendance.correction.rejected",
+        action: input.decision === "approve"
+            ? "ATTENDANCE_CORRECTION_APPROVED"
+            : "ATTENDANCE_CORRECTION_REJECTED",
+        module: "HR Attendance Review",
         actor: {
             type: "user",
             uid: input.reviewer.uid,
@@ -96,7 +100,7 @@ function toAttendanceDto(
         attendanceDate: string;
         timeIn: { toDate(): Date } | null;
         timeOut: { toDate(): Date } | null;
-        timeInSource: "QR" | "BUNDY";
+        timeInSource: "QR" | "BUNDY" | null;
         timeOutSource: "QR" | "BUNDY" | null;
         status: "present" | "completed";
     } | null,
@@ -180,17 +184,7 @@ async function toCorrectionRecord(
         ? toAttendanceDto(request.originalAttendance)
         : null;
     const resultingAttendance = request.status === "approved"
-        ? toAttendanceDto(currentAttendance
-            ? {
-                attendanceRecordId: request.attendanceRecordId,
-                attendanceDate: currentAttendance.attendanceDate,
-                timeIn: currentAttendance.timeIn,
-                timeOut: currentAttendance.timeOut,
-                timeInSource: currentAttendance.timeInSource,
-                timeOutSource: currentAttendance.timeOutSource,
-                status: currentAttendance.status,
-            }
-            : null)
+        ? toAttendanceDto(request.resultingAttendance)
         : null;
 
     return {

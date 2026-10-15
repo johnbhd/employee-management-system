@@ -61,7 +61,9 @@ export function PayrollVerifiedAttendanceDetailsModal({
           <div><dt>Undertime minutes</dt><dd>{formatAvailability(record.attendanceSummary.undertimeMinutes)}</dd></div>
           <div>
             <dt>HR verification</dt>
-            <dd><StatusBadge tone="success">Verified</StatusBadge></dd>
+            <dd><StatusBadge tone={record.hrVerification.status === "verified" ? "success" : "warning"}>
+              {record.hrVerification.status === "verified" ? "Verified" : "Pending HR verification"}
+            </StatusBadge></dd>
           </div>
           <div><dt>Verified at</dt><dd>{record.hrVerification.verifiedAt ?? "Unavailable"}</dd></div>
           <div>
@@ -79,7 +81,11 @@ export function PayrollVerifiedAttendanceDetailsModal({
           <div className="payroll-verified-attendance__modal-reasons">
             <h3>Blocking reasons</h3>
             <ul>
-              {record.payrollReadiness.reasons.map((reason) => <li key={reason}>{reason}</li>)}
+              {record.payrollReadiness.reasons.map((reason) => (
+                <li key={`${reason.code}:${reason.label}`}>
+                  <strong>{reason.code}</strong> — {reason.label} <span>(Owner: {reason.owner})</span>
+                </li>
+              ))}
             </ul>
           </div>
         ) : null}

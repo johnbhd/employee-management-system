@@ -32,6 +32,10 @@ type PayrollVerifiedAttendancePageProps = {
 function buildQueryString(values: PayrollVerifiedAttendanceQuery) {
   const params = new URLSearchParams();
 
+  if (values.periodStart) {
+    params.set("periodStart", values.periodStart);
+  }
+
   if (values.search.trim()) {
     params.set("search", values.search.trim());
   }
@@ -215,6 +219,10 @@ export function PayrollVerifiedAttendancePage({
   }, [isRefreshing, query]);
 
   function navigateToFilters(overrides: Partial<PayrollVerifiedAttendanceQuery> = {}) {
+    if (Object.prototype.hasOwnProperty.call(overrides, "periodStart")) {
+      setSelectedIds(new Set());
+    }
+
     const nextQuery: PayrollVerifiedAttendanceQuery = {
       ...query,
       ...overrides,
@@ -226,6 +234,7 @@ export function PayrollVerifiedAttendancePage({
   }
 
   function resetFilters() {
+    setSelectedIds(new Set());
     router.push(pathname);
   }
 
@@ -329,10 +338,26 @@ export function PayrollVerifiedAttendancePage({
         </p>
       ) : null}
 
-      <p className="payroll-verified-attendance__period">
-        <Icon name="calendar" />
-        Payroll period: {data.period.label}
-      </p>
+      <div className="payroll-verified-attendance__period-controls">
+        <p className="payroll-verified-attendance__period">
+          <Icon name="calendar" />
+          Payroll period: {data.period.label}
+        </p>
+        <label className="payroll-verified-attendance__period-selector">
+          <span>Payroll period</span>
+          <select
+            value={query.periodStart ?? data.period.start}
+            onChange={(event) => navigateToFilters({ periodStart: event.target.value })}
+            aria-label="Select payroll period"
+          >
+            {data.periodOptions.map((option) => (
+              <option value={option.start} key={option.start}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
 
       <div className="metric-grid payroll-verified-attendance__summary">
         {summaryMetrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}
@@ -380,6 +405,7 @@ export function PayrollVerifiedAttendancePage({
 
         <PayrollVerifiedAttendanceTable
           records={data.items}
+          periodLabel={data.period.label}
           selectedIds={selectedIds}
           allSelectableSelected={allSelectableSelected}
           onToggleAll={toggleAllVisible}

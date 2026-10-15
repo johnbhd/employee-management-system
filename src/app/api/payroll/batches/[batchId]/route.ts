@@ -9,6 +9,7 @@ import {
   PayrollBatchConflictError,
   PayrollBatchDataError,
   PayrollBatchNotFoundError,
+  PayrollBatchReadinessError,
   PayrollBatchValidationError,
   updatePayrollBatchStatus,
 } from "@/server/repositories/payroll-batches/payroll-batch.repository";
@@ -19,15 +20,18 @@ export const runtime = "nodejs";
 
 type RouteContext = { params: Promise<{ batchId: string }> };
 
-function errorResponse(code: string, message: string, status: number) {
+function errorResponse(code: string, message: string, status: number, details?: unknown) {
   return NextResponse.json<ApiErrorResponse>(
-    { success: false, error: { code, message } },
+    { success: false, error: { code, message, ...(details === undefined ? {} : { details }) } },
     { status },
   );
 }
 
 function mapError(error: unknown) {
   if (error instanceof PayrollBatchConflictError) return errorResponse(error.code, error.message, 409);
+  if (error instanceof PayrollBatchReadinessError) {
+    return errorResponse(error.code, error.message, 422, error.readiness);
+  }
   if (error instanceof PayrollBatchValidationError) return errorResponse(error.code, error.message, 400);
   if (error instanceof PayrollBatchNotFoundError) return errorResponse(error.code, error.message, 404);
   if (error instanceof PayrollBatchDataError) return errorResponse(error.code, error.message, 500);

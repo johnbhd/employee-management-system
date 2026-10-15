@@ -1,6 +1,13 @@
 import "server-only";
 
-import type { AttendanceSource, AttendanceStatus, HrVerificationStatus, PayrollReadinessStatus, Prisma } from "@prisma/client";
+import type {
+    AttendanceSource,
+    AttendanceStatus,
+    HrVerificationStatus,
+    PayrollReadinessStatus,
+    Prisma,
+    UnifiedAttendanceTechnicalState,
+} from "@prisma/client";
 
 import { determineQrAttendanceAction } from "@/server/attendance/qr/qr-attendance-state";
 import {
@@ -29,6 +36,10 @@ export type PrismaAttendanceView = {
     status: AttendanceStatus;
     hrVerificationStatus: HrVerificationStatus;
     hrVerifiedAt: string | null;
+    technicalState: UnifiedAttendanceTechnicalState;
+    processedAt: string | null;
+    requiresReview: boolean;
+    reviewReasonCode: string | null;
     payrollReadinessStatus: PayrollReadinessStatus;
     payrollReadinessReasons: unknown[];
     correctionMetadata: Record<string, unknown>;
@@ -66,6 +77,10 @@ const attendanceSelect = {
     status: true,
     hrVerificationStatus: true,
     hrVerifiedAt: true,
+    technicalState: true,
+    processedAt: true,
+    requiresReview: true,
+    reviewReasonCode: true,
     payrollReadinessStatus: true,
     payrollReadinessReasons: true,
     correctionMetadata: true,
@@ -87,6 +102,10 @@ type AttendanceRow = Prisma.AttendanceRecordGetPayload<{
 }>;
 
 function mapAttendance(row: AttendanceRow): PrismaAttendanceView {
+    if (!row.timeIn || !row.timeInSource || row.timeInActorSnapshot === null) {
+        throw new Error("The attendance record has no time-in evidence for the legacy attendance view.");
+    }
+
     return {
         id: row.id,
         employeeId: row.employee.employeeId,
@@ -106,6 +125,10 @@ function mapAttendance(row: AttendanceRow): PrismaAttendanceView {
         status: row.status,
         hrVerificationStatus: row.hrVerificationStatus,
         hrVerifiedAt: toIso(row.hrVerifiedAt),
+        technicalState: row.technicalState,
+        processedAt: toIso(row.processedAt),
+        requiresReview: row.requiresReview,
+        reviewReasonCode: row.reviewReasonCode,
         payrollReadinessStatus: row.payrollReadinessStatus,
         payrollReadinessReasons: Array.isArray(row.payrollReadinessReasons)
             ? row.payrollReadinessReasons
@@ -129,6 +152,7 @@ function whereFor(filters: PrismaAttendanceFilters): Prisma.AttendanceRecordWher
     }
 
     return {
+        timeIn: { not: null },
         ...(filters.attendanceDate ? { attendanceDate: new Date(`${filters.attendanceDate}T00:00:00.000Z`) } : {}),
         ...(!filters.attendanceDate && (filters.fromDate || filters.toDate)
             ? {
@@ -164,7 +188,9 @@ export async function getPrismaAttendanceById(
         select: attendanceSelect,
     });
 
-    return row ? mapAttendance(row) : null;
+    return row && row.timeIn && row.timeInSource && row.timeInActorSnapshot !== null
+        ? mapAttendance(row)
+        : null;
 }
 
 export async function getPrismaAttendanceByEmployeeAndDate(
@@ -179,7 +205,9 @@ export async function getPrismaAttendanceByEmployeeAndDate(
         select: attendanceSelect,
     });
 
-    return row ? mapAttendance(row) : null;
+    return row && row.timeIn && row.timeInSource && row.timeInActorSnapshot !== null
+        ? mapAttendance(row)
+        : null;
 }
 
 export async function listPrismaAttendance(
@@ -308,6 +336,32 @@ export async function recordPrismaQrAttendance(input: {
             });
 
             return { action: "time_in" as const, record: mapAttendance(created) };
+        }
+
+        if (existing.hrVerificationStatus === "verified") {
+            throw new Error(
+                "FINAL_VERIFIED_ATTENDANCE: final-verified attendance cannot be changed.",
+            );
+        }
+
+        if (!existing.timeIn || !existing.timeInSource || existing.timeInActorSnapshot === null) {
+            const updated = await transaction.attendanceRecord.update({
+                where: { id: existing.id },
+                data: {
+                    timeIn: input.occurredAt,
+                    timeInSource: "QR",
+                    timeInSourceReference: null,
+                    timeInOperatorUserId: operatorUser?.id,
+                    timeInActorSnapshot: input.scannerOperator,
+                    status: existing.timeOut ? "completed" : "present",
+                    technicalState: existing.timeOut ? "COMPLETE" : "MISSING_OUT",
+                    processedAt: new Date(),
+                    sourceMetadata: { source: "QR" },
+                },
+                select: attendanceSelect,
+            });
+
+            return { action: "time_in" as const, record: mapAttendance(updated) };
         }
 
         const action = determineQrAttendanceAction(

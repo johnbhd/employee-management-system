@@ -5,7 +5,6 @@ import {
     type AttendanceSource,
     type AttendanceStatus,
     type UnifiedAttendanceBusinessStatus,
-    type UnifiedAttendanceTechnicalState,
 } from "@prisma/client";
 import {
     getRepositoryPrisma,
@@ -20,6 +19,7 @@ import type {
     UnifiedAttendanceBusinessStatus as UnifiedAttendanceBusinessStatusValue,
     UnifiedAttendanceListFilters,
     UnifiedAttendanceTechnicalState as UnifiedAttendanceTechnicalStateValue,
+    UnifiedAttendanceView,
 } from "@/types/unified-attendance";
 
 const scheduleSelect = {
@@ -53,7 +53,11 @@ const unifiedAttendanceSelect = {
     lastReprocessedAt: true,
     requiresReview: true,
     reviewReasonCode: true,
+    hrVerificationStatus: true,
+    hrVerifiedAt: true,
+    hrVerifiedBySnapshot: true,
     scheduleSnapshot: true,
+    sourceMetadata: true,
     createdAt: true,
     updatedAt: true,
     employee: {
@@ -87,65 +91,14 @@ type UnifiedAttendanceRow = Prisma.AttendanceRecordGetPayload<{
     select: typeof unifiedAttendanceSelect;
 }>;
 
-export type UnifiedAttendanceEvidence = {
-    id: string;
-    rawEventId: string;
-    sourceLogId: string;
-    importId: string;
-    event: "IN" | "OUT";
-    occurredAt: string;
-};
-
-export type UnifiedAttendanceView = {
-    id: string;
-    employee: {
-        internalId: string;
-        employeeId: string;
-        displayName: string;
-        department: string;
-    };
-    attendanceDate: string;
-    firstInAt: string;
-    lastOutAt: string | null;
-    firstInSource: AttendanceSource;
-    lastOutSource: AttendanceSource | null;
-    firstInSourceReference: string | null;
-    lastOutSourceReference: string | null;
-    technicalState: UnifiedAttendanceTechnicalState;
-    businessStatus: UnifiedAttendanceBusinessStatus;
-    schedule: {
-        internalId: string;
-        scheduleId: string;
-        workStart: string | null;
-        workEnd: string | null;
-        breakStart: string | null;
-        breakEnd: string | null;
-        shiftLabel: string | null;
-        workDays: string[];
-        restDays: string[];
-        workLocation: string | null;
-        effectiveFrom: string | null;
-        effectiveTo: string | null;
-    } | null;
-    scheduleSnapshot: Prisma.JsonValue | null;
-    requiresReview: boolean;
-    reviewReasonCode: string | null;
-    processedAt: string | null;
-    processingVersion: string | null;
-    lastReprocessedAt: string | null;
-    bundyEvidence: UnifiedAttendanceEvidence[];
-    createdAt: string;
-    updatedAt: string;
-};
-
 export type UnifiedAttendanceUpsertInput = {
     employeeId: string;
     attendanceDate: string;
     employeeScheduleId?: string | null;
     scheduleSnapshot?: Prisma.InputJsonValue | null;
-    timeIn: Date;
+    timeIn: Date | null;
     timeOut?: Date | null;
-    timeInSource: AttendanceSource;
+    timeInSource: AttendanceSource | null;
     timeOutSource?: AttendanceSource | null;
     timeInSourceReference?: string | null;
     timeOutSourceReference?: string | null;
@@ -198,7 +151,7 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
             department: row.employee.department,
         },
         attendanceDate: toDateKey(row.attendanceDate),
-        firstInAt: row.timeIn.toISOString(),
+        firstInAt: toIso(row.timeIn),
         lastOutAt: toIso(row.timeOut),
         firstInSource: row.timeInSource,
         lastOutSource: row.timeOutSource,
@@ -208,8 +161,16 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
         businessStatus: row.businessStatus,
         schedule: mapSchedule(row.schedule),
         scheduleSnapshot: row.scheduleSnapshot,
+        sourceMetadata: row.sourceMetadata,
         requiresReview: row.requiresReview,
         reviewReasonCode: row.reviewReasonCode,
+        hrVerificationStatus: row.hrVerificationStatus,
+        hrVerifiedAt: toIso(row.hrVerifiedAt),
+        hrVerifiedBy: row.hrVerifiedBySnapshot && typeof row.hrVerifiedBySnapshot === "object"
+            && !Array.isArray(row.hrVerifiedBySnapshot)
+            && typeof row.hrVerifiedBySnapshot.displayName === "string"
+            ? row.hrVerifiedBySnapshot.displayName
+            : null,
         processedAt: toIso(row.processedAt),
         processingVersion: row.processingVersion,
         lastReprocessedAt: toIso(row.lastReprocessedAt),
@@ -228,7 +189,58 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
     };
 }
 
+export type UnifiedAttendanceProcessingSource = {
+    id: string;
+    timeIn: Date | null;
+    timeOut: Date | null;
+    timeInSource: AttendanceSource | null;
+    timeOutSource: AttendanceSource | null;
+    timeInSourceReference: string | null;
+    timeOutSourceReference: string | null;
+    sourceMetadata: Prisma.JsonValue | null;
+};
+
+export async function findAttendanceProcessingSource(
+    employeeId: string,
+    attendanceDate: string,
+): Promise<UnifiedAttendanceProcessingSource | null> {
+    const row = await getRepositoryPrisma().attendanceRecord.findFirst({
+        where: {
+            employee: { employeeId },
+            attendanceDate: toUtcDate(attendanceDate),
+        },
+        select: {
+            id: true,
+            timeIn: true,
+            timeOut: true,
+            timeInSource: true,
+            timeOutSource: true,
+            timeInSourceReference: true,
+            timeOutSourceReference: true,
+            sourceMetadata: true,
+        },
+    });
+
+    return row;
+}
+
 function whereFor(filters: UnifiedAttendanceListFilters): Prisma.AttendanceRecordWhereInput {
+    const employeeFilter = filters.employeeId || filters.search || filters.department
+        ? {
+            ...(filters.employeeId ? { employeeId: filters.employeeId } : {}),
+            ...(filters.department ? { department: { contains: filters.department, mode: "insensitive" as const } } : {}),
+            ...(filters.search
+                ? {
+                    OR: [
+                        { employeeId: { contains: filters.search, mode: "insensitive" as const } },
+                        { displayName: { contains: filters.search, mode: "insensitive" as const } },
+                        { department: { contains: filters.search, mode: "insensitive" as const } },
+                    ],
+                }
+                : {}),
+        }
+        : undefined;
+
     return {
         ...(filters.attendanceDate
             ? { attendanceDate: toUtcDate(filters.attendanceDate) }
@@ -241,7 +253,7 @@ function whereFor(filters: UnifiedAttendanceListFilters): Prisma.AttendanceRecor
                 },
             }
             : {}),
-        ...(filters.employeeId ? { employee: { employeeId: filters.employeeId } } : {}),
+        ...(employeeFilter ? { employee: employeeFilter } : {}),
         ...(filters.technicalState ? { technicalState: filters.technicalState } : {}),
         ...(filters.businessStatus ? { businessStatus: filters.businessStatus } : {}),
         ...(filters.requiresReview === undefined || filters.requiresReview === null
@@ -451,7 +463,23 @@ export async function upsertUnifiedAttendance(
             ? input.scheduleSnapshot
             : scheduleSnapshotFromRecord(schedule);
         const actorSnapshot = input.actorSnapshot ?? defaultActorSnapshot();
-        const status: AttendanceStatus = input.timeOut ? "completed" : "present";
+        const existing = await transaction.attendanceRecord.findUnique({
+            where: {
+                employeeId_attendanceDate: {
+                    employeeId: employee.id,
+                    attendanceDate: toUtcDate(input.attendanceDate),
+                },
+            },
+            select: { id: true, hrVerificationStatus: true },
+        });
+        if (existing?.hrVerificationStatus === "verified") {
+            throw new Error(
+                "FINAL_VERIFIED_ATTENDANCE: final-verified attendance cannot be reprocessed.",
+            );
+        }
+        const status: AttendanceStatus = input.timeIn && input.timeOut
+            ? "completed"
+            : "present";
         const businessStatus: UnifiedAttendanceBusinessStatus = input.businessStatus ?? "UNCLASSIFIED";
         const requiresReview = input.requiresReview ?? input.technicalState === "NEEDS_REVIEW";
         const processedAt = input.processedAt === undefined ? now : input.processedAt;
@@ -466,7 +494,7 @@ export async function upsertUnifiedAttendance(
             timeInSourceReference: input.timeInSourceReference ?? null,
             timeOutSourceReference: input.timeOutSourceReference ?? null,
             status,
-            timeInActorSnapshot: actorSnapshot,
+            timeInActorSnapshot: input.timeIn ? actorSnapshot : Prisma.DbNull,
             timeOutActorSnapshot: input.timeOut ? actorSnapshot : Prisma.DbNull,
             employeeScheduleId: input.employeeScheduleId ?? null,
             scheduleSnapshot: nullableJson(scheduleSnapshot),
@@ -490,6 +518,7 @@ export async function upsertUnifiedAttendance(
             timeInSourceReference: input.timeInSourceReference ?? null,
             timeOutSourceReference: input.timeOutSourceReference ?? null,
             status,
+            timeInActorSnapshot: input.timeIn ? actorSnapshot : Prisma.DbNull,
             timeOutActorSnapshot: input.timeOut ? actorSnapshot : Prisma.DbNull,
             technicalState: input.technicalState,
             processedAt,

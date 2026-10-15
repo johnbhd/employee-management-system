@@ -53,6 +53,7 @@ export function parsePayrollVerifiedAttendanceQuery(
   params: URLSearchParams,
 ): PayrollVerifiedAttendanceQuery {
   return {
+    periodStart: getTrimmedValue(params, "periodStart", 10) || null,
     search: getTrimmedValue(params, "search"),
     department: getTrimmedValue(params, "department") || null,
     readiness: getReadiness(params),

@@ -1,16 +1,10 @@
 import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
-import { formatCampusDateKey } from "@/lib/campus-time";
-import {
-    getAttendanceMonitoringData,
-} from "@/server/hr/attendance-monitoring.service";
-import {
-    parseAttendanceMonitoringQuery,
-} from "@/server/hr/attendance-monitoring-query";
-import type { AttendanceMonitoringData } from "@/types/hr-attendance-monitoring";
-
-import { AttendanceMonitoringPage } from "@/components/hr/attendance-monitoring/AttendanceMonitoringPage";
+import { HrAttendanceReviewPage } from "@/components/hr/attendance-review/HrAttendanceReviewPage";
 import { hasPermission } from "@/server/auth/permission.service";
 import { requireRoleContext } from "@/server/auth/guards";
+import { parseHrAttendanceReviewQuery } from "@/server/hr/attendance-review-query";
+import { getHrAttendanceReviewData } from "@/server/hr/attendance-review.service";
+import type { HrAttendanceReviewData } from "@/types/hr-attendance-review";
 
 type PageProps = {
     searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -32,46 +26,58 @@ function toSearchParams(
     return params;
 }
 
+const emptyData: HrAttendanceReviewData = {
+    records: [],
+    total: 0,
+    page: 1,
+    pageSize: 25,
+    hasNext: false,
+    summary: {
+        needsReview: 0,
+        missingIn: 0,
+        missingOut: 0,
+        pendingCorrections: 0,
+        readyForVerification: 0,
+        finalVerified: 0,
+    },
+    employees: [],
+    departments: [],
+    permissions: {
+        canReviewCorrections: false,
+        canVerifyAttendance: false,
+    },
+};
+
 export default async function Page({ searchParams }: PageProps) {
     const context = await requireRoleContext("hr");
     if (!(await hasPermission(context.user, "hr.attendance.view"))) {
-        return <PermissionDeniedPage title="Attendance Monitoring unavailable" backHref="/hr/dashboard" backLabel="Back to HR Dashboard" />;
+        return (
+            <PermissionDeniedPage
+                title="Attendance review unavailable"
+                backHref="/hr/dashboard"
+                backLabel="Back to HR Dashboard"
+            />
+        );
     }
 
-    const defaultDate = formatCampusDateKey(new Date());
     const resolvedSearchParams = searchParams ? await searchParams : {};
-    const query = parseAttendanceMonitoringQuery(
-        toSearchParams(resolvedSearchParams),
-        defaultDate,
-    );
-    let data: AttendanceMonitoringData = {
-        records: [],
-        total: 0,
-        page: query.page,
-        pageSize: query.pageSize,
-        hasNext: false,
-        summary: {
-            total: 0,
-            present: 0,
-            completed: 0,
-            awaitingTimeOut: 0,
-        },
-        employees: [],
-        departments: [],
-    };
+    const query = parseHrAttendanceReviewQuery(toSearchParams(resolvedSearchParams));
+    let data = emptyData;
     let loadError = false;
 
     try {
-        data = await getAttendanceMonitoringData(query);
+        data = await getHrAttendanceReviewData(query, {
+            canReviewCorrections: await hasPermission(context.user, "hr.correction.review"),
+            canVerifyAttendance: await hasPermission(context.user, "hr.attendance.verify"),
+        });
     } catch {
         loadError = true;
     }
 
     return (
-        <AttendanceMonitoringPage
+        <HrAttendanceReviewPage
             data={data}
             query={query}
-            defaultDate={defaultDate}
             loadError={loadError}
         />
     );

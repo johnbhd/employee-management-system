@@ -41,7 +41,7 @@ type StoredCorrectionSnapshot = {
     attendanceDate: string;
     timeIn: Timestamp | null;
     timeOut: Timestamp | null;
-    timeInSource: "QR" | "BUNDY";
+    timeInSource: "QR" | "BUNDY" | null;
     timeOutSource: "QR" | "BUNDY" | null;
     status: "present" | "completed";
 };
@@ -67,7 +67,11 @@ function toCorrectionSnapshot(value: unknown): StoredCorrectionSnapshot | null {
         attendanceDate: snapshot.attendanceDate,
         timeIn: toRepositoryTimestamp(snapshot.timeIn as string | null | undefined),
         timeOut: toRepositoryTimestamp(snapshot.timeOut as string | null | undefined),
-        timeInSource: snapshot.timeInSource === "BUNDY" ? "BUNDY" : "QR",
+        timeInSource: snapshot.timeInSource === "BUNDY"
+            ? "BUNDY"
+            : snapshot.timeInSource === "QR"
+                ? "QR"
+                : null,
         timeOutSource: snapshot.timeOutSource === "BUNDY"
             ? "BUNDY"
             : snapshot.timeOutSource === "QR"
@@ -692,6 +696,7 @@ export async function applyAttendanceCorrectionDecision(
     } catch (error) {
         if (error instanceof Error && /could not be found/i.test(error.message)) throw new AttendanceCorrectionNotFoundError();
         if (error instanceof Error && /already/i.test(error.message)) throw new AttendanceCorrectionConflictError(error.message);
+        if (error instanceof Error && /Final-verified/i.test(error.message)) throw new AttendanceCorrectionConflictError(error.message);
         throw error;
     }
 
