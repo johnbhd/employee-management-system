@@ -4,18 +4,19 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
 import type { CurrentUserContext } from "@/types/auth";
+import type { PermissionKey } from "@/types/permissions";
 
 import { HrMain } from "./HrMain";
 import { HrNavbar } from "./HrNavbar";
 import { HrSidebar } from "./HrSidebar";
-import { HrWorkflowProvider } from "./HrWorkflowContext";
 
 type HrShellProps = {
   children: ReactNode;
   context: CurrentUserContext;
+  permissions: readonly PermissionKey[];
 };
 
-export function HrShell({ children, context }: HrShellProps) {
+export function HrShell({ children, context, permissions }: HrShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -30,11 +31,11 @@ export function HrShell({ children, context }: HrShellProps) {
   }, []);
 
   return (
-    <HrWorkflowProvider>
       <div className="hr-shell">
         <HrSidebar
           user={context.user}
           employee={context.employee}
+          permissions={permissions}
           isOpen={sidebarOpen}
           onClose={() => setSidebarOpen(false)}
         />
@@ -47,6 +48,5 @@ export function HrShell({ children, context }: HrShellProps) {
           <HrMain>{children}</HrMain>
         </div>
       </div>
-    </HrWorkflowProvider>
   );
 }

@@ -10,6 +10,7 @@ import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
 import type { IconName } from "@/types/ui";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 
@@ -19,6 +20,7 @@ type AccountingNavigationItem = {
   icon: IconName;
   href?: string;
   planned?: boolean;
+  permission?: PermissionKey;
 };
 
 const accountingNavigation: AccountingNavigationItem[] = [
@@ -27,35 +29,40 @@ const accountingNavigation: AccountingNavigationItem[] = [
     label: "Dashboard",
     icon: "dashboard",
     href: "/accounting/dashboard",
+    permission: "accounting.dashboard.view",
   },
   {
     id: "approved-payroll",
     label: "Approved Payroll Information",
     icon: "payroll",
-    planned: true,
+    href: "/accounting/approved-payroll",
+    permission: "accounting.approved_payroll.view",
   },
   {
     id: "integration-status",
     label: "Integration Status",
     icon: "accounting",
     href: "/accounting/integration-status",
+    permission: "accounting.transfer.view",
   },
   {
     id: "transaction-history",
     label: "Transaction History",
     icon: "clock",
     href: "/accounting/transaction-history",
+    permission: "accounting.history.view",
   },
 ];
 
 type AccountingSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AccountingSidebar({ user, employee, isOpen, onClose }: AccountingSidebarProps) {
+export function AccountingSidebar({ user, employee, permissions, isOpen, onClose }: AccountingSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -109,7 +116,7 @@ export function AccountingSidebar({ user, employee, isOpen, onClose }: Accountin
               <span className="accounting-role-pill">{displayName}</span>
             </div>
             <nav className="accounting-sidebar-nav" aria-label="Accounting portal navigation">
-              {accountingNavigation.map((item) => {
+              {accountingNavigation.filter((item) => !item.permission || permissions.includes(item.permission)).map((item) => {
                 const active = item.href
                   ? pathname === item.href || pathname.startsWith(`${item.href}/`)
                   : false;

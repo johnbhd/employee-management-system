@@ -1,0 +1,898 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ApplicationRoleCode {
+  admin
+  hr
+  employee
+  payroll
+  accounting
+}
+
+enum UserStatus {
+  active
+  inactive
+  disabled
+}
+
+enum EmployeeEmploymentStatus {
+  active
+  inactive
+}
+
+enum EmployeeSourceSystem {
+  HRPS
+}
+
+enum HrpsImportStatus {
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+  ROLLING_BACK
+  ROLLED_BACK
+  ROLLBACK_FAILED
+}
+
+enum HrpsImportRowStatus {
+  PENDING
+  ROLLED_BACK
+  BLOCKED
+}
+
+enum BundyImportStatus {
+  PROCESSING
+  COMPLETED
+  COMPLETED_WITH_ERRORS
+  FAILED
+  ROLLING_BACK
+  ROLLED_BACK
+  ROLLBACK_FAILED
+}
+
+enum BundyEventType {
+  IN
+  OUT
+}
+
+enum BundyMatchStatus {
+  MATCHED
+  UNMATCHED
+  EMPLOYEE_INACTIVE
+}
+
+enum BundyValidationStatus {
+  VALID
+  INVALID
+}
+
+enum BundyDuplicateStatus {
+  UNIQUE
+  DUPLICATE_SCAN
+}
+
+enum AttendanceSource {
+  QR
+  BUNDY
+}
+
+enum AttendanceStatus {
+  present
+  completed
+}
+
+enum UnifiedAttendanceTechnicalState {
+  NO_EVENTS
+  IN_PROGRESS
+  COMPLETE
+  MISSING_IN
+  MISSING_OUT
+  NEEDS_REVIEW
+}
+
+enum UnifiedAttendanceBusinessStatus {
+  UNCLASSIFIED
+  PRESENT
+  LATE
+  ABSENT
+}
+
+enum HrVerificationStatus {
+  pending
+  verified
+}
+
+enum PayrollReadinessStatus {
+  ready
+  blocked
+}
+
+enum AttendanceCorrectionStatus {
+  pending
+  approved
+  rejected
+}
+
+enum AttendanceCorrectionIssueType {
+  MissingTimeIn              @map("Missing Time-In")
+  MissingTimeOut             @map("Missing Time-Out")
+  IncorrectTimeIn            @map("Incorrect Time-In")
+  IncorrectTimeOut           @map("Incorrect Time-Out")
+  TimeInAndTimeOutCorrection @map("Time In and Time Out Correction")
+}
+
+enum PayrollBatchStatus {
+  Draft        @map("Draft")
+  Ready        @map("Ready")
+  Submitted    @map("Submitted")
+  Acknowledged @map("Acknowledged")
+  Blocked      @map("Blocked")
+  Failed       @map("Failed")
+}
+
+enum PayrollTransferStatus {
+  preparing
+  submitting
+  submitted
+  failed
+}
+
+enum PayrollAcknowledgementStatus {
+  pending
+  accepted
+  rejected
+  not_received
+}
+
+enum PayrollExternalResultStatus {
+  processing
+  completed
+  completed_with_issues
+  partially_completed
+  rejected
+  failed
+}
+
+enum PayrollExternalProcessingStatus {
+  processed
+  pending
+  rejected
+  failed
+}
+
+enum PayrollExternalPayslipStatus {
+  available
+  not_yet_available
+  unavailable
+}
+
+enum PayslipStatus {
+  released
+  InProgress @map("in-progress")
+}
+
+enum AccountingTransferStatus {
+  preparing
+  submitting
+  submitted
+  failed
+}
+
+enum AccountingAcknowledgementStatus {
+  pending
+  accepted
+  rejected
+  not_received
+}
+
+enum AccountingReadinessStatus {
+  ready
+  blocked
+}
+
+enum AuditActorType {
+  user
+  system
+  integration
+}
+
+enum AuditOutcome {
+  Successful
+  Failed
+  Blocked
+}
+
+// Identity and RBAC. Firebase Authentication remains the credential owner;
+// users.firebase_uid is only the application identity bridge.
+model ApplicationRole {
+  id          String              @id @default(uuid()) @db.Uuid
+  code        ApplicationRoleCode @unique
+  label       String              @db.VarChar(120)
+  description String              @db.Text
+  createdAt   DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("application_roles")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique @db.VarChar(120)
+  label       String   @db.VarChar(160)
+  description String   @db.Text
+  category    String   @db.VarChar(80)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId            String   @map("role_id") @db.Uuid
+  permissionId      String   @map("permission_id") @db.Uuid
+  version           Int      @default(1)
+  updatedByUserId   String?  @map("updated_by_user_id") @db.Uuid
+  updatedBySnapshot Json?    @map("updated_by_snapshot")
+  updatedAt         DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  role          ApplicationRole @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission    Permission      @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  updatedByUser User?           @relation("RolePermissionUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+  @@map("role_permissions")
+}
+
+model User {
+  id                 String     @id @default(uuid()) @db.Uuid
+  firebaseUid        String     @unique @map("firebase_uid") @db.VarChar(128)
+  username           String     @unique @db.VarChar(80)
+  displayName        String     @map("display_name") @db.VarChar(160)
+  roleId             String     @map("role_id") @db.Uuid
+  employeeId         String?    @map("employee_id") @db.Uuid
+  status             UserStatus @default(active)
+  mustChangePassword Boolean    @default(false) @map("must_change_password")
+  createdAt          DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  role                         ApplicationRole        @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  employee                     Employee?              @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  rolePermissionUpdates        RolePermission[]       @relation("RolePermissionUpdatedBy")
+  settingUpdates               SystemSetting[]        @relation("SystemSettingUpdatedBy")
+  attendanceTimeIn             AttendanceRecord[]     @relation("AttendanceTimeInOperator")
+  attendanceTimeOut            AttendanceRecord[]     @relation("AttendanceTimeOutOperator")
+  attendanceVerifications      AttendanceRecord[]     @relation("AttendanceHrVerifier")
+  correctionsSubmitted         AttendanceCorrection[] @relation("CorrectionSubmittedBy")
+  correctionsReviewed          AttendanceCorrection[] @relation("CorrectionReviewedBy")
+  payrollBatchesCreated        PayrollBatch[]         @relation("PayrollBatchCreatedBy")
+  payrollBatchesSubmitted      PayrollBatch[]         @relation("PayrollBatchSubmittedBy")
+  payrollHandoffsSubmitted     PayrollHandoff[]       @relation("PayrollHandoffSubmittedBy")
+  accountingTransfersSubmitted AccountingTransfer[]   @relation("AccountingTransferSubmittedBy")
+  auditEvents                  AuditEvent[]           @relation("AuditActor")
+  hrpsImports                  HrpsImport[]           @relation("HrpsImportInitiatedBy")
+  bundyImports                 BundyImport[]          @relation("BundyImportInitiatedBy")
+  bundyRollbacks               BundyImport[]          @relation("BundyImportRolledBackBy")
+
+  @@index([employeeId])
+  @@map("users")
+}
+
+// HRPS reference data. employee_id is the institutional integration key, not
+// the relational primary key, so values such as 001 retain their leading zero.
+model Employee {
+  id                String                   @id @default(uuid()) @db.Uuid
+  employeeId        String                   @unique @map("employee_id") @db.VarChar(64)
+  displayName       String                   @map("display_name") @db.VarChar(160)
+  department        String                   @db.VarChar(160)
+  position          String?                  @db.VarChar(160)
+  employmentStatus  EmployeeEmploymentStatus @map("employment_status")
+  sourceSystem      EmployeeSourceSystem     @default(HRPS) @map("source_system")
+  dataSource        String?                  @map("data_source") @db.VarChar(80)
+  sourceUpdatedAt   DateTime?                @map("source_updated_at") @db.Timestamptz(3)
+  syncedAt          DateTime?                @map("synced_at") @db.Timestamptz(3)
+  legacyFirestoreId String?                  @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt         DateTime                 @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime                 @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  users              User[]
+  schedules          EmployeeSchedule[]
+  attendanceRecords  AttendanceRecord[]
+  corrections        AttendanceCorrection[]
+  payrollBatchItems  PayrollBatchItem[]
+  payrollResultItems PayrollResultItem[]
+  payslips           PayrollPayslip[]
+  bundyEvents        BundyRawEvent[]
+
+  @@index([department])
+  @@index([employmentStatus])
+  @@map("employees")
+}
+
+model EmployeeSchedule {
+  id                String               @id @default(uuid()) @db.Uuid
+  employeeId        String               @map("employee_id") @db.Uuid
+  scheduleId        String               @map("schedule_id") @db.VarChar(120)
+  workStart         DateTime?            @map("work_start") @db.Time(0)
+  workEnd           DateTime?            @map("work_end") @db.Time(0)
+  breakStart        DateTime?            @map("break_start") @db.Time(0)
+  breakEnd          DateTime?            @map("break_end") @db.Time(0)
+  shiftLabel        String?              @map("shift_label") @db.VarChar(120)
+  workDays          Json                 @map("work_days")
+  restDays          Json                 @map("rest_days")
+  workLocation      String?              @map("work_location") @db.VarChar(200)
+  sourceSystem      EmployeeSourceSystem @default(HRPS) @map("source_system")
+  dataSource        String?              @map("data_source") @db.VarChar(80)
+  effectiveFrom     DateTime?            @map("effective_from") @db.Date
+  effectiveTo       DateTime?            @map("effective_to") @db.Date
+  legacyFirestoreId String?              @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt         DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  employee          Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  attendanceRecords AttendanceRecord[]
+
+  @@unique([employeeId, scheduleId])
+  @@index([employeeId, effectiveFrom])
+  @@map("employee_schedules")
+}
+
+// HRPS import history stores safe operational metadata only. Raw CSV content
+// is intentionally not persisted; the preview is revalidated from the upload
+// before any business write is accepted.
+model HrpsImport {
+  id                   String               @id @default(uuid()) @db.Uuid
+  sourceSystem         EmployeeSourceSystem @default(HRPS) @map("source_system")
+  filename             String               @db.VarChar(255)
+  contentHash          String               @map("content_hash") @db.VarChar(64)
+  initiatedByUserId    String?              @map("initiated_by_user_id") @db.Uuid
+  initiatedBySnapshot  Json                 @map("initiated_by_snapshot")
+  startedAt            DateTime             @map("started_at") @db.Timestamptz(3)
+  completedAt          DateTime?            @map("completed_at") @db.Timestamptz(3)
+  status               HrpsImportStatus
+  totalRows            Int                  @map("total_rows")
+  newCount             Int                  @map("new_count")
+  updatedCount         Int                  @map("updated_count")
+  unchangedCount       Int                  @map("unchanged_count")
+  invalidCount         Int                  @map("invalid_count")
+  duplicateCount       Int                  @map("duplicate_count")
+  needsReviewCount     Int                  @map("needs_review_count")
+  createdEmployees     Int                  @default(0) @map("created_employees")
+  updatedEmployees     Int                  @default(0) @map("updated_employees")
+  schedulesCreated     Int                  @default(0) @map("schedules_created")
+  schedulesUpdated     Int                  @default(0) @map("schedules_updated")
+  accountsProvisioned  Int                  @default(0) @map("accounts_provisioned")
+  accountsPending      Int                  @default(0) @map("accounts_pending")
+  accountsFailed       Int                  @default(0) @map("accounts_failed")
+  errorSummary         String?              @map("error_summary") @db.Text
+  rollbackStartedAt    DateTime?            @map("rollback_started_at") @db.Timestamptz(3)
+  rolledBackAt         DateTime?            @map("rolled_back_at") @db.Timestamptz(3)
+  rolledBackByUserId   String?              @map("rolled_back_by_user_id") @db.Uuid
+  rolledBackBySnapshot Json?                @map("rolled_back_by_snapshot")
+  rollbackErrorSummary String?              @map("rollback_error_summary") @db.Text
+  rollbackSummary      Json?                @map("rollback_summary")
+  createdAt            DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  initiatedBy User?           @relation("HrpsImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+  rows        HrpsImportRow[]
+
+  @@index([startedAt, id])
+  @@index([status, startedAt])
+  @@index([contentHash])
+  @@map("hrps_imports")
+}
+
+// Each processed HRPS row keeps explicit ownership and minimal before/after
+// snapshots so rollback never has to infer ownership from timestamps.
+model HrpsImportRow {
+  id                     String              @id @default(uuid()) @db.Uuid
+  importId               String              @map("import_id") @db.Uuid
+  rowNumber              Int                 @map("row_number")
+  employeeId             String?             @map("employee_id") @db.VarChar(64)
+  classification         String              @db.VarChar(40)
+  employeeRecordId       String?             @map("employee_record_id") @db.Uuid
+  employeeCreated        Boolean             @default(false) @map("employee_created")
+  employeeBefore         Json?               @map("employee_before")
+  employeeAfter          Json?               @map("employee_after")
+  scheduleOwnership      Json                @default("{}") @map("schedule_ownership")
+  applicationUserId      String?             @map("application_user_id") @db.Uuid
+  applicationUserCreated Boolean             @default(false) @map("application_user_created")
+  firebaseUid            String?             @map("firebase_uid") @db.VarChar(128)
+  firebaseCreated        Boolean             @default(false) @map("firebase_created")
+  rollbackStatus         HrpsImportRowStatus @default(PENDING) @map("rollback_status")
+  rollbackMessage        String?             @map("rollback_message") @db.Text
+  createdAt              DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt              DateTime            @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  import HrpsImport @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@unique([importId, rowNumber])
+  @@index([employeeId])
+  @@index([employeeRecordId])
+  @@index([rollbackStatus])
+  @@map("hrps_import_rows")
+}
+
+// Bundy imports retain safe operational metadata. Raw CSV content is never
+// copied into PostgreSQL or audit metadata.
+model BundyImport {
+  id                   String            @id @default(uuid()) @db.Uuid
+  filename             String            @db.VarChar(255)
+  contentHash          String            @map("content_hash") @db.VarChar(64)
+  initiatedByUserId    String?           @map("initiated_by_user_id") @db.Uuid
+  initiatedBySnapshot  Json              @map("initiated_by_snapshot")
+  startedAt            DateTime          @map("started_at") @db.Timestamptz(3)
+  completedAt          DateTime?         @map("completed_at") @db.Timestamptz(3)
+  status               BundyImportStatus
+  totalRows            Int               @map("total_rows")
+  inCount              Int               @map("in_count")
+  outCount             Int               @map("out_count")
+  matchedCount         Int               @map("matched_count")
+  unmatchedCount       Int               @map("unmatched_count")
+  inactiveCount        Int               @map("inactive_count")
+  duplicateScanCount   Int               @map("duplicate_scan_count")
+  alreadyImportedCount Int               @map("already_imported_count")
+  invalidCount         Int               @map("invalid_count")
+  sourceConflictCount  Int               @map("source_conflict_count")
+  importedCount        Int               @map("imported_count")
+  devices              Json
+  sourceBatches        Json              @map("source_batches")
+  errorSummary         String?           @map("error_summary") @db.Text
+  rollbackStartedAt    DateTime?         @map("rollback_started_at") @db.Timestamptz(3)
+  rolledBackAt         DateTime?         @map("rolled_back_at") @db.Timestamptz(3)
+  rolledBackByUserId   String?           @map("rolled_back_by_user_id") @db.Uuid
+  rolledBackBySnapshot Json?             @map("rolled_back_by_snapshot")
+  rollbackErrorSummary String?           @map("rollback_error_summary") @db.Text
+  rollbackSummary      Json?             @map("rollback_summary")
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt            DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  initiatedBy  User?           @relation("BundyImportInitiatedBy", fields: [initiatedByUserId], references: [id], onDelete: SetNull)
+  rolledBackBy User?           @relation("BundyImportRolledBackBy", fields: [rolledBackByUserId], references: [id], onDelete: SetNull)
+  events       BundyRawEvent[]
+
+  @@index([startedAt, id])
+  @@index([status, startedAt])
+  @@index([status, rollbackStartedAt])
+  @@index([contentHash])
+  @@map("bundy_imports")
+}
+
+// Bundy rows are immutable source evidence. Unified Attendance references them
+// through AttendanceBundyEvidence without consuming or mutating raw rows.
+model BundyRawEvent {
+  id                          String                @id @default(uuid()) @db.Uuid
+  importId                    String                @map("import_id") @db.Uuid
+  sourceLogId                 String                @unique @map("source_log_id") @db.VarChar(160)
+  deviceEmployeeId            String                @map("device_employee_id") @db.VarChar(64)
+  employeeId                  String?               @map("employee_id") @db.Uuid
+  sourceTimestamp             String                @map("source_timestamp") @db.VarChar(40)
+  occurredAt                  DateTime              @map("occurred_at") @db.Timestamptz(3)
+  event                       BundyEventType        @map("event")
+  deviceId                    String                @map("device_id") @db.VarChar(120)
+  sourceBatch                 String?               @map("source_batch") @db.VarChar(160)
+  sourceProcessingStatus      String?               @map("source_processing_status") @db.VarChar(80)
+  sourceMatchedHrpsEmployeeId String?               @map("source_matched_hrps_employee_id") @db.VarChar(64)
+  matchStatus                 BundyMatchStatus      @map("match_status")
+  validationStatus            BundyValidationStatus @map("validation_status")
+  duplicateStatus             BundyDuplicateStatus  @map("duplicate_status")
+  anomalyCodes                Json                  @default("[]") @map("anomaly_codes")
+  importedAt                  DateTime              @default(now()) @map("imported_at") @db.Timestamptz(3)
+  createdAt                   DateTime              @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  import             BundyImport               @relation(fields: [importId], references: [id], onDelete: Restrict)
+  employee           Employee?                 @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  attendanceEvidence AttendanceBundyEvidence[]
+
+  @@index([deviceEmployeeId, occurredAt])
+  @@index([employeeId, occurredAt])
+  @@index([matchStatus, occurredAt])
+  @@index([duplicateStatus, occurredAt])
+  @@index([importId, occurredAt])
+  @@map("bundy_raw_events")
+}
+
+// AttendanceRecord is the existing canonical attendance model. Its legacy QR
+// lifecycle status remains for compatibility while Unified Attendance adds
+// separate technical and business state fields below.
+model AttendanceRecord {
+  id                      String                          @id @default(uuid()) @db.Uuid
+  employeeId              String                          @map("employee_id") @db.Uuid
+  attendanceDate          DateTime                        @map("attendance_date") @db.Date
+  timeIn                  DateTime                        @map("time_in") @db.Timestamptz(3)
+  timeOut                 DateTime?                       @map("time_out") @db.Timestamptz(3)
+  timeInSource            AttendanceSource                @map("time_in_source")
+  timeOutSource           AttendanceSource?               @map("time_out_source")
+  timeInSourceReference   String?                         @map("time_in_source_reference") @db.VarChar(160)
+  timeOutSourceReference  String?                         @map("time_out_source_reference") @db.VarChar(160)
+  status                  AttendanceStatus
+  timeInOperatorUserId    String?                         @map("time_in_operator_user_id") @db.Uuid
+  timeOutOperatorUserId   String?                         @map("time_out_operator_user_id") @db.Uuid
+  timeInActorSnapshot     Json                            @map("time_in_actor_snapshot")
+  timeOutActorSnapshot    Json?                           @map("time_out_actor_snapshot")
+  hrVerificationStatus    HrVerificationStatus            @default(pending) @map("hr_verification_status")
+  hrVerifiedAt            DateTime?                       @map("hr_verified_at") @db.Timestamptz(3)
+  hrVerifiedByUserId      String?                         @map("hr_verified_by_user_id") @db.Uuid
+  hrVerifiedBySnapshot    Json?                           @map("hr_verified_by_snapshot")
+  payrollReadinessStatus  PayrollReadinessStatus          @default(blocked) @map("payroll_readiness_status")
+  payrollReadinessReasons Json?                           @map("payroll_readiness_reasons")
+  correctionMetadata      Json?                           @map("correction_metadata")
+  sourceMetadata          Json?                           @map("source_metadata")
+  legacyFirestoreId       String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt               DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt               DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)
+  employeeScheduleId      String?                         @map("employee_schedule_id") @db.Uuid
+  scheduleSnapshot        Json?                           @map("schedule_snapshot")
+  technicalState          UnifiedAttendanceTechnicalState @default(IN_PROGRESS) @map("technical_state")
+  businessStatus          UnifiedAttendanceBusinessStatus @default(UNCLASSIFIED) @map("business_status")
+  processedAt             DateTime?                       @map("processed_at") @db.Timestamptz(3)
+  processingVersion       String?                         @map("processing_version") @db.VarChar(80)
+  lastReprocessedAt       DateTime?                       @map("last_reprocessed_at") @db.Timestamptz(3)
+  requiresReview          Boolean                         @default(false) @map("requires_review")
+  reviewReasonCode        String?                         @map("review_reason_code") @db.VarChar(80)
+
+  employee        Employee                  @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  schedule        EmployeeSchedule?         @relation(fields: [employeeScheduleId], references: [id], onDelete: Restrict)
+  timeInOperator  User?                     @relation("AttendanceTimeInOperator", fields: [timeInOperatorUserId], references: [id], onDelete: SetNull)
+  timeOutOperator User?                     @relation("AttendanceTimeOutOperator", fields: [timeOutOperatorUserId], references: [id], onDelete: SetNull)
+  hrVerifiedBy    User?                     @relation("AttendanceHrVerifier", fields: [hrVerifiedByUserId], references: [id], onDelete: SetNull)
+  corrections     AttendanceCorrection[]
+  bundyEvidence   AttendanceBundyEvidence[]
+
+  @@unique([employeeId, attendanceDate])
+  @@index([attendanceDate, status])
+  @@index([attendanceDate, timeInSource])
+  @@index([hrVerificationStatus, payrollReadinessStatus, attendanceDate])
+  @@index([technicalState, attendanceDate])
+  @@index([businessStatus, attendanceDate])
+  @@index([requiresReview, attendanceDate])
+  @@index([employeeScheduleId])
+  @@map("attendance_records")
+}
+
+// Bundy rows are immutable source evidence. Link rows may be replaced during
+// controlled reprocessing, but the raw source rows themselves are preserved.
+model AttendanceBundyEvidence {
+  id                 String   @id @default(uuid()) @db.Uuid
+  attendanceRecordId String   @map("attendance_record_id") @db.Uuid
+  bundyRawEventId    String   @map("bundy_raw_event_id") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  attendanceRecord AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Cascade)
+  bundyRawEvent    BundyRawEvent    @relation(fields: [bundyRawEventId], references: [id], onDelete: Restrict)
+
+  @@unique([attendanceRecordId, bundyRawEventId])
+  @@index([bundyRawEventId])
+  @@map("attendance_bundy_evidence")
+}
+
+model AttendanceCorrection {
+  id                  String                        @id @default(uuid()) @db.Uuid
+  employeeId          String                        @map("employee_id") @db.Uuid
+  attendanceRecordId  String                        @map("attendance_record_id") @db.Uuid
+  attendanceDate      DateTime                      @map("attendance_date") @db.Date
+  issueType           AttendanceCorrectionIssueType @map("issue_type")
+  status              AttendanceCorrectionStatus
+  reason              String                        @db.Text
+  originalSnapshot    Json?                         @map("original_snapshot")
+  requestedChanges    Json                          @map("requested_changes")
+  resultingSnapshot   Json?                         @map("resulting_snapshot")
+  changedFields       Json                          @map("changed_fields")
+  evidence            Json                          @default("[]")
+  submittedByUserId   String?                       @map("submitted_by_user_id") @db.Uuid
+  submittedBySnapshot Json                          @map("submitted_by_snapshot")
+  reviewedByUserId    String?                       @map("reviewed_by_user_id") @db.Uuid
+  reviewedBySnapshot  Json?                         @map("reviewed_by_snapshot")
+  submittedAt         DateTime                      @map("submitted_at") @db.Timestamptz(3)
+  reviewedAt          DateTime?                     @map("reviewed_at") @db.Timestamptz(3)
+  reviewNote          String?                       @map("review_note") @db.Text
+  legacyFirestoreId   String?                       @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt           DateTime                      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime                      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  employee    Employee         @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  attendance  AttendanceRecord @relation(fields: [attendanceRecordId], references: [id], onDelete: Restrict)
+  submittedBy User?            @relation("CorrectionSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  reviewedBy  User?            @relation("CorrectionReviewedBy", fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+  @@index([employeeId, attendanceDate])
+  @@index([attendanceRecordId])
+  @@map("attendance_corrections")
+}
+
+// Payroll values are external outputs or immutable snapshots. This schema
+// contains no local salary, tax, deduction, or net-pay calculation logic.
+model PayrollBatch {
+  id                  String             @id @default(uuid()) @db.Uuid
+  batchReference      String             @unique @map("batch_reference") @db.VarChar(160)
+  periodStart         DateTime           @map("period_start") @db.Date
+  periodEnd           DateTime           @map("period_end") @db.Date
+  periodLabel         String             @map("period_label") @db.VarChar(80)
+  status              PayrollBatchStatus
+  createdByUserId     String?            @map("created_by_user_id") @db.Uuid
+  createdBySnapshot   Json               @map("created_by_snapshot")
+  createdAt           DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime           @updatedAt @map("updated_at") @db.Timestamptz(3)
+  submittedByUserId   String?            @map("submitted_by_user_id") @db.Uuid
+  submittedBySnapshot Json?              @map("submitted_by_snapshot")
+  submittedAt         DateTime?          @map("submitted_at") @db.Timestamptz(3)
+  recordCount         Int                @map("record_count")
+  blockedCount        Int                @map("blocked_count")
+  notes               String?            @db.Text
+  legacyFirestoreId   String?            @unique @map("legacy_firestore_id") @db.VarChar(160)
+
+  createdBy           User?                @relation("PayrollBatchCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  submittedBy         User?                @relation("PayrollBatchSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  items               PayrollBatchItem[]
+  handoff             PayrollHandoff?
+  results             PayrollResult[]
+  accountingTransfers AccountingTransfer[]
+
+  @@index([updatedAt, id])
+  @@index([periodStart, status])
+  @@map("payroll_batches")
+}
+
+model PayrollBatchItem {
+  id                     String                 @id @default(uuid()) @db.Uuid
+  batchId                String                 @map("batch_id") @db.Uuid
+  employeeId             String                 @map("employee_id") @db.Uuid
+  employeePeriodId       String                 @map("employee_period_id") @db.VarChar(160)
+  periodStart            DateTime               @map("period_start") @db.Date
+  periodEnd              DateTime               @map("period_end") @db.Date
+  employeeIdSnapshot     String                 @map("employee_id_snapshot") @db.VarChar(64)
+  employeeNameSnapshot   String                 @map("employee_name_snapshot") @db.VarChar(160)
+  departmentSnapshot     String                 @map("department_snapshot") @db.VarChar(160)
+  presentDays            Int                    @map("present_days")
+  lateCount              Int?                   @map("late_count")
+  lateMinutes            Int?                   @map("late_minutes")
+  undertimeMinutes       Int?                   @map("undertime_minutes")
+  hrVerificationStatus   HrVerificationStatus   @default(verified) @map("hr_verification_status")
+  payrollReadinessStatus PayrollReadinessStatus @default(ready) @map("payroll_readiness_status")
+  sourceAttendanceIds    Json                   @map("source_attendance_ids")
+  snapshotCreatedAt      DateTime               @map("snapshot_created_at") @db.Timestamptz(3)
+  legacyFirestoreId      String?                @unique @map("legacy_firestore_id") @db.VarChar(160)
+
+  batch    PayrollBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  employee Employee     @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@unique([employeeId, periodStart])
+  @@unique([batchId, employeePeriodId])
+  @@index([employeeId, periodStart])
+  @@map("payroll_batch_items")
+}
+
+model PayrollHandoff {
+  id                    String                       @id @default(uuid()) @db.Uuid
+  batchId               String                       @unique @map("batch_id") @db.Uuid
+  transferReference     String                       @unique @map("transfer_reference") @db.VarChar(160)
+  periodStart           DateTime                     @map("period_start") @db.Date
+  periodEnd             DateTime                     @map("period_end") @db.Date
+  periodLabel           String                       @map("period_label") @db.VarChar(80)
+  submittedByUserId     String?                      @map("submitted_by_user_id") @db.Uuid
+  submittedBySnapshot   Json                         @map("submitted_by_snapshot")
+  readyAt               DateTime                     @map("ready_at") @db.Timestamptz(3)
+  submittedAt           DateTime                     @map("submitted_at") @db.Timestamptz(3)
+  acknowledgedAt        DateTime?                    @map("acknowledged_at") @db.Timestamptz(3)
+  failedAt              DateTime?                    @map("failed_at") @db.Timestamptz(3)
+  transferStatus        PayrollTransferStatus        @map("transfer_status")
+  acknowledgementStatus PayrollAcknowledgementStatus @map("acknowledgement_status")
+  externalReference     String?                      @map("external_reference") @db.VarChar(200)
+  provider              String                       @db.VarChar(120)
+  failureCode           String?                      @map("failure_code") @db.VarChar(120)
+  failureSummary        String?                      @map("failure_summary") @db.Text
+  attemptCount          Int                          @default(0) @map("attempt_count")
+  batchSummarySnapshot  Json                         @map("batch_summary_snapshot")
+  legacyFirestoreId     String?                      @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt             DateTime                     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime                     @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  batch               PayrollBatch         @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  submittedBy         User?                @relation("PayrollHandoffSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  result              PayrollResult?
+  accountingTransfers AccountingTransfer[]
+
+  @@index([transferStatus, updatedAt])
+  @@index([acknowledgementStatus, updatedAt])
+  @@map("payroll_handoffs")
+}
+
+model PayrollResult {
+  id                         String                      @id @default(uuid()) @db.Uuid
+  batchId                    String                      @map("batch_id") @db.Uuid
+  handoffId                  String                      @unique @map("handoff_id") @db.Uuid
+  resultReference            String                      @unique @map("result_reference") @db.VarChar(160)
+  externalPayrollReference   String                      @map("external_payroll_reference") @db.VarChar(200)
+  status                     PayrollExternalResultStatus
+  provider                   String                      @db.VarChar(120)
+  employeeCount              Int                         @map("employee_count")
+  processedCount             Int                         @map("processed_count")
+  pendingCount               Int                         @map("pending_count")
+  rejectedCount              Int                         @map("rejected_count")
+  failedCount                Int                         @map("failed_count")
+  payslipAvailableCount      Int                         @map("payslip_available_count")
+  accountingReadinessStatus  AccountingReadinessStatus   @default(blocked) @map("accounting_readiness_status")
+  accountingReadinessReasons Json?                       @map("accounting_readiness_reasons")
+  receivedAt                 DateTime                    @map("received_at") @db.Timestamptz(3)
+  processedAt                DateTime?                   @map("processed_at") @db.Timestamptz(3)
+  completedAt                DateTime?                   @map("completed_at") @db.Timestamptz(3)
+  legacyFirestoreId          String?                     @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt                  DateTime                    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                  DateTime                    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  batch              PayrollBatch        @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  handoff            PayrollHandoff      @relation(fields: [handoffId], references: [id], onDelete: Restrict)
+  items              PayrollResultItem[]
+  accountingTransfer AccountingTransfer?
+
+  @@index([batchId])
+  @@index([status, updatedAt])
+  @@index([accountingReadinessStatus, updatedAt])
+  @@map("payroll_results")
+}
+
+model PayrollResultItem {
+  id                        String                          @id @default(uuid()) @db.Uuid
+  resultId                  String                          @map("result_id") @db.Uuid
+  employeeId                String?                         @map("employee_id") @db.Uuid
+  employeeIdSnapshot        String                          @map("employee_id_snapshot") @db.VarChar(64)
+  employeeNameSnapshot      String                          @map("employee_name_snapshot") @db.VarChar(160)
+  departmentSnapshot        String                          @map("department_snapshot") @db.VarChar(160)
+  periodStart               DateTime                        @map("period_start") @db.Date
+  periodEnd                 DateTime                        @map("period_end") @db.Date
+  externalEmployeeReference String                          @map("external_employee_reference") @db.VarChar(200)
+  externalPayrollReference  String?                         @map("external_payroll_reference") @db.VarChar(200)
+  processingStatus          PayrollExternalProcessingStatus @map("processing_status")
+  payslipStatus             PayrollExternalPayslipStatus    @map("payslip_status")
+  externalPayslipId         String?                         @map("external_payslip_id") @db.VarChar(200)
+  issueCode                 String?                         @map("issue_code") @db.VarChar(120)
+  issueSummary              String?                         @map("issue_summary") @db.Text
+  processedAt               DateTime?                       @map("processed_at") @db.Timestamptz(3)
+  releasedAt                DateTime?                       @map("released_at") @db.Timestamptz(3)
+  legacyFirestoreId         String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt                 DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                 DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  result   PayrollResult    @relation(fields: [resultId], references: [id], onDelete: Cascade)
+  employee Employee?        @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  payslips PayrollPayslip[]
+
+  @@unique([resultId, employeeIdSnapshot])
+  @@index([employeeId, periodEnd])
+  @@index([processingStatus, payslipStatus])
+  @@map("payroll_result_items")
+}
+
+model PayrollPayslip {
+  id                 String        @id @default(uuid()) @db.Uuid
+  employeeId         String        @map("employee_id") @db.Uuid
+  resultItemId       String?       @map("result_item_id") @db.Uuid
+  periodStart        DateTime      @map("period_start") @db.Date
+  periodEnd          DateTime      @map("period_end") @db.Date
+  payFrequency       String        @map("pay_frequency") @db.VarChar(80)
+  monthlyBasicSalary Decimal?      @map("monthly_basic_salary") @db.Decimal(18, 2)
+  cutoffBasicPay     Decimal?      @map("cutoff_basic_pay") @db.Decimal(18, 2)
+  referenceDailyRate Decimal?      @map("reference_daily_rate") @db.Decimal(18, 2)
+  basicPay           Decimal?      @map("basic_pay") @db.Decimal(18, 2)
+  grossPay           Decimal?      @map("gross_pay") @db.Decimal(18, 2)
+  deductions         Json
+  totalDeductions    Decimal?      @map("total_deductions") @db.Decimal(18, 2)
+  netPay             Decimal?      @map("net_pay") @db.Decimal(18, 2)
+  status             PayslipStatus
+  releasedAt         DateTime?     @map("released_at") @db.Timestamptz(3)
+  source             String        @db.VarChar(80)
+  payrollReference   String        @unique @map("payroll_reference") @db.VarChar(200)
+  monthlySummary     Json          @map("monthly_summary")
+  legacyFirestoreId  String?       @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  employee   Employee           @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+  resultItem PayrollResultItem? @relation(fields: [resultItemId], references: [id], onDelete: SetNull)
+
+  @@unique([employeeId, periodStart, periodEnd])
+  @@index([employeeId, periodEnd])
+  @@index([status, releasedAt])
+  @@map("payroll_payslips")
+}
+
+model AccountingTransfer {
+  id                          String                          @id @default(uuid()) @db.Uuid
+  payrollResultId             String                          @unique @map("payroll_result_id") @db.Uuid
+  payrollBatchId              String                          @map("payroll_batch_id") @db.Uuid
+  payrollHandoffId            String                          @map("payroll_handoff_id") @db.Uuid
+  transferReference           String                          @unique @map("transfer_reference") @db.VarChar(160)
+  periodStart                 DateTime                        @map("period_start") @db.Date
+  periodEnd                   DateTime                        @map("period_end") @db.Date
+  periodLabel                 String                          @map("period_label") @db.VarChar(80)
+  externalPayrollReference    String                          @map("external_payroll_reference") @db.VarChar(200)
+  employeeCount               Int                             @map("employee_count")
+  payrollResultStatus         PayrollExternalResultStatus     @map("payroll_result_status")
+  submittedByUserId           String?                         @map("submitted_by_user_id") @db.Uuid
+  submittedBySnapshot         Json                            @map("submitted_by_snapshot")
+  submittedAt                 DateTime                        @map("submitted_at") @db.Timestamptz(3)
+  acknowledgedAt              DateTime?                       @map("acknowledged_at") @db.Timestamptz(3)
+  failedAt                    DateTime?                       @map("failed_at") @db.Timestamptz(3)
+  transferStatus              AccountingTransferStatus        @map("transfer_status")
+  acknowledgementStatus       AccountingAcknowledgementStatus @map("acknowledgement_status")
+  externalAccountingReference String?                         @map("external_accounting_reference") @db.VarChar(200)
+  provider                    String                          @db.VarChar(120)
+  failureCode                 String?                         @map("failure_code") @db.VarChar(120)
+  failureSummary              String?                         @map("failure_summary") @db.Text
+  attemptCount                Int                             @default(0) @map("attempt_count")
+  legacyFirestoreId           String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
+  createdAt                   DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt                   DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  payrollResult  PayrollResult  @relation(fields: [payrollResultId], references: [id], onDelete: Restrict)
+  payrollBatch   PayrollBatch   @relation(fields: [payrollBatchId], references: [id], onDelete: Restrict)
+  payrollHandoff PayrollHandoff @relation(fields: [payrollHandoffId], references: [id], onDelete: Restrict)
+  submittedBy    User?          @relation("AccountingTransferSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([transferStatus, updatedAt])
+  @@index([acknowledgementStatus, updatedAt])
+  @@map("accounting_transfers")
+}
+
+model AuditEvent {
+  id               String         @id @default(uuid()) @db.Uuid
+  eventType        String         @map("event_type") @db.VarChar(160)
+  action           String         @db.VarChar(160)
+  module           String         @db.VarChar(120)
+  actorType        AuditActorType @map("actor_type")
+  actorUserId      String?        @map("actor_user_id") @db.Uuid
+  actorUid         String?        @map("actor_uid") @db.VarChar(128)
+  actorSnapshot    Json           @map("actor_snapshot")
+  targetType       String         @map("target_type") @db.VarChar(120)
+  targetId         String?        @map("target_id") @db.VarChar(160)
+  targetReference  String         @map("target_reference") @db.VarChar(200)
+  targetLabel      String         @map("target_label") @db.VarChar(200)
+  targetSnapshot   Json?          @map("target_snapshot")
+  outcome          AuditOutcome
+  summary          String         @db.Text
+  metadata         Json           @default("{}")
+  sourceCollection String?        @map("source_collection") @db.VarChar(120)
+  legacyDocumentId String?        @map("legacy_document_id") @db.VarChar(160)
+  occurredAt       DateTime       @map("occurred_at") @db.Timestamptz(3)
+  createdAt        DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  actorUser User? @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@unique([sourceCollection, legacyDocumentId])
+  @@index([occurredAt, id])
+  @@index([module, occurredAt])
+  @@index([actorUid, occurredAt])
+  @@index([targetType, targetId])
+  @@map("audit_events")
+}
+
+// The registry of supported setting keys remains in application code. This
+// row stores only validated runtime overrides and its optimistic version.
+model SystemSetting {
+  id                String   @id @default(uuid()) @db.Uuid
+  settingKey        String   @unique @default("runtime") @map("setting_key") @db.VarChar(80)
+  overrides         Json     @default("{}")
+  version           Int      @default(0)
+  updatedByUserId   String?  @map("updated_by_user_id") @db.Uuid
+  updatedBySnapshot Json?    @map("updated_by_snapshot")
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  updatedByUser User? @relation("SystemSettingUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@map("system_settings")
+}

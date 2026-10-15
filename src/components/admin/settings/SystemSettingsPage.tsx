@@ -1,10 +1,19 @@
 import { AdminPageHeader } from "@/components/admin/shared/AdminPageHeader";
 import { Icon } from "@/components/ui/Icon";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { AdminSettingsData } from "@/types/admin-settings";
 
 import { SystemSettingsManager } from "./SystemSettingsManager";
 
-export function SystemSettingsPage() {
+export function SystemSettingsPage({
+  initialData,
+  loadError,
+  canManage,
+}: {
+  initialData: AdminSettingsData | null;
+  loadError: boolean;
+  canManage: boolean;
+}) {
   return (
     <div className="admin-page admin-settings-page">
       <AdminPageHeader
@@ -14,12 +23,12 @@ export function SystemSettingsPage() {
         actions={(
           <StatusBadge tone="success">
             <Icon name="check" />
-            Application operational
+            {loadError ? "Settings unavailable" : canManage ? "Configuration access" : "Read-only access"}
           </StatusBadge>
         )}
       />
 
-      <SystemSettingsManager />
+      <SystemSettingsManager initialData={initialData} loadError={loadError} canManage={canManage} />
     </div>
   );
 }

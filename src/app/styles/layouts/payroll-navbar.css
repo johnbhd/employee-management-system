@@ -1,0 +1,278 @@
+.payroll-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  border-bottom: 1px solid rgba(228, 233, 242, 0.9);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+}
+
+.payroll-navbar-inner {
+  display: flex;
+  min-width: 0;
+  min-height: 4.75rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem clamp(1rem, 3vw, 2rem);
+}
+
+.payroll-navbar-title-wrap,
+.payroll-navbar-actions,
+.payroll-date,
+.payroll-profile-trigger {
+  display: flex;
+  align-items: center;
+}
+
+.payroll-navbar-title-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+  gap: 0.7rem;
+}
+
+.payroll-menu-button,
+.payroll-icon-button {
+  display: none;
+  min-width: 2.5rem;
+  height: 2.5rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.payroll-menu-button:hover,
+.payroll-icon-button:hover {
+  background: #f1f5f9;
+  color: var(--au-navy);
+}
+
+.payroll-navbar-title {
+  min-width: 0;
+}
+
+.payroll-navbar-title strong,
+.payroll-navbar-title span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payroll-navbar-title strong {
+  color: var(--au-navy);
+  font-size: 0.92rem;
+}
+
+.payroll-navbar-title span {
+  margin-top: 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.payroll-navbar-actions {
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.7rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+}
+
+.payroll-date {
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.payroll-progress-badge {
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  background: var(--success-soft);
+  color: var(--success);
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.payroll-icon-button {
+  display: grid;
+  position: relative;
+}
+
+.payroll-notification-button > span {
+  position: absolute;
+  top: 0.15rem;
+  right: 0.1rem;
+  display: grid;
+  min-width: 1rem;
+  height: 1rem;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--au-red);
+  color: #fff;
+  font-size: 0.52rem;
+  font-weight: 800;
+}
+
+.payroll-profile-wrap {
+  position: relative;
+}
+
+.payroll-profile-trigger {
+  min-height: 2.5rem;
+  gap: 0.5rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: transparent;
+  padding: 0.2rem 0.35rem;
+  text-align: left;
+}
+
+.payroll-profile-trigger:hover,
+.payroll-profile-trigger[aria-expanded="true"] {
+  background: #f8fafc;
+}
+
+.payroll-profile-trigger .payroll-account-avatar {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: #edf5ff;
+  color: var(--au-blue);
+  font-size: 0.9rem;
+}
+
+.payroll-profile-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.payroll-profile-copy strong {
+  color: #334155;
+  font-size: 0.7rem;
+}
+
+.payroll-profile-copy small {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+}
+
+.payroll-profile-trigger > .ui-icon:last-child {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.payroll-profile-menu {
+  position: absolute;
+  top: 3.1rem;
+  right: 0;
+  z-index: 60;
+  display: grid;
+  width: 15rem;
+  gap: 0.2rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: #fff;
+  box-shadow: 0 20px 40px rgba(15, 35, 80, 0.14);
+}
+
+.payroll-profile-menu strong,
+.payroll-profile-menu small {
+  display: block;
+  padding: 0.2rem 0.45rem;
+}
+
+.payroll-profile-menu strong {
+  color: #334155;
+  font-size: 0.72rem;
+}
+
+.payroll-profile-menu small {
+  margin-bottom: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+}
+
+.payroll-profile-menu button,
+.payroll-profile-menu a {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.35rem;
+  border: 0;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #475569;
+  font-size: 0.7rem;
+  padding: 0.55rem;
+  text-align: left;
+}
+
+.payroll-profile-menu button:hover,
+.payroll-profile-menu a:hover {
+  background: #f8fafc;
+  color: var(--au-navy);
+}
+
+.payroll-profile-menu .ui-icon {
+  color: var(--au-blue);
+}
+
+@media (max-width: 1050px) {
+  .payroll-menu-button {
+    display: grid;
+  }
+
+  .payroll-navbar-actions {
+    flex-wrap: nowrap;
+  }
+}
+
+@media (max-width: 1100px) {
+  .payroll-help-button,
+  .payroll-search-button,
+  .payroll-progress-badge,
+  .payroll-profile-copy,
+  .payroll-profile-trigger > .ui-icon:last-child {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .payroll-navbar-inner {
+    min-height: 4.35rem;
+    padding: 0.65rem 0.9rem;
+  }
+
+  .payroll-navbar-title strong {
+    font-size: 0.8rem;
+  }
+
+  .payroll-navbar-title span,
+  .payroll-date,
+  .payroll-help-button,
+  .payroll-profile-copy,
+  .payroll-profile-trigger > .ui-icon:last-child {
+    display: none;
+  }
+
+  .payroll-navbar-actions {
+    flex-wrap: nowrap;
+    gap: 0.2rem;
+  }
+
+  .payroll-profile-trigger {
+    padding: 0.15rem;
+  }
+}

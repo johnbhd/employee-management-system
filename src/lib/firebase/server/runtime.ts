@@ -9,10 +9,6 @@ import {
   getAuth,
   type Auth,
 } from "firebase-admin/auth";
-import {
-  getFirestore,
-  type Firestore,
-} from "firebase-admin/firestore";
 
 import { getFirebaseAdminConfig } from "./config";
 
@@ -59,8 +55,4 @@ export function getFirebaseAdminApp(): App {
 
 export function getFirebaseAdminAuth(): Auth {
   return getAuth(getFirebaseAdminApp());
-}
-
-export function getFirebaseAdminDb(): Firestore {
-  return getFirestore(getFirebaseAdminApp());
 }

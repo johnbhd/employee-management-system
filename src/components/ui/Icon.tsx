@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAddressBook,
   faArrowRight,
+  faArrowRightArrowLeft,
   faArrowsRotate,
   faBars,
   faBell,
@@ -86,6 +87,7 @@ const icons: Record<IconName, IconDefinition> = {
   support: faEnvelope,
   sun: faSun,
   hand: faHand,
+  handoff: faArrowRightArrowLeft,
   file: faFileLines,
   layers: faLayerGroup,
   shield: faShieldHalved,

@@ -15,6 +15,76 @@
   min-width: 0;
 }
 
+.accounting-dashboard__load-error {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid #f4caca;
+  border-radius: 0.75rem;
+  background: var(--danger-soft);
+  color: #8f2727;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.accounting-dashboard__load-error span {
+  flex: 1 1 auto;
+}
+
+.accounting-dashboard__load-error .button-link {
+  flex: 0 0 auto;
+}
+
+.accounting-dashboard__alerts {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.accounting-dashboard__alert {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  color: #334155;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.accounting-dashboard__alert span {
+  flex: 1 1 auto;
+}
+
+.accounting-dashboard__alert > .ui-icon:last-child {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+}
+
+.accounting-dashboard__alert.is-info {
+  border-color: #d9e7f8;
+  background: var(--info-soft);
+  color: #174a7a;
+}
+
+.accounting-dashboard__alert.is-warning {
+  border-color: #f3dfad;
+  background: var(--warning-soft);
+  color: #805d11;
+}
+
+.accounting-dashboard__alert.is-error {
+  border-color: #f4caca;
+  background: var(--danger-soft);
+  color: #8f2727;
+}
+
+.accounting-dashboard__alert:hover {
+  border-color: var(--au-blue);
+}
+
 .accounting-dashboard__summary {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -172,6 +242,27 @@
   line-height: 1.35;
 }
 
+.accounting-dashboard__flow-node time {
+  color: var(--text-faint);
+  font-size: 0.59rem;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.accounting-dashboard__flow-node.is-current {
+  border-color: #f3dfad;
+  background: var(--warning-soft);
+}
+
+.accounting-dashboard__flow-node.is-failed {
+  border-color: #f4caca;
+  background: var(--danger-soft);
+}
+
+.accounting-dashboard__flow-node.is-pending {
+  opacity: 0.82;
+}
+
 .accounting-dashboard__flow-arrow {
   display: grid;
   place-items: center;
@@ -241,6 +332,14 @@
 
 .accounting-dashboard__health-copy p {
   margin: 0;
+}
+
+.accounting-dashboard__empty-state {
+  margin: 0;
+  padding: 1.35rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
 }
 
 .accounting-dashboard__health-list {
@@ -428,6 +527,66 @@
   color: var(--text-muted);
   font-size: 0.76rem;
   line-height: 1.6;
+}
+
+.accounting-dashboard__latest-source {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  line-height: 1.45;
+}
+
+.accounting-dashboard__loading-card,
+.accounting-dashboard__loading-panel {
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--surface);
+}
+
+.accounting-dashboard__loading-card {
+  display: flex;
+  gap: 0.8rem;
+  min-height: 7.5rem;
+  padding: 1.1rem;
+}
+
+.accounting-dashboard__loading-content {
+  display: grid;
+  flex: 1 1 auto;
+  gap: 0.55rem;
+  align-content: center;
+}
+
+.accounting-dashboard__loading-block {
+  display: block;
+  border-radius: 0.35rem;
+  background: #e9eef5;
+}
+
+.accounting-dashboard__loading-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 auto;
+}
+
+.accounting-dashboard__loading-label {
+  width: 45%;
+  height: 0.55rem;
+}
+
+.accounting-dashboard__loading-value {
+  width: 30%;
+  height: 1.2rem;
+}
+
+.accounting-dashboard__loading-note {
+  width: 70%;
+  height: 0.5rem;
+}
+
+.accounting-dashboard__loading-panel {
+  min-height: 13rem;
 }
 
 @media (max-width: 1250px) {

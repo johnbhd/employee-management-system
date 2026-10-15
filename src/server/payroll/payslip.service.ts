@@ -12,6 +12,7 @@ import type {
   EmployeePayslip,
   EmployeePayslipHistoryData,
   EmployeePayslipStat,
+  MoneyValue,
 } from "@/types/payslip";
 
 const periodMonthFormatter = new Intl.DateTimeFormat("en-US", {
@@ -43,7 +44,7 @@ function formatPayrollPeriod(periodStart: string, periodEnd: string): string {
   return `${month} ${startDay} - ${endDay}, ${year}`;
 }
 
-function formatAmount(value: number | null): string {
+function formatAmount(value: MoneyValue | null): string {
   return value === null ? emptyAmount : formatPhilippinePeso(value);
 }
 

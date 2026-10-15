@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 
 import type { CurrentUserContext } from "@/types/auth";
+import type { PermissionKey } from "@/types/permissions";
 
 import { EmployeeMain } from "./EmployeeMain";
 import { EmployeeNavbar } from "./EmployeeNavbar";
@@ -12,9 +13,10 @@ import { EmployeeSidebar } from "./EmployeeSidebar";
 type EmployeeShellProps = {
   children: ReactNode;
   context: CurrentUserContext;
+  permissions: readonly PermissionKey[];
 };
 
-export function EmployeeShell({ children, context }: EmployeeShellProps) {
+export function EmployeeShell({ children, context, permissions }: EmployeeShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
@@ -22,6 +24,7 @@ export function EmployeeShell({ children, context }: EmployeeShellProps) {
       <EmployeeSidebar
         user={context.user}
         employee={context.employee}
+        permissions={permissions}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

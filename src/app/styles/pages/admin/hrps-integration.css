@@ -1,8 +1,304 @@
-.hrps-page .connection-summary,
-.hrps-page .source-summary {
-  min-height: 100%;
+.hrps-integration-page {
+  gap: 1.25rem;
 }
 
-.hrps-page .list-row {
-  align-items: center;
+.hrps-import-top-grid {
+  align-items: start;
+}
+
+.hrps-upload-panel,
+.hrps-contract-panel,
+.hrps-preview-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.hrps-file-field {
+  display: grid;
+  gap: 0.45rem;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.hrps-file-field input[type="file"] {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px dashed #b8c7dc;
+  border-radius: 0.7rem;
+  background: #fbfdff;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.hrps-file-field small,
+.hrps-history-table small,
+.hrps-history-count,
+.hrps-permission-note,
+.hrps-preview-meta,
+.hrps-row-messages,
+.hrps-contract-panel p {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.hrps-upload-actions {
+  justify-content: flex-start;
+}
+
+.hrps-permission-note {
+  margin: 0;
+  color: #8a5700;
+}
+
+.hrps-boundary-note,
+.hrps-account-policy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #d5e3f7;
+  border-radius: 0.75rem;
+  background: #f7fbff;
+  color: #174a7a;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.hrps-boundary-note strong {
+  flex: 0 0 auto;
+}
+
+.hrps-boundary-note span,
+.hrps-account-policy p {
+  margin: 0;
+}
+
+.hrps-contract-panel p {
+  margin: 0;
+}
+
+.hrps-contract-panel strong {
+  color: #334155;
+}
+
+.hrps-import-metrics {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.hrps-preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.hrps-preview-meta code {
+  color: var(--au-navy);
+  font-size: 0.68rem;
+}
+
+.hrps-preview-table,
+.hrps-history-table {
+  min-width: 75rem;
+}
+
+.hrps-preview-table td,
+.hrps-history-table td {
+  vertical-align: top;
+}
+
+.hrps-preview-table td > strong,
+.hrps-history-table td > strong {
+  display: block;
+  color: #334155;
+}
+
+.hrps-history-table td small {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.hrps-undo-import-button {
+  white-space: nowrap;
+}
+
+.hrps-row-messages {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 16rem;
+  margin: 0;
+  padding-left: 1rem;
+  color: #9b2635;
+}
+
+.hrps-row-messages.is-warning {
+  color: #8a5700;
+}
+
+.hrps-row-messages + .hrps-row-messages {
+  margin-top: 0.35rem;
+}
+
+.hrps-error {
+  border-color: #f1cdca;
+  background: #fff8f7;
+  color: #8f211b;
+}
+
+.hrps-error .ui-icon {
+  color: var(--error);
+}
+
+.hrps-feedback p,
+.hrps-error p {
+  margin: 0;
+}
+
+.hrps-rollback-backdrop {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 0.44);
+}
+
+.hrps-rollback-dialog {
+  width: min(52rem, 100%);
+  max-height: min(42rem, calc(100vh - 2rem));
+  overflow: auto;
+  padding: 1.25rem;
+  border: 1px solid #d5e3f7;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 0.22);
+}
+
+.hrps-rollback-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.hrps-rollback-dialog-header h2,
+.hrps-rollback-dialog-header p {
+  margin: 0;
+}
+
+.hrps-rollback-dialog-header h2 {
+  color: var(--au-navy);
+  font-size: 1.15rem;
+}
+
+.hrps-rollback-dialog-header p,
+.hrps-rollback-loading,
+.hrps-rollback-warning,
+.hrps-rollback-safe {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.hrps-rollback-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.hrps-rollback-metrics div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border: 1px solid #e1eaf5;
+  border-radius: 0.7rem;
+  background: #f8fbff;
+}
+
+.hrps-rollback-metrics strong {
+  color: var(--au-navy);
+  font-size: 1.15rem;
+}
+
+.hrps-rollback-metrics span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.hrps-rollback-blocked,
+.hrps-rollback-safe,
+.hrps-rollback-warning {
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.7rem;
+}
+
+.hrps-rollback-blocked {
+  border: 1px solid #f1cdca;
+  background: #fff8f7;
+  color: #8f211b;
+  font-size: 0.76rem;
+}
+
+.hrps-rollback-blocked ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.hrps-rollback-safe {
+  border: 1px solid #cbe7d2;
+  background: #f5fff7;
+  color: #1b6b35;
+}
+
+.hrps-rollback-warning {
+  margin: 0.5rem 0;
+  border: 1px solid #f3dfaa;
+  background: #fffaf0;
+  color: #8a5700;
+}
+
+.hrps-rollback-actions {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .hrps-import-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .hrps-import-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .hrps-boundary-note {
+    flex-direction: column;
+  }
+
+  .hrps-rollback-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .hrps-import-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .hrps-rollback-dialog-header {
+    display: grid;
+  }
+
+  .hrps-rollback-metrics {
+    grid-template-columns: 1fr;
+  }
 }

@@ -5,5 +5,4 @@ export {
     FirebaseAdminInitializationError,
     getFirebaseAdminApp,
     getFirebaseAdminAuth,
-    getFirebaseAdminDb,
 } from "./runtime";

@@ -49,4 +49,12 @@ export const prototypeAuthAccounts: readonly PrototypeAuthAccount[] = [
     redirectTo: "/accounting/dashboard",
     employeeId: null,
   },
+  {
+    username: "aujsc.payroll",
+    password: "payroll123",
+    role: "payroll",
+    displayName: "Payroll Staff",
+    redirectTo: "/payroll/dashboard",
+    employeeId: null,
+  },
 ];

@@ -183,8 +183,8 @@ export function LoginPage() {
                     {isSubmitting ? "Logging in..." : "Login"}
                   </button>
                   <div className="auth-links-row">
-                    <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not connected in this prototype.")}><Icon name="key" /> Forgot password</button>
-                    <button type="button" className="auth-link" onClick={() => showFeedback("IT support contact is a prototype action.")}><Icon name="comment" /> Contact IT Support</button>
+                    <button type="button" className="auth-link" onClick={() => showFeedback("Password recovery is not configured. Contact authorized IT support.")}><Icon name="key" /> Forgot password</button>
+                    <button type="button" className="auth-link" onClick={() => showFeedback("Contact authorized IT support through the approved support process.")}><Icon name="comment" /> Contact IT Support</button>
                   </div>
                 </div>
               </div>

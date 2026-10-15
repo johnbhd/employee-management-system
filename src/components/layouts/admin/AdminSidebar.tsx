@@ -5,23 +5,25 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import type { MouseEvent } from "react";
 
-import { adminNavigation } from "@/data/admin";
+import { adminNavigation, adminNavigationSections } from "@/data/admin";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
 import { getRoleLabel } from "@/lib/auth/roles";
 import type { SessionUser } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
+import type { PermissionKey } from "@/types/permissions";
 
 import { Icon } from "../../ui/Icon";
 
 type AdminSidebarProps = {
   user: SessionUser;
   employee: EmployeeReference | null;
+  permissions: readonly PermissionKey[];
   isOpen: boolean;
   onClose: () => void;
 };
 
-export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarProps) {
+export function AdminSidebar({ user, employee, permissions, isOpen, onClose }: AdminSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const displayName = getAuthenticatedDisplayName(user, employee);
@@ -57,33 +59,36 @@ export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarPr
 
           <div className="admin-sidebar-scroll">
             <div className="workspace-label">
-              <span>Workspace</span>
               <span className="role-pill">{getRoleLabel(user.role)}</span>
             </div>
             <nav className="admin-sidebar-nav" aria-label="Primary navigation">
-              {adminNavigation.map((item) => {
-                const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
+              {adminNavigationSections.map((section) => {
+                const items = adminNavigation.filter((item) => (
+                  item.section === section.id && permissions.includes(item.permission)
+                ));
 
-                if (!item.href) {
-                  return (
-                    <span className="admin-nav-link admin-nav-placeholder" key={item.id} aria-disabled="true">
-                      <Icon name={item.icon} />
-                      <span>{item.label}</span>
-                    </span>
-                  );
-                }
+                if (items.length === 0) return null;
 
                 return (
-                  <Link
-                    href={item.href}
-                    className={`admin-nav-link ${active ? "is-active" : ""}`}
-                    aria-current={active ? "page" : undefined}
-                    key={item.id}
-                    onClick={onClose}
-                  >
-                    <Icon name={item.icon} />
-                    <span>{item.label}</span>
-                  </Link>
+                  <div className="admin-nav-section" key={section.id}>
+                    <p className="admin-nav-section-label">{section.label}</p>
+                    {items.map((item) => {
+                      const active = item.href ? pathname === item.href || pathname.startsWith(`${item.href}/`) : false;
+
+                      return (
+                        <Link
+                          href={item.href}
+                          className={`admin-nav-link ${active ? "is-active" : ""}`}
+                          aria-current={active ? "page" : undefined}
+                          key={item.id}
+                          onClick={onClose}
+                        >
+                          <Icon name={item.icon} />
+                          <span>{item.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
                 );
               })}
             </nav>
@@ -96,7 +101,7 @@ export function AdminSidebar({ user, employee, isOpen, onClose }: AdminSidebarPr
                 <span>Integration layer</span>
               </div>
               <strong>Live</strong>
-              <p>Six connected services monitored from one control center.</p>
+              <p>Configured integration boundaries monitored from one control center.</p>
             </div>
             <div className="sidebar-account">
               <span className="account-avatar"><Icon name="user" /></span>

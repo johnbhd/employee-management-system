@@ -80,6 +80,28 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.25rem 1rem;
+  scrollbar-color: rgba(219, 234, 254, 0.32) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 0.1rem solid transparent;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.32);
+  background-clip: padding-box;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(219, 234, 254, 0.52);
+  background-clip: padding-box;
 }
 
 .workspace-label {
@@ -111,7 +133,22 @@
 
 .admin-sidebar-nav {
   display: grid;
+  gap: 1rem;
+}
+
+.admin-nav-section {
+  display: grid;
   gap: 0.25rem;
+}
+
+.admin-nav-section-label {
+  margin: 0 0 0.2rem;
+  padding: 0 0.5rem;
+  color: rgba(219, 234, 254, 0.48);
+  font-size: 0.59rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 .admin-nav-link {
@@ -133,14 +170,21 @@
 }
 
 .admin-nav-link:hover,
+.admin-nav-link:focus-visible,
 .admin-nav-link.is-active {
   background: #fff;
   color: var(--au-navy);
 }
 
 .admin-nav-link:hover .ui-icon,
+.admin-nav-link:focus-visible .ui-icon,
 .admin-nav-link.is-active .ui-icon {
   color: var(--au-blue);
+}
+
+.admin-nav-link:focus-visible {
+  outline: 3px solid rgba(219, 234, 254, 0.72);
+  outline-offset: -3px;
 }
 
 .admin-nav-placeholder {

@@ -26,8 +26,8 @@ export type QrAttendanceData = {
     date: string;
     timeIn: string;
     timeOut: string | null;
-    timeInSource: "QR";
-    timeOutSource: "QR" | null;
+    timeInSource: "QR" | "BUNDY";
+    timeOutSource: "QR" | "BUNDY" | null;
     status: QrAttendanceStatus;
 };
 

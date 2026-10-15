@@ -7,7 +7,7 @@ import "./styles/globals.css";
 
 export const metadata: Metadata = {
   title: "Employee Management System | Arellano University",
-  description: "Arellano University employee and integration management prototype.",
+  description: "Arellano University employee and integration management application.",
   icons: {
     icon: "/images/new-au-logo.png",
     shortcut: "/images/new-au-logo.png",

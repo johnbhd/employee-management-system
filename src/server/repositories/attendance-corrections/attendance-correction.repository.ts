@@ -1,14 +1,5 @@
 import "server-only";
 
-import {
-    FieldValue,
-    Timestamp,
-    type DocumentData,
-} from "firebase-admin/firestore";
-
-import {
-    getFirebaseAdminDb,
-} from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type {
     AttendanceCorrectionDecision,
@@ -20,6 +11,21 @@ import {
     parseStoredQrAttendanceRecord,
     type StoredQrAttendanceRecord,
 } from "../attendance/attendance.repository";
+import {
+    applyPrismaAttendanceCorrectionDecision,
+    getPrismaAttendanceCorrectionById,
+    listPrismaAttendanceCorrections,
+    type PrismaAttendanceCorrectionView,
+} from "@/server/repositories/attendance-corrections/prisma-attendance-correction.repository";
+import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    legacyFieldValue as FieldValue,
+    RepositoryTimestamp as Timestamp,
+    type DocumentData,
+    toRepositoryOperator,
+    toRepositoryRecord,
+    toRepositoryTimestamp,
+} from "@/server/repositories/prisma/prisma-compat";
 
 const correctionCollection = "attendanceCorrectionRequests";
 const attendanceCollection = "attendance";
@@ -35,8 +41,8 @@ type StoredCorrectionSnapshot = {
     attendanceDate: string;
     timeIn: Timestamp | null;
     timeOut: Timestamp | null;
-    timeInSource: "QR";
-    timeOutSource: "QR" | null;
+    timeInSource: "QR" | "BUNDY";
+    timeOutSource: "QR" | "BUNDY" | null;
     status: "present" | "completed";
 };
 
@@ -52,6 +58,80 @@ type StoredCorrectionReviewer = {
     displayName: string;
     role: "hr";
 };
+
+function toCorrectionSnapshot(value: unknown): StoredCorrectionSnapshot | null {
+    const snapshot = toRepositoryRecord(value);
+    if (typeof snapshot.attendanceRecordId !== "string" || typeof snapshot.attendanceDate !== "string") return null;
+    return {
+        attendanceRecordId: snapshot.attendanceRecordId,
+        attendanceDate: snapshot.attendanceDate,
+        timeIn: toRepositoryTimestamp(snapshot.timeIn as string | null | undefined),
+        timeOut: toRepositoryTimestamp(snapshot.timeOut as string | null | undefined),
+        timeInSource: snapshot.timeInSource === "BUNDY" ? "BUNDY" : "QR",
+        timeOutSource: snapshot.timeOutSource === "BUNDY"
+            ? "BUNDY"
+            : snapshot.timeOutSource === "QR"
+                ? "QR"
+                : null,
+        status: snapshot.status === "completed" ? "completed" : "present",
+    };
+}
+
+function toCorrectionRequest(view: PrismaAttendanceCorrectionView): StoredAttendanceCorrectionRequest {
+    const submittedBySnapshot = toRepositoryOperator(view.submittedBy, "employee");
+    const reviewedBySnapshot = view.reviewedBy ? toRepositoryOperator(view.reviewedBy, "hr") : null;
+    return {
+        id: view.id,
+        attendanceRecordId: view.attendanceRecordId,
+        employeeId: view.employeeId,
+        attendanceDate: view.attendanceDate,
+        issueType: view.issueType as AttendanceCorrectionIssueType,
+        status: view.status,
+        reason: view.reason,
+        submittedAt: toRepositoryTimestamp(view.submittedAt) as Timestamp,
+        submittedBy: {
+            displayName: submittedBySnapshot.displayName,
+            username: submittedBySnapshot.username,
+            role: submittedBySnapshot.role === "hr" ? "hr" : "employee",
+        },
+        originalAttendance: toCorrectionSnapshot(view.originalAttendance),
+        requestedChanges: (() => {
+            const requested = toRepositoryRecord(view.requestedChanges);
+            return {
+                ...(typeof requested.timeIn === "string" ? { timeIn: toRepositoryTimestamp(requested.timeIn) as Timestamp } : {}),
+                ...(typeof requested.timeOut === "string" ? { timeOut: toRepositoryTimestamp(requested.timeOut) as Timestamp } : {}),
+            };
+        })(),
+        resultingAttendance: toCorrectionSnapshot(view.resultingAttendance),
+        changedFields: Array.isArray(view.changedFields)
+            ? view.changedFields.flatMap((value) => {
+                const field = toRepositoryRecord(value);
+                if (field.field !== "timeIn" && field.field !== "timeOut") return [];
+                const next = toRepositoryTimestamp(field.newValue as string | null | undefined);
+                if (!next) return [];
+                return [{
+                    field: field.field,
+                    previousValue: toRepositoryTimestamp(field.previousValue as string | null | undefined),
+                    newValue: next,
+                }];
+            })
+            : [],
+        evidence: Array.isArray(view.evidence)
+            ? view.evidence.flatMap((value) => {
+                const evidence = toRepositoryRecord(value);
+                if (typeof evidence.id !== "string" || typeof evidence.fileName !== "string" || typeof evidence.fileType !== "string") return [];
+                const submittedAt = toRepositoryTimestamp(evidence.submittedAt as string | null | undefined);
+                return submittedAt ? [{ id: evidence.id, fileName: evidence.fileName, fileType: evidence.fileType, submittedAt }] : [];
+            })
+            : [],
+        reviewedBy: reviewedBySnapshot
+            ? { uid: reviewedBySnapshot.uid, username: reviewedBySnapshot.username, displayName: reviewedBySnapshot.displayName, role: "hr" }
+            : null,
+        reviewedAt: toRepositoryTimestamp(view.reviewedAt),
+        reviewNote: view.reviewNote,
+        updatedAt: toRepositoryTimestamp(view.updatedAt),
+    };
+}
 
 export type StoredAttendanceCorrectionRequest = {
     id: string;
@@ -243,8 +323,8 @@ function parseSnapshot(value: unknown): StoredCorrectionSnapshot | null {
         || !attendanceDate
         || (value.timeIn !== null && !timeIn)
         || (value.timeOut !== null && !timeOut)
-        || timeInSource !== "QR"
-        || (timeOutSource !== null && timeOutSource !== "QR")
+        || (timeInSource !== "QR" && timeInSource !== "BUNDY")
+        || (timeOutSource !== null && timeOutSource !== "QR" && timeOutSource !== "BUNDY")
         || (status !== "present" && status !== "completed")
     ) {
         return null;
@@ -524,8 +604,8 @@ function toSerializableSnapshot(
     attendanceDate: string,
     timeIn: Timestamp,
     timeOut: Timestamp | null,
-    timeInSource: "QR",
-    timeOutSource: "QR" | null,
+    timeInSource: "QR" | "BUNDY",
+    timeOutSource: "QR" | "BUNDY" | null,
 ): StoredCorrectionSnapshot {
     return {
         attendanceRecordId: recordId,
@@ -541,6 +621,10 @@ function toSerializableSnapshot(
 export async function getAttendanceCorrectionRequestById(
     requestId: string,
 ): Promise<StoredAttendanceCorrectionRequest | null> {
+    const prismaRequest = await getPrismaAttendanceCorrectionById(requestId);
+    return prismaRequest ? toCorrectionRequest(prismaRequest) : null;
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshot = await getFirebaseAdminDb()
         .collection(correctionCollection)
         .doc(requestId)
@@ -550,21 +634,25 @@ export async function getAttendanceCorrectionRequestById(
         return null;
     }
 
-    const request = parseStoredAttendanceCorrectionRequest(
+    const legacyRequest = parseStoredAttendanceCorrectionRequest(
         snapshot.id,
         snapshot.data(),
     );
 
-    if (!request) {
+    if (!legacyRequest) {
         throw new AttendanceCorrectionDataError();
     }
 
-    return request;
+    return legacyRequest;
 }
 
 export async function listAttendanceCorrectionRequests(): Promise<
     StoredAttendanceCorrectionRequest[]
 > {
+    const result = await listPrismaAttendanceCorrections({ page: 1, pageSize: 100 });
+    return result.rows.map(toCorrectionRequest);
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshots = await getFirebaseAdminDb()
         .collection(correctionCollection)
         .get();
@@ -593,6 +681,21 @@ export async function applyAttendanceCorrectionDecision(
         reviewer: CorrectionReviewer;
     },
 ): Promise<void> {
+    try {
+        await applyPrismaAttendanceCorrectionDecision({
+            requestId: input.requestId,
+            decision: input.decision,
+            reviewNote: input.reviewNote,
+            reviewer: input.reviewer,
+        });
+        return;
+    } catch (error) {
+        if (error instanceof Error && /could not be found/i.test(error.message)) throw new AttendanceCorrectionNotFoundError();
+        if (error instanceof Error && /already/i.test(error.message)) throw new AttendanceCorrectionConflictError(error.message);
+        throw error;
+    }
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const db = getFirebaseAdminDb();
     const requestReference = db
         .collection(correctionCollection)

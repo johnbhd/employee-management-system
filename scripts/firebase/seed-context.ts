@@ -1,7 +1,7 @@
 import {
   getFirebaseAdminAuth,
-  getFirebaseAdminDb,
 } from "../../src/lib/firebase/server/runtime";
+import { getFirebaseAdminDb } from "../../src/lib/firebase/server/legacy-firestore";
 import { getFirebaseAdminConfig } from "../../src/lib/firebase/server/config";
 
 import type { SeedContext } from "./seed-types";

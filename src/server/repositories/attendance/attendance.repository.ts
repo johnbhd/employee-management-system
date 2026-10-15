@@ -1,9 +1,5 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-import { Timestamp } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { SessionUser } from "@/types/auth";
 import type {
     QrAttendanceAction,
@@ -11,6 +7,21 @@ import type {
 } from "@/types/attendance-qr";
 
 import { determineQrAttendanceAction } from "@/server/attendance/qr/qr-attendance-state";
+import {
+    getPrismaAttendanceByEmployeeAndDate,
+    getPrismaAttendanceById,
+    listPrismaAttendance,
+    recordPrismaQrAttendance,
+    type PrismaAttendanceView,
+} from "@/server/repositories/attendance/prisma-attendance.repository";
+import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    RepositoryTimestamp as Timestamp,
+    type DocumentData,
+    toRepositoryOperator,
+    toRepositoryRecord,
+    toRepositoryTimestamp,
+} from "@/server/repositories/prisma/prisma-compat";
 
 const attendanceCollection = "attendance";
 
@@ -27,19 +38,26 @@ export type StoredAttendanceCorrectionMetadata = {
     correctedBy: QrAttendanceOperatorSnapshot;
 };
 
+export type StoredAttendanceHrVerification = {
+    status: "verified";
+    verifiedAt: Timestamp;
+    verifiedBy: QrAttendanceOperatorSnapshot;
+};
+
 export type StoredQrAttendanceRecord = {
     employeeId: string;
     attendanceDate: string;
     timeIn: Timestamp;
     timeOut: Timestamp | null;
-    timeInSource: "QR";
-    timeOutSource: "QR" | null;
+    timeInSource: "QR" | "BUNDY";
+    timeOutSource: "QR" | "BUNDY" | null;
     status: QrAttendanceStatus;
     timeInOperator: QrAttendanceOperatorSnapshot;
     timeOutOperator: QrAttendanceOperatorSnapshot | null;
     createdAt: Timestamp;
     updatedAt: Timestamp;
     correction?: StoredAttendanceCorrectionMetadata;
+    hrVerification?: StoredAttendanceHrVerification;
 };
 
 export type QrAttendanceRepositoryResult = {
@@ -68,6 +86,55 @@ export class QrAttendanceDataError extends Error {
         super("The attendance record has an invalid shape.");
         this.name = "QrAttendanceDataError";
     }
+}
+
+function toScannerOperator(value: unknown, fallbackRole: "admin" | "hr" = "admin"): QrAttendanceOperatorSnapshot {
+    const operator = toRepositoryOperator(value, fallbackRole);
+    return {
+        uid: operator.uid,
+        username: operator.username,
+        displayName: operator.displayName,
+        role: operator.role === "hr" ? "hr" : "admin",
+    };
+}
+
+function toPrismaAttendanceRecord(record: PrismaAttendanceView): StoredQrAttendanceRecord {
+    const correction = toRepositoryRecord(record.correctionMetadata);
+    const correctedAt = typeof correction.correctedAt === "string"
+        ? toRepositoryTimestamp(correction.correctedAt)
+        : null;
+    const correctedBy = correction.correctedBy
+        ? toScannerOperator(correction.correctedBy)
+        : null;
+    const verification = record.hrVerificationStatus === "verified" && record.hrVerifiedAt
+        ? {
+            status: "verified" as const,
+            verifiedAt: toRepositoryTimestamp(record.hrVerifiedAt) as Timestamp,
+            verifiedBy: toScannerOperator(record.hrVerifiedBySnapshot, "hr"),
+        }
+        : undefined;
+
+    return {
+        employeeId: record.employeeId,
+        attendanceDate: record.attendanceDate,
+        timeIn: toRepositoryTimestamp(record.timeIn) as Timestamp,
+        timeOut: toRepositoryTimestamp(record.timeOut),
+        timeInSource: record.timeInSource,
+        timeOutSource: record.timeOutSource,
+        status: record.status,
+        timeInOperator: toScannerOperator(record.timeInActorSnapshot),
+        timeOutOperator: record.timeOutActorSnapshot ? toScannerOperator(record.timeOutActorSnapshot) : null,
+        createdAt: toRepositoryTimestamp(record.createdAt) as Timestamp,
+        updatedAt: toRepositoryTimestamp(record.updatedAt) as Timestamp,
+        ...(correction.requestId && correctedAt && correctedBy
+            ? { correction: { requestId: correction.requestId as string, correctedAt, correctedBy } }
+            : {}),
+        ...(verification ? { hrVerification: verification } : {}),
+    };
+}
+
+function toPrismaAttendanceResult(result: Awaited<ReturnType<typeof recordPrismaQrAttendance>>): QrAttendanceRepositoryResult {
+    return { action: result.action, record: toPrismaAttendanceRecord(result.record) };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -140,6 +207,32 @@ function parseCorrectionMetadata(
     };
 }
 
+function parseHrVerificationMetadata(
+    value: unknown,
+): StoredAttendanceHrVerification | undefined | null {
+    if (value === undefined) {
+        return undefined;
+    }
+
+    if (!isRecord(value)) {
+        return null;
+    }
+
+    const status = value.status;
+    const verifiedAt = getTimestamp(value.verifiedAt);
+    const verifiedBy = parseOperator(value.verifiedBy);
+
+    if (status !== "verified" || !verifiedAt || !verifiedBy || verifiedBy.role !== "hr") {
+        return null;
+    }
+
+    return {
+        status,
+        verifiedAt,
+        verifiedBy,
+    };
+}
+
 export function parseStoredQrAttendanceRecord(
     data: DocumentData | undefined,
 ): StoredQrAttendanceRecord | null {
@@ -167,6 +260,7 @@ export function parseStoredQrAttendanceRecord(
     const createdAt = getTimestamp(data.createdAt);
     const updatedAt = getTimestamp(data.updatedAt);
     const correction = parseCorrectionMetadata(data.correction);
+    const hrVerification = parseHrVerificationMetadata(data.hrVerification);
 
     if (
         !employeeId
@@ -188,6 +282,7 @@ export function parseStoredQrAttendanceRecord(
         || !createdAt
         || !updatedAt
         || correction === null
+        || hrVerification === null
     ) {
         return null;
     }
@@ -205,6 +300,7 @@ export function parseStoredQrAttendanceRecord(
         createdAt,
         updatedAt,
         ...(correction ? { correction } : {}),
+        ...(hrVerification ? { hrVerification } : {}),
     };
 }
 
@@ -240,6 +336,10 @@ function getNextMonthDateKey(month: string) {
 export async function getAttendanceByRecordId(
     attendanceRecordId: string,
 ): Promise<StoredQrAttendanceRecord | null> {
+    const prismaRecord = await getPrismaAttendanceById(attendanceRecordId);
+    return prismaRecord ? toPrismaAttendanceRecord(prismaRecord) : null;
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshot = await getFirebaseAdminDb()
         .collection(attendanceCollection)
         .doc(attendanceRecordId)
@@ -262,6 +362,10 @@ export async function getAttendanceByEmployeeAndDate(
     employeeId: string,
     attendanceDate: string,
 ): Promise<StoredQrAttendanceRecord | null> {
+    const prismaRecord = await getPrismaAttendanceByEmployeeAndDate(employeeId, attendanceDate);
+    return prismaRecord ? toPrismaAttendanceRecord(prismaRecord) : null;
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshot = await getFirebaseAdminDb()
         .collection(attendanceCollection)
         .doc(getAttendanceDocumentId(employeeId, attendanceDate))
@@ -283,6 +387,10 @@ export async function getAttendanceByEmployeeAndDate(
 export async function listAttendanceByEmployee(
     employeeId: string,
 ): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const prismaResult = await listPrismaAttendance({ employeeId, page: 1, pageSize: 200 });
+    return prismaResult.rows.map((record) => ({ id: record.id, record: toPrismaAttendanceRecord(record) }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshots = await getFirebaseAdminDb()
         .collection(attendanceCollection)
         .where("employeeId", "==", employeeId)
@@ -313,6 +421,10 @@ export async function listAttendanceByEmployee(
 export async function listAttendanceByDate(
     attendanceDate: string,
 ): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const prismaResult = await listPrismaAttendance({ attendanceDate, page: 1, pageSize: 200 });
+    return prismaResult.rows.map((record) => ({ id: record.id, record: toPrismaAttendanceRecord(record) }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshots = await getFirebaseAdminDb()
         .collection(attendanceCollection)
         .where("attendanceDate", "==", attendanceDate)
@@ -342,6 +454,17 @@ export async function listAttendanceByDate(
 export async function listAttendanceForMonitoring(
     filters: AttendanceMonitoringRepositoryFilters = {},
 ): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const result = await listPrismaAttendance({
+        attendanceDate: filters.attendanceDate,
+        employeeId: filters.employeeId,
+        status: filters.status,
+        source: filters.source,
+        page: 1,
+        pageSize: 200,
+    });
+    return result.rows.map((record) => ({ id: record.id, record: toPrismaAttendanceRecord(record) }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const collection = getFirebaseAdminDb().collection(attendanceCollection);
     const snapshots = filters.attendanceDate
         ? await collection
@@ -392,6 +515,17 @@ export async function listAttendanceForMonitoring(
 export async function listAttendanceForReport(
     filters: AttendanceReportRepositoryFilters = {},
 ): Promise<Array<{ id: string; record: StoredQrAttendanceRecord }>> {
+    const result = await listPrismaAttendance({
+        attendanceDate: filters.attendanceDate,
+        attendanceMonth: filters.attendanceMonth,
+        employeeId: filters.employeeId,
+        status: filters.status,
+        page: 1,
+        pageSize: 200,
+    });
+    return result.rows.map((record) => ({ id: record.id, record: toPrismaAttendanceRecord(record) }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const collection = getFirebaseAdminDb().collection(attendanceCollection);
     const snapshots = filters.attendanceDate
         ? await collection
@@ -400,7 +534,7 @@ export async function listAttendanceForReport(
         : filters.attendanceMonth
             ? await collection
                 .where("attendanceDate", ">=", `${filters.attendanceMonth}-01`)
-                .where("attendanceDate", "<", getNextMonthDateKey(filters.attendanceMonth))
+                .where("attendanceDate", "<", getNextMonthDateKey(filters.attendanceMonth ?? ""))
                 .get()
             : filters.employeeId
                 ? await collection.where("employeeId", "==", filters.employeeId).get()
@@ -456,6 +590,15 @@ export async function recordQrAttendance(
         scannerOperator: ScannerOperator;
     },
 ): Promise<QrAttendanceRepositoryResult> {
+    return toPrismaAttendanceResult(await recordPrismaQrAttendance({
+        ...input,
+        scannerOperator: {
+            ...input.scannerOperator,
+            role: input.scannerOperator.role === "hr" ? "hr" : "admin",
+        },
+    }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const db = getFirebaseAdminDb();
     const attendanceReference = db
         .collection(attendanceCollection)

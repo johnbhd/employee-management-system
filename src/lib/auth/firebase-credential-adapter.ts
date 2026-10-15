@@ -1,10 +1,12 @@
 const firebaseMinimumPasswordLength = 6;
+const firebaseInternalAuthDomain = "auth.aujsc.local";
 
 const authEmailByUsername: Readonly<Record<string, string>> = {
     "aujsc.admin": "aujsc.admin@auth.aujsc.local",
     "aujsc.hr": "aujsc.hr@auth.aujsc.local",
     "aujsc.employee": "aujsc.employee@auth.aujsc.local",
     "aujsc.accounting": "aujsc.accounting@auth.aujsc.local",
+    "aujsc.payroll": "aujsc.payroll@auth.aujsc.local",
     "aujsc.registrar.001": "aujsc.registrar.001@auth.aujsc.local",
     "aujsc.admissions.002": "aujsc.admissions.002@auth.aujsc.local",
     "aujsc.library.003": "aujsc.library.003@auth.aujsc.local",
@@ -24,7 +26,10 @@ export function normalizeAuthUsername(username: string): string {
 export function getFirebaseAuthEmail(username: string): string | null {
     const normalizedUsername = normalizeAuthUsername(username);
 
-    return authEmailByUsername[normalizedUsername] ?? null;
+    return authEmailByUsername[normalizedUsername]
+        ?? (/^aujsc\.[a-z0-9][a-z0-9._-]*$/.test(normalizedUsername)
+            ? `${normalizedUsername}@${firebaseInternalAuthDomain}`
+            : null);
 }
 
 export function getRequiredFirebaseAuthEmail(username: string): string {

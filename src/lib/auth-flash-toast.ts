@@ -43,6 +43,11 @@ const loginToastMessages: Record<AuthRole, AuthToastMessage> = {
     title: "Welcome back, Accounting Staff.",
     description: "Your accounting integration workspace is ready.",
   },
+  payroll: {
+    type: "login-success",
+    title: "Welcome back, Payroll Staff.",
+    description: "Your verified attendance and payroll handoff workspace is ready.",
+  },
 };
 
 const logoutToastMessage: AuthToastMessage = {

@@ -1,3 +1,4 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { formatCampusDateKey } from "@/lib/campus-time";
 import {
   getAttendanceReportsData,
@@ -8,6 +9,8 @@ import {
 import type { AttendanceReportsData } from "@/server/hr/attendance-reports.service";
 
 import { AttendanceReportsPage } from "@/components/hr/attendance-reports/AttendanceReportsPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -50,6 +53,11 @@ const emptyData: AttendanceReportsData = {
 export const dynamic = "force-dynamic";
 
 export default async function Page({ searchParams }: PageProps) {
+  const context = await requireRoleContext("hr");
+  if (!(await hasPermission(context.user, "hr.attendance.reports.view"))) {
+    return <PermissionDeniedPage title="Attendance Reports unavailable" backHref="/hr/dashboard" backLabel="Back to HR Dashboard" />;
+  }
+
   const defaultDate = formatCampusDateKey(new Date());
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = parseAttendanceReportsQuery(

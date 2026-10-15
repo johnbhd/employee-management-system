@@ -60,7 +60,7 @@ export function ScannerPage() {
 
     try {
       const response = await fetch(
-        "/api/v1/attendance/qr/resolve",
+        "/api/attendance/qr/resolve",
         {
           body: JSON.stringify({
             qrValue: qrValue.trim(),
@@ -188,10 +188,10 @@ export function ScannerPage() {
       {!result ? (
         <section className="attendance-scanner-manual" aria-labelledby="scanner-manual-heading">
           <div>
-            <span className="attendance-scanner-kicker">Development fallback</span>
+            <span className="attendance-scanner-kicker">Manual fallback</span>
             <h2 id="scanner-manual-heading">Paste a QR value</h2>
             <p>
-              Use this when camera access is unavailable. A valid value uses the same server flow and may record a development attendance action.
+              Use this when camera access is unavailable. A valid value follows the same attendance validation and recording flow.
             </p>
           </div>
           <form className="attendance-scanner-manual-form" onSubmit={handleManualSubmit}>

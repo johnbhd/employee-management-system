@@ -1,32 +1,66 @@
-import type { AccountingTransactionStatus } from "@/data/accounting/transaction-history";
+import type {
+  AccountingAcknowledgementStatus,
+  AccountingTransferStatus,
+} from "@/types/accounting-transfers";
+import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 
 import { Icon } from "@/components/ui/Icon";
 
-type TransactionHistoryStatusFilter = "all" | AccountingTransactionStatus;
-type TransactionHistoryAcknowledgementFilter = "all" | "acknowledged" | "waiting" | "not-acknowledged";
+type TransactionHistoryStatusFilter = "all" | AccountingTransferStatus;
+type TransactionHistoryAcknowledgementFilter = "all" | AccountingAcknowledgementStatus;
 
 type TransactionHistoryFiltersProps = {
   search: string;
   status: TransactionHistoryStatusFilter;
-  year: string;
+  period: string;
   acknowledgement: TransactionHistoryAcknowledgementFilter;
-  years: readonly string[];
+  periods: readonly PayrollBatchPeriod[];
+  transferStatuses: readonly AccountingTransferStatus[];
+  acknowledgementStatuses: readonly AccountingAcknowledgementStatus[];
   onSearchChange: (value: string) => void;
   onStatusChange: (value: TransactionHistoryStatusFilter) => void;
-  onYearChange: (value: string) => void;
+  onPeriodChange: (value: string) => void;
   onAcknowledgementChange: (value: TransactionHistoryAcknowledgementFilter) => void;
   onReset: () => void;
 };
 
+function getTransferStatusLabel(status: AccountingTransferStatus) {
+  switch (status) {
+    case "preparing":
+      return "Preparing";
+    case "submitting":
+      return "Submitting";
+    case "submitted":
+      return "Submitted";
+    case "failed":
+      return "Failed";
+  }
+}
+
+function getAcknowledgementLabel(status: AccountingAcknowledgementStatus) {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "accepted":
+      return "Accepted";
+    case "rejected":
+      return "Rejected";
+    case "not_received":
+      return "Not received";
+  }
+}
+
 export function TransactionHistoryFilters({
   search,
   status,
-  year,
+  period,
   acknowledgement,
-  years,
+  periods,
+  transferStatuses,
+  acknowledgementStatuses,
   onSearchChange,
   onStatusChange,
-  onYearChange,
+  onPeriodChange,
   onAcknowledgementChange,
   onReset,
 }: TransactionHistoryFiltersProps) {
@@ -45,36 +79,36 @@ export function TransactionHistoryFilters({
             type="search"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search reference or payroll period"
-            aria-label="Search transaction or payroll reference"
+            placeholder="Search transfer, result, or reference"
+            aria-label="Search Accounting transfer history"
           />
         </span>
       </label>
 
       <label className="accounting-transaction-history__field">
-        <span>Status</span>
+        <span>Transfer status</span>
         <select
           value={status}
           onChange={(event) => onStatusChange(event.target.value as TransactionHistoryStatusFilter)}
-          aria-label="Filter transactions by status"
+          aria-label="Filter transactions by transfer status"
         >
-          <option value="all">All Status</option>
-          <option value="successful">Successful</option>
-          <option value="pending">Pending</option>
-          <option value="failed">Failed</option>
+          <option value="all">All transfer statuses</option>
+          {transferStatuses.map((option) => (
+            <option value={option} key={option}>{getTransferStatusLabel(option)}</option>
+          ))}
         </select>
       </label>
 
       <label className="accounting-transaction-history__field">
-        <span>Year</span>
+        <span>Payroll period</span>
         <select
-          value={year}
-          onChange={(event) => onYearChange(event.target.value)}
-          aria-label="Filter transactions by year"
+          value={period}
+          onChange={(event) => onPeriodChange(event.target.value)}
+          aria-label="Filter transactions by Payroll period"
         >
-          <option value="all">All Years</option>
-          {years.map((option) => (
-            <option value={option} key={option}>{option}</option>
+          <option value="all">All Payroll periods</option>
+          {periods.map((option) => (
+            <option value={option.start} key={option.start}>{option.label}</option>
           ))}
         </select>
       </label>
@@ -86,12 +120,12 @@ export function TransactionHistoryFilters({
           onChange={(event) => onAcknowledgementChange(
             event.target.value as TransactionHistoryAcknowledgementFilter,
           )}
-          aria-label="Filter transactions by acknowledgement"
+          aria-label="Filter transactions by acknowledgement status"
         >
-          <option value="all">All Acknowledgements</option>
-          <option value="acknowledged">Acknowledged</option>
-          <option value="waiting">Waiting</option>
-          <option value="not-acknowledged">Not Acknowledged</option>
+          <option value="all">All acknowledgements</option>
+          {acknowledgementStatuses.map((option) => (
+            <option value={option} key={option}>{getAcknowledgementLabel(option)}</option>
+          ))}
         </select>
       </label>
 

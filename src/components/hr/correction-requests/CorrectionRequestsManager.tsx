@@ -152,7 +152,7 @@ export function CorrectionRequestsManager({
 
     try {
       await apiRequest<DecisionResponse>(
-        `/api/v1/hr/attendance-corrections/${encodeURIComponent(selectedRequest.id)}`,
+        `/api/hr/attendance-corrections/${encodeURIComponent(selectedRequest.id)}`,
         {
           method: "POST",
           body: JSON.stringify({

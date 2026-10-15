@@ -45,15 +45,15 @@ React UI
     ↓
 src/lib/api/ client functions
     ↓
-src/app/api/v1/ Route Handlers
+src/app/api/ Route Handlers
     ↓
 src/server/services/ business logic
     ↓
 src/server/repositories/ data access
     ↓
-src/lib/firebase/server/ Firebase Admin boundary
+src/lib/firebase/server/ Firebase Admin Auth boundary
     ↓
-Firestore / Firebase Authentication / Firebase Storage
+Firebase Authentication (credentials) + Supabase PostgreSQL (application data)
 ```
 
 The API boundary includes safe health checks, authenticated current-user
@@ -63,12 +63,11 @@ types live under `src/types/api/`, and the browser-safe base client uses native
 their deterministic mock data unless a task explicitly migrates them.
 
 Firebase foundation initialization is now available under
-`src/lib/firebase/client/` and `src/lib/firebase/server/`. The browser module
-provides lazy singleton accessors for the Firebase App, Auth, and Firestore
-services. The server module is protected by `server-only`, uses lazy singleton
-Firebase Admin initialization, and keeps Admin credentials out of browser
-code. Existing feature pages still use their deterministic mock data; no page
-has been migrated to a Firebase-backed endpoint.
+`src/lib/firebase/client/` and `src/lib/firebase/server/`. These modules expose
+Firebase Authentication only. The server module is protected by `server-only`,
+uses lazy singleton Firebase Admin initialization, and keeps Admin credentials
+out of browser code. Application profiles and business data are read and
+written through server-only Prisma repositories backed by Supabase PostgreSQL.
 
 ## Firebase Foundation Setup
 
@@ -89,12 +88,11 @@ value, preserve escaped newline characters (`\\n`); the server initializer
 normalizes them before creating the Admin credential. Configure the same
 variables in Vercel under Project Settings → Environment Variables.
 
-The existing health contract remains available at `GET /api/v1/health`. The
-Firebase foundation check is available at `GET /api/v1/health/firebase` and
-returns a safe `503` error response when server configuration is missing or
-Firestore cannot be reached. It never returns credentials, stack traces, or
-service-account details. The Firestore check reads the reserved
-`_system/health` document without creating or modifying it.
+The existing health contract remains available at `GET /api/health`. The
+Firebase check at `GET /api/health/firebase` verifies Firebase Authentication
+and returns a safe `503` error response when server configuration or Auth
+connectivity is unavailable. It never returns credentials, stack traces, or
+service-account details.
 
 The employee-specific QR attendance flow uses a separate server-only HMAC secret.
 Set `QR_ATTENDANCE_SIGNING_SECRET` in `.env.local` to a unique random value;
@@ -103,12 +101,11 @@ the Firebase private key, expose the value with `NEXT_PUBLIC_`, or commit the
 real secret. Employees receive a QR from `/employee/attendance-qr`; authorized
 HR staff and administrators use the canonical `/scanner` route. The scanner
 validates the QR through the server, resolves the employee, and records the
-next valid daily attendance action through a Firebase Admin Firestore
-transaction. The first valid scan records Time In, the next allowed scan
+next valid daily attendance action through the Prisma/PostgreSQL attendance
+repository. The first valid scan records Time In, the next allowed scan
 records Time Out, and later scans return the completed state without
-overwriting the record. The server stores attendance under the deterministic
-`attendance/{employeeId}_{attendanceDate}` document key using Asia/Manila for
-the business date.
+overwriting the record. The server stores attendance in Supabase PostgreSQL
+through Prisma using Asia/Manila for the business date.
 
 The deterministic local QR contract can be checked without Firebase writes:
 
@@ -120,21 +117,21 @@ yarn qr:attendance:verify
 The Employee `/employee/my-attendance` page reads the authenticated Employee's
 current Asia/Manila attendance record through the server-side attendance
 service. The equivalent protected API is `GET
-/api/v1/attendance/me/today`; it derives the Employee ID from the HttpOnly
+/api/attendance/me/today`; it derives the Employee ID from the HttpOnly
 session and does not accept an Employee ID from the browser.
 
-The Employee `/employee/attendance-history` page reads the same canonical
-Firestore attendance collection through the authenticated Employee context.
-The protected `GET /api/v1/attendance/me/history` endpoint returns only the
+The Employee `/employee/attendance-history` page reads the canonical
+PostgreSQL attendance records through the authenticated Employee context.
+The protected `GET /api/attendance/me/history` endpoint returns only the
 linked Employee's daily records, newest first, with serialized date, Time In,
 Time Out, source, and status values. The page does not accept a browser-supplied
 Employee ID or use browser storage/mock rows as an authority.
 
-The protected HR `/hr/dashboard` page now reads the active Employee reference
+The protected HR `/hr/dashboard` page reads the active Employee reference
 count and current Asia/Manila attendance records through the server-side HR
-dashboard service. Its equivalent API is `GET /api/v1/hr/dashboard/summary`;
+dashboard service. Its equivalent API is `GET /api/hr/dashboard/summary`;
 it derives Timed In Today, Completed Today, Awaiting Time-Out, and recent
-awaiting-Time-Out items from the canonical attendance collection. Correction,
+awaiting-Time-Out items from PostgreSQL. Correction,
 verification, schedule, lateness, absence, and overtime values remain
 unavailable until their real data sources and policy rules are integrated.
 
@@ -176,11 +173,12 @@ fixtures.
 
 The default command runs `employees` before `users`. Selecting `users` also
 runs the employee seeder first because seeded users may reference an employee.
-The `employees` seeder writes deterministic `employees/{employeeId}` documents.
-The `users` seeder reconciles Firebase Auth users with stable development UIDs
-and writes matching `users/{uid}` documents. It never stores passwords in
-Firestore, deletes records, or resets a collection. Re-running a write command
-merges the same seed-owned fields instead of creating duplicates.
+The historical `employees` and `users` seeders write deterministic Firestore
+documents only when explicitly run as offline/development migration tooling.
+They are not imported by the Next.js application and are not part of normal
+runtime persistence. They never store passwords in Firestore, delete records,
+or reset a collection. Re-running a write command merges the same seed-owned
+fields instead of creating duplicates.
 
 The prototype login remains unchanged. If a prototype password is shorter than
 Firebase Email/Password Auth permits, the seed source uses a deterministic
@@ -201,20 +199,23 @@ FIREBASE_SEED_CREDENTIAL_ROTATED=true
 The final flag is an explicit safety gate because a previously exposed service
 account key must be revoked and replaced before any seed write is enabled. Do
 not set the write guard for production projects, and never commit `.env.local`
-or service-account credentials. The seeder only prepares Firebase data; the
-current prototype Login still does not read these Firebase users.
+or service-account credentials. The seeder only prepares legacy Firebase
+development data; application login uses Firebase Authentication and resolves
+the application profile from PostgreSQL.
 
-Before supplying environment values, create or select the Firebase project,
-register the Web App, enable Cloud Firestore and the intended Authentication
-provider, and create server credentials as needed. Transfer those values into
-`.env.local` or Vercel manually. Firebase Hosting, Cloud Functions, open
-Firestore rules, and feature-data migrations are outside this foundation task.
+Before supplying environment values for the historical seed/migration tools,
+create or select the Firebase project, register the Web App, enable the
+intended Authentication provider, and create server credentials as needed.
+Transfer those values into `.env.local` or Vercel manually. Firestore access is
+not required by normal application runtime; legacy Firestore reads are limited
+to explicitly invoked migration tooling. Firebase Hosting, Cloud Functions,
+and open Firestore rules are outside the application runtime boundary.
 
 Server responsibilities are separated into `auth`, `services`,
 `repositories`, `validators`, and external-system adapters under
-`src/server/integrations/` for HRPS, Bundy, Payroll, and Accounting. These
-directories are scaffolding only: no Firebase connection, production
-authentication, Firestore collection, or external integration was added.
+`src/server/integrations/` for HRPS, Bundy, Payroll, and Accounting. Runtime
+business persistence uses Prisma repositories backed by PostgreSQL; historical
+Firebase migration/seed scripts remain separate from the application boundary.
 
 Future feature migration should follow this sequence:
 
@@ -228,6 +229,10 @@ the corresponding backend feature is implemented. Browser role or identifier
 values are never sufficient authorization. Passwords must belong to Firebase
 Authentication rather than Firestore. Existing HRPS, Bundy, Payroll, and
 Accounting systems remain external owners; Firebase is not their replacement.
+
+For implemented application features, the repository boundary terminates in
+Prisma/PostgreSQL; Firebase Authentication is retained only for credentials
+and identity.
 
 ## Project Scope
 

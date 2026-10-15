@@ -16,11 +16,11 @@ export type AttendanceReportRecord = {
   dateLabel: string;
   timeIn: string;
   timeOut: string | null;
-  source: "QR";
+  source: "QR" | "BUNDY";
   status: "Present" | "Completed";
   statusTone: StatusTone;
-  timeInSource: "QR";
-  timeOutSource: "QR" | null;
+  timeInSource: "QR" | "BUNDY";
+  timeOutSource: "QR" | "BUNDY" | null;
 };
 
 export type AttendanceReportCorrectionRecord = {

@@ -11,6 +11,9 @@
 @import "./layouts/accounting.css";
 @import "./layouts/accounting-sidebar.css";
 @import "./layouts/accounting-navbar.css";
+@import "./layouts/payroll.css";
+@import "./layouts/payroll-sidebar.css";
+@import "./layouts/payroll-navbar.css";
 @import "./components/cards.css";
 @import "./components/tables.css";
 @import "./components/badges.css";
@@ -24,7 +27,6 @@
 @import "./pages/employee/profile.css";
 @import "./pages/employee/settings.css";
 @import "./pages/employee/payslips.css";
-@import "./pages/employee/announcements.css";
 @import "./pages/employee/help-support.css";
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
@@ -36,20 +38,24 @@
 @import "./pages/hr/scanner.css";
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
+@import "./pages/admin/integration-detail.css";
 @import "./pages/admin/hrps-integration.css";
-@import "./pages/admin/bundy-biometric-etl.css";
-@import "./pages/admin/qr-attendance.css";
-@import "./pages/admin/unified-attendance.css";
-@import "./pages/admin/payroll-accounting-flow.css";
-@import "./pages/admin/accounting-integration-page.css";
-@import "./pages/admin/integration-errors.css";
+@import "./pages/admin/bundy-integration.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";
 @import "./pages/admin/roles-permissions.css";
 @import "./pages/admin/audit-logs.css";
 @import "./pages/admin/settings.css";
+@import "./pages/admin/typography.css";
 @import "./pages/accounting/dashboard.css";
+@import "./pages/accounting/approved-payroll.css";
 @import "./pages/accounting/integration-status.css";
 @import "./pages/accounting/transaction-history.css";
+@import "./pages/payroll/dashboard.css";
+@import "./pages/payroll/verified-attendance.css";
+@import "./pages/payroll/batches.css";
+@import "./pages/payroll/handoff.css";
+@import "./pages/payroll/results.css";
+@import "./pages/payroll/history.css";
 
 *,
 *::before,

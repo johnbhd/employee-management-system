@@ -1,9 +1,14 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type { EmployeeScheduleReference } from "@/types/hr-employee-schedule";
+import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
+import {
+    getPrismaEmployeeScheduleById,
+    listPrismaEmployeeScheduleReferences,
+} from "@/server/repositories/employee-schedules/prisma-employee-schedule.repository";
 
 const scheduleCollection = "employeeSchedules";
 
@@ -128,6 +133,25 @@ function parseScheduleReference(
 export async function getEmployeeScheduleById(
     employeeId: string,
 ): Promise<EmployeeScheduleReference | null> {
+    const prismaSchedule = await getPrismaEmployeeScheduleById(employeeId);
+    return prismaSchedule
+        ? {
+            scheduleId: prismaSchedule.scheduleId,
+            employeeId: prismaSchedule.employeeId,
+            workStart: prismaSchedule.workStart,
+            workEnd: prismaSchedule.workEnd,
+            breakStart: prismaSchedule.breakStart,
+            breakEnd: prismaSchedule.breakEnd,
+            shiftLabel: prismaSchedule.shiftLabel,
+            workDays: prismaSchedule.workDays,
+            restDays: prismaSchedule.restDays,
+            workLocation: prismaSchedule.workLocation,
+            sourceSystem: prismaSchedule.sourceSystem,
+            dataSource: prismaSchedule.dataSource,
+        }
+        : null;
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshot = await getFirebaseAdminDb()
         .collection(scheduleCollection)
         .doc(employeeId)
@@ -147,6 +171,23 @@ export async function getEmployeeScheduleById(
 }
 
 export async function listEmployeeScheduleReferences(): Promise<EmployeeScheduleReference[]> {
+    const schedules = await listPrismaEmployeeScheduleReferences();
+    return schedules.map((schedule) => ({
+        scheduleId: schedule.scheduleId,
+        employeeId: schedule.employeeId,
+        workStart: schedule.workStart,
+        workEnd: schedule.workEnd,
+        breakStart: schedule.breakStart,
+        breakEnd: schedule.breakEnd,
+        shiftLabel: schedule.shiftLabel,
+        workDays: schedule.workDays,
+        restDays: schedule.restDays,
+        workLocation: schedule.workLocation,
+        sourceSystem: schedule.sourceSystem,
+        dataSource: schedule.dataSource,
+    }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshots = await getFirebaseAdminDb()
         .collection(scheduleCollection)
         .get();

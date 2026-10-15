@@ -95,7 +95,7 @@ export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
           >
             <Icon name="qr" />
           </Link>
-          <button type="button" className="hr-icon-button hr-help-button" onClick={() => notify("HR help center is a prototype action.")} aria-label="Open HR help">
+          <button type="button" className="hr-icon-button hr-help-button" onClick={() => notify("Open Help and Support for attendance guidance.")} aria-label="Open HR help">
             <Icon name="help" />
           </button>
           <div className="hr-profile-wrap" ref={profileRef}>
@@ -119,7 +119,7 @@ export function HrNavbar({ user, employee, onOpenSidebar }: HrNavbarProps) {
               <nav id="hr-profile-menu" className="hr-profile-menu" aria-label="HR staff account menu">
                 <strong>{displayName}</strong>
                 <small>Attendance operations access</small>
-                <button type="button" onClick={() => notify("HR settings are not connected in the prototype.")}>
+                <button type="button" onClick={() => notify("HR settings are managed by the authorized administrator.")}>
                   <Icon name="settings" />
                   Settings
                 </button>

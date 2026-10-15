@@ -46,6 +46,7 @@ function toSessionUser(user: ApplicationUser): SessionUser {
         displayName: user.displayName,
         role: user.role,
         employeeId: user.employeeId,
+        mustChangePassword: user.mustChangePassword,
     };
 }
 
@@ -65,7 +66,11 @@ function isRecentAuthentication(decodedToken: DecodedIdToken): boolean {
 async function getActiveUserByUid(uid: string): Promise<SessionUser> {
     const user = await getApplicationUserByUid(uid);
 
-    if (!user || user.status !== "active") {
+    if (
+        !user
+        || user.status !== "active"
+        || (user.role === "employee" && !user.employeeId)
+    ) {
         throw new AuthSessionError(
             "ACCOUNT_UNAVAILABLE",
             403,
@@ -119,13 +124,17 @@ export async function getOptionalSessionUser(): Promise<SessionUser | null> {
         return null;
     }
 
+    const adminAuth = getFirebaseAdminAuth();
+    let decodedToken: DecodedIdToken;
+
     try {
-        const decodedToken = await getFirebaseAdminAuth().verifySessionCookie(
+        decodedToken = await adminAuth.verifySessionCookie(
             sessionCookie,
             true,
         );
-        return await getActiveUserByUid(decodedToken.uid);
     } catch {
         return null;
     }
+
+    return getActiveUserByUid(decodedToken.uid);
 }

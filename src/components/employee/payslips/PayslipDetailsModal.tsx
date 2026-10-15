@@ -9,6 +9,7 @@ import { formatPhilippinePeso } from "@/lib/format-currency";
 import type {
   EmployeeMonthlyPayslip,
   EmployeePayslip,
+  MoneyValue,
 } from "@/types/payslip";
 import type { EmployeeReference } from "@/types/employee";
 
@@ -479,6 +480,6 @@ function ModalLineItem({
   );
 }
 
-function displayAmount(value: number | null) {
+function displayAmount(value: MoneyValue | null) {
   return value === null ? "—" : formatPhilippinePeso(value);
 }

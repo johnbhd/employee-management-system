@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 
-import { announcements, getLatestAnnouncements } from "@/data/employee";
 import { formatCampusNavbarDate } from "@/lib/campus-time";
 import { logoutFromFirebaseSession } from "@/lib/auth/client-session";
 import { getAuthenticatedDisplayName } from "@/lib/auth/display-name";
@@ -43,8 +42,16 @@ function getEmployeePageTitle(pathname: string) {
   }
 }
 
-const latestNotifications = getLatestAnnouncements(5);
-const notificationCount = announcements.length;
+const latestNotifications: Array<{
+  id: string;
+  title: string;
+  tone: string;
+  category: string;
+  postedAt: string;
+  date: string;
+  message: string;
+}> = [];
+const notificationCount = 0;
 const notificationBadge = notificationCount > 9 ? "9+" : String(notificationCount);
 
 export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbarProps) {
@@ -170,13 +177,13 @@ export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbar
             aria-haspopup="menu"
           >
             <Icon name="bell" />
-            <span>{notificationBadge}</span>
+            {notificationCount > 0 ? <span>{notificationBadge}</span> : null}
           </button>
           {notificationMenuIsOpen ? (
             <div id="employee-notification-menu" className="employee-notification-menu" role="menu" aria-label="Employee notifications">
               <div className="employee-notification-menu-header">
                 <strong>Notifications</strong>
-                <span>{notificationCount} available</span>
+                <span>{notificationCount > 0 ? `${notificationCount} available` : "No new notifications"}</span>
               </div>
               {latestNotifications.length > 0 ? (
                 latestNotifications.map((announcement) => (
@@ -256,7 +263,7 @@ export function EmployeeNavbar({ user, employee, onOpenSidebar }: EmployeeNavbar
               <button type="button" className="employee-profile-menu-item" onClick={openNotificationMenu}>
                 <Icon name="bell" />
                 <span>Notifications</span>
-                <strong className="employee-profile-menu-count">{notificationBadge}</strong>
+                {notificationCount > 0 ? <strong className="employee-profile-menu-count">{notificationBadge}</strong> : null}
               </button>
               <Link
                 href="/employee/my-attendance"

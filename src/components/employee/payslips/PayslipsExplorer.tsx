@@ -12,6 +12,7 @@ import type {
   EmployeePayslip,
   EmployeePayslipHistoryData,
   EmployeePayslipStat,
+  MoneyValue,
   PayslipStatus,
 } from "@/types/payslip";
 
@@ -489,6 +490,6 @@ function getUnavailableStats(
   ];
 }
 
-function displayAmount(value: number | null) {
+function displayAmount(value: MoneyValue | null) {
   return value === null ? "—" : formatPhilippinePeso(value);
 }

@@ -1,0 +1,722 @@
+.payroll-batches {
+  display: grid;
+  width: 100%;
+  max-width: 1600px;
+  min-width: 0;
+  margin-inline: auto;
+  gap: 1.25rem;
+}
+
+.payroll-batches > * {
+  min-width: 0;
+}
+
+.payroll-batches .page-header {
+  min-width: 0;
+}
+
+.payroll-batches__header-actions,
+.payroll-batches__panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.payroll-batches__period {
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.4rem;
+  margin: -0.45rem 0 0;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #d9e7f8;
+  border-radius: 999px;
+  background: var(--info-soft);
+  color: #174a7a;
+  font-size: 0.67rem;
+  font-weight: 700;
+}
+
+.payroll-batches__period .ui-icon {
+  font-size: 0.76rem;
+}
+
+.payroll-batches__data-error,
+.payroll-batches__form-error {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid #f2c7c7;
+  border-radius: 0.7rem;
+  background: #fff5f5;
+  color: #9b2525;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.payroll-batches__form-error {
+  padding: 0.5rem 0.65rem;
+  font-size: 0.65rem;
+}
+
+.payroll-batches__summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.payroll-batches__current-card,
+.payroll-batches__list-card {
+  min-width: 0;
+}
+
+.payroll-batches__title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.35rem;
+}
+
+.payroll-batches__title-row h2 {
+  margin: 0;
+  color: var(--au-navy);
+  font-size: 1.05rem;
+}
+
+.payroll-batches__panel-description {
+  margin: 0.4rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.payroll-batches__current-info {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7rem;
+  padding: 0 1.35rem 1.35rem;
+}
+
+.payroll-batches__current-info > div {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  border: 1px solid #edf1f6;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.payroll-batches__current-info > .ui-icon {
+  flex: 0 0 auto;
+  color: var(--au-blue);
+}
+
+.payroll-batches__current-info span {
+  display: grid;
+  min-width: 0;
+  gap: 0.25rem;
+}
+
+.payroll-batches__current-info small,
+.payroll-batches__current-info strong {
+  overflow-wrap: anywhere;
+}
+
+.payroll-batches__current-info small {
+  color: var(--text-faint);
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.payroll-batches__current-info strong {
+  color: #334155;
+  font-size: 0.72rem;
+}
+
+.payroll-batches__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.75fr);
+  gap: 1.25rem;
+}
+
+.payroll-batches__list-header {
+  align-items: flex-end;
+}
+
+.payroll-batches__filters {
+  display: flex;
+  flex: 1 1 100%;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
+.payroll-batches__filters label {
+  display: grid;
+  min-width: 9.5rem;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.payroll-batches__filters label > span:first-child {
+  display: block;
+}
+
+.payroll-batches__filters select,
+.payroll-batches__search-input {
+  min-height: 2.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.payroll-batches__filters select {
+  width: 100%;
+  padding: 0 0.65rem;
+}
+
+.payroll-batches__filters .payroll-batches__search {
+  flex: 1 1 15rem;
+}
+
+.payroll-batches__search-input {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 0.75rem;
+}
+
+.payroll-batches__search-input .ui-icon {
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.payroll-batches__search-input input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.72rem;
+}
+
+.payroll-batches__filters > .button-secondary {
+  min-height: 2.55rem;
+  white-space: nowrap;
+}
+
+.payroll-batches__result-meta {
+  margin: 0.95rem 1.35rem 0.75rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+}
+
+.payroll-batches__table-wrap,
+.payroll-batches__summary-table-wrap,
+.payroll-batches__modal-table-wrap {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.payroll-batches__table-wrap {
+  padding: 0 1.35rem;
+}
+
+.payroll-batches__table {
+  min-width: 72rem;
+}
+
+.payroll-batches__table td {
+  vertical-align: middle;
+}
+
+.payroll-batches__table td strong {
+  color: #334155;
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.payroll-batches__row-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+}
+
+.payroll-batches__row-menu {
+  position: relative;
+}
+
+.payroll-batches__row-menu summary {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: #fff;
+  color: var(--text-muted);
+  cursor: pointer;
+  list-style: none;
+}
+
+.payroll-batches__row-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.payroll-batches__row-menu summary:hover {
+  border-color: #b9c8dd;
+  color: var(--au-navy);
+}
+
+.payroll-batches__row-menu > div {
+  position: absolute;
+  top: 2.25rem;
+  right: 0;
+  z-index: 5;
+  display: grid;
+  width: 10rem;
+  gap: 0.15rem;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: 0 14px 32px rgba(15, 35, 80, 0.14);
+}
+
+.payroll-batches__row-menu button {
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #475569;
+  padding: 0.5rem;
+  font-size: 0.66rem;
+  text-align: left;
+}
+
+.payroll-batches__row-menu button:hover {
+  background: #f8fafc;
+  color: var(--au-navy);
+}
+
+.payroll-batches__empty {
+  padding: 2rem 1rem !important;
+  text-align: center;
+}
+
+.payroll-batches__empty strong,
+.payroll-batches__empty span {
+  display: block;
+}
+
+.payroll-batches__empty strong {
+  color: var(--au-navy);
+  font-size: 0.78rem;
+}
+
+.payroll-batches__empty span {
+  margin-top: 0.3rem;
+  color: var(--text-faint);
+  font-size: 0.68rem;
+}
+
+.payroll-batches__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 0 1.35rem 1.35rem;
+  color: var(--text-faint);
+  font-size: 0.65rem;
+}
+
+.payroll-batches__pagination nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.payroll-batches__page-button {
+  display: inline-flex;
+  min-width: 2rem;
+  min-height: 2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 0.55rem;
+  background: #fff;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+}
+
+.payroll-batches__page-button:hover:not(:disabled),
+.payroll-batches__page-button.is-active {
+  border-color: var(--au-blue);
+  background: var(--au-blue);
+  color: #fff;
+}
+
+.payroll-batches__page-button:disabled,
+.payroll-batches__panel-actions button:disabled,
+.payroll-batches__side-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  transform: none;
+}
+
+.payroll-batches__page-button .ui-icon {
+  font-size: 0.55rem;
+}
+
+.payroll-batches__side {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 1.25rem;
+}
+
+.payroll-batches__side-description {
+  margin: 0;
+  padding: 0 1.35rem 1rem;
+}
+
+.payroll-batches__summary-table-wrap {
+  padding: 0 1.35rem 1.35rem;
+}
+
+.payroll-batches__summary-table {
+  min-width: 28rem;
+}
+
+.payroll-batches__summary-table td,
+.payroll-batches__summary-table th {
+  padding-right: 0.75rem;
+  padding-left: 0.75rem;
+}
+
+.payroll-batches__total-row td {
+  color: var(--au-navy);
+  font-weight: 800;
+}
+
+.payroll-batches__side-actions {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0 1.35rem 1.35rem;
+}
+
+.payroll-batches__side-actions button {
+  justify-content: flex-start;
+}
+
+.payroll-batches__boundary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid #d9e7f8;
+  border-radius: 0.75rem;
+  background: var(--info-soft);
+  color: #174a7a;
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+.payroll-batches__boundary-note .ui-icon {
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}
+
+.payroll-batches__modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  overflow-y: auto;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(10, 23, 63, 0.5);
+}
+
+.payroll-batches__modal {
+  width: min(100%, 38rem);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: 0 24px 70px rgba(10, 23, 63, 0.25);
+}
+
+.payroll-batches__modal.is-wide {
+  width: min(100%, 48rem);
+}
+
+.payroll-batches__modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.35rem;
+  border-bottom: 1px solid #edf1f6;
+}
+
+.payroll-batches__modal-header h2 {
+  margin: 0.3rem 0 0;
+  color: var(--au-navy);
+  font-size: 1.05rem;
+}
+
+.payroll-batches__modal-header p:last-child {
+  margin: 0.3rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.payroll-batches__modal-header .button-secondary {
+  min-width: 2.25rem;
+  padding: 0.55rem;
+}
+
+.payroll-batches__modal-details {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin: 0;
+  padding: 1.25rem 1.35rem;
+}
+
+.payroll-batches__modal-details > div {
+  display: grid;
+  min-width: 0;
+  gap: 0.35rem;
+  align-content: start;
+  padding: 0.75rem;
+  border: 1px solid #edf1f6;
+  border-radius: 0.75rem;
+  background: var(--surface-muted);
+}
+
+.payroll-batches__modal-details dt {
+  color: var(--text-faint);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.payroll-batches__modal-details dd {
+  min-width: 0;
+  margin: 0;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.payroll-batches__modal-table-wrap {
+  padding: 1.25rem 1.35rem;
+}
+
+.payroll-batches__modal-table-wrap .data-table {
+  min-width: 32rem;
+}
+
+.payroll-batches__records-table td small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-faint);
+  font-size: 0.62rem;
+}
+
+.payroll-batches__read-only,
+.payroll-batches__selection-count {
+  color: var(--text-faint);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.payroll-batches__selection-count {
+  margin-right: auto;
+}
+
+.payroll-batches__confirm-copy {
+  margin: 0;
+  padding: 1.25rem 1.35rem;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.6;
+}
+
+.payroll-batches__confirm-copy strong {
+  color: #334155;
+}
+
+.payroll-batches__modal-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+  padding: 0 1.35rem 1.35rem;
+}
+
+.payroll-batches__form {
+  display: grid;
+  gap: 0.95rem;
+  padding: 1.25rem 1.35rem 0;
+}
+
+.payroll-batches__form label {
+  display: grid;
+  gap: 0.35rem;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.payroll-batches__form label em {
+  color: var(--text-faint);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.payroll-batches__form input,
+.payroll-batches__form select,
+.payroll-batches__form textarea {
+  width: 100%;
+  min-height: 2.55rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: #fff;
+  color: var(--text);
+  padding: 0.6rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+
+.payroll-batches__form textarea {
+  min-height: 5rem;
+  resize: vertical;
+}
+
+.payroll-batches__form input[readonly] {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.payroll-batches__form input[aria-invalid="true"],
+.payroll-batches__form select[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.payroll-batches__form label small {
+  color: var(--danger);
+  font-size: 0.62rem;
+  font-weight: 600;
+}
+
+.payroll-batches__form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 1400px) {
+  .payroll-batches__summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1050px) {
+  .payroll-batches__summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .payroll-batches__layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-batches__current-info {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .payroll-batches__summary {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-batches__header-actions,
+  .payroll-batches__header-actions > *,
+  .payroll-batches__header-actions .action-control,
+  .payroll-batches__header-actions .action-control button {
+    width: 100%;
+  }
+
+  .payroll-batches__current-card .panel-header,
+  .payroll-batches__list-header,
+  .payroll-batches__current-info {
+    grid-template-columns: 1fr;
+  }
+
+  .payroll-batches__current-card .panel-header,
+  .payroll-batches__list-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .payroll-batches__panel-actions {
+    justify-content: stretch;
+    margin-top: 1rem;
+  }
+
+  .payroll-batches__panel-actions > * {
+    flex: 1 1 100%;
+  }
+
+  .payroll-batches__filters {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .payroll-batches__filters label,
+  .payroll-batches__filters > .button-secondary {
+    width: 100%;
+  }
+
+  .payroll-batches__pagination {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-inline: 1rem;
+  }
+
+  .payroll-batches__modal-details,
+  .payroll-batches__form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .payroll-batches__current-info {
+    grid-template-columns: 1fr;
+  }
+}

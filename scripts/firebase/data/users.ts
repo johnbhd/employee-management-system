@@ -30,6 +30,7 @@ const legacySeedUidByUsername: Readonly<Record<string, string>> = {
   "aujsc.hr": "seed-aujsc-hr",
   "aujsc.employee": "seed-aujsc-employee",
   "aujsc.accounting": "seed-aujsc-accounting",
+  "aujsc.payroll": "seed-aujsc-payroll",
 };
 
 function getSeedUid(account: SeedUserSource): string {

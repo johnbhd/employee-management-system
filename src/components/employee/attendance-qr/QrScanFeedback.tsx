@@ -7,28 +7,35 @@ type QrScanFeedbackProps = {
 };
 
 export function QrScanFeedback({ feedback }: QrScanFeedbackProps) {
-  const isCompleted = feedback.type === "completed";
+  const isAlreadyRecorded = feedback.type === "already-recorded";
   const title = feedback.type === "time-in"
     ? "Time-In Recorded"
     : feedback.type === "time-out"
       ? "Time-Out Recorded"
-      : "Attendance Already Completed";
-  const message = isCompleted
-    ? "Your Time-In and Time-Out have already been recorded."
+      : "Attendance Already Recorded";
+  const message = isAlreadyRecorded
+    ? "Today's Time-In and Time-Out have already been recorded."
     : "Your attendance was recorded successfully.";
 
   return (
     <div
-      className={`attendance-qr-scan-feedback ${isCompleted ? "is-neutral" : "is-success"}`}
+      className={`attendance-qr-scan-feedback ${isAlreadyRecorded ? "is-neutral" : "is-success"}`}
       role="status"
       aria-live="polite"
     >
       <span className="attendance-qr-scan-feedback-icon" aria-hidden="true">
-        <Icon name={isCompleted ? "info" : "check"} />
+        <Icon name={isAlreadyRecorded ? "info" : "check"} />
       </span>
       <strong>{title}</strong>
       <p>{message}</p>
-      {feedback.type !== "completed" ? <time>{feedback.time}</time> : null}
+      {feedback.type === "already-recorded" ? (
+        <div className="attendance-qr-scan-feedback-times">
+          <time>Time-In: {feedback.timeIn}</time>
+          <time>Time-Out: {feedback.timeOut}</time>
+        </div>
+      ) : (
+        <time>{feedback.time}</time>
+      )}
     </div>
   );
 }

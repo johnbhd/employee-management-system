@@ -1,3 +1,4 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { formatCampusDateKey } from "@/lib/campus-time";
 import {
     getAttendanceMonitoringData,
@@ -8,6 +9,8 @@ import {
 import type { AttendanceMonitoringData } from "@/types/hr-attendance-monitoring";
 
 import { AttendanceMonitoringPage } from "@/components/hr/attendance-monitoring/AttendanceMonitoringPage";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 
 type PageProps = {
     searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -30,6 +33,11 @@ function toSearchParams(
 }
 
 export default async function Page({ searchParams }: PageProps) {
+    const context = await requireRoleContext("hr");
+    if (!(await hasPermission(context.user, "hr.attendance.view"))) {
+        return <PermissionDeniedPage title="Attendance Monitoring unavailable" backHref="/hr/dashboard" backLabel="Back to HR Dashboard" />;
+    }
+
     const defaultDate = formatCampusDateKey(new Date());
     const resolvedSearchParams = searchParams ? await searchParams : {};
     const query = parseAttendanceMonitoringQuery(

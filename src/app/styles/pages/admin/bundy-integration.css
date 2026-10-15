@@ -1,0 +1,343 @@
+.bundy-integration-page {
+  gap: 1.25rem;
+}
+
+.bundy-import-top-grid {
+  align-items: start;
+}
+
+.bundy-upload-panel,
+.bundy-contract-panel,
+.bundy-preview-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.bundy-file-field {
+  display: grid;
+  gap: 0.45rem;
+  color: #334155;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.bundy-file-field input[type="file"] {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px dashed #b8c7dc;
+  border-radius: 0.7rem;
+  background: #fbfdff;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.bundy-file-field small,
+.bundy-contract-panel p,
+.bundy-permission-note,
+.bundy-preview-meta,
+.bundy-cell-meta,
+.bundy-row-messages {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+.bundy-upload-actions {
+  justify-content: flex-start;
+}
+
+.bundy-permission-note {
+  margin: 0;
+  color: #8a5700;
+}
+
+.bundy-boundary-note,
+.bundy-account-policy {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.85rem 0.95rem;
+  border: 1px solid #d5e3f7;
+  border-radius: 0.75rem;
+  background: #f7fbff;
+  color: #174a7a;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.bundy-boundary-note strong {
+  flex: 0 0 auto;
+}
+
+.bundy-boundary-note span,
+.bundy-account-policy p,
+.bundy-contract-panel p {
+  margin: 0;
+}
+
+.bundy-contract-panel strong {
+  color: #334155;
+}
+
+.bundy-import-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.bundy-preview-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+
+.bundy-preview-meta strong {
+  color: #334155;
+}
+
+.bundy-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.bundy-filter-button {
+  padding: 0.42rem 0.7rem;
+  border: 1px solid #d4dfec;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.bundy-filter-button:hover,
+.bundy-filter-button:focus-visible,
+.bundy-filter-button.is-active {
+  border-color: var(--au-blue);
+  background: var(--info-soft);
+  color: var(--au-navy);
+}
+
+.bundy-preview-table,
+.bundy-history-table,
+.bundy-events-table {
+  min-width: 78rem;
+}
+
+.bundy-preview-table td,
+.bundy-history-table td,
+.bundy-events-table td {
+  vertical-align: top;
+}
+
+.bundy-preview-table td > strong,
+.bundy-history-table td > strong,
+.bundy-events-table td > strong {
+  display: block;
+  color: #334155;
+}
+
+.bundy-cell-meta {
+  display: block;
+  margin-top: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.bundy-row-messages {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 15rem;
+  margin: 0.35rem 0 0;
+  padding-left: 1rem;
+}
+
+.bundy-row-messages.is-error {
+  color: var(--error);
+}
+
+.bundy-error {
+  border-color: #f1cdca;
+  background: #fff8f7;
+  color: #8f211b;
+}
+
+.bundy-error .ui-icon {
+  color: var(--error);
+}
+
+.bundy-history-count {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.bundy-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.bundy-pagination nav {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.bundy-undo-import-button {
+  white-space: nowrap;
+}
+
+.bundy-rollback-backdrop {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(15 23 42 / 0.44);
+}
+
+.bundy-rollback-dialog {
+  width: min(52rem, 100%);
+  max-height: min(42rem, calc(100vh - 2rem));
+  overflow: auto;
+  padding: 1.25rem;
+  border: 1px solid #d5e3f7;
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 1.5rem 4rem rgb(15 23 42 / 0.22);
+}
+
+.bundy-rollback-dialog-header {
+  margin-bottom: 1rem;
+}
+
+.bundy-rollback-dialog-header h2,
+.bundy-rollback-dialog-header p,
+.bundy-rollback-description {
+  margin: 0;
+}
+
+.bundy-rollback-dialog-header h2 {
+  color: var(--au-navy);
+  font-size: 1.15rem;
+}
+
+.bundy-rollback-dialog-header p,
+.bundy-rollback-loading,
+.bundy-rollback-description,
+.bundy-rollback-warning,
+.bundy-rollback-meta {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.bundy-rollback-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin: 1rem 0;
+}
+
+.bundy-rollback-metrics div {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.75rem;
+  border: 1px solid #e1eaf5;
+  border-radius: 0.7rem;
+  background: #f8fbff;
+}
+
+.bundy-rollback-metrics strong {
+  color: var(--au-navy);
+  font-size: 1.15rem;
+}
+
+.bundy-rollback-metrics span {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.bundy-rollback-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.bundy-rollback-meta strong {
+  color: #334155;
+}
+
+.bundy-rollback-blocked,
+.bundy-rollback-safe,
+.bundy-rollback-warning {
+  padding: 0.8rem 0.9rem;
+  border-radius: 0.7rem;
+}
+
+.bundy-rollback-blocked {
+  border: 1px solid #f1cdca;
+  background: #fff8f7;
+  color: #8f211b;
+  font-size: 0.76rem;
+}
+
+.bundy-rollback-blocked ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.bundy-rollback-safe {
+  border: 1px solid #cbe7d2;
+  background: #f5fff7;
+  color: #1b6b35;
+}
+
+.bundy-rollback-warning {
+  margin: 0.5rem 0;
+  border: 1px solid #f3dfaa;
+  background: #fffaf0;
+  color: #8a5700;
+}
+
+.bundy-rollback-actions {
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+@media (max-width: 1100px) {
+  .bundy-import-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .bundy-boundary-note,
+  .bundy-account-policy {
+    flex-direction: column;
+  }
+
+  .bundy-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bundy-rollback-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 440px) {
+  .bundy-import-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .bundy-rollback-metrics {
+    grid-template-columns: 1fr;
+  }
+}

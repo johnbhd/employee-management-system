@@ -16,6 +16,7 @@ export type ApplicationUser = {
     role: ApplicationRole;
     employeeId: string | null;
     status: ApplicationUserStatus;
+    mustChangePassword: boolean;
 };
 
 export type SessionUser = Omit<ApplicationUser, "status">;

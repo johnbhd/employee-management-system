@@ -1,9 +1,12 @@
+import { PermissionDeniedPage } from "@/components/auth/PermissionDeniedPage";
 import { AuditHistoryPage } from "@/components/hr/audit-history/AuditHistoryPage";
 import {
   getHrAuditHistory,
   type HrAuditHistoryData,
 } from "@/server/hr/audit-history.service";
 import { parseAuditHistoryQuery } from "@/server/hr/audit-history-query";
+import { hasPermission } from "@/server/auth/permission.service";
+import { requireRoleContext } from "@/server/auth/guards";
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -49,6 +52,11 @@ const emptyData: HrAuditHistoryData = {
 export const dynamic = "force-dynamic";
 
 export default async function Page({ searchParams }: PageProps) {
+  const context = await requireRoleContext("hr");
+  if (!(await hasPermission(context.user, "hr.audit_history.view"))) {
+    return <PermissionDeniedPage title="HR Audit History unavailable" backHref="/hr/dashboard" backLabel="Back to HR Dashboard" />;
+  }
+
   const resolvedSearchParams = searchParams ? await searchParams : {};
   const query = parseAuditHistoryQuery(toSearchParams(resolvedSearchParams));
   let data = emptyData;

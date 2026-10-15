@@ -15,7 +15,9 @@ import {
     getCurrentUserContext,
     requireCurrentUserContext,
 } from "./current-user-context";
-import { getOptionalSessionUser } from "./session";
+import { hasPermission } from "./permission.service";
+import { AuthSessionError, getOptionalSessionUser } from "./session";
+import type { PermissionKey } from "@/types/permissions";
 
 export class ApiAuthorizationError extends Error {
     readonly code: "UNAUTHENTICATED" | "FORBIDDEN";
@@ -80,7 +82,21 @@ export async function requireAnyRoleContext(
 }
 
 export async function requireApiSessionUser(): Promise<SessionUser> {
-    const user = await getOptionalSessionUser();
+    let user: SessionUser | null;
+
+    try {
+        user = await getOptionalSessionUser();
+    } catch (error) {
+        if (error instanceof AuthSessionError) {
+            throw new ApiAuthorizationError(
+                error.code === "INVALID_ID_TOKEN" ? "UNAUTHENTICATED" : "FORBIDDEN",
+                error.status,
+                error.message,
+            );
+        }
+
+        throw error;
+    }
 
     if (!user) {
         throw new ApiAuthorizationError(
@@ -147,4 +163,21 @@ export async function requireApiRoleContext(
     }
 
     return context;
+}
+
+export async function requireApiPermission(
+    permission: PermissionKey,
+    user?: SessionUser,
+): Promise<SessionUser> {
+    const sessionUser = user ?? await requireApiSessionUser();
+
+    if (!(await hasPermission(sessionUser, permission))) {
+        throw new ApiAuthorizationError(
+            "FORBIDDEN",
+            403,
+            "You do not have permission to perform this operation.",
+        );
+    }
+
+    return sessionUser;
 }

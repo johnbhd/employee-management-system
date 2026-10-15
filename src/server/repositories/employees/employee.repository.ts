@@ -1,12 +1,17 @@
 import "server-only";
 
-import type { DocumentData } from "firebase-admin/firestore";
-
-import { getFirebaseAdminDb } from "@/lib/firebase/server";
 import type {
     EmployeeEmploymentStatus,
     EmployeeReference,
 } from "@/types/employee";
+import {
+    getDisabledLegacyStore as getFirebaseAdminDb,
+    type DocumentData,
+} from "@/server/repositories/prisma/prisma-compat";
+import {
+    getPrismaEmployeeByEmployeeId,
+    listPrismaEmployees,
+} from "@/server/repositories/employees/prisma-employee.repository";
 
 const employeeCollection = "employees";
 
@@ -76,6 +81,18 @@ function parseEmployeeReference(
 export async function getEmployeeById(
     employeeId: string,
 ): Promise<EmployeeReference | null> {
+    const employee = await getPrismaEmployeeByEmployeeId(employeeId);
+    return employee
+        ? {
+            employeeId: employee.employeeId,
+            displayName: employee.displayName,
+            department: employee.department,
+            position: employee.position,
+            employmentStatus: employee.employmentStatus,
+        }
+        : null;
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshot = await getFirebaseAdminDb()
         .collection(employeeCollection)
         .doc(employeeId)
@@ -89,6 +106,16 @@ export async function getEmployeeById(
 }
 
 export async function listEmployees(): Promise<EmployeeReference[]> {
+    const employees = await listPrismaEmployees({ page: 1, pageSize: 100 });
+    return employees.rows.map((employee) => ({
+        employeeId: employee.employeeId,
+        displayName: employee.displayName,
+        department: employee.department,
+        position: employee.position,
+        employmentStatus: employee.employmentStatus,
+    }));
+
+    /* istanbul ignore next -- legacy Firestore implementation retained below for migration reference. */
     const snapshots = await getFirebaseAdminDb()
         .collection(employeeCollection)
         .get();

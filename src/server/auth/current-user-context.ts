@@ -10,7 +10,7 @@ import type {
 } from "@/types/auth";
 import type { EmployeeReference } from "@/types/employee";
 
-import { getEmployeeById } from "../repositories/employees/employee.repository";
+import { getApplicationEmployeeById } from "../repositories/application-employees/application-employee.repository";
 import { getOptionalSessionUser } from "./session";
 
 export class CurrentEmployeeUnavailableError extends Error {
@@ -46,7 +46,7 @@ export async function getEmployeeForApplicationUser(
         return null;
     }
 
-    return getEmployeeById(user.employeeId);
+    return getApplicationEmployeeById(user.employeeId);
 }
 
 export async function getCurrentEmployee(): Promise<EmployeeReference | null> {
