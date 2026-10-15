@@ -26,6 +26,11 @@ fields are optional as a group: `work_days`, `rest_day`, `shift`,
 `schedule_id` remains a supported optional field; when omitted, the importer
 derives a stable schedule ID from the Employee ID.
 
+`work_days` and `rest_day` accept single weekdays, explicit lists, and ordered
+weekday ranges such as `Monday-Friday` and `Saturday-Sunday`. Ranges are
+expanded into the canonical Monday-through-Sunday order before validation and
+persistence. Work/rest overlap remains invalid.
+
 `sia_application_role` is accepted as informational source data only. It never
 grants an application role or permission.
 

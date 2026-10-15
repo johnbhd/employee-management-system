@@ -209,6 +209,7 @@ export const hrpsHeaderAliases: Record<string, HrpsCanonicalField> = {
 
 const requiredSourceFields = ["employeeId", "department", "employmentStatus"] as const;
 const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const weekdayIndexes = new Map(weekdays.map((day, index) => [day, index]));
 const weekdayAliases: Record<string, string> = {
   mon: "Monday",
   monday: "Monday",
@@ -316,13 +317,41 @@ function parseDays(value: string, field: string, errors: string[]): string[] {
     errors.push(`${field} is required when a schedule is supplied.`);
     return [];
   }
-  const sourceValues = value.split(/[;,|]/).filter((item) => item.trim());
-  const values = sourceValues.map((item) => weekdayAliases[item.trim().toLowerCase()]).filter(Boolean);
-  if (!values.length || values.length !== sourceValues.length) {
+
+  const sourceValues = value.split(/[;,|]/).map((item) => item.trim());
+  if (!sourceValues.length || sourceValues.some((item) => !item)) {
     errors.push(`${field} contains an unsupported weekday.`);
     return [];
   }
-  return [...new Set(values)];
+
+  const values: string[] = [];
+  for (const sourceValue of sourceValues) {
+    const normalizedValue = sourceValue.toLowerCase();
+    const directMatch = weekdayAliases[normalizedValue];
+    if (directMatch) {
+      values.push(directMatch);
+      continue;
+    }
+
+    const range = normalizedValue.match(/^(.+?)\s*[-\u2013\u2014]\s*(.+)$/);
+    if (!range) {
+      errors.push(`${field} contains an unsupported weekday.`);
+      return [];
+    }
+
+    const rangeStart = weekdayAliases[range[1].trim()];
+    const rangeEnd = weekdayAliases[range[2].trim()];
+    const startIndex = rangeStart ? weekdayIndexes.get(rangeStart) : undefined;
+    const endIndex = rangeEnd ? weekdayIndexes.get(rangeEnd) : undefined;
+    if (startIndex === undefined || endIndex === undefined || startIndex > endIndex) {
+      errors.push(`${field} contains an invalid weekday range.`);
+      return [];
+    }
+    values.push(...weekdays.slice(startIndex, endIndex + 1));
+  }
+
+  const selectedDays = new Set(values);
+  return weekdays.filter((day) => selectedDays.has(day));
 }
 
 function parseSchedule(
@@ -366,6 +395,9 @@ function parseSchedule(
   }
   if (workStart && workEnd && workEnd <= workStart) {
     errors.push("work_end_time must be later than work_start_time.");
+  }
+  if (workDays.length && restDays.length && workDays.some((day) => restDays.includes(day))) {
+    errors.push("work_days and rest_day cannot contain the same weekday.");
   }
 
   const effectiveFrom = parseDate(cleanValue(valueAt(row, columns, "effectiveFrom"), 10), "schedule_effective_from", errors);

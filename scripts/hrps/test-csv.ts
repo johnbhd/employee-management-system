@@ -27,7 +27,9 @@ assert.throws(
 );
 
 const prototypeCsv = `employee_id,employee_number,first_name,middle_name,last_name,suffix,full_name,work_email,department,office_unit,position,employee_category,employment_type,employment_status,date_hired,assigned_office,work_location,work_days,shift,work_start_time,work_end_time,break_start_time,break_end_time,rest_day,schedule_effective_from,schedule_effective_to,sia_application_role,record_status,source_updated_at,birth_date,age,sex,civil_status,nationality,current_address,mobile_number,personal_email
-001,AU-001,Jane,Marie,Doe,Jr.,"Doe, Jane Marie",jane@example.test,Admissions,AU-JSC,Registrar,Non-Teaching,Regular,active,2024-01-15,Main Campus,Office 101,Monday;Tuesday;Wednesday;Thursday;Friday,Regular,08:00,17:00,12:00,13:00,Saturday;Sunday,2024-01-01,2024-12-31,IT Administrator,active,2026-10-15,1990-01-01,36,F,Single,Filipino,"Address",09170000000,personal@example.test`;
+001,AU-001,Jane,Marie,Doe,Jr.,"Doe, Jane Marie",jane@example.test,Admissions,AU-JSC,Registrar,Non-Teaching,Regular,active,2024-01-15,Main Campus,Office 101,Monday-Friday,Early Day,07:30,16:30,12:00,13:00,Saturday-Sunday,2024-01-01,,IT Administrator,active,2026-10-15,1990-01-01,36,F,Single,Filipino,"Address",09170000000,personal@example.test
+002,AU-002,John,,Smith,,"Smith, John",john@example.test,Registrar,AU-JSC,Clerk,Non-Teaching,Regular,active,2024-01-15,Main Campus,Office 102,Monday-Friday,Day,08:00,17:00,12:00,13:00,Saturday-Sunday,2024-01-01,,Employee,active,2026-10-15,1991-02-02,35,M,Single,Filipino,"Address",09170000001,personal2@example.test
+003,AU-003,Ana,,Reyes,,"Reyes, Ana",ana@example.test,Library,AU-JSC,Assistant,Non-Teaching,Regular,active,2024-01-15,Main Campus,Office 103,Monday-Friday,Day,08:00,17:00,12:00,13:00,Saturday-Sunday,2024-01-01,,Employee,active,2026-10-15,1992-03-03,34,F,Single,Filipino,"Address",09170000002,personal3@example.test`;
 const prototypeParsed = parseCsv(prototypeCsv);
 const prototypeHeaders = canonicalizeHrpsHeaders(prototypeParsed.headers);
 const prototypeRows = parseHrpsRows(prototypeHeaders, prototypeParsed.rows);
@@ -37,13 +39,18 @@ assert.ok(prototypeRow);
 assert.deepEqual(prototypeRow.errors, []);
 assert.equal(prototypeRow.employeeId, "001");
 assert.equal(prototypeRow.input?.displayName, "Doe, Jane Marie");
-assert.equal(prototypeRow.input?.schedule?.workStart, "08:00");
-assert.equal(prototypeRow.input?.schedule?.workEnd, "17:00");
+assert.equal(prototypeRow.input?.schedule?.workStart, "07:30");
+assert.equal(prototypeRow.input?.schedule?.workEnd, "16:30");
 assert.equal(prototypeRow.input?.schedule?.breakStart, "12:00");
 assert.equal(prototypeRow.input?.schedule?.breakEnd, "13:00");
 assert.equal(prototypeRow.input?.schedule?.effectiveFrom, "2024-01-01");
-assert.equal(prototypeRow.input?.schedule?.effectiveTo, "2024-12-31");
+assert.equal(prototypeRow.input?.schedule?.effectiveTo, null);
 assert.equal(prototypeRow.input?.schedule?.scheduleId, "hrps:001");
+assert.deepEqual(prototypeRow.input?.schedule?.workDays, ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]);
+assert.deepEqual(prototypeRow.input?.schedule?.restDays, ["Saturday", "Sunday"]);
+assert.deepEqual(prototypeRows.map((row) => row.employeeId), ["001", "002", "003"]);
+assert.deepEqual(prototypeRows.map((row) => row.errors), [[], [], []]);
+assert.deepEqual(prototypeRows.map((row) => row.input?.schedule?.shiftLabel), ["Early Day", "Day", "Day"]);
 assert.ok(prototypeRow.warnings.includes("sia_application_role is informational only and does not grant application access."));
 assert.equal("role" in (prototypeRow.input ?? {}), false);
 assert.deepEqual(prototypeHeaders.ignored, [
@@ -73,6 +80,27 @@ const missingNameParsed = parseCsv("employee_id,department,employment_status\n00
 const missingNameRows = parseHrpsRows(canonicalizeHrpsHeaders(missingNameParsed.headers), missingNameParsed.rows);
 assert.equal(missingNameRows[0].input?.displayName, "");
 assert.ok(missingNameRows[0].errors.includes("Name is required: provide full_name or both first_name and last_name."));
+
+const invalidRangeParsed = parseCsv(`employee_id,full_name,department,employment_status,work_days,rest_day,work_start_time,work_end_time
+005,Invalid Range,Registrar,active,Monday-Funday,Saturday-Sunday,08:00,17:00
+006,Malformed Range,Registrar,active,Monday-,Saturday-Sunday,08:00,17:00
+`);
+const invalidRangeRows = parseHrpsRows(canonicalizeHrpsHeaders(invalidRangeParsed.headers), invalidRangeParsed.rows);
+assert.ok(invalidRangeRows[0].errors.includes("work_days contains an invalid weekday range."));
+assert.ok(invalidRangeRows[1].errors.includes("work_days contains an unsupported weekday."));
+
+const overlapParsed = parseCsv(`employee_id,full_name,department,employment_status,work_days,rest_day,work_start_time,work_end_time
+007,Overlap,Registrar,active,Monday-Friday,Friday-Sunday,08:00,17:00
+`);
+const overlapRows = parseHrpsRows(canonicalizeHrpsHeaders(overlapParsed.headers), overlapParsed.rows);
+assert.ok(overlapRows[0].errors.includes("work_days and rest_day cannot contain the same weekday."));
+
+const explicitListParsed = parseCsv(`employee_id,full_name,department,employment_status,work_days,rest_day,work_start_time,work_end_time
+008,Explicit List,Registrar,active,"Friday, Monday, Wednesday",Sunday,08:00,17:00
+`);
+const explicitListRows = parseHrpsRows(canonicalizeHrpsHeaders(explicitListParsed.headers), explicitListParsed.rows);
+assert.deepEqual(explicitListRows[0].input?.schedule?.workDays, ["Monday", "Wednesday", "Friday"]);
+assert.deepEqual(explicitListRows[0].errors, []);
 
 assert.doesNotThrow(() => canonicalizeHrpsHeaders(["employee_id", "full_name", "department", "employment_status"]));
 assert.throws(
