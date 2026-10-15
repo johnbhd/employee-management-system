@@ -1,5 +1,6 @@
 import "server-only";
 
+import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma, PrismaClient } from "@prisma/client";
 
 type PrismaGlobal = typeof globalThis & {
@@ -56,11 +57,9 @@ export function getPrismaClient(): PrismaClient {
   }
 
   const client = new PrismaClient({
-    datasources: {
-      db: {
-        url: getDatabaseUrl(),
-      },
-    },
+    adapter: new PrismaPg({
+      connectionString: getDatabaseUrl(),
+    }),
   });
 
   prismaGlobal.__employeeManagementPrisma = client;
