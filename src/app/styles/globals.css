@@ -59,6 +59,7 @@
 @import "./pages/payroll/handoff.css";
 @import "./pages/payroll/results.css";
 @import "./pages/payroll/history.css";
+@import "./pages/payroll/typography.css";
 
 *,
 *::before,
