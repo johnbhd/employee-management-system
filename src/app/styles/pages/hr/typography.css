@@ -1,0 +1,324 @@
+/*
+ * HR / Attendance typography refinement
+ *
+ * This layer is scoped to the HR shell and loaded after the HR page styles.
+ * It keeps the existing layouts, colors, and interaction patterns while
+ * making operational copy easier to read and reducing unnecessary bold text.
+ */
+
+.hr-shell {
+  --hr-body-size: 0.875rem;
+  --hr-small-size: 0.8125rem;
+  --hr-meta-size: 0.75rem;
+  --hr-caption-size: 0.6875rem;
+  --hr-regular: 400;
+  --hr-medium: 500;
+  --hr-semibold: 600;
+  --hr-bold: 700;
+}
+
+.hr-shell .hr-brand strong {
+  font-size: 0.72rem;
+  font-weight: var(--hr-semibold);
+  letter-spacing: 0.1em;
+}
+
+.hr-shell .hr-brand small {
+  font-size: var(--hr-meta-size);
+}
+
+.hr-shell .hr-workspace-label {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-semibold);
+  letter-spacing: 0.1em;
+}
+
+.hr-shell .hr-role-pill {
+  font-size: var(--hr-caption-size);
+  letter-spacing: 0.06em;
+}
+
+.hr-shell .hr-nav-link {
+  font-size: var(--hr-body-size);
+  font-weight: var(--hr-medium);
+}
+
+.hr-shell .hr-nav-link.is-active {
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-nav-copy small {
+  font-size: var(--hr-caption-size);
+}
+
+.hr-shell .hr-sidebar-account strong {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-sidebar-account small {
+  font-size: var(--hr-meta-size);
+}
+
+.hr-shell .hr-sidebar-logout {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-medium);
+}
+
+.hr-shell .hr-navbar-title strong {
+  font-size: 0.9375rem;
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-navbar-title span {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-medium);
+}
+
+.hr-shell .hr-navbar-actions {
+  font-size: var(--hr-meta-size);
+}
+
+.hr-shell .hr-profile-copy strong,
+.hr-shell .hr-profile-menu strong {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-profile-copy small,
+.hr-shell .hr-profile-menu small {
+  font-size: var(--hr-meta-size);
+}
+
+.hr-shell .hr-profile-menu button,
+.hr-shell .hr-profile-menu a {
+  font-size: var(--hr-small-size);
+}
+
+.hr-shell .hr-dashboard-eyebrow,
+.hr-shell .hr-section-kicker {
+  font-size: 0.72rem;
+  font-weight: var(--hr-semibold);
+  letter-spacing: 0.1em;
+  line-height: 1.4;
+}
+
+.hr-shell .hr-dashboard-heading h1 {
+  font-weight: var(--hr-bold);
+}
+
+.hr-shell .hr-dashboard-description {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.hr-shell .hr-dashboard-date {
+  font-size: var(--hr-meta-size);
+  line-height: 1.45;
+}
+
+.hr-shell .hr-panel-header h2,
+.hr-shell [class*="-filter-heading"] h2,
+.hr-shell [class*="-result-toolbar"] h2,
+.hr-shell [class*="-selector-heading"] h2,
+.hr-shell [class*="-drawer-header"] h2 {
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-panel-description,
+.hr-shell [class*="-dialog-description"] {
+  font-size: var(--hr-small-size);
+  line-height: 1.55;
+}
+
+.hr-shell [class*="-summary-copy"] > span,
+.hr-shell [class*="-summary-copy"] > p {
+  font-size: var(--hr-meta-size);
+  line-height: 1.4;
+}
+
+.hr-shell [class*="-summary-copy"] > p {
+  font-weight: var(--hr-medium);
+}
+
+.hr-shell [class*="-summary-copy"] > span {
+  font-weight: var(--hr-regular);
+}
+
+.hr-shell [class*="-summary-copy"] strong {
+  font-weight: var(--hr-bold);
+}
+
+.hr-shell .hr-summary-copy strong {
+  font-size: 1.45rem;
+}
+
+.hr-shell [class*="-field"] > span:first-child {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-semibold);
+  letter-spacing: 0.03em;
+}
+
+.hr-shell [class*="-field"] input,
+.hr-shell [class*="-field"] select,
+.hr-shell [class*="-field"] textarea {
+  font-size: var(--hr-body-size);
+  line-height: 1.4;
+}
+
+.hr-shell [class*="-filter-count"],
+.hr-shell [class*="-result-count"],
+.hr-shell [class*="-result-meta"] {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-medium);
+  line-height: 1.45;
+}
+
+.hr-shell .button-primary,
+.hr-shell .button-secondary,
+.hr-shell .button-link {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .status-badge,
+.hr-shell .inline-status {
+  font-size: var(--hr-caption-size);
+  font-weight: var(--hr-semibold);
+  line-height: 1.2;
+}
+
+.hr-shell [class$="-table"] {
+  font-size: var(--hr-small-size);
+}
+
+.hr-shell [class$="-table"] th {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-semibold);
+  letter-spacing: 0.05em;
+  line-height: 1.35;
+}
+
+.hr-shell [class$="-table"] td {
+  font-size: var(--hr-body-size);
+  line-height: 1.5;
+}
+
+.hr-shell [class$="-table"] td strong {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell [class*="-employee-name"],
+.hr-shell [class*="-request-id"],
+.hr-shell [class*="-value"] {
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell [class*="-employee-meta"],
+.hr-shell [class*="-request-meta"],
+.hr-shell [class*="-cell-meta"],
+.hr-shell [class*="-drawer-meta"],
+.hr-shell [class*="-missing-value"] {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-regular);
+  line-height: 1.45;
+}
+
+.hr-shell [class*="-empty-state"],
+.hr-shell [class*="-empty-row"] {
+  font-size: var(--hr-small-size);
+  line-height: 1.55;
+}
+
+.hr-shell [class*="-empty-state"] p,
+.hr-shell [class*="-empty-state"] strong {
+  font-size: var(--hr-small-size);
+}
+
+.hr-shell [class*="-empty-state"] strong {
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-empty-state,
+.hr-shell .hr-dashboard-data-error {
+  font-size: var(--hr-small-size);
+  line-height: 1.55;
+}
+
+.hr-shell .hr-action-copy strong,
+.hr-shell .hr-issue-heading strong {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-action-copy span,
+.hr-shell .hr-issue-heading span,
+.hr-shell .hr-issue-copy small {
+  font-size: var(--hr-meta-size);
+  line-height: 1.45;
+}
+
+.hr-shell .hr-issue-copy h3 {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell .hr-issue-copy p {
+  font-size: var(--hr-small-size);
+  line-height: 1.55;
+}
+
+.hr-shell [class*="-detail-section"] h3 {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell [class*="-detail-row"] dt {
+  font-size: var(--hr-meta-size);
+  font-weight: var(--hr-medium);
+}
+
+.hr-shell [class*="-detail-row"] dd {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+  line-height: 1.5;
+}
+
+.hr-shell [class*="-pagination"] span,
+.hr-shell [class*="-filter-footer"] p {
+  font-size: var(--hr-meta-size);
+  line-height: 1.45;
+}
+
+.hr-shell [class*="-source-label"] strong,
+.hr-shell [class*="-related-link"] strong {
+  font-size: var(--hr-small-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell [class*="-source-label"] span,
+.hr-shell [class*="-source-note"],
+.hr-shell [class*="-related-link"] small {
+  font-size: var(--hr-meta-size);
+  line-height: 1.45;
+}
+
+.hr-shell [class*="-drawer-employee"] {
+  font-size: var(--hr-body-size);
+  font-weight: var(--hr-semibold);
+}
+
+.hr-shell [class*="-drawer-employee"] + [class*="-drawer-meta"] {
+  font-size: var(--hr-meta-size);
+}
+
+@media (max-width: 700px) {
+  .hr-shell .hr-dashboard-description {
+    font-size: var(--hr-small-size);
+  }
+
+  .hr-shell .hr-dashboard-date {
+    font-size: var(--hr-meta-size);
+  }
+}
