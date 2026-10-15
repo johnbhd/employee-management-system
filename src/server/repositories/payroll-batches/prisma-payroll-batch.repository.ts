@@ -473,7 +473,7 @@ export async function createPrismaPayrollBatch(input: {
     notes?: string | null;
     blockedCount?: number;
     items?: Array<PayrollBatchItemSnapshot & { employeeInternalId: string }>;
-}): Promise<PrismaPayrollBatchView> {
+}, transaction?: Prisma.TransactionClient): Promise<PrismaPayrollBatchView> {
     const actorSnapshot = {
         uid: input.actor.uid,
         username: input.actor.username,
@@ -481,9 +481,9 @@ export async function createPrismaPayrollBatch(input: {
         role: input.actor.role,
     };
     const batchReference = `PAY-${input.period.start.replaceAll("-", "")}-${randomUUID().slice(0, 8).toUpperCase()}`;
-    const createdByUserId = await findUserIdByFirebaseUid(input.actor.uid);
-    const prisma = getRepositoryPrisma();
-    const row = await prisma.$transaction(async (transaction) => {
+    const create = async (transaction: Prisma.TransactionClient) => {
+        const createdByUserId = await findUserIdByFirebaseUid(input.actor.uid, transaction);
+
         const created = await transaction.payrollBatch.create({
             data: {
                 batchReference,
@@ -524,7 +524,11 @@ export async function createPrismaPayrollBatch(input: {
         });
 
         return created;
-    });
+    };
+
+    const row = transaction
+        ? await create(transaction)
+        : await getRepositoryPrisma().$transaction(create);
 
     return mapBatch(row);
 }
@@ -532,9 +536,8 @@ export async function createPrismaPayrollBatch(input: {
 export async function addPrismaPayrollBatchItem(input: {
     batchId: string;
     snapshot: PayrollBatchItemSnapshot;
-}): Promise<PrismaPayrollBatchView> {
-    const prisma = getRepositoryPrisma();
-    const row = await prisma.$transaction(async (transaction) => {
+}, transaction?: Prisma.TransactionClient): Promise<PrismaPayrollBatchView> {
+    const add = async (transaction: Prisma.TransactionClient) => {
         const batch = await transaction.payrollBatch.findUnique({
             where: batchWhere(input.batchId),
             include: batchInclude,
@@ -640,7 +643,11 @@ export async function addPrismaPayrollBatchItem(input: {
             data: { recordCount: { increment: 1 } },
             include: batchInclude,
         });
-    });
+    };
+
+    const row = transaction
+        ? await add(transaction)
+        : await getRepositoryPrisma().$transaction(add);
 
     return mapBatch(row);
 }

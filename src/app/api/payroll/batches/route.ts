@@ -6,7 +6,6 @@ import {
 } from "@/lib/firebase/server";
 import { requireApiPermission, requireApiRoleContext, ApiAuthorizationError } from "@/server/auth/guards";
 import {
-  addPayrollBatchItem,
   createPayrollBatch,
   PayrollBatchConflictError,
   PayrollBatchDataError,
@@ -190,24 +189,13 @@ export async function POST(request: Request) {
       // Draft batches contain only selected Ready records. Keep the persisted
       // count valid until a batch item exists and readiness is recalculated.
       blockedCount: 0,
+      items: selectedSources.map(({ source, snapshot }) => ({
+        ...snapshot,
+        employeeInternalId: source.employeeInternalId,
+      })),
     });
 
-    if (employeePeriodIds.length === 0) {
-      const response: ApiSuccessResponse<PayrollBatchRecord> = { success: true, data: batch };
-      return NextResponse.json(response, { status: 201 });
-    }
-
-    let updatedBatch = batch;
-
-    for (const { snapshot } of selectedSources) {
-      updatedBatch = await addPayrollBatchItem({
-        batchId: updatedBatch.id,
-        snapshot,
-        actor: context.user,
-      });
-    }
-
-    const response: ApiSuccessResponse<PayrollBatchRecord> = { success: true, data: updatedBatch };
+    const response: ApiSuccessResponse<PayrollBatchRecord> = { success: true, data: batch };
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     logPostError(error, diagnosticInput);
