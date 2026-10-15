@@ -319,6 +319,12 @@ export async function recordPrismaQrAttendance(input: {
             return { action: "time_in" as const, record: mapAttendance(created) };
         }
 
+        if (existing.hrVerificationStatus === "verified") {
+            throw new Error(
+                "FINAL_VERIFIED_ATTENDANCE: final-verified attendance cannot be changed.",
+            );
+        }
+
         if (!existing.timeIn || !existing.timeInSource || existing.timeInActorSnapshot === null) {
             const updated = await transaction.attendanceRecord.update({
                 where: { id: existing.id },

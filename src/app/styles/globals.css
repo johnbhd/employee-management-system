@@ -30,6 +30,7 @@
 @import "./pages/employee/help-support.css";
 @import "./pages/hr/dashboard.css";
 @import "./pages/hr/attendance-monitoring.css";
+@import "./pages/hr/attendance-review.css";
 @import "./pages/hr/correction-requests.css";
 @import "./pages/hr/employee-schedules.css";
 @import "./pages/hr/employee-directory.css";

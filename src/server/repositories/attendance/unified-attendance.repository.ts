@@ -53,6 +53,9 @@ const unifiedAttendanceSelect = {
     lastReprocessedAt: true,
     requiresReview: true,
     reviewReasonCode: true,
+    hrVerificationStatus: true,
+    hrVerifiedAt: true,
+    hrVerifiedBySnapshot: true,
     scheduleSnapshot: true,
     sourceMetadata: true,
     createdAt: true,
@@ -161,6 +164,13 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
         sourceMetadata: row.sourceMetadata,
         requiresReview: row.requiresReview,
         reviewReasonCode: row.reviewReasonCode,
+        hrVerificationStatus: row.hrVerificationStatus,
+        hrVerifiedAt: toIso(row.hrVerifiedAt),
+        hrVerifiedBy: row.hrVerifiedBySnapshot && typeof row.hrVerifiedBySnapshot === "object"
+            && !Array.isArray(row.hrVerifiedBySnapshot)
+            && typeof row.hrVerifiedBySnapshot.displayName === "string"
+            ? row.hrVerifiedBySnapshot.displayName
+            : null,
         processedAt: toIso(row.processedAt),
         processingVersion: row.processingVersion,
         lastReprocessedAt: toIso(row.lastReprocessedAt),
@@ -453,6 +463,20 @@ export async function upsertUnifiedAttendance(
             ? input.scheduleSnapshot
             : scheduleSnapshotFromRecord(schedule);
         const actorSnapshot = input.actorSnapshot ?? defaultActorSnapshot();
+        const existing = await transaction.attendanceRecord.findUnique({
+            where: {
+                employeeId_attendanceDate: {
+                    employeeId: employee.id,
+                    attendanceDate: toUtcDate(input.attendanceDate),
+                },
+            },
+            select: { id: true, hrVerificationStatus: true },
+        });
+        if (existing?.hrVerificationStatus === "verified") {
+            throw new Error(
+                "FINAL_VERIFIED_ATTENDANCE: final-verified attendance cannot be reprocessed.",
+            );
+        }
         const status: AttendanceStatus = input.timeIn && input.timeOut
             ? "completed"
             : "present";

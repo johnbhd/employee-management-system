@@ -86,6 +86,9 @@ export type UnifiedAttendanceView = {
     sourceMetadata: Prisma.JsonValue | null;
     requiresReview: boolean;
     reviewReasonCode: string | null;
+    hrVerificationStatus: "pending" | "verified";
+    hrVerifiedAt: string | null;
+    hrVerifiedBy: string | null;
     processedAt: string | null;
     processingVersion: string | null;
     lastReprocessedAt: string | null;

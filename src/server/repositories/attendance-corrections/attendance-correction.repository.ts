@@ -696,6 +696,7 @@ export async function applyAttendanceCorrectionDecision(
     } catch (error) {
         if (error instanceof Error && /could not be found/i.test(error.message)) throw new AttendanceCorrectionNotFoundError();
         if (error instanceof Error && /already/i.test(error.message)) throw new AttendanceCorrectionConflictError(error.message);
+        if (error instanceof Error && /Final-verified/i.test(error.message)) throw new AttendanceCorrectionConflictError(error.message);
         throw error;
     }
 

@@ -255,6 +255,7 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
                         timeInSource: true,
                         timeOutSource: true,
                         status: true,
+                        hrVerificationStatus: true,
                     },
                 },
             },
@@ -264,6 +265,9 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
         }
         if (request.status !== "pending") {
             throw new Error(`This correction request is already ${request.status}.`);
+        }
+        if (request.attendance.hrVerificationStatus === "verified") {
+            throw new Error("Final-verified attendance cannot be changed.");
         }
 
         const reviewerUserId = typeof input.reviewer.uid === "string"
@@ -280,7 +284,7 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
         const nextTimeOut = input.decision === "approve" && typeof requested.timeOut === "string"
             ? new Date(requested.timeOut)
             : attendance.timeOut;
-        const nextStatus = nextTimeOut ? "completed" : "present";
+        const nextStatus = nextTimeIn && nextTimeOut ? "completed" : "present";
         const resulting = input.decision === "approve"
             ? attendanceSnapshot({ ...attendance, timeIn: nextTimeIn, timeOut: nextTimeOut, status: nextStatus })
             : null;
@@ -295,18 +299,6 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
                     : []),
             ]
             : [];
-
-        if (input.decision === "approve") {
-            await transaction.attendanceRecord.update({
-                where: { id: attendance.id },
-                data: {
-                    timeIn: nextTimeIn,
-                    timeOut: nextTimeOut,
-                    status: nextStatus,
-                    correctionMetadata: toJson({ requestId: request.id, correctedAt: new Date().toISOString(), correctedBy: input.reviewer }),
-                },
-            });
-        }
 
         return transaction.attendanceCorrection.update({
             where: { id: request.id },

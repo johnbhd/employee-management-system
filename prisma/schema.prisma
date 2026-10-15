@@ -705,6 +705,7 @@ model AttendanceCorrection {
   @@index([status, submittedAt])
   @@index([employeeId, attendanceDate])
   @@index([attendanceRecordId])
+  @@index([attendanceRecordId, status])
   @@map("attendance_corrections")
 }
 

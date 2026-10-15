@@ -51,6 +51,7 @@ export class UnifiedAttendanceProcessingError extends Error {
     readonly code:
         | "INVALID_ATTENDANCE_DATE"
         | "EMPLOYEE_NOT_FOUND"
+        | "FINAL_VERIFIED_ATTENDANCE"
         | "ATTENDANCE_PROCESSING_FAILED";
 
     constructor(
@@ -280,6 +281,12 @@ export async function processUnifiedAttendanceForEmployeeDate(input: {
         : existing
             ? "UPDATED"
             : "CREATED";
+    if (existing?.hrVerificationStatus === "verified") {
+        throw new UnifiedAttendanceProcessingError(
+            "FINAL_VERIFIED_ATTENDANCE",
+            "Final-verified attendance cannot be reprocessed.",
+        );
+    }
     const persisted = await upsertUnifiedAttendance({
         employeeId: input.employeeId,
         attendanceDate: input.attendanceDate,
