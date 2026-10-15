@@ -39,6 +39,7 @@
 @import "./pages/admin/dashboard.css";
 @import "./pages/admin/integration-monitoring.css";
 @import "./pages/admin/integration-detail.css";
+@import "./pages/admin/unified-attendance.css";
 @import "./pages/admin/hrps-integration.css";
 @import "./pages/admin/bundy-integration.css";
 @import "./pages/admin/user-accounts-hrps-flow.css";

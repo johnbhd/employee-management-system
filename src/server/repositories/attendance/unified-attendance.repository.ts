@@ -5,7 +5,6 @@ import {
     type AttendanceSource,
     type AttendanceStatus,
     type UnifiedAttendanceBusinessStatus,
-    type UnifiedAttendanceTechnicalState,
 } from "@prisma/client";
 import {
     getRepositoryPrisma,
@@ -20,6 +19,7 @@ import type {
     UnifiedAttendanceBusinessStatus as UnifiedAttendanceBusinessStatusValue,
     UnifiedAttendanceListFilters,
     UnifiedAttendanceTechnicalState as UnifiedAttendanceTechnicalStateValue,
+    UnifiedAttendanceView,
 } from "@/types/unified-attendance";
 
 const scheduleSelect = {
@@ -54,6 +54,7 @@ const unifiedAttendanceSelect = {
     requiresReview: true,
     reviewReasonCode: true,
     scheduleSnapshot: true,
+    sourceMetadata: true,
     createdAt: true,
     updatedAt: true,
     employee: {
@@ -86,57 +87,6 @@ const unifiedAttendanceSelect = {
 type UnifiedAttendanceRow = Prisma.AttendanceRecordGetPayload<{
     select: typeof unifiedAttendanceSelect;
 }>;
-
-export type UnifiedAttendanceEvidence = {
-    id: string;
-    rawEventId: string;
-    sourceLogId: string;
-    importId: string;
-    event: "IN" | "OUT";
-    occurredAt: string;
-};
-
-export type UnifiedAttendanceView = {
-    id: string;
-    employee: {
-        internalId: string;
-        employeeId: string;
-        displayName: string;
-        department: string;
-    };
-    attendanceDate: string;
-    firstInAt: string | null;
-    lastOutAt: string | null;
-    firstInSource: AttendanceSource | null;
-    lastOutSource: AttendanceSource | null;
-    firstInSourceReference: string | null;
-    lastOutSourceReference: string | null;
-    technicalState: UnifiedAttendanceTechnicalState;
-    businessStatus: UnifiedAttendanceBusinessStatus;
-    schedule: {
-        internalId: string;
-        scheduleId: string;
-        workStart: string | null;
-        workEnd: string | null;
-        breakStart: string | null;
-        breakEnd: string | null;
-        shiftLabel: string | null;
-        workDays: string[];
-        restDays: string[];
-        workLocation: string | null;
-        effectiveFrom: string | null;
-        effectiveTo: string | null;
-    } | null;
-    scheduleSnapshot: Prisma.JsonValue | null;
-    requiresReview: boolean;
-    reviewReasonCode: string | null;
-    processedAt: string | null;
-    processingVersion: string | null;
-    lastReprocessedAt: string | null;
-    bundyEvidence: UnifiedAttendanceEvidence[];
-    createdAt: string;
-    updatedAt: string;
-};
 
 export type UnifiedAttendanceUpsertInput = {
     employeeId: string;
@@ -208,6 +158,7 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
         businessStatus: row.businessStatus,
         schedule: mapSchedule(row.schedule),
         scheduleSnapshot: row.scheduleSnapshot,
+        sourceMetadata: row.sourceMetadata,
         requiresReview: row.requiresReview,
         reviewReasonCode: row.reviewReasonCode,
         processedAt: toIso(row.processedAt),
@@ -264,6 +215,22 @@ export async function findAttendanceProcessingSource(
 }
 
 function whereFor(filters: UnifiedAttendanceListFilters): Prisma.AttendanceRecordWhereInput {
+    const employeeFilter = filters.employeeId || filters.search || filters.department
+        ? {
+            ...(filters.employeeId ? { employeeId: filters.employeeId } : {}),
+            ...(filters.department ? { department: { contains: filters.department, mode: "insensitive" as const } } : {}),
+            ...(filters.search
+                ? {
+                    OR: [
+                        { employeeId: { contains: filters.search, mode: "insensitive" as const } },
+                        { displayName: { contains: filters.search, mode: "insensitive" as const } },
+                        { department: { contains: filters.search, mode: "insensitive" as const } },
+                    ],
+                }
+                : {}),
+        }
+        : undefined;
+
     return {
         ...(filters.attendanceDate
             ? { attendanceDate: toUtcDate(filters.attendanceDate) }
@@ -276,7 +243,7 @@ function whereFor(filters: UnifiedAttendanceListFilters): Prisma.AttendanceRecor
                 },
             }
             : {}),
-        ...(filters.employeeId ? { employee: { employeeId: filters.employeeId } } : {}),
+        ...(employeeFilter ? { employee: employeeFilter } : {}),
         ...(filters.technicalState ? { technicalState: filters.technicalState } : {}),
         ...(filters.businessStatus ? { businessStatus: filters.businessStatus } : {}),
         ...(filters.requiresReview === undefined || filters.requiresReview === null
