@@ -73,17 +73,12 @@
   font-weight: 600;
 }
 
-.system-status {
+.admin-navbar-actions {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  border: 1px solid #d8f1e2;
-  border-radius: 0.75rem;
-  background: #effcf3;
-  color: var(--success);
-  font-size: 0.65rem;
-  padding: 0.65rem 0.75rem;
-  white-space: nowrap;
+  flex: 0 0 auto;
+  gap: 0.35rem;
+  margin-left: auto;
 }
 
 .notification-button {
@@ -242,17 +237,9 @@
   .navbar-title strong {
     font-size: 0.78rem;
   }
-
-  .compact-status {
-    padding: 0.55rem;
-  }
 }
 
 @media (max-width: 480px) {
-  .compact-status strong {
-    display: none;
-  }
-
   .profile-trigger {
     padding-inline: 0.15rem;
   }

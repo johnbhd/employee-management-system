@@ -47,38 +47,36 @@ export function AdminNavbar({ user, employee, onOpenSidebar }: AdminNavbarProps)
             <strong>IT Administrator Dashboard</strong>
             <span>Integration control center</span>
           </div>
-          <div className="system-status compact-status">
-            <span className="status-dot status-success" />
-            <strong>Configured</strong>
-          </div>
-          <button type="button" className="icon-button notification-button" onClick={() => notify("No new notifications.")} aria-label="View notifications">
-            <Icon name="bell" />
-            <span>3</span>
-          </button>
-          <Link
-            href="/scanner"
-            className="icon-button scanner-button"
-            aria-label="Open QR scanner"
-          >
-            <Icon name="qr" />
-          </Link>
-          <div className="profile-wrap">
-            <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-label="Open administrator profile menu" aria-expanded={profileOpen}>
-              <span className="account-avatar"><Icon name="user" /></span>
-              <span className="profile-copy"><strong>{displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
-              <Icon name="chevron" />
+          <div className="admin-navbar-actions" aria-label="Administrator header actions">
+            <button type="button" className="icon-button notification-button" onClick={() => notify("No new notifications.")} aria-label="View notifications">
+              <Icon name="bell" />
+              <span>3</span>
             </button>
-            {profileOpen ? (
-              <div className="profile-menu">
-                <strong>{displayName} account</strong>
-                <small>AU-JSC integration access</small>
-                <button type="button" onClick={() => notify("Account settings are managed from System & Settings.")}><Icon name="settings" />Account settings</button>
-                <Link href="/" onClick={handleLogout}>
-                  <Icon name="logout" />
-                  Logout
-                </Link>
-              </div>
-            ) : null}
+            <Link
+              href="/scanner"
+              className="icon-button scanner-button"
+              aria-label="Open QR scanner"
+            >
+              <Icon name="qr" />
+            </Link>
+            <div className="profile-wrap">
+              <button type="button" className="profile-trigger" onClick={() => setProfileOpen((open) => !open)} aria-label="Open administrator profile menu" aria-expanded={profileOpen}>
+                <span className="account-avatar"><Icon name="user" /></span>
+                <span className="profile-copy"><strong>{displayName}</strong><small>{getRoleLabel(user.role)}</small></span>
+                <Icon name="chevron" />
+              </button>
+              {profileOpen ? (
+                <div className="profile-menu">
+                  <strong>{displayName} account</strong>
+                  <small>AU-JSC integration access</small>
+                  <button type="button" onClick={() => notify("Account settings are managed from System & Settings.")}><Icon name="settings" />Account settings</button>
+                  <Link href="/" onClick={handleLogout}>
+                    <Icon name="logout" />
+                    Logout
+                  </Link>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
