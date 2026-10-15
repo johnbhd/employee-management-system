@@ -80,6 +80,28 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.25rem 1rem;
+  scrollbar-color: rgba(219, 234, 254, 0.32) transparent;
+  scrollbar-width: thin;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar {
+  width: 0.4rem;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 0.1rem solid transparent;
+  border-radius: 999px;
+  background: rgba(219, 234, 254, 0.32);
+  background-clip: padding-box;
+}
+
+.admin-sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(219, 234, 254, 0.52);
+  background-clip: padding-box;
 }
 
 .workspace-label {
