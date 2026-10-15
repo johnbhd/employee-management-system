@@ -274,7 +274,7 @@ export function AdminIntegrationDetailPage({
         </div>
       ) : null}
 
-      <div className="metric-grid admin-integration-detail-metrics">
+      <div className="metric-grid admin-five-card-metrics admin-integration-detail-metrics">
         {getSummaryMetrics(data, statuses).map((metric) => (
           <SummaryCard key={metric.label} {...metric} />
         ))}

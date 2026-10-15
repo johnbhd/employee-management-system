@@ -207,7 +207,7 @@ export function UserAccountsHrpsPage({ initialData, loadError: initialLoadError,
     <div className={`admin-page user-accounts-hrps-page${isLoading ? " is-loading" : ""}`} aria-busy={isLoading}>
       <AdminPageHeader eyebrow="Application access" title="User Accounts" description="Manage Firebase Authentication identities and application profiles while keeping official HRPS employee records read-only." actions={<div className="user-accounts-actions">{canManage ? <button type="button" className="button-primary" onClick={() => { setModal("create"); setFeedback(""); }}><Icon name="users" /> Create account</button> : null}<button type="button" className="button-secondary" onClick={() => void loadData()} disabled={isLoading}><Icon name="refresh" /> {isLoading ? "Refreshing…" : "Refresh"}</button></div>} />
 
-      <div className="metric-grid user-accounts-hrps-metrics">{metrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
+      <div className="metric-grid admin-five-card-metrics user-accounts-hrps-metrics">{metrics.map((metric) => <SummaryCard key={metric.label} {...metric} />)}</div>
 
       <SectionCard title="Application accounts" eyebrow="Firebase Authentication + application profiles" actions={<span className="user-accounts-source-note">No passwords or tokens are returned</span>}>
         <div className="panel-body user-accounts-panel">

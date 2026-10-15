@@ -116,6 +116,11 @@
   gap: 1rem;
 }
 
+.metric-grid.admin-five-card-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  width: 100%;
+}
+
 .two-column {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(20rem, 0.85fr);
@@ -406,6 +411,12 @@
   }
 }
 
+@media (max-width: 1200px) {
+  .metric-grid.admin-five-card-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1050px) {
   .two-column,
   .two-column-wide {
@@ -441,6 +452,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .metric-grid.admin-five-card-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .panel-header {
     flex-direction: column;
   }
@@ -452,6 +467,10 @@
 
 @media (max-width: 480px) {
   .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-grid.admin-five-card-metrics {
     grid-template-columns: 1fr;
   }
 }

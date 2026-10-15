@@ -8,7 +8,7 @@ export function AdminIntegrationLoading({ title }: { title: string }) {
         title={title}
         description="Loading current integration status…"
       />
-      <div className="metric-grid admin-integration-detail-metrics">
+      <div className="metric-grid admin-five-card-metrics admin-integration-detail-metrics">
         {Array.from({ length: 5 }, (_, index) => (
           <div className="metric-card admin-integration-detail-skeleton" key={index} />
         ))}
