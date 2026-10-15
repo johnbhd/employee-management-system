@@ -109,16 +109,16 @@ function mapCorrection(row: CorrectionRow): PrismaAttendanceCorrectionView {
 function attendanceSnapshot(row: {
     id: string;
     attendanceDate: Date;
-    timeIn: Date;
+    timeIn: Date | null;
     timeOut: Date | null;
-    timeInSource: string;
+    timeInSource: string | null;
     timeOutSource: string | null;
     status: string;
 }) {
     return {
         attendanceRecordId: row.id,
         attendanceDate: toDateKey(row.attendanceDate),
-        timeIn: row.timeIn.toISOString(),
+        timeIn: row.timeIn?.toISOString() ?? null,
         timeOut: toIso(row.timeOut),
         timeInSource: row.timeInSource,
         timeOutSource: row.timeOutSource,
@@ -286,8 +286,9 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
             : null;
         const changedFields = input.decision === "approve"
             ? [
-                ...(nextTimeIn.getTime() !== attendance.timeIn.getTime()
-                    ? [{ field: "timeIn", previousValue: attendance.timeIn.toISOString(), newValue: nextTimeIn.toISOString() }]
+                ...(nextTimeIn?.getTime() !== attendance.timeIn?.getTime()
+                    && nextTimeIn
+                    ? [{ field: "timeIn", previousValue: attendance.timeIn?.toISOString() ?? null, newValue: nextTimeIn.toISOString() }]
                     : []),
                 ...(nextTimeOut?.getTime() !== attendance.timeOut?.getTime()
                     ? [{ field: "timeOut", previousValue: attendance.timeOut?.toISOString() ?? null, newValue: nextTimeOut?.toISOString() ?? attendance.timeOut?.toISOString() }]

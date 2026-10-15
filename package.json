@@ -21,6 +21,7 @@
     "test:bundy:classification": "tsx scripts/bundy/test-classification.ts",
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",
     "qr:attendance:verify": "tsx scripts/attendance/verify-qr-attendance.ts",
+    "test:unified-attendance": "node --experimental-strip-types scripts/attendance/test-unified-attendance.mjs",
     "firebase:seed": "tsx scripts/firebase/seed.ts"
   },
   "resolutions": {

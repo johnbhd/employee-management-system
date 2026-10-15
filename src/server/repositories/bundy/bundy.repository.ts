@@ -35,6 +35,15 @@ export type BundyExistingEvent = {
   deviceId: string;
 };
 
+export type BundyAttendanceEvidence = {
+  id: string;
+  sourceLogId: string;
+  importId: string;
+  event: BundyEventType;
+  occurredAt: Date;
+  sourceTimestamp: string;
+};
+
 const employeeSelect = {
   id: true,
   employeeId: true,
@@ -182,6 +191,33 @@ export async function findBundyEventsBySourceLogIds(sourceLogIds: string[]) {
     rows.forEach((row) => result.set(row.sourceLogId, row));
   }
   return result;
+}
+
+export async function listBundyAttendanceEvidence(
+  employeeId: string,
+  attendanceDate: string,
+): Promise<BundyAttendanceEvidence[]> {
+  const start = new Date(`${attendanceDate}T00:00:00+08:00`);
+  const end = new Date(start.getTime());
+  end.setUTCDate(end.getUTCDate() + 1);
+
+  return getRepositoryPrisma().bundyRawEvent.findMany({
+    where: {
+      employee: { employeeId },
+      occurredAt: { gte: start, lt: end },
+      matchStatus: "MATCHED",
+      validationStatus: "VALID",
+    },
+    select: {
+      id: true,
+      sourceLogId: true,
+      importId: true,
+      event: true,
+      occurredAt: true,
+      sourceTimestamp: true,
+    },
+    orderBy: [{ occurredAt: "asc" }, { id: "asc" }],
+  });
 }
 
 export async function countBundyEmployees() {

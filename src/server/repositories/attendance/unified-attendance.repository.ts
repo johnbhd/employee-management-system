@@ -105,9 +105,9 @@ export type UnifiedAttendanceView = {
         department: string;
     };
     attendanceDate: string;
-    firstInAt: string;
+    firstInAt: string | null;
     lastOutAt: string | null;
-    firstInSource: AttendanceSource;
+    firstInSource: AttendanceSource | null;
     lastOutSource: AttendanceSource | null;
     firstInSourceReference: string | null;
     lastOutSourceReference: string | null;
@@ -143,9 +143,9 @@ export type UnifiedAttendanceUpsertInput = {
     attendanceDate: string;
     employeeScheduleId?: string | null;
     scheduleSnapshot?: Prisma.InputJsonValue | null;
-    timeIn: Date;
+    timeIn: Date | null;
     timeOut?: Date | null;
-    timeInSource: AttendanceSource;
+    timeInSource: AttendanceSource | null;
     timeOutSource?: AttendanceSource | null;
     timeInSourceReference?: string | null;
     timeOutSourceReference?: string | null;
@@ -198,7 +198,7 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
             department: row.employee.department,
         },
         attendanceDate: toDateKey(row.attendanceDate),
-        firstInAt: row.timeIn.toISOString(),
+        firstInAt: toIso(row.timeIn),
         lastOutAt: toIso(row.timeOut),
         firstInSource: row.timeInSource,
         lastOutSource: row.timeOutSource,
@@ -226,6 +226,41 @@ function mapAttendance(row: UnifiedAttendanceRow): UnifiedAttendanceView {
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString(),
     };
+}
+
+export type UnifiedAttendanceProcessingSource = {
+    id: string;
+    timeIn: Date | null;
+    timeOut: Date | null;
+    timeInSource: AttendanceSource | null;
+    timeOutSource: AttendanceSource | null;
+    timeInSourceReference: string | null;
+    timeOutSourceReference: string | null;
+    sourceMetadata: Prisma.JsonValue | null;
+};
+
+export async function findAttendanceProcessingSource(
+    employeeId: string,
+    attendanceDate: string,
+): Promise<UnifiedAttendanceProcessingSource | null> {
+    const row = await getRepositoryPrisma().attendanceRecord.findFirst({
+        where: {
+            employee: { employeeId },
+            attendanceDate: toUtcDate(attendanceDate),
+        },
+        select: {
+            id: true,
+            timeIn: true,
+            timeOut: true,
+            timeInSource: true,
+            timeOutSource: true,
+            timeInSourceReference: true,
+            timeOutSourceReference: true,
+            sourceMetadata: true,
+        },
+    });
+
+    return row;
 }
 
 function whereFor(filters: UnifiedAttendanceListFilters): Prisma.AttendanceRecordWhereInput {
@@ -451,7 +486,9 @@ export async function upsertUnifiedAttendance(
             ? input.scheduleSnapshot
             : scheduleSnapshotFromRecord(schedule);
         const actorSnapshot = input.actorSnapshot ?? defaultActorSnapshot();
-        const status: AttendanceStatus = input.timeOut ? "completed" : "present";
+        const status: AttendanceStatus = input.timeIn && input.timeOut
+            ? "completed"
+            : "present";
         const businessStatus: UnifiedAttendanceBusinessStatus = input.businessStatus ?? "UNCLASSIFIED";
         const requiresReview = input.requiresReview ?? input.technicalState === "NEEDS_REVIEW";
         const processedAt = input.processedAt === undefined ? now : input.processedAt;
@@ -466,7 +503,7 @@ export async function upsertUnifiedAttendance(
             timeInSourceReference: input.timeInSourceReference ?? null,
             timeOutSourceReference: input.timeOutSourceReference ?? null,
             status,
-            timeInActorSnapshot: actorSnapshot,
+            timeInActorSnapshot: input.timeIn ? actorSnapshot : Prisma.DbNull,
             timeOutActorSnapshot: input.timeOut ? actorSnapshot : Prisma.DbNull,
             employeeScheduleId: input.employeeScheduleId ?? null,
             scheduleSnapshot: nullableJson(scheduleSnapshot),
@@ -490,6 +527,7 @@ export async function upsertUnifiedAttendance(
             timeInSourceReference: input.timeInSourceReference ?? null,
             timeOutSourceReference: input.timeOutSourceReference ?? null,
             status,
+            timeInActorSnapshot: input.timeIn ? actorSnapshot : Prisma.DbNull,
             timeOutActorSnapshot: input.timeOut ? actorSnapshot : Prisma.DbNull,
             technicalState: input.technicalState,
             processedAt,

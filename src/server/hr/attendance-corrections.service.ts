@@ -96,7 +96,7 @@ function toAttendanceDto(
         attendanceDate: string;
         timeIn: { toDate(): Date } | null;
         timeOut: { toDate(): Date } | null;
-        timeInSource: "QR" | "BUNDY";
+        timeInSource: "QR" | "BUNDY" | null;
         timeOutSource: "QR" | "BUNDY" | null;
         status: "present" | "completed";
     } | null,

@@ -512,16 +512,16 @@ model AttendanceRecord {
   id                      String                          @id @default(uuid()) @db.Uuid
   employeeId              String                          @map("employee_id") @db.Uuid
   attendanceDate          DateTime                        @map("attendance_date") @db.Date
-  timeIn                  DateTime                        @map("time_in") @db.Timestamptz(3)
+  timeIn                  DateTime?                       @map("time_in") @db.Timestamptz(3)
   timeOut                 DateTime?                       @map("time_out") @db.Timestamptz(3)
-  timeInSource            AttendanceSource                @map("time_in_source")
+  timeInSource            AttendanceSource?               @map("time_in_source")
   timeOutSource           AttendanceSource?               @map("time_out_source")
   timeInSourceReference   String?                         @map("time_in_source_reference") @db.VarChar(160)
   timeOutSourceReference  String?                         @map("time_out_source_reference") @db.VarChar(160)
   status                  AttendanceStatus
   timeInOperatorUserId    String?                         @map("time_in_operator_user_id") @db.Uuid
   timeOutOperatorUserId   String?                         @map("time_out_operator_user_id") @db.Uuid
-  timeInActorSnapshot     Json                            @map("time_in_actor_snapshot")
+  timeInActorSnapshot     Json?                           @map("time_in_actor_snapshot")
   timeOutActorSnapshot    Json?                           @map("time_out_actor_snapshot")
   hrVerificationStatus    HrVerificationStatus            @default(pending) @map("hr_verification_status")
   hrVerifiedAt            DateTime?                       @map("hr_verified_at") @db.Timestamptz(3)
