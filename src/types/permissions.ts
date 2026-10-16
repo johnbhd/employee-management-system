@@ -45,6 +45,7 @@ export const permissionKeys = [
   "accounting.transfer.view",
   "accounting.transfer.prepare",
   "accounting.transfer.submit",
+  "accounting.transfer.acknowledge",
   "accounting.history.view",
   "admin.dashboard.view",
   "admin.integration_monitoring.view",

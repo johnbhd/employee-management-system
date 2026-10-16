@@ -26,9 +26,20 @@ export default async function Page({
 
   const { transferId } = await params;
   const transfer = await getAccountingTransferDetail(transferId);
-  if (!transfer || transfer.transferStatus !== "prepared") {
+  if (!transfer) {
     notFound();
   }
 
-  return <PreparedAccountingTransferPage transfer={transfer} />;
+  const [canSubmit, canAcknowledge] = await Promise.all([
+    hasPermission(context.user, "accounting.transfer.submit"),
+    hasPermission(context.user, "accounting.transfer.acknowledge"),
+  ]);
+
+  return (
+    <PreparedAccountingTransferPage
+      transfer={transfer}
+      canSubmit={canSubmit}
+      canAcknowledge={canAcknowledge}
+    />
+  );
 }

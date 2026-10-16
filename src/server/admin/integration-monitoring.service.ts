@@ -68,14 +68,15 @@ function hasPayrollResultPending(result: PayrollResultRecord) {
 
 function hasAccountingFailure(transfer: AccountingTransferRecord) {
   return transfer.transferStatus === "failed"
-    || transfer.acknowledgementStatus === "rejected";
+    || transfer.acknowledgementStatus === "rejected"
+    || transfer.acknowledgementStatus === "not_received";
 }
 
 function hasAccountingPending(transfer: AccountingTransferRecord) {
   return transfer.transferStatus === "preparing"
     || transfer.transferStatus === "submitting"
     || (transfer.transferStatus === "submitted"
-      && transfer.acknowledgementStatus !== "accepted");
+      && transfer.acknowledgementStatus === "pending");
 }
 
 function hasAccountingSuccess(transfer: AccountingTransferRecord) {
@@ -198,7 +199,7 @@ function buildAccountingIssues(
       detectedAt: transfer.failedAt ?? transfer.updatedAt,
       lastAttemptAt: transfer.updatedAt,
       retrySupported: false,
-      detailHref: "/admin/qr-attendance",
+      detailHref: "/admin/accounting-integration",
     }));
 }
 
@@ -262,8 +263,16 @@ function buildAccountingActivities(
       summary: successful
         ? "Accounting acknowledgement received"
         : failed
-          ? "Accounting transfer failed"
-          : "Accounting transfer submitted",
+          ? transfer.acknowledgementStatus === "not_received"
+            ? "Accounting acknowledgement not received"
+            : transfer.acknowledgementStatus === "rejected"
+              ? "Accounting transfer rejected"
+              : "Accounting transfer failed"
+          : transfer.transferStatus === "prepared"
+            ? "Accounting transfer prepared"
+            : transfer.transferStatus === "submitting"
+              ? "Accounting transfer submitting"
+              : "Accounting transfer submitted",
       reference: transfer.externalAccountingReference ?? transfer.transferId,
       status: successful ? "success" : failed ? "failed" : "pending",
       occurredAt: successful

@@ -107,6 +107,8 @@ export type AccountingTransferRecord = {
   failureCode: string | null;
   failureSummary: string | null;
   attemptCount: number;
+  lastAttemptAt: string | null;
+  lastError: string | null;
   createdAt: string;
   updatedAt: string;
   timeline: AccountingTransferTimelineEvent[];

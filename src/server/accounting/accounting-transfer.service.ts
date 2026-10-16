@@ -2,29 +2,21 @@ import "server-only";
 
 import { formatCampusDate, formatCampusTime } from "@/lib/campus-time";
 import {
+  AccountingAdapterTechnicalError,
   getAccountingIntegrationAdapter,
   accountingIntegrationProviderNote,
-  type AccountingSubmissionPayload,
+  type AccountingHandoffPayload,
 } from "@/server/accounting/accounting-integration.adapter";
-import {
-  getAccountingReadiness,
-} from "@/server/accounting/accounting-readiness.service";
-import {
-  getPayrollHandoffByTransferId,
-} from "@/server/repositories/payroll-handoffs/payroll-handoff.repository";
-import {
-  getPayrollResultById,
-  listPayrollResults,
-  PayrollResultDataError,
-} from "@/server/repositories/payroll-results/payroll-result.repository";
+import { listPayrollResults, PayrollResultDataError } from "@/server/repositories/payroll-results/payroll-result.repository";
 import {
   accountingAdapterProvider,
   AccountingTransferConflictError,
   AccountingTransferDataError,
   AccountingTransferNotFoundError,
-  claimAccountingTransfer,
+  claimAccountingTransferForSubmission,
   getAccountingTransferById,
   listAccountingTransfers,
+  updateAccountingAcknowledgement,
   updateAccountingTransferResult,
   writeAccountingTransferAuditEvent,
 } from "@/server/repositories/accounting-transfers/accounting-transfer.repository";
@@ -71,6 +63,11 @@ function isInProgress(status: AccountingTransferStatus) {
 
 function buildTransferView(transfer: AccountingTransferRecord): AccountingTransferView {
   const updatedAt = new Date(transfer.updatedAt);
+  const hasAcknowledgementIssue = transfer.acknowledgementStatus === "rejected"
+    || transfer.acknowledgementStatus === "not_received";
+  const transferTone = transfer.transferStatus === "failed" || hasAcknowledgementIssue
+    ? "danger" as const
+    : getAccountingTransferTone(transfer.transferStatus);
   return {
     transferId: transfer.transferId,
     payrollResultId: transfer.payrollResultId,
@@ -82,15 +79,17 @@ function buildTransferView(transfer: AccountingTransferRecord): AccountingTransf
     records: String(transfer.employeeCount),
     amount: "Not returned by Payroll",
     result: getAccountingTransferLabel(transfer.transferStatus),
-    resultTone: getAccountingTransferTone(transfer.transferStatus),
+    resultTone: transferTone,
     status: getAccountingTransferLabel(transfer.transferStatus),
-    tone: getAccountingTransferTone(transfer.transferStatus),
+    tone: transferTone,
     acknowledgement: transfer.transferStatus === "prepared"
       ? "Not submitted - local snapshot"
       : transfer.acknowledgementStatus === "accepted"
         ? "Received by Accounting adapter"
         : transfer.acknowledgementStatus === "rejected"
           ? "Rejected by Accounting adapter"
+          : transfer.acknowledgementStatus === "not_received"
+            ? "Not received"
           : transfer.acknowledgementStatus === "pending"
             ? "Awaiting acknowledgement"
             : "No acknowledgement received",
@@ -125,17 +124,17 @@ function buildConnectionStatuses(transfers: readonly AccountingTransferRecord[])
     },
     {
       system: "Accounting Integration Service",
-      status: "Operational - Local preparation",
+      status: "Operational - Simulated handoff",
       tone: "success" as const,
       lastSync: latestSync,
-      details: `${transfers.length} persisted preparation record${transfers.length === 1 ? "" : "s"}.`,
+      details: `${transfers.length} persisted transfer record${transfers.length === 1 ? "" : "s"}; handoff state is retained locally.`,
     },
     {
       system: "Existing Accounting System",
       status: "Not connected · No live API",
       tone: "warning" as const,
       lastSync: "No live sync",
-      details: "No external Accounting API is called during local preparation.",
+      details: "The configured adapter is simulated; no live Accounting API is connected.",
     },
   ];
 }
@@ -152,16 +151,15 @@ export function getAccountingIntegrationStatusSummary(
   return {
     readyForTransfer: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer
-        || (!isAccountingTransferSuccessful(transfer)
-          && !isInProgress(transfer.transferStatus)
-          && transfer.transferStatus !== "prepared");
+      return !transfer;
     }).length,
     preparedTransfers: transfers.filter((transfer) => transfer.transferStatus === "prepared").length,
     inProgress: transfers.filter((transfer) => isInProgress(transfer.transferStatus)).length,
     successfulTransfers: transfers.filter(isAccountingTransferSuccessful).length,
     awaitingAcknowledgement: transfers.filter(isAccountingTransferAwaitingAcknowledgement).length,
-    failedTransfers: transfers.filter((transfer) => transfer.transferStatus === "failed").length,
+    failedTransfers: transfers.filter((transfer) => transfer.transferStatus === "failed"
+      || transfer.acknowledgementStatus === "rejected"
+      || transfer.acknowledgementStatus === "not_received").length,
   };
 }
 
@@ -191,14 +189,13 @@ export async function getAccountingIntegrationStatusData(
   return {
     readyRecords: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer
-        || (!isAccountingTransferSuccessful(transfer)
-          && !isInProgress(transfer.transferStatus)
-          && transfer.transferStatus !== "prepared");
+      return !transfer;
     }),
     transfers: pageTransfers,
     attention: pageTransfers
-      .filter((transfer) => transfer.transferStatus === "failed")
+      .filter((transfer) => transfer.transferStatus === "failed"
+        || transfer.acknowledgementStatus === "rejected"
+        || transfer.acknowledgementStatus === "not_received")
       .map(buildTransferView),
     history: pageTransfers.map(buildTransferView),
     connectionStatuses: buildConnectionStatuses(transfers),
@@ -219,76 +216,80 @@ export async function getAccountingTransferDetail(transferId: string) {
   return transfer;
 }
 
-export async function submitAccountingTransfer(input: {
-  payrollResultId: string;
-  actor: Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
-}) {
-  const result = await getPayrollResultById(input.payrollResultId);
-  if (!result) {
-    throw new AccountingTransferValidationError("The selected Payroll Result could not be found.");
-  }
-
-  const readiness = getAccountingReadiness(result);
-  if (readiness.status !== "ready") {
-    throw new AccountingTransferValidationError(
-      `This Payroll Result is blocked from Accounting transfer: ${readiness.reasons.join(" ")}`,
+function buildHandoffPayload(transfer: AccountingTransferRecord): AccountingHandoffPayload {
+  if (!transfer.snapshot || !transfer.preparedAt) {
+    throw new AccountingTransferConflictError(
+      "This Accounting transfer has no immutable prepared snapshot to submit.",
     );
   }
 
-  const handoff = await getPayrollHandoffByTransferId(result.transferId);
-  if (!handoff) {
-    throw new AccountingTransferValidationError("The Payroll handoff record for this result could not be found.");
-  }
-
-  const claimed = await claimAccountingTransfer({
-    payrollResultId: result.resultId,
-    payrollBatchId: result.batchId,
-    payrollHandoffId: handoff.transferId,
-    period: result.period,
-    externalPayrollReference: result.externalPayrollReference,
-    employeeCount: result.employeeCount,
-    payrollResultStatus: result.status,
-    actor: input.actor,
-  });
-
-  await writeAccountingTransferAuditEvent({
-    transfer: claimed,
-    action: claimed.attemptCount === 1 ? "Transfer Created" : "Submitted",
-    occurredAt: claimed.submittedAt,
-  });
-
-  const payload: AccountingSubmissionPayload = {
-    transferId: claimed.transferId,
-    payrollResultId: result.resultId,
-    payrollBatchId: result.batchId,
-    payrollHandoffId: handoff.transferId,
-    period: result.period,
-    externalPayrollReference: result.externalPayrollReference,
-    employeeCount: result.employeeCount,
-    payrollResultStatus: result.status,
+  return {
+    transfer: {
+      transferReference: transfer.transferId,
+      preparedAt: transfer.preparedAt,
+      idempotencyKey: transfer.transferId,
+    },
+    payroll: {
+      batchReference: transfer.snapshot.payroll.payrollBatchId,
+      payrollResultReference: transfer.snapshot.payroll.payrollResultId,
+      externalPayrollReference: transfer.snapshot.payroll.externalPayrollReference,
+      periodStart: transfer.snapshot.payroll.periodStart,
+      periodEnd: transfer.snapshot.payroll.periodEnd,
+      resultStatus: transfer.snapshot.payroll.resultStatus,
+    },
+    summary: transfer.snapshot.summary,
+    source: transfer.snapshot.source,
+    items: transfer.snapshot.items,
   };
+}
+
+function toAcknowledgementEvent(
+  transfer: AccountingTransferRecord,
+) {
+  if (transfer.acknowledgementStatus === "accepted") return "Acknowledged" as const;
+  if (transfer.acknowledgementStatus === "rejected") return "Rejected" as const;
+  return null;
+}
+
+async function runAccountingTransferSubmission(input: {
+  transferId: string;
+  actor: Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
+  mode: "initial" | "retry";
+}) {
+  const claimed = await claimAccountingTransferForSubmission({
+    transferId: input.transferId,
+    actor: input.actor,
+    mode: input.mode,
+  });
+  const payload = buildHandoffPayload(claimed);
 
   let response;
   try {
-    response = await getAccountingIntegrationAdapter().submitPayrollResult(payload);
-  } catch {
+    response = await getAccountingIntegrationAdapter().submitTransfer(payload);
+  } catch (error) {
+    const failureCode = error instanceof AccountingAdapterTechnicalError
+      ? error.code
+      : "ACCOUNTING_ADAPTER_UNAVAILABLE";
+
     const failed = await updateAccountingTransferResult({
       transferId: claimed.transferId,
       transferStatus: "failed",
       acknowledgementStatus: "not_received",
       provider: accountingAdapterProvider,
-      failureCode: "ADAPTER_UNAVAILABLE",
+      failureCode,
       failureSummary: "The Accounting adapter did not return a response. Technical follow-up is required.",
     });
-    await writeAccountingTransferAuditEvent({ transfer: failed, action: "Failed", occurredAt: failed.failedAt ?? failed.updatedAt });
+    await writeAccountingTransferAuditEvent({
+      transfer: failed,
+      action: "Failed",
+      occurredAt: failed.failedAt ?? failed.updatedAt,
+    });
     throw new AccountingTransferUnavailableError();
   }
 
   const updated = await updateAccountingTransferResult({
     transferId: claimed.transferId,
-    transferStatus: response.accepted && response.acknowledgementStatus !== "rejected"
-      ? "submitted"
-      : "failed",
+    transferStatus: "submitted",
     acknowledgementStatus: response.acknowledgementStatus,
     provider: response.provider,
     externalAccountingReference: response.externalAccountingReference,
@@ -296,16 +297,85 @@ export async function submitAccountingTransfer(input: {
     failureSummary: response.failureSummary ?? null,
   });
 
-  if (updated.transferStatus === "failed") {
-    await writeAccountingTransferAuditEvent({ transfer: updated, action: "Failed", occurredAt: updated.failedAt ?? updated.updatedAt });
-    if (updated.acknowledgementStatus === "rejected") {
-      await writeAccountingTransferAuditEvent({ transfer: updated, action: "Rejected", occurredAt: updated.acknowledgedAt ?? updated.updatedAt });
-    }
-  } else {
-    await writeAccountingTransferAuditEvent({ transfer: updated, action: "Submitted", occurredAt: updated.submittedAt });
-    if (updated.acknowledgementStatus === "accepted") {
-      await writeAccountingTransferAuditEvent({ transfer: updated, action: "Acknowledged", occurredAt: updated.acknowledgedAt ?? updated.updatedAt });
-    }
+  await writeAccountingTransferAuditEvent({
+    transfer: updated,
+    action: "Submitted",
+    occurredAt: updated.submittedAt,
+  });
+
+  const acknowledgementEvent = toAcknowledgementEvent(updated);
+  if (acknowledgementEvent) {
+    await writeAccountingTransferAuditEvent({
+      transfer: updated,
+      action: acknowledgementEvent,
+      occurredAt: updated.acknowledgedAt ?? updated.updatedAt,
+    });
+  }
+
+  return updated;
+}
+
+export async function submitAccountingTransfer(input: {
+  transferId: string;
+  actor: Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
+}) {
+  return runAccountingTransferSubmission({
+    ...input,
+    mode: "initial",
+  });
+}
+
+export async function retryAccountingTransfer(input: {
+  transferId: string;
+  actor: Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
+}) {
+  return runAccountingTransferSubmission({
+    ...input,
+    mode: "retry",
+  });
+}
+
+export async function checkAccountingAcknowledgement(input: {
+  transferId: string;
+}) {
+  const transfer = await getAccountingTransferById(input.transferId);
+  if (!transfer) {
+    throw new AccountingTransferNotFoundError();
+  }
+
+  if (transfer.transferStatus !== "submitted") {
+    throw new AccountingTransferConflictError(
+      "Only a submitted Accounting transfer can be checked for acknowledgement.",
+    );
+  }
+
+  let response;
+  try {
+    response = await getAccountingIntegrationAdapter().checkAcknowledgement({
+      transferReference: transfer.transferId,
+      externalAccountingReference: transfer.externalAccountingReference,
+      idempotencyKey: transfer.transferId,
+    });
+  } catch {
+    throw new AccountingTransferUnavailableError();
+  }
+
+  const updated = await updateAccountingAcknowledgement({
+    transferId: transfer.transferId,
+    acknowledgementStatus: response.acknowledgementStatus,
+    provider: response.provider,
+    externalAccountingReference: response.externalAccountingReference,
+    failureCode: response.failureCode ?? null,
+    failureSummary: response.failureSummary ?? null,
+  });
+
+  const acknowledgementEvent = toAcknowledgementEvent(updated);
+  if (acknowledgementEvent) {
+    await writeAccountingTransferAuditEvent({
+      transfer: updated,
+      action: acknowledgementEvent,
+      occurredAt: updated.acknowledgedAt ?? updated.updatedAt,
+    });
   }
 
   return updated;

@@ -65,6 +65,7 @@ function getAcknowledgementTone(status: AccountingAcknowledgementStatus) {
 function getLifecycleTone(status: AccountingTransactionHistoryItem["lifecycleStatus"]) {
   if (status === "Completed") return "success" as const;
   if (status === "Failed" || status === "Rejected") return "danger" as const;
+  if (status === "Not Received") return "warning" as const;
   if (status === "Awaiting Acknowledgement") return "warning" as const;
   return "info" as const;
 }

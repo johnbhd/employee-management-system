@@ -8,10 +8,12 @@ import { ApiAuthorizationError, requireApiPermission, requireApiRoleContext } fr
 import {
   AccountingTransferConflictError,
   AccountingTransferDataError,
+  AccountingTransferNotFoundError,
   AccountingTransferUnavailableError,
   AccountingTransferValidationError,
   getAccountingIntegrationStatusData,
   getDefaultAccountingIntegrationStatusQuery,
+  submitAccountingTransfer,
 } from "@/server/accounting/accounting-transfer.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
 import {
@@ -30,6 +32,7 @@ function mapError(error: unknown) {
   if (error instanceof ApiAuthorizationError) return errorResponse(error.code, error.message, error.status);
   if (error instanceof AccountingTransferValidationError) return errorResponse(error.code, error.message, 400);
   if (error instanceof AccountingTransferConflictError) return errorResponse(error.code, error.message, 409);
+  if (error instanceof AccountingTransferNotFoundError) return errorResponse(error.code, error.message, 404);
   if (error instanceof AccountingTransferUnavailableError) return errorResponse(error.code, error.message, 503);
   if (error instanceof AccountingTransferDataError) return errorResponse(error.code, "Accounting transfer data is invalid.", 503);
   if (error instanceof FirebaseAdminConfigurationError || error instanceof FirebaseAdminInitializationError) {
@@ -76,15 +79,37 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(_request: Request) {
+export async function POST(request: Request) {
   try {
     const context = await requireApiRoleContext("accounting");
     await requireApiPermission("accounting.transfer.submit", context.user);
-    return errorResponse(
-      "ACCOUNTING_SUBMISSION_NOT_AVAILABLE",
-      "External Accounting submission belongs to ACCOUNTING-017B and is not available during local preparation.",
-      409,
-    );
+    let body: unknown;
+    try {
+      body = await request.json();
+    } catch {
+      return errorResponse("ACCOUNTING_TRANSFER_REQUEST_INVALID", "A transfer reference is required.", 400);
+    }
+
+    const transferId = typeof body === "object"
+      && body !== null
+      && "transferId" in body
+      && typeof body.transferId === "string"
+      ? body.transferId.trim()
+      : "";
+
+    if (!transferId) {
+      return errorResponse("ACCOUNTING_TRANSFER_REQUEST_INVALID", "A transfer reference is required.", 400);
+    }
+
+    const transfer = await submitAccountingTransfer({
+      transferId,
+      actor: context.user,
+    });
+
+    return NextResponse.json<ApiSuccessResponse<typeof transfer>>({
+      success: true,
+      data: transfer,
+    });
   } catch (error) {
     return mapError(error);
   }

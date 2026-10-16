@@ -11,6 +11,7 @@ export const accountingHistoryLifecycleStatuses = [
   "Prepared",
   "Submitted",
   "Awaiting Acknowledgement",
+  "Not Received",
   "Completed",
   "Failed",
   "Rejected",

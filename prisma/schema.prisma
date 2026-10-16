@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "client"
 }
 
@@ -959,6 +959,8 @@ model AccountingTransfer {
   failureCode                 String?                         @map("failure_code") @db.VarChar(120)
   failureSummary              String?                         @map("failure_summary") @db.Text
   attemptCount                Int                             @default(0) @map("attempt_count")
+  lastAttemptAt               DateTime?                       @map("last_attempt_at") @db.Timestamptz(3)
+  lastError                   String?                         @map("last_error") @db.Text
   legacyFirestoreId           String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
   createdAt                   DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                   DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)

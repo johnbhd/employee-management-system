@@ -138,10 +138,7 @@ function getSummary(
     ).length,
     readyForTransfer: records.filter(
       (record) => record.accountingReadiness.status === "ready"
-        && record.accountingTransfer.status !== "submitted"
-        && record.accountingTransfer.status !== "prepared"
-        && record.accountingTransfer.status !== "preparing"
-        && record.accountingTransfer.status !== "submitting",
+        && record.accountingTransfer.status === "not_transferred",
     ).length,
     transferred: records.filter(
       (record) => record.accountingTransfer.acknowledgementStatus === "accepted",

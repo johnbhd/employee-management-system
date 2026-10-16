@@ -22,6 +22,8 @@ export const auditEventRegistry: readonly AuditEventDefinition[] = [
   { eventType: "accounting.transfer.preparation_blocked", action: "Accounting Transfer Preparation Blocked", module: "Accounting Integration", defaultOutcome: "Blocked" },
   { eventType: "accounting.transfer.prepared", action: "Accounting Transfer Prepared", module: "Accounting Integration", defaultOutcome: "Successful" },
   { eventType: "accounting.transfer.submitted", action: "Accounting Transfer Submitted", module: "Accounting Integration", defaultOutcome: "Successful" },
+  { eventType: "accounting.transfer.submitting", action: "Accounting Transfer Submission Started", module: "Accounting Integration", defaultOutcome: "Successful" },
+  { eventType: "accounting.transfer.retry", action: "Accounting Transfer Retry Started", module: "Accounting Integration", defaultOutcome: "Successful" },
   { eventType: "accounting.transfer.acknowledged", action: "Accounting Acknowledged", module: "Accounting Integration", defaultOutcome: "Successful" },
   { eventType: "accounting.transfer.rejected", action: "Accounting Transfer Rejected", module: "Accounting Integration", defaultOutcome: "Blocked" },
   { eventType: "accounting.transfer.failed", action: "Accounting Transfer Failed", module: "Accounting Integration", defaultOutcome: "Failed" },

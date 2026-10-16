@@ -48,7 +48,7 @@ function getPayrollDetail(
   }
 
   if (accountingStatus === "Prepared") {
-    return "A local, read-only Accounting snapshot was prepared. External submission is reserved for ACCOUNTING-017B.";
+    return "A local, read-only Accounting snapshot is prepared and ready for controlled simulated handoff.";
   }
 
   if (accountingStatus === "Awaiting Acknowledgement") {
@@ -142,7 +142,7 @@ function buildIntegrationFlow(
       detail: transferFailed
         ? "Transfer requires follow-up"
         : transferPrepared
-          ? "Local snapshot prepared; external submission is not active"
+          ? "Local snapshot prepared; ready for controlled handoff"
           : transferInProgress
             ? "Transfer in progress"
             : hasTransfer
@@ -165,7 +165,7 @@ function buildIntegrationFlow(
         : acknowledgementComplete
           ? "Accepted by Accounting adapter"
           : transferPrepared
-            ? "Submission is reserved for ACCOUNTING-017B"
+            ? "Submit the prepared snapshot from the Accounting transfer workspace"
             : latest.accountingStatus === "Awaiting Acknowledgement"
               ? "Awaiting response"
               : "No acknowledgement yet",
@@ -210,6 +210,15 @@ function getActivityPresentation(item: AccountingTransactionHistoryItem) {
         type: "pending" as const,
         title: "Accounting transfer submitted",
         description: `${item.transferId} is awaiting acknowledgement from the Accounting adapter.`,
+        tone: "warning" as const,
+        icon: "clock" as const,
+        occurredAt: item.submittedAt,
+      };
+    case "Not Received":
+      return {
+        type: "failed" as const,
+        title: "Accounting acknowledgement not received",
+        description: item.issueSummary ?? `${item.transferId} has not been acknowledged by the Accounting adapter.`,
         tone: "warning" as const,
         icon: "clock" as const,
         occurredAt: item.submittedAt,

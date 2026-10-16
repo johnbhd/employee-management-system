@@ -15,9 +15,10 @@ export function determineAccountingLifecycleStatus(
   }
 
   if (transfer.transferStatus === "submitted") {
-    return transfer.acknowledgementStatus === "accepted"
-      ? "Completed"
-      : "Awaiting Acknowledgement";
+    if (transfer.acknowledgementStatus === "accepted") return "Completed";
+    if (transfer.acknowledgementStatus === "rejected") return "Rejected";
+    if (transfer.acknowledgementStatus === "not_received") return "Not Received";
+    return "Awaiting Acknowledgement";
   }
 
   if (transfer.transferStatus === "prepared") {

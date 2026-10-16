@@ -67,7 +67,8 @@ function mapTimeline(row: TransferRow): AccountingTransferTimelineEvent[] {
             label: "Accounting Transfer Prepared",
             occurredAt: row.preparedAt.toISOString(),
         });
-    } else {
+    }
+    if (!row.preparedAt || row.transferStatus !== "prepared") {
         events.push({
             id: "submitted",
             label: "Submitted to Accounting adapter",
@@ -110,6 +111,8 @@ function mapTransfer(row: TransferRow): AccountingTransferRecord {
         failureCode: row.failureCode,
         failureSummary: row.failureSummary,
         attemptCount: row.attemptCount,
+        lastAttemptAt: toIso(row.lastAttemptAt),
+        lastError: row.lastError,
         createdAt: row.createdAt.toISOString(),
         updatedAt: row.updatedAt.toISOString(),
         timeline: mapTimeline(row),
@@ -381,6 +384,131 @@ export async function preparePrismaAccountingTransfer(input: {
     return mapTransfer(row);
 }
 
+export async function claimPrismaAccountingTransferForSubmission(input: {
+    transferId: string;
+    actor: TransferActorInput;
+    mode: "initial" | "retry";
+}): Promise<AccountingTransferRecord> {
+    const prisma = getRepositoryPrisma();
+    const submittedByUserId = await findUserIdByFirebaseUid(input.actor.uid);
+    const row = await prisma.$transaction(async (transaction) => {
+        const candidate = await transaction.accountingTransfer.findUnique({
+            where: { transferReference: input.transferId },
+            include: transferInclude,
+        });
+
+        if (!candidate) {
+            throw new PrismaAccountingTransferNotFoundError();
+        }
+
+        if (!candidate.snapshot || !candidate.preparedAt) {
+            throw new PrismaAccountingTransferConflictError(
+                "This Accounting transfer has no immutable prepared snapshot.",
+            );
+        }
+
+        const isRetry = input.mode === "retry";
+        if (isRetry && candidate.transferStatus !== "failed") {
+            throw new PrismaAccountingTransferConflictError(
+                "Only a technically failed Accounting transfer can be retried.",
+            );
+        }
+        if (!isRetry && candidate.transferStatus !== "prepared") {
+            throw new PrismaAccountingTransferConflictError(
+                "Only a prepared Accounting transfer can be submitted.",
+            );
+        }
+
+        if (isRetry && candidate.acknowledgementStatus !== "not_received") {
+            throw new PrismaAccountingTransferConflictError(
+                "Only a technically failed transfer with no acknowledgement can be retried.",
+            );
+        }
+
+        if (candidate.attemptCount >= 3) {
+            throw new PrismaAccountingTransferConflictError(
+                "This Accounting transfer has reached its retry limit.",
+            );
+        }
+
+        const now = new Date();
+        const nextAttemptCount = candidate.attemptCount + 1;
+        const claimed = await transaction.accountingTransfer.updateMany({
+            where: {
+                transferReference: input.transferId,
+                transferStatus: isRetry ? "failed" : "prepared",
+                ...(isRetry ? { acknowledgementStatus: "not_received" } : {}),
+                attemptCount: { lt: 3 },
+            },
+            data: {
+                submittedByUserId,
+                submittedBySnapshot: toJson(input.actor),
+                submittedAt: now,
+                transferStatus: "submitting",
+                acknowledgementStatus: "pending",
+                externalAccountingReference: null,
+                failureCode: null,
+                failureSummary: null,
+                attemptCount: { increment: 1 },
+                lastAttemptAt: now,
+                updatedAt: now,
+            },
+        });
+
+        if (claimed.count !== 1) {
+            throw new PrismaAccountingTransferConflictError(
+                "This Accounting transfer is already being submitted or has changed state.",
+            );
+        }
+
+        const updated = await transaction.accountingTransfer.findUnique({
+            where: { transferReference: input.transferId },
+            include: transferInclude,
+        });
+
+        if (!updated) {
+            throw new PrismaAccountingTransferNotFoundError();
+        }
+
+        await recordPrismaAuditEvent({
+            id: `${input.transferId}:attempt:${nextAttemptCount}`,
+            eventType: isRetry
+                ? "accounting.transfer.retry"
+                : "accounting.transfer.submitting",
+            action: isRetry
+                ? "Accounting Transfer Retry Started"
+                : "Accounting Transfer Submission Started",
+            module: "Accounting Integration",
+            actor: {
+                type: "user",
+                uid: input.actor.uid,
+                displayName: input.actor.displayName,
+                role: input.actor.role,
+            },
+            target: {
+                type: "accounting_transfer",
+                id: input.transferId,
+                reference: input.transferId,
+                label: input.transferId,
+            },
+            outcome: "Successful",
+            summary: isRetry
+                ? "A technical Accounting transfer failure is being retried with the same prepared snapshot."
+                : "A prepared Accounting transfer was claimed for adapter submission.",
+            metadata: {
+                transferReference: input.transferId,
+                attemptCount: nextAttemptCount,
+                idempotencyKey: input.transferId,
+            },
+            occurredAt: now,
+        }, transaction);
+
+        return updated;
+    });
+
+    return mapTransfer(row);
+}
+
 export async function updatePrismaAccountingTransferResult(input: {
     transferId: string;
     transferStatus: "submitted" | "failed";
@@ -408,10 +536,65 @@ export async function updatePrismaAccountingTransferResult(input: {
                 failureSummary: input.failureSummary ?? null,
                 acknowledgedAt: acknowledged ? new Date() : null,
                 failedAt: input.transferStatus === "failed" ? new Date() : null,
+                lastError: input.failureSummary ?? null,
             },
             include: transferInclude,
         });
     });
+    return mapTransfer(row);
+}
+
+export async function updatePrismaAccountingAcknowledgement(input: {
+    transferId: string;
+    acknowledgementStatus: AccountingAcknowledgementStatus;
+    provider: string;
+    externalAccountingReference?: string | null;
+    failureCode?: string | null;
+    failureSummary?: string | null;
+}): Promise<AccountingTransferRecord> {
+    const row = await getRepositoryPrisma().$transaction(async (transaction) => {
+        const existing = await transaction.accountingTransfer.findUnique({
+            where: { transferReference: input.transferId },
+        });
+
+        if (!existing) {
+            throw new PrismaAccountingTransferNotFoundError();
+        }
+
+        if (existing.transferStatus !== "submitted") {
+            throw new PrismaAccountingTransferConflictError(
+                "Only a submitted Accounting transfer can be checked for acknowledgement.",
+            );
+        }
+
+        if (
+            existing.acknowledgementStatus === "accepted"
+            || existing.acknowledgementStatus === "rejected"
+        ) {
+            throw new PrismaAccountingTransferConflictError(
+                "This Accounting transfer has already been acknowledged.",
+            );
+        }
+
+        const acknowledged = input.acknowledgementStatus === "accepted"
+            || input.acknowledgementStatus === "rejected";
+        return transaction.accountingTransfer.update({
+            where: { id: existing.id },
+            data: {
+                acknowledgementStatus: input.acknowledgementStatus,
+                provider: input.provider,
+                externalAccountingReference: input.externalAccountingReference
+                    ?? existing.externalAccountingReference,
+                failureCode: input.failureCode ?? null,
+                failureSummary: input.failureSummary ?? null,
+                lastError: input.failureSummary ?? null,
+                acknowledgedAt: acknowledged ? new Date() : null,
+                updatedAt: new Date(),
+            },
+            include: transferInclude,
+        });
+    });
+
     return mapTransfer(row);
 }
 

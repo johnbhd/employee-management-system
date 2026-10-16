@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Link from "next/link";
 
 import { getAccountingTransferLabel, getAccountingTransferTone } from "@/data/accounting/approved-payroll";
 import type { AccountingTransferRecord } from "@/types/accounting-transfers";
@@ -63,7 +64,7 @@ export function AccountingTransferDetailsDialog({
             <StatusBadge tone={getAccountingTransferTone(transfer.transferStatus)}>
               {getAccountingTransferLabel(transfer.transferStatus)}
             </StatusBadge>
-            <StatusBadge tone={transfer.acknowledgementStatus === "accepted" ? "success" : "warning"}>
+            <StatusBadge tone={transfer.acknowledgementStatus === "accepted" ? "success" : transfer.acknowledgementStatus === "rejected" || transfer.acknowledgementStatus === "not_received" ? "danger" : "warning"}>
               {transfer.acknowledgementStatus === "accepted" ? "Acknowledged" : transfer.acknowledgementStatus}
             </StatusBadge>
           </div>
@@ -81,6 +82,13 @@ export function AccountingTransferDetailsDialog({
             <div><dt>Prepared / submitted at</dt><dd>{new Date(transfer.preparedAt ?? transfer.submittedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</dd></div>
             <div><dt>Provider</dt><dd>{transfer.provider}</dd></div>
           </dl>
+
+          <Link
+            href={`/accounting/transfers/${encodeURIComponent(transfer.transferId)}`}
+            className="button-secondary"
+          >
+            Open transfer workspace
+          </Link>
 
           {transfer.failureSummary ? (
             <p className="accounting-integration-status__failure" role="alert">
