@@ -59,6 +59,9 @@ export function getPrismaClient(): PrismaClient {
   const client = new PrismaClient({
     adapter: new PrismaPg({
       connectionString: getDatabaseUrl(),
+      max: 1,
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
     }),
   });
 
