@@ -51,8 +51,10 @@ export function EmployeeDashboardPageUnavailable() {
 
 export async function EmployeeDashboardPage({
   employee,
+  scheduledStart,
 }: {
   employee: EmployeeReference;
+  scheduledStart: string | null;
 }) {
   const now = new Date();
   const fallbackTodayAttendance: TodayAttendanceData = {
@@ -118,6 +120,7 @@ export async function EmployeeDashboardPage({
 
       <EmployeeDashboardAttendanceCard
         attendanceLoadError={attendanceLoadError}
+        scheduledStart={scheduledStart}
         todayAttendance={todayAttendance}
       />
 
