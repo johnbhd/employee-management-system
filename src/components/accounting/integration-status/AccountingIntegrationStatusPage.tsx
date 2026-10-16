@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { getAccountingTransferLabel } from "@/data/accounting/approved-payroll";
@@ -35,12 +36,13 @@ export function AccountingIntegrationStatusPage({
   initialData,
   loadError: initialLoadError,
 }: AccountingIntegrationStatusPageProps) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const [search, setSearch] = useState("");
   const [transferStatus, setTransferStatus] = useState("all");
   const [page, setPage] = useState(1);
   const [selectedTransferId, setSelectedTransferId] = useState<string | null>(null);
-  const [submittingResultId, setSubmittingResultId] = useState<string | null>(null);
+  const [preparingResultId, setPreparingResultId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState(initialLoadError);
@@ -81,20 +83,24 @@ export function AccountingIntegrationStatusPage({
     [data.transfers, selectedTransferId],
   );
 
-  async function submitTransfer(payrollResultId: string) {
-    if (!window.confirm("Submit this completed Payroll Result to the Accounting integration?")) return;
-    setSubmittingResultId(payrollResultId);
+  async function prepareTransfer(payrollResultId: string) {
+    if (!window.confirm(
+      "Prepare this Payroll Result for Accounting transfer?\n\nA stable local snapshot will be created. No data will be sent to the external Accounting System yet.",
+    )) return;
+    setPreparingResultId(payrollResultId);
     try {
-      await apiRequest(`/api/accounting/transfers`, {
-        method: "POST",
-        body: JSON.stringify({ payrollResultId }),
-      });
-      setFeedback("Accounting transfer submitted and persisted.");
-      await loadData();
+      const response = await apiRequest<ApiSuccessResponse<{ transferId: string }>>(
+        `/api/accounting/payroll-results/${encodeURIComponent(payrollResultId)}/prepare`,
+        {
+          method: "POST",
+        },
+      );
+      setFeedback("Accounting transfer prepared locally.");
+      router.push(`/accounting/transfers/${encodeURIComponent(response.data.transferId)}`);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "The Accounting transfer could not be submitted.");
+      setFeedback(error instanceof Error ? error.message : "The Accounting transfer could not be prepared.");
     } finally {
-      setSubmittingResultId(null);
+      setPreparingResultId(null);
     }
   }
 
@@ -106,14 +112,14 @@ export function AccountingIntegrationStatusPage({
     {
       label: "Connection status",
       value: data.connectionStatuses.length > 0 ? "Online" : "Unavailable",
-      note: "Simulated adapter boundary",
+      note: "Local preparation boundary",
       icon: "activity" as const,
       tone: data.connectionStatuses.length > 0 ? "info" as const : "danger" as const,
     },
     {
-      label: "Successful transfers",
-      value: String(data.summary.successfulTransfers),
-      note: "Acknowledged by adapter",
+      label: "Prepared transfers",
+      value: String(data.summary.preparedTransfers),
+      note: "Local read-only snapshots",
       icon: "check" as const,
       tone: "success" as const,
     },
@@ -155,7 +161,7 @@ export function AccountingIntegrationStatusPage({
       <AdminPageHeader
         eyebrow="System integration"
         title="Accounting Integration Status"
-        description="Submit verified Payroll Results and monitor the persisted Accounting handoff record."
+        description="Prepare verified Payroll Results as local, traceable Accounting transfer snapshots."
         actions={(
           <ActionButton
             icon="refresh"
@@ -189,8 +195,8 @@ export function AccountingIntegrationStatusPage({
         </p>
         <AccountingReadyPayrollTable
           items={data.readyRecords}
-          submittingResultId={submittingResultId}
-          onSubmit={(record) => void submitTransfer(record.payrollResultId)}
+          preparingResultId={preparingResultId}
+          onPrepare={(record) => void prepareTransfer(record.payrollResultId)}
         />
       </SectionCard>
 
@@ -218,9 +224,7 @@ export function AccountingIntegrationStatusPage({
         >
           <AccountingAttentionTable
             items={data.attention}
-            retryingTransferId={submittingResultId}
             onView={viewTransfer}
-            onRetry={(item) => void submitTransfer(item.payrollResultId)}
           />
         </SectionCard>
       </div>
@@ -267,7 +271,7 @@ export function AccountingIntegrationStatusPage({
       <p className="accounting-integration-status__boundary-note">
         <Icon name="shield" />
         <span>
-          <StatusBadge tone="warning">Simulated adapter</StatusBadge>
+          <StatusBadge tone="info">Local preparation only</StatusBadge>
           {data.providerNote}
         </span>
       </p>

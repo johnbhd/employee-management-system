@@ -39,7 +39,7 @@ function getTransferStatusLabel(status: AccountingTransferStatus) {
 
 function getTransferStatusTone(status: AccountingTransferStatus) {
   if (status === "failed") return "danger" as const;
-  if (status === "submitted") return "success" as const;
+  if (status === "submitted" || status === "prepared") return "success" as const;
   return "warning" as const;
 }
 
@@ -165,8 +165,8 @@ export function TransactionDetailsDialog({
                 <h3 id="accounting-transaction-transfer-title">Accounting transfer summary</h3>
                 <dl className="accounting-transaction-history__details-grid">
                   <div><dt>Accounting Transfer ID</dt><dd>{detail.transferId}</dd></div>
-                  <div><dt>Submitted by</dt><dd>{detail.submittedBy.displayName}</dd></div>
-                  <div><dt>Submitted at</dt><dd>{formatDateTime(detail.submittedAt)}</dd></div>
+                  <div><dt>Prepared / submitted by</dt><dd>{(detail.preparedBy ?? detail.submittedBy).displayName}</dd></div>
+                  <div><dt>Prepared / submitted at</dt><dd>{formatDateTime(detail.preparedAt ?? detail.submittedAt)}</dd></div>
                   <div><dt>Transfer status</dt><dd><StatusBadge tone={getTransferStatusTone(detail.transferStatus)}>{getTransferStatusLabel(detail.transferStatus)}</StatusBadge></dd></div>
                   <div><dt>Provider</dt><dd>{detail.provider}</dd></div>
                   <div><dt>Attempt count</dt><dd>{detail.attemptCount}</dd></div>

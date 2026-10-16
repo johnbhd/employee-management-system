@@ -52,6 +52,7 @@
 @import "./pages/accounting/approved-payroll.css";
 @import "./pages/accounting/integration-status.css";
 @import "./pages/accounting/transaction-history.css";
+@import "./pages/accounting/prepared-transfer.css";
 @import "./pages/accounting/typography.css";
 @import "./pages/payroll/dashboard.css";
 @import "./pages/payroll/verified-attendance.css";

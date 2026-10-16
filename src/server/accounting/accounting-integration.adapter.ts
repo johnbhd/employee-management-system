@@ -78,4 +78,4 @@ export function getAccountingIntegrationAdapter(): AccountingIntegrationAdapter 
 }
 
 export const accountingIntegrationProviderNote =
-  "Accounting transfers are persisted in PostgreSQL through Prisma and submitted through the deterministic simulated adapter. No live Accounting API credentials are configured.";
+  "ACCOUNTING-017A only prepares immutable local snapshots in PostgreSQL through Prisma. No external Accounting API call is made; live submission is reserved for ACCOUNTING-017B.";

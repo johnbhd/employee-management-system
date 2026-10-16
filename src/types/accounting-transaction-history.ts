@@ -8,6 +8,7 @@ import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import type { PayrollResultStatus } from "@/types/payroll-results";
 
 export const accountingHistoryLifecycleStatuses = [
+  "Prepared",
   "Submitted",
   "Awaiting Acknowledgement",
   "Completed",
@@ -29,6 +30,8 @@ export type AccountingTransactionHistoryItem = {
   accountingReference: string | null;
   submittedBy: AccountingTransferActor;
   submittedAt: string;
+  preparedAt: string | null;
+  preparedBy: AccountingTransferActor | null;
   transferStatus: AccountingTransferStatus;
   acknowledgementStatus: AccountingAcknowledgementStatus;
   lifecycleStatus: AccountingHistoryLifecycleStatus;

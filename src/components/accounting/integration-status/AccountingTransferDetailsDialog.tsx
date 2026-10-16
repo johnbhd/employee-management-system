@@ -77,7 +77,8 @@ export function AccountingTransferDetailsDialog({
             <div><dt>Payroll period</dt><dd>{transfer.period.label}</dd></div>
             <div><dt>Employees</dt><dd>{transfer.employeeCount}</dd></div>
             <div><dt>Attempt</dt><dd>{transfer.attemptCount}</dd></div>
-            <div><dt>Submitted by</dt><dd>{transfer.submittedBy.displayName}</dd></div>
+            <div><dt>Prepared / submitted by</dt><dd>{(transfer.preparedBy ?? transfer.submittedBy).displayName}</dd></div>
+            <div><dt>Prepared / submitted at</dt><dd>{new Date(transfer.preparedAt ?? transfer.submittedAt).toLocaleString("en-PH", { timeZone: "Asia/Manila" })}</dd></div>
             <div><dt>Provider</dt><dd>{transfer.provider}</dd></div>
           </dl>
 

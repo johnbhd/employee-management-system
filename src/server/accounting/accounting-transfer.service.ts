@@ -85,13 +85,15 @@ function buildTransferView(transfer: AccountingTransferRecord): AccountingTransf
     resultTone: getAccountingTransferTone(transfer.transferStatus),
     status: getAccountingTransferLabel(transfer.transferStatus),
     tone: getAccountingTransferTone(transfer.transferStatus),
-    acknowledgement: transfer.acknowledgementStatus === "accepted"
-      ? "Received by Accounting adapter"
-      : transfer.acknowledgementStatus === "rejected"
-        ? "Rejected by Accounting adapter"
-        : transfer.acknowledgementStatus === "pending"
-          ? "Awaiting acknowledgement"
-          : "No acknowledgement received",
+    acknowledgement: transfer.transferStatus === "prepared"
+      ? "Not submitted - local snapshot"
+      : transfer.acknowledgementStatus === "accepted"
+        ? "Received by Accounting adapter"
+        : transfer.acknowledgementStatus === "rejected"
+          ? "Rejected by Accounting adapter"
+          : transfer.acknowledgementStatus === "pending"
+            ? "Awaiting acknowledgement"
+            : "No acknowledgement received",
     error: transfer.failureSummary,
   };
 }
@@ -123,17 +125,17 @@ function buildConnectionStatuses(transfers: readonly AccountingTransferRecord[])
     },
     {
       system: "Accounting Integration Service",
-      status: "Operational · Simulated adapter",
+      status: "Operational - Local preparation",
       tone: "success" as const,
       lastSync: latestSync,
-      details: `${transfers.length} persisted transfer record${transfers.length === 1 ? "" : "s"}.`,
+      details: `${transfers.length} persisted preparation record${transfers.length === 1 ? "" : "s"}.`,
     },
     {
       system: "Existing Accounting System",
       status: "Not connected · No live API",
       tone: "warning" as const,
       lastSync: "No live sync",
-      details: "Transfers use the configured deterministic simulated adapter.",
+      details: "No external Accounting API is called during local preparation.",
     },
   ];
 }
@@ -150,8 +152,12 @@ export function getAccountingIntegrationStatusSummary(
   return {
     readyForTransfer: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer || (!isAccountingTransferSuccessful(transfer) && !isInProgress(transfer.transferStatus));
+      return !transfer
+        || (!isAccountingTransferSuccessful(transfer)
+          && !isInProgress(transfer.transferStatus)
+          && transfer.transferStatus !== "prepared");
     }).length,
+    preparedTransfers: transfers.filter((transfer) => transfer.transferStatus === "prepared").length,
     inProgress: transfers.filter((transfer) => isInProgress(transfer.transferStatus)).length,
     successfulTransfers: transfers.filter(isAccountingTransferSuccessful).length,
     awaitingAcknowledgement: transfers.filter(isAccountingTransferAwaitingAcknowledgement).length,
@@ -185,7 +191,10 @@ export async function getAccountingIntegrationStatusData(
   return {
     readyRecords: readyRecords.filter((record) => {
       const transfer = transfers.find((item) => item.payrollResultId === record.payrollResultId);
-      return !transfer || (!isAccountingTransferSuccessful(transfer) && !isInProgress(transfer.transferStatus));
+      return !transfer
+        || (!isAccountingTransferSuccessful(transfer)
+          && !isInProgress(transfer.transferStatus)
+          && transfer.transferStatus !== "prepared");
     }),
     transfers: pageTransfers,
     attention: pageTransfers
@@ -199,7 +208,7 @@ export async function getAccountingIntegrationStatusData(
     pageSize: query.pageSize,
     totalPages,
     hasNext: page < totalPages,
-    transferStatusOptions: ["preparing", "submitting", "submitted", "failed"],
+    transferStatusOptions: ["preparing", "prepared", "submitting", "submitted", "failed"],
     providerNote: accountingIntegrationProviderNote,
   };
 }

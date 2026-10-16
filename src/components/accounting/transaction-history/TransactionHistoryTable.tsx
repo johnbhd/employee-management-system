@@ -66,8 +66,8 @@ export function TransactionHistoryTable({
             <th scope="col">Accounting Transfer ID</th>
             <th scope="col">Payroll Result ID</th>
             <th scope="col">Payroll Period</th>
-            <th scope="col">Submitted At</th>
-            <th scope="col">Submitted By</th>
+            <th scope="col">Prepared / submitted at</th>
+            <th scope="col">Prepared / submitted by</th>
             <th scope="col">Employees</th>
             <th scope="col">Transfer Status</th>
             <th scope="col">Acknowledgement</th>
@@ -85,8 +85,8 @@ export function TransactionHistoryTable({
               </td>
               <td>{transaction.payrollResultId}</td>
               <td>{transaction.payrollPeriod.label}</td>
-              <td>{formatDateTime(transaction.submittedAt)}</td>
-              <td>{transaction.submittedBy.displayName}</td>
+              <td>{formatDateTime(transaction.preparedAt ?? transaction.submittedAt)}</td>
+              <td>{(transaction.preparedBy ?? transaction.submittedBy).displayName}</td>
               <td>{transaction.employeeCount}</td>
               <td>
                 <StatusBadge tone={getTransferStatusTone(transaction.transferStatus)}>
@@ -116,7 +116,7 @@ export function TransactionHistoryTable({
             <tr>
               <td colSpan={10} className="accounting-transaction-history__empty">
                 <strong>{emptyMessage}</strong>
-                <span>Accounting transfer records will appear after Payroll Results are submitted.</span>
+                <span>Accounting transfer records will appear after Payroll Results are prepared.</span>
               </td>
             </tr>
           ) : null}

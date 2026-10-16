@@ -26,6 +26,8 @@ export function getAccountingTransferLabel(
       return "Not yet transferred";
     case "preparing":
       return "Preparing";
+    case "prepared":
+      return "Prepared";
     case "submitting":
       return "Submitting";
     case "submitted":
@@ -40,7 +42,7 @@ export function getAccountingTransferTone(
 ): StatusTone {
   if (status === "not_transferred") return "muted";
   if (status === "failed") return "danger";
-  if (status === "submitted") return "success";
+  if (status === "submitted" || status === "prepared") return "success";
   return "warning";
 }
 

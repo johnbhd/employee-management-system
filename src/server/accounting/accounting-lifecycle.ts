@@ -20,6 +20,10 @@ export function determineAccountingLifecycleStatus(
       : "Awaiting Acknowledgement";
   }
 
+  if (transfer.transferStatus === "prepared") {
+    return "Prepared";
+  }
+
   return "Submitted";
 }
 
@@ -62,6 +66,10 @@ export function determineAccountingDashboardStatus(input: {
     AccountingTransferRecord,
     "transferStatus" | "acknowledgementStatus"
   >;
+
+  if (transfer.transferStatus === "prepared") {
+    return "Prepared";
+  }
 
   if (
     transfer.transferStatus === "preparing"

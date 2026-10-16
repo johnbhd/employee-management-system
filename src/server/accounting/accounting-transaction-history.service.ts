@@ -73,6 +73,8 @@ function toHistoryItem(
     accountingReference: transfer.externalAccountingReference,
     submittedBy: transfer.submittedBy,
     submittedAt: transfer.submittedAt,
+    preparedAt: transfer.preparedAt,
+    preparedBy: transfer.preparedBy,
     transferStatus: transfer.transferStatus,
     acknowledgementStatus: transfer.acknowledgementStatus,
     lifecycleStatus,

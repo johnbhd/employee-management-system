@@ -12,7 +12,6 @@ import {
   AccountingTransferValidationError,
   getAccountingIntegrationStatusData,
   getDefaultAccountingIntegrationStatusQuery,
-  submitAccountingTransfer,
 } from "@/server/accounting/accounting-transfer.service";
 import type { ApiErrorResponse, ApiSuccessResponse } from "@/types/api/responses";
 import {
@@ -77,29 +76,15 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
   try {
     const context = await requireApiRoleContext("accounting");
     await requireApiPermission("accounting.transfer.submit", context.user);
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return errorResponse("ACCOUNTING_TRANSFER_PAYLOAD_INVALID", "A valid JSON payload is required.", 400);
-    }
-
-    const payrollResultId = typeof body === "object" && body !== null && "payrollResultId" in body
-      ? (body as { payrollResultId?: unknown }).payrollResultId
-      : null;
-    if (typeof payrollResultId !== "string" || !payrollResultId.trim()) {
-      return errorResponse("ACCOUNTING_TRANSFER_PAYLOAD_INVALID", "payrollResultId is required.", 400);
-    }
-
-    const transfer = await submitAccountingTransfer({
-      payrollResultId: payrollResultId.trim(),
-      actor: context.user,
-    });
-    return NextResponse.json<ApiSuccessResponse<typeof transfer>>({ success: true, data: transfer }, { status: 201 });
+    return errorResponse(
+      "ACCOUNTING_SUBMISSION_NOT_AVAILABLE",
+      "External Accounting submission belongs to ACCOUNTING-017B and is not available during local preparation.",
+      409,
+    );
   } catch (error) {
     return mapError(error);
   }

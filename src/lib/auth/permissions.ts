@@ -49,6 +49,7 @@ const dependencyMap: Partial<Record<PermissionKey, readonly PermissionKey[]>> = 
   "payroll.batch.manage": ["payroll.batch.view"],
   "payroll.handoff.submit": ["payroll.handoff.view"],
   "accounting.transfer.submit": ["accounting.transfer.view"],
+  "accounting.transfer.prepare": ["accounting.transfer.view"],
 };
 
 function permission(
@@ -97,6 +98,7 @@ export const permissionCatalog: readonly PermissionDefinition[] = [
   permission("accounting.dashboard.view", "View Accounting Dashboard", "Open the Accounting Staff dashboard.", "Accounting Integration"),
   permission("accounting.approved_payroll.view", "View Approved Payroll", "Review Payroll results prepared for Accounting.", "Accounting Integration"),
   permission("accounting.transfer.view", "View Accounting Transfers", "Review Accounting transfer and acknowledgement status.", "Accounting Integration"),
+  permission("accounting.transfer.prepare", "Prepare Accounting Transfer", "Create a read-only Accounting transfer snapshot from an eligible Payroll Result.", "Accounting Integration"),
   permission("accounting.transfer.submit", "Submit Accounting Transfer", "Submit eligible Payroll results to the Accounting adapter.", "Accounting Integration"),
   permission("accounting.history.view", "View Accounting History", "Review read-only Accounting transfer history.", "Accounting Integration"),
   permission("admin.dashboard.view", "View Admin Dashboard", "Open the IT Administrator integration control center.", "Integration Monitoring"),

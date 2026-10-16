@@ -8,6 +8,7 @@ import type { IconName, StatusTone } from "@/types/ui";
 export const accountingDashboardStatusValues = [
   "Blocked",
   "Ready for Transfer",
+  "Prepared",
   "Transfer In Progress",
   "Awaiting Acknowledgement",
   "Transferred",

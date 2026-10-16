@@ -13,6 +13,7 @@ import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import { payrollResultStatuses, type PayrollResultStatus } from "@/types/payroll-results";
 import {
   claimPrismaAccountingTransfer,
+  preparePrismaAccountingTransfer,
   getPrismaAccountingTransferById,
   getPrismaAccountingTransferByPayrollResultId,
   listPrismaAccountingTransferAuditEvents,
@@ -68,6 +69,13 @@ function mapPrismaAccountingError(error: unknown): never {
   if (error instanceof PrismaAccountingTransferNotFoundError) throw new AccountingTransferNotFoundError();
   if (error instanceof PrismaAccountingTransferConflictError) throw new AccountingTransferConflictError(error.message);
   throw error;
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return typeof error === "object"
+    && error !== null
+    && "code" in error
+    && (error as { code?: unknown }).code === "P2002";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -148,7 +156,7 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
     !transferId || transferId !== id || !payrollResultId || !payrollBatchId
     || !payrollHandoffId || !period || !externalPayrollReference || employeeCount === null
     || !payrollResultStatus || !submittedBy || !submittedAt || !createdAt || !updatedAt
-    || !["preparing", "submitting", "submitted", "failed"].includes(transferStatus)
+    || !["preparing", "prepared", "submitting", "submitted", "failed"].includes(transferStatus)
     || !["pending", "accepted", "rejected", "not_received"].includes(acknowledgementStatus)
     || !providerName || attemptCount === null
     || (data.acknowledgedAt !== null && data.acknowledgedAt !== undefined && !acknowledgedAt)
@@ -168,6 +176,10 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
     payrollResultStatus,
     submittedBy,
     submittedAt: toIso(submittedAt),
+    preparedBy: null,
+    preparedAt: null,
+    snapshot: null,
+    sourceMode: null,
     acknowledgedAt: acknowledgedAt ? toIso(acknowledgedAt) : null,
     failedAt: failedAt ? toIso(failedAt) : null,
     transferStatus,
@@ -383,6 +395,10 @@ export async function claimAccountingTransfer(input: {
       payrollResultStatus: input.payrollResultStatus,
       submittedBy: actor,
       submittedAt: toIso(now),
+      preparedBy: null,
+      preparedAt: null,
+      snapshot: null,
+      sourceMode: null,
       acknowledgedAt: null,
       failedAt: null,
       transferStatus: "submitting",
@@ -405,6 +421,20 @@ export async function claimAccountingTransfer(input: {
     });
     return withTimeline(transfer);
   });
+}
+
+export async function prepareAccountingTransfer(input: {
+  payrollResultId: string;
+  actor: TransferActor;
+}) {
+  try {
+    return await preparePrismaAccountingTransfer(input);
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw new AccountingTransferConflictError("An Accounting transfer already exists for this Payroll Result.");
+    }
+    return mapPrismaAccountingError(error);
+  }
 }
 
 export async function updateAccountingTransferResult(input: {
