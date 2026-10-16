@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { formatCampusTime } from "@/lib/campus-time";
 import type { ApiErrorResponse } from "@/types/api/responses";
+import type { AttendanceDemoSettingsData } from "@/types/attendance-demo";
 import type {
   EmployeeQrSuccessResponse,
   QrAttendanceData,
@@ -24,6 +25,7 @@ type AttendanceQrPageProps = {
   initialQrError: string | null;
   initialQrGeneratedAt: string | null;
   initialQrValue: string | null;
+  initialDemoSettings: AttendanceDemoSettingsData;
 };
 
 type EmployeeQrApiResponse = EmployeeQrSuccessResponse | ApiErrorResponse;
@@ -36,6 +38,7 @@ export function AttendanceQrPage({
   initialQrError,
   initialQrGeneratedAt,
   initialQrValue,
+  initialDemoSettings,
 }: AttendanceQrPageProps) {
   const [attendance, setAttendance] = useState(initialAttendance.attendance);
   const [attendanceError, setAttendanceError] = useState(initialAttendanceError);
@@ -215,6 +218,7 @@ export function AttendanceQrPage({
           attendanceError={attendanceError}
           attendanceFeedback={attendanceFeedback}
           attendanceRefreshing={attendanceRefreshing}
+          demoSettings={initialDemoSettings}
           employee={employee}
           onAttendanceRetry={retryAttendance}
           onQrRefreshed={refreshQr}

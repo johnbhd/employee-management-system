@@ -1,10 +1,12 @@
 import { AttendanceQrPage } from "@/components/employee/attendance-qr/AttendanceQrPage";
 import { formatCampusDateKey } from "@/lib/campus-time";
+import { getEmployeeAttendanceDemoData } from "@/server/attendance/demo-attendance.service";
 import { getTodayAttendanceForEmployee } from "@/server/attendance/attendance.service";
 import { createEmployeeQrData } from "@/server/attendance/qr/attendance-qr.service";
 import { requireCurrentUserContext } from "@/server/auth/current-user-context";
 import { hasPermission } from "@/server/auth/permission.service";
 import type { TodayAttendanceData } from "@/types/attendance-qr";
+import type { AttendanceDemoSettingsData } from "@/types/attendance-demo";
 
 export default async function Page() {
   const context = await requireCurrentUserContext();
@@ -25,6 +27,15 @@ export default async function Page() {
   };
   let initialAttendance = fallbackAttendance;
   let initialAttendanceError: string | null = null;
+  let initialDemoSettings: AttendanceDemoSettingsData = {
+    featureEnabled: false,
+    enabled: false,
+    customTime: null,
+    attendanceDate: fallbackAttendance.attendanceDate,
+    attendance: null,
+    resetAvailable: false,
+    resetBlockedReason: null,
+  };
 
   if (employee) {
     try {
@@ -44,6 +55,15 @@ export default async function Page() {
       initialAttendanceError =
         "Today's attendance could not be loaded. We'll keep trying while this page is open.";
     }
+
+    try {
+      initialDemoSettings = await getEmployeeAttendanceDemoData(
+        employee.employeeId,
+        now,
+      );
+    } catch {
+      // The QR page remains usable with normal attendance when optional demo data is unavailable.
+    }
   } else {
     initialQrError =
       "Your employee QR is currently unavailable. Please contact the system administrator.";
@@ -59,6 +79,7 @@ export default async function Page() {
       initialQrValue={initialQrValue}
       initialAttendance={initialAttendance}
       initialAttendanceError={initialAttendanceError}
+      initialDemoSettings={initialDemoSettings}
     />
   );
 }

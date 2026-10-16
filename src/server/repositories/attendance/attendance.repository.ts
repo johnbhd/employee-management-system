@@ -587,6 +587,9 @@ export async function recordQrAttendance(
         employeeId: string;
         attendanceDate: string;
         occurredAt: Date;
+        actualRecordedAt?: Date;
+        simulated?: boolean;
+        demoAttendanceTime?: string | null;
         scannerOperator: ScannerOperator;
     },
 ): Promise<QrAttendanceRepositoryResult> {
