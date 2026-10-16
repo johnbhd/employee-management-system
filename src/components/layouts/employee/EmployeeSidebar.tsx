@@ -21,7 +21,7 @@ type EmployeeSidebarProps = {
   onClose: () => void;
 };
 
-const employeeLinks: readonly { label: string; icon: "dashboard" | "calendar" | "qr" | "clock" | "payroll" | "user" | "settings" | "activity" | "help"; href: string; permission?: PermissionKey }[] = [
+const employeeLinks: readonly { label: string; icon: "dashboard" | "calendar" | "qr" | "clock" | "payroll" | "user" | "settings"; href: string; permission?: PermissionKey }[] = [
   { label: "Dashboard", icon: "dashboard", href: "/employee/dashboard", permission: "employee.dashboard.view" },
   { label: "My Attendance", icon: "calendar", href: "/employee/my-attendance", permission: "employee.attendance.view_own" },
   { label: "Show Attendance QR", icon: "qr", href: "/employee/attendance-qr", permission: "employee.attendance_qr.view_own" },
@@ -29,8 +29,6 @@ const employeeLinks: readonly { label: string; icon: "dashboard" | "calendar" | 
   { label: "My Payslips", icon: "payroll", href: "/employee/payslips", permission: "employee.payslip.view_own" },
   { label: "My Profile", icon: "user", href: "/employee/profile", permission: "employee.profile.view_own" },
   { label: "Settings", icon: "settings" as const, href: "/employee/settings" },
-  { label: "Announcements", icon: "activity" as const, href: "/employee/announcements" },
-  { label: "Help and Support", icon: "help" as const, href: "/employee/help-support" },
 ];
 
 export function EmployeeSidebar({ user, employee, permissions, isOpen, onClose }: EmployeeSidebarProps) {

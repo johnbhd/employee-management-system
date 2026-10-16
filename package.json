@@ -20,6 +20,7 @@
     "test:hrps": "tsx scripts/hrps/test-csv.ts",
     "test:bundy": "node --experimental-strip-types scripts/bundy/test-csv.ts",
     "test:bundy:classification": "tsx scripts/bundy/test-classification.ts",
+    "test:audit": "node --experimental-strip-types scripts/audit/test-audit-id.mjs",
     "test:payroll:eligibility": "node --experimental-strip-types scripts/payroll/test-eligibility.mjs",
     "test:payroll:batch-readiness": "tsx scripts/payroll/test-batch-readiness.ts",
     "qr:verify": "tsx scripts/attendance/verify-employee-qr.ts",

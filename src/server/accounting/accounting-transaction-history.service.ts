@@ -52,6 +52,9 @@ function getIssueSummary(
       ? `The Accounting transfer failed with code ${transfer.failureCode}.`
       : "The Accounting transfer failed without a provider summary.";
   }
+  if (lifecycleStatus === "Not Received") {
+    return "The Accounting System has not acknowledged this transfer.";
+  }
   return null;
 }
 
@@ -73,6 +76,8 @@ function toHistoryItem(
     accountingReference: transfer.externalAccountingReference,
     submittedBy: transfer.submittedBy,
     submittedAt: transfer.submittedAt,
+    preparedAt: transfer.preparedAt,
+    preparedBy: transfer.preparedBy,
     transferStatus: transfer.transferStatus,
     acknowledgementStatus: transfer.acknowledgementStatus,
     lifecycleStatus,
@@ -83,6 +88,7 @@ function toHistoryItem(
     issueSummary,
     hasIssue: lifecycleStatus === "Failed"
       || lifecycleStatus === "Rejected"
+      || lifecycleStatus === "Not Received"
       || Boolean(issueSummary),
   };
 }
@@ -134,7 +140,9 @@ function getSummary(records: readonly AccountingTransactionHistoryItem[]) {
       (record) => record.lifecycleStatus === "Awaiting Acknowledgement",
     ).length,
     failedOrRejected: records.filter(
-      (record) => record.lifecycleStatus === "Failed" || record.lifecycleStatus === "Rejected",
+      (record) => record.lifecycleStatus === "Failed"
+        || record.lifecycleStatus === "Rejected"
+        || record.lifecycleStatus === "Not Received",
     ).length,
     latestCompletedPeriod: completed
       .slice()

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 
 import { Icon } from "@/components/ui/Icon";
 import { formatCampusDateTime, formatCampusTime } from "@/lib/campus-time";
+import type { AttendanceDemoSettingsData } from "@/types/attendance-demo";
 import type { QrAttendanceData } from "@/types/attendance-qr";
 import type { EmployeeReference } from "@/types/employee";
 
@@ -20,6 +21,7 @@ type AttendanceQrCardProps = {
   attendanceError: string | null;
   attendanceFeedback: QrScanFeedbackState | null;
   attendanceRefreshing: boolean;
+  demoSettings: AttendanceDemoSettingsData;
   employee: EmployeeReference | null;
   onAttendanceRetry: () => Promise<void>;
   onQrRefreshed: () => Promise<void>;
@@ -34,6 +36,7 @@ export function AttendanceQrCard({
   attendanceError,
   attendanceFeedback,
   attendanceRefreshing,
+  demoSettings,
   employee,
   onAttendanceRetry,
   onQrRefreshed,
@@ -90,6 +93,18 @@ export function AttendanceQrCard({
       </div>
 
       <div className="attendance-qr-divider" aria-hidden="true" />
+
+      {demoSettings.featureEnabled && demoSettings.enabled ? (
+        <div className="attendance-qr-demo-banner" role="status">
+          <span className="attendance-qr-demo-badge">DEMO MODE</span>
+          <span>
+            Next attendance action will use {formatDemoTime(demoSettings.customTime)}.
+          </span>
+          <Link href="/employee/settings" className="attendance-qr-demo-link">
+            Change in Settings
+          </Link>
+        </div>
+      ) : null}
 
       <div className="attendance-qr-code-wrap" aria-busy={qrLoading}>
         <EmployeeQrImage
@@ -344,4 +359,18 @@ function formatGeneratedAt(value: string | null) {
   }
 
   return `Generated ${formatCampusDateTime(date)}`;
+}
+
+function formatDemoTime(value: string | null) {
+  if (!value) {
+    return "your saved time";
+  }
+
+  const [hours, minutes] = value.split(":");
+  const hour = Number(hours);
+  if (!Number.isInteger(hour) || !minutes) {
+    return "your saved time";
+  }
+
+  return `${hour % 12 || 12}:${minutes} ${hour >= 12 ? "PM" : "AM"}`;
 }

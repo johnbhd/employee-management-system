@@ -1,16 +1,13 @@
 import type { AccountingTransferView } from "@/types/accounting-transfers";
 
-import { ActionButton } from "@/components/ui/ActionButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type AccountingAttentionTableProps = {
   items: readonly AccountingTransferView[];
-  retryingTransferId: string | null;
   onView: (item: AccountingTransferView) => void;
-  onRetry: (item: AccountingTransferView) => void;
 };
 
-export function AccountingAttentionTable({ items, retryingTransferId, onView, onRetry }: AccountingAttentionTableProps) {
+export function AccountingAttentionTable({ items, onView }: AccountingAttentionTableProps) {
   return (
     <div className="accounting-integration-status__table-wrap">
       <table className="data-table accounting-integration-status__attention-table">
@@ -42,24 +39,13 @@ export function AccountingAttentionTable({ items, retryingTransferId, onView, on
               <td><StatusBadge tone={item.tone}>{item.status}</StatusBadge></td>
               <td>
                 <div className="accounting-integration-status__row-actions">
-                  <ActionButton
-                    className="accounting-integration-status__row-action"
-                    variant="link"
-                    icon="warning"
-                    action={`${item.transactionReference} error details opened.`}
-                    onAction={() => onView(item)}
+                  <button
+                    type="button"
+                    className="button-link"
+                    onClick={() => onView(item)}
                   >
-                    View error
-                  </ActionButton>
-                  <ActionButton
-                    className="accounting-integration-status__row-action"
-                    variant="secondary"
-                    icon="refresh"
-                    action={retryingTransferId === item.transferId ? "Retry submitted." : `${item.transactionReference} retry submitted.`}
-                    onAction={() => onRetry(item)}
-                  >
-                    {retryingTransferId === item.transferId ? "Retrying..." : "Retry"}
-                  </ActionButton>
+                    View details
+                  </button>
                 </div>
               </td>
             </tr>

@@ -23,7 +23,7 @@ export const accountingIntegrationFlow: AccountingIntegrationFlowStep[] = [
   },
   {
     label: "Accounting Integration Service",
-    detail: "Validates and submits the transfer",
+    detail: "Validates and prepares a local transfer snapshot",
     icon: "settings",
     tone: "success",
   },
@@ -35,8 +35,8 @@ export const accountingIntegrationFlow: AccountingIntegrationFlowStep[] = [
     highlighted: true,
   },
   {
-    label: "Transfer",
-    detail: "Persists the Accounting handoff result",
+    label: "Prepared transfer",
+    detail: "Persists the read-only Accounting handoff snapshot",
     icon: "refresh",
     tone: "info",
   },

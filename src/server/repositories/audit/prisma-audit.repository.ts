@@ -3,11 +3,13 @@ import "server-only";
 import type { AuditActorType, AuditOutcome, Prisma } from "@prisma/client";
 
 import type { AdminAuditActorType, AdminAuditOutcome } from "@/types/admin-audit-logs";
+import { normalizeAuditEventId } from "./audit-id";
 import {
     findUserIdByFirebaseUid,
     getRepositoryPrisma,
     toJson,
     toJsonObject,
+    type PrismaDbClient,
 } from "@/server/repositories/prisma/prisma-repository-helpers";
 
 export type PrismaAuditEventView = {
@@ -100,11 +102,16 @@ function mapEvent(row: {
     };
 }
 
-export async function recordPrismaAuditEvent(input: PrismaAuditEventInput): Promise<void> {
-    const actorUserId = await findUserIdByFirebaseUid(input.actor.uid);
-    await getRepositoryPrisma().auditEvent.create({
+export async function recordPrismaAuditEvent(
+    input: PrismaAuditEventInput,
+    prisma: PrismaDbClient = getRepositoryPrisma(),
+): Promise<void> {
+    const actorUserId = await findUserIdByFirebaseUid(input.actor.uid, prisma);
+    const auditId = normalizeAuditEventId(input.id);
+
+    await prisma.auditEvent.create({
         data: {
-            ...(input.id ? { id: input.id } : {}),
+            ...(auditId ? { id: auditId } : {}),
             eventType: input.eventType,
             action: input.action,
             module: input.module,

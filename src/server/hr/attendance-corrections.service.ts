@@ -10,13 +10,14 @@ import {
     getAttendanceByRecordId,
 } from "@/server/repositories/attendance/attendance.repository";
 import {
-    applyAttendanceCorrectionDecision,
+    applyAttendanceCorrectionDecisionInTransaction,
     getAttendanceCorrectionRequestById,
     listAttendanceCorrectionRequests,
     AttendanceCorrectionValidationError,
     type StoredAttendanceCorrectionRequest,
 } from "@/server/repositories/attendance-corrections/attendance-correction.repository";
 import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
+import { getRepositoryPrisma } from "@/server/repositories/prisma/prisma-repository-helpers";
 import type { SessionUser } from "@/types/auth";
 import { listEmployees } from "@/server/repositories/employees/employee.repository";
 import type {
@@ -47,38 +48,39 @@ export async function reviewAttendanceCorrection(input: {
         throw new AttendanceCorrectionValidationError("The correction request could not be found.");
     }
 
-    await applyAttendanceCorrectionDecision({
-        ...input,
-        reviewNote,
-    });
+    await getRepositoryPrisma().$transaction(async (transaction) => {
+        await applyAttendanceCorrectionDecisionInTransaction({
+            ...input,
+            reviewNote,
+        }, transaction);
 
-    await recordAuditEvent({
-        id: `${input.requestId}:review:${input.decision}`,
-        eventType: input.decision === "approve"
-            ? "hr.attendance.correction.approved"
-            : "hr.attendance.correction.rejected",
-        action: input.decision === "approve"
-            ? "ATTENDANCE_CORRECTION_APPROVED"
-            : "ATTENDANCE_CORRECTION_REJECTED",
-        module: "HR Attendance Review",
-        actor: {
-            type: "user",
-            uid: input.reviewer.uid,
-            displayName: input.reviewer.displayName,
-            role: input.reviewer.role,
-        },
-        target: {
-            type: "correction_request",
-            id: request.id,
-            reference: request.id,
-            label: `${request.employeeId} · ${request.issueType}`,
-        },
-        outcome: input.decision === "approve" ? "Successful" : "Blocked",
-        summary: input.decision === "approve"
-            ? "An attendance correction request was approved."
-            : "An attendance correction request was rejected.",
-        metadata: {},
-        occurredAt: new Date(),
+        await recordAuditEvent({
+            eventType: input.decision === "approve"
+                ? "hr.attendance.correction.approved"
+                : "hr.attendance.correction.rejected",
+            action: input.decision === "approve"
+                ? "ATTENDANCE_CORRECTION_APPROVED"
+                : "ATTENDANCE_CORRECTION_REJECTED",
+            module: "HR Attendance Review",
+            actor: {
+                type: "user",
+                uid: input.reviewer.uid,
+                displayName: input.reviewer.displayName,
+                role: input.reviewer.role,
+            },
+            target: {
+                type: "correction_request",
+                id: request.id,
+                reference: request.id,
+                label: `${request.employeeId} · ${request.issueType}`,
+            },
+            outcome: input.decision === "approve" ? "Successful" : "Blocked",
+            summary: input.decision === "approve"
+                ? "An attendance correction request was approved."
+                : "An attendance correction request was rejected.",
+            metadata: {},
+            occurredAt: new Date(),
+        }, transaction);
     });
 }
 

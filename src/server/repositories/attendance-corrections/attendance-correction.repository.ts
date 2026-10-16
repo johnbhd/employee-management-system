@@ -1,5 +1,6 @@
 import "server-only";
 
+import type { Prisma } from "@prisma/client";
 import type { SessionUser } from "@/types/auth";
 import type {
     AttendanceCorrectionDecision,
@@ -868,4 +869,34 @@ export async function applyAttendanceCorrectionDecision(
             updatedAt: FieldValue.serverTimestamp(),
         });
     });
+}
+
+export async function applyAttendanceCorrectionDecisionInTransaction(
+    input: {
+        requestId: string;
+        decision: AttendanceCorrectionDecision;
+        reviewNote: string | null;
+        reviewer: CorrectionReviewer;
+    },
+    transaction: Prisma.TransactionClient,
+): Promise<PrismaAttendanceCorrectionView> {
+    try {
+        return await applyPrismaAttendanceCorrectionDecision({
+            requestId: input.requestId,
+            decision: input.decision,
+            reviewNote: input.reviewNote,
+            reviewer: input.reviewer,
+        }, transaction);
+    } catch (error) {
+        if (error instanceof Error && /could not be found/i.test(error.message)) {
+            throw new AttendanceCorrectionNotFoundError();
+        }
+        if (error instanceof Error && /already/i.test(error.message)) {
+            throw new AttendanceCorrectionConflictError(error.message);
+        }
+        if (error instanceof Error && /Final-verified/i.test(error.message)) {
+            throw new AttendanceCorrectionConflictError(error.message);
+        }
+        throw error;
+    }
 }

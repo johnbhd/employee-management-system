@@ -5,14 +5,14 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type AccountingReadyPayrollTableProps = {
   items: readonly AccountingApprovedPayrollItem[];
-  submittingResultId: string | null;
-  onSubmit: (record: AccountingApprovedPayrollItem) => void;
+  preparingResultId: string | null;
+  onPrepare: (record: AccountingApprovedPayrollItem) => void;
 };
 
 export function AccountingReadyPayrollTable({
   items,
-  submittingResultId,
-  onSubmit,
+  preparingResultId,
+  onPrepare,
 }: AccountingReadyPayrollTableProps) {
   return (
     <div className="accounting-integration-status__table-wrap">
@@ -30,7 +30,7 @@ export function AccountingReadyPayrollTable({
         </thead>
         <tbody>
           {items.length > 0 ? items.map((record) => {
-            const isSubmitting = submittingResultId === record.payrollResultId;
+            const isPreparing = preparingResultId === record.payrollResultId;
             return (
               <tr key={record.payrollResultId}>
                 <td>
@@ -52,10 +52,10 @@ export function AccountingReadyPayrollTable({
                     <button
                       type="button"
                       className="button-primary accounting-integration-status__row-button"
-                      onClick={() => onSubmit(record)}
-                      disabled={isSubmitting}
+                      onClick={() => onPrepare(record)}
+                      disabled={isPreparing}
                     >
-                      {isSubmitting ? "Submitting..." : "Submit transfer"}
+                      {isPreparing ? "Preparing..." : "Prepare transfer"}
                     </button>
                   </div>
                 </td>

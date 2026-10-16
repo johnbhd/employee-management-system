@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "client"
 }
 
@@ -207,6 +207,7 @@ enum PayslipStatus {
 
 enum AccountingTransferStatus {
   preparing
+  prepared
   submitting
   submitted
   failed
@@ -309,6 +310,7 @@ model User {
   payrollBatchesFrozen         PayrollBatch[]                   @relation("PayrollBatchFrozenBy")
   payrollHandoffsSubmitted     PayrollHandoff[]                 @relation("PayrollHandoffSubmittedBy")
   accountingTransfersSubmitted AccountingTransfer[]             @relation("AccountingTransferSubmittedBy")
+  accountingTransfersPrepared  AccountingTransfer[]             @relation("AccountingTransferPreparedBy")
   auditEvents                  AuditEvent[]                     @relation("AuditActor")
   hrpsImports                  HrpsImport[]                     @relation("HrpsImportInitiatedBy")
   bundyImports                 BundyImport[]                    @relation("BundyImportInitiatedBy")
@@ -345,10 +347,24 @@ model Employee {
   payslips                         PayrollPayslip[]
   bundyEvents                      BundyRawEvent[]
   unifiedAttendanceProcessingItems UnifiedAttendanceProcessingItem[]
+  attendanceDemoSetting            EmployeeAttendanceDemoSetting?
 
   @@index([department])
   @@index([employmentStatus])
   @@map("employees")
+}
+
+model EmployeeAttendanceDemoSetting {
+  id         String   @id @default(uuid()) @db.Uuid
+  employeeId String   @unique @map("employee_id") @db.Uuid
+  enabled    Boolean  @default(false)
+  customTime String?  @map("custom_time") @db.VarChar(5)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@map("employee_attendance_demo_settings")
 }
 
 model EmployeeSchedule {
@@ -929,6 +945,11 @@ model AccountingTransfer {
   submittedByUserId           String?                         @map("submitted_by_user_id") @db.Uuid
   submittedBySnapshot         Json                            @map("submitted_by_snapshot")
   submittedAt                 DateTime                        @map("submitted_at") @db.Timestamptz(3)
+  preparedByUserId            String?                         @map("prepared_by_user_id") @db.Uuid
+  preparedBySnapshot          Json?                           @map("prepared_by_snapshot")
+  preparedAt                  DateTime?                       @map("prepared_at") @db.Timestamptz(3)
+  snapshot                    Json?                           @map("snapshot")
+  sourceMode                  String?                         @map("source_mode") @db.VarChar(80)
   acknowledgedAt              DateTime?                       @map("acknowledged_at") @db.Timestamptz(3)
   failedAt                    DateTime?                       @map("failed_at") @db.Timestamptz(3)
   transferStatus              AccountingTransferStatus        @map("transfer_status")
@@ -938,6 +959,8 @@ model AccountingTransfer {
   failureCode                 String?                         @map("failure_code") @db.VarChar(120)
   failureSummary              String?                         @map("failure_summary") @db.Text
   attemptCount                Int                             @default(0) @map("attempt_count")
+  lastAttemptAt               DateTime?                       @map("last_attempt_at") @db.Timestamptz(3)
+  lastError                   String?                         @map("last_error") @db.Text
   legacyFirestoreId           String?                         @unique @map("legacy_firestore_id") @db.VarChar(160)
   createdAt                   DateTime                        @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt                   DateTime                        @updatedAt @map("updated_at") @db.Timestamptz(3)
@@ -946,6 +969,7 @@ model AccountingTransfer {
   payrollBatch   PayrollBatch   @relation(fields: [payrollBatchId], references: [id], onDelete: Restrict)
   payrollHandoff PayrollHandoff @relation(fields: [payrollHandoffId], references: [id], onDelete: Restrict)
   submittedBy    User?          @relation("AccountingTransferSubmittedBy", fields: [submittedByUserId], references: [id], onDelete: SetNull)
+  preparedBy     User?          @relation("AccountingTransferPreparedBy", fields: [preparedByUserId], references: [id], onDelete: SetNull)
 
   @@index([transferStatus, updatedAt])
   @@index([acknowledgementStatus, updatedAt])

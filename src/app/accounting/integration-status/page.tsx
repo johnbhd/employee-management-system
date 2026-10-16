@@ -15,6 +15,7 @@ const emptyIntegrationData: AccountingIntegrationStatusData = {
   connectionStatuses: [],
   summary: {
     readyForTransfer: 0,
+    preparedTransfers: 0,
     inProgress: 0,
     successfulTransfers: 0,
     awaitingAcknowledgement: 0,

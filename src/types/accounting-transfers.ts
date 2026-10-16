@@ -4,6 +4,7 @@ import type { PayrollResultStatus } from "@/types/payroll-results";
 
 export const accountingTransferStatuses = [
   "preparing",
+  "prepared",
   "submitting",
   "submitted",
   "failed",
@@ -42,6 +43,46 @@ export type AccountingTransferTimelineEvent = {
   occurredAt: string;
 };
 
+export type AccountingTransferSnapshotItem = {
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  externalEmployeeReference: string;
+  externalPayrollReference: string | null;
+  processingStatus: string;
+  payslipStatus: string;
+  issueCode: string | null;
+  issueSummary: string | null;
+};
+
+export type AccountingTransferSnapshot = {
+  source: {
+    mode: "external-payroll" | "simulated-payroll";
+    provider: string;
+  };
+  payroll: {
+    payrollResultId: string;
+    payrollBatchId: string;
+    payrollHandoffId: string;
+    externalPayrollReference: string;
+    periodStart: string;
+    periodEnd: string;
+    resultStatus: PayrollResultStatus;
+    receivedAt: string;
+    processedAt: string | null;
+    completedAt: string | null;
+  };
+  summary: {
+    employeeCount: number;
+    processedCount: number;
+    pendingCount: number;
+    rejectedCount: number;
+    failedCount: number;
+    payslipAvailableCount: number;
+  };
+  items: AccountingTransferSnapshotItem[];
+};
+
 export type AccountingTransferRecord = {
   transferId: string;
   payrollResultId: string;
@@ -53,6 +94,10 @@ export type AccountingTransferRecord = {
   payrollResultStatus: PayrollResultStatus;
   submittedBy: AccountingTransferActor;
   submittedAt: string;
+  preparedBy: AccountingTransferActor | null;
+  preparedAt: string | null;
+  snapshot: AccountingTransferSnapshot | null;
+  sourceMode: string | null;
   acknowledgedAt: string | null;
   failedAt: string | null;
   transferStatus: AccountingTransferStatus;
@@ -62,6 +107,8 @@ export type AccountingTransferRecord = {
   failureCode: string | null;
   failureSummary: string | null;
   attemptCount: number;
+  lastAttemptAt: string | null;
+  lastError: string | null;
   createdAt: string;
   updatedAt: string;
   timeline: AccountingTransferTimelineEvent[];
@@ -95,6 +142,7 @@ export type AccountingTransferView = {
 
 export type AccountingIntegrationSummary = {
   readyForTransfer: number;
+  preparedTransfers: number;
   inProgress: number;
   successfulTransfers: number;
   awaitingAcknowledgement: number;

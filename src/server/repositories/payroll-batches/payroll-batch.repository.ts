@@ -3,6 +3,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 
 import { recordAuditEvent } from "@/server/repositories/audit/audit.repository";
+import { withTransaction } from "@/lib/prisma/server";
 import {
   getDisabledLegacyStore as getFirebaseAdminDb,
   RepositoryTimestamp as Timestamp,
@@ -31,11 +32,15 @@ import {
   PrismaPayrollBatchValidationError,
 } from "@/server/repositories/payroll-batches/prisma-payroll-batch.repository";
 import type { PayrollBatchReadiness } from "@/types/payroll-batches";
+import {
+  type PrismaDbClient,
+} from "@/server/repositories/prisma/prisma-repository-helpers";
 
 const batchCollection = "payrollBatches";
 const membershipCollection = "payrollBatchMembership";
 
 type BatchActor = Pick<SessionUser, "uid" | "username" | "displayName" | "role">;
+type PayrollBatchItemInput = PayrollBatchItemSnapshot & { employeeInternalId: string };
 
 export class PayrollBatchDataError extends Error {
   readonly code = "PAYROLL_BATCH_DATA_INVALID";
@@ -291,6 +296,7 @@ async function writeBatchAuditEvent(
   eventType: "payroll.batch.created" | "payroll.batch.updated",
   actor: BatchActor,
   summary: string,
+  prisma?: PrismaDbClient,
 ) {
   await recordAuditEvent({
     eventType,
@@ -302,7 +308,7 @@ async function writeBatchAuditEvent(
     summary,
     metadata: { batchId: batch.id },
     occurredAt: new Date(batch.updatedAt),
-  });
+  }, prisma);
 }
 
 function membershipDocumentId(employeePeriodId: string) {
@@ -371,11 +377,38 @@ export async function createPayrollBatch(input: {
   actor: BatchActor;
   notes?: string | null;
   blockedCount?: number;
+  items?: readonly PayrollBatchItemInput[];
 }): Promise<PayrollBatchRecord> {
   try {
-    const batch = await createPrismaPayrollBatch(input) as PayrollBatchRecord;
-    await writeBatchAuditEvent(batch, "payroll.batch.created", input.actor, "A Payroll batch was created.");
-    return batch;
+    return await withTransaction(async (transaction) => {
+      let batch = await createPrismaPayrollBatch({
+        ...input,
+        items: [],
+      }, transaction) as PayrollBatchRecord;
+      await writeBatchAuditEvent(
+        batch,
+        "payroll.batch.created",
+        input.actor,
+        "A Payroll batch was created.",
+        transaction,
+      );
+
+      for (const item of input.items ?? []) {
+        batch = await addPrismaPayrollBatchItem({
+          batchId: batch.id,
+          snapshot: item,
+        }, transaction) as PayrollBatchRecord;
+        await writeBatchAuditEvent(
+          batch,
+          "payroll.batch.updated",
+          input.actor,
+          "A final-verified attendance record was added to a Payroll batch.",
+          transaction,
+        );
+      }
+
+      return batch;
+    });
   } catch (error) {
     return mapPrismaBatchError(error);
   }
@@ -411,9 +444,17 @@ export async function addPayrollBatchItem(input: {
   actor: BatchActor;
 }): Promise<PayrollBatchRecord> {
   try {
-    const batch = await addPrismaPayrollBatchItem(input) as PayrollBatchRecord;
-    await writeBatchAuditEvent(batch, "payroll.batch.updated", input.actor, "A final-verified attendance record was added to a Payroll batch.");
-    return batch;
+    return await withTransaction(async (transaction) => {
+      const batch = await addPrismaPayrollBatchItem(input, transaction) as PayrollBatchRecord;
+      await writeBatchAuditEvent(
+        batch,
+        "payroll.batch.updated",
+        input.actor,
+        "A final-verified attendance record was added to a Payroll batch.",
+        transaction,
+      );
+      return batch;
+    });
   } catch (error) {
     return mapPrismaBatchError(error);
   }

@@ -88,6 +88,38 @@
   background: var(--employee-line);
 }
 
+.attendance-qr-demo-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+  border: 1px solid #dce7f4;
+  border-radius: 0.55rem;
+  padding: 0.65rem 0.75rem;
+  background: #f7faff;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.attendance-qr-demo-badge {
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  background: #e9edff;
+  color: var(--employee-blue);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.attendance-qr-demo-link {
+  color: var(--employee-blue);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
 .attendance-qr-code-wrap {
   position: relative;
   display: flex;

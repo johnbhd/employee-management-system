@@ -28,6 +28,8 @@ function getTransferStatusLabel(status: AccountingTransferStatus) {
   switch (status) {
     case "preparing":
       return "Preparing";
+    case "prepared":
+      return "Prepared";
     case "submitting":
       return "Submitting";
     case "submitted":

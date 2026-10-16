@@ -2,6 +2,7 @@ import "server-only";
 
 import { formatCampusDateKey } from "@/lib/campus-time";
 import { serializeAttendanceRecord } from "@/server/attendance/attendance.service";
+import { getEffectiveDemoAttendanceTime } from "@/server/attendance/demo-attendance.service";
 import { getEmployeeById } from "@/server/repositories/employees/employee.repository";
 import { recordQrAttendance } from "@/server/repositories/attendance/attendance.repository";
 import type { SessionUser } from "@/types/auth";
@@ -50,10 +51,18 @@ export async function recordEmployeeQrAttendance(
     }
 
     const scannedAt = new Date();
+    const demoTime = await getEffectiveDemoAttendanceTime({
+        employeeReference: employee.employeeId,
+        attendanceDate: formatCampusDateKey(scannedAt),
+        actualRecordedAt: scannedAt,
+    });
     const attendanceResult = await recordQrAttendance({
         attendanceDate: formatCampusDateKey(scannedAt),
         employeeId: employee.employeeId,
-        occurredAt: scannedAt,
+        occurredAt: demoTime.occurredAt,
+        actualRecordedAt: scannedAt,
+        simulated: demoTime.simulated,
+        demoAttendanceTime: demoTime.demoAttendanceTime,
         scannerOperator,
     });
 

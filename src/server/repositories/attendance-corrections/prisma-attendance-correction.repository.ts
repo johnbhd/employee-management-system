@@ -239,9 +239,8 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
     decision: "approve" | "reject";
     reviewNote: string | null;
     reviewer: Record<string, unknown>;
-}): Promise<PrismaAttendanceCorrectionView> {
-    const prisma = getRepositoryPrisma();
-    const row = await prisma.$transaction(async (transaction) => {
+}, transaction?: Prisma.TransactionClient): Promise<PrismaAttendanceCorrectionView> {
+    const apply = async (transaction: Prisma.TransactionClient) => {
         const request = await transaction.attendanceCorrection.findUnique({
             where: { id: input.requestId },
             select: {
@@ -313,7 +312,11 @@ export async function applyPrismaAttendanceCorrectionDecision(input: {
             },
             select: correctionSelect,
         });
-    });
+    };
+
+    const row = transaction
+        ? await apply(transaction)
+        : await getRepositoryPrisma().$transaction(apply);
 
     return mapCorrection(row);
 }

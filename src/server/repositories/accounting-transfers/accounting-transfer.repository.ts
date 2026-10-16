@@ -13,11 +13,14 @@ import type { PayrollBatchPeriod } from "@/types/payroll-batches";
 import { payrollResultStatuses, type PayrollResultStatus } from "@/types/payroll-results";
 import {
   claimPrismaAccountingTransfer,
+  claimPrismaAccountingTransferForSubmission,
+  preparePrismaAccountingTransfer,
   getPrismaAccountingTransferById,
   getPrismaAccountingTransferByPayrollResultId,
   listPrismaAccountingTransferAuditEvents,
   listPrismaAccountingTransfers,
   updatePrismaAccountingTransferResult,
+  updatePrismaAccountingAcknowledgement,
   PrismaAccountingTransferConflictError,
   PrismaAccountingTransferNotFoundError,
 } from "@/server/repositories/accounting-transfers/prisma-accounting-transfer.repository";
@@ -68,6 +71,13 @@ function mapPrismaAccountingError(error: unknown): never {
   if (error instanceof PrismaAccountingTransferNotFoundError) throw new AccountingTransferNotFoundError();
   if (error instanceof PrismaAccountingTransferConflictError) throw new AccountingTransferConflictError(error.message);
   throw error;
+}
+
+function isUniqueConstraintError(error: unknown): boolean {
+  return typeof error === "object"
+    && error !== null
+    && "code" in error
+    && (error as { code?: unknown }).code === "P2002";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -143,12 +153,13 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
   const acknowledgementStatus = data.acknowledgementStatus as AccountingAcknowledgementStatus;
   const providerName = getString(data, "provider");
   const attemptCount = getNumber(data, "attemptCount");
+  const lastAttemptAt = getTimestamp(data.lastAttemptAt, true);
 
   if (
     !transferId || transferId !== id || !payrollResultId || !payrollBatchId
     || !payrollHandoffId || !period || !externalPayrollReference || employeeCount === null
     || !payrollResultStatus || !submittedBy || !submittedAt || !createdAt || !updatedAt
-    || !["preparing", "submitting", "submitted", "failed"].includes(transferStatus)
+    || !["preparing", "prepared", "submitting", "submitted", "failed"].includes(transferStatus)
     || !["pending", "accepted", "rejected", "not_received"].includes(acknowledgementStatus)
     || !providerName || attemptCount === null
     || (data.acknowledgedAt !== null && data.acknowledgedAt !== undefined && !acknowledgedAt)
@@ -168,6 +179,10 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
     payrollResultStatus,
     submittedBy,
     submittedAt: toIso(submittedAt),
+    preparedBy: null,
+    preparedAt: null,
+    snapshot: null,
+    sourceMode: null,
     acknowledgedAt: acknowledgedAt ? toIso(acknowledgedAt) : null,
     failedAt: failedAt ? toIso(failedAt) : null,
     transferStatus,
@@ -177,6 +192,8 @@ function parseTransfer(id: string, data: DocumentData | undefined): AccountingTr
     failureCode: getNullableString(data, "failureCode"),
     failureSummary: getNullableString(data, "failureSummary"),
     attemptCount,
+    lastAttemptAt: lastAttemptAt ? toIso(lastAttemptAt) : null,
+    lastError: getNullableString(data, "lastError"),
     createdAt: toIso(createdAt),
     updatedAt: toIso(updatedAt),
     timeline: [],
@@ -243,6 +260,8 @@ function transferDocument(record: AccountingTransferRecord): DocumentData {
     failureCode: record.failureCode,
     failureSummary: record.failureSummary,
     attemptCount: record.attemptCount,
+    lastAttemptAt: record.lastAttemptAt ? Timestamp.fromDate(new Date(record.lastAttemptAt)) : null,
+    lastError: record.lastError,
     createdAt: Timestamp.fromDate(new Date(record.createdAt)),
     updatedAt: Timestamp.fromDate(new Date(record.updatedAt)),
   };
@@ -350,6 +369,8 @@ export async function claimAccountingTransfer(input: {
         failureCode: null,
         failureSummary: null,
         attemptCount: existing.attemptCount + 1,
+      lastAttemptAt: now,
+      lastError: existing.lastError,
         updatedAt: now,
       });
 
@@ -383,6 +404,10 @@ export async function claimAccountingTransfer(input: {
       payrollResultStatus: input.payrollResultStatus,
       submittedBy: actor,
       submittedAt: toIso(now),
+      preparedBy: null,
+      preparedAt: null,
+      snapshot: null,
+      sourceMode: null,
       acknowledgedAt: null,
       failedAt: null,
       transferStatus: "submitting",
@@ -392,6 +417,8 @@ export async function claimAccountingTransfer(input: {
       failureCode: null,
       failureSummary: null,
       attemptCount: 1,
+      lastAttemptAt: toIso(now),
+      lastError: null,
       createdAt: toIso(now),
       updatedAt: toIso(now),
       timeline: [],
@@ -405,6 +432,20 @@ export async function claimAccountingTransfer(input: {
     });
     return withTimeline(transfer);
   });
+}
+
+export async function prepareAccountingTransfer(input: {
+  payrollResultId: string;
+  actor: TransferActor;
+}) {
+  try {
+    return await preparePrismaAccountingTransfer(input);
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      throw new AccountingTransferConflictError("An Accounting transfer already exists for this Payroll Result.");
+    }
+    return mapPrismaAccountingError(error);
+  }
 }
 
 export async function updateAccountingTransferResult(input: {
@@ -469,9 +510,36 @@ export async function updateAccountingTransferResult(input: {
   });
 }
 
+export async function claimAccountingTransferForSubmission(input: {
+  transferId: string;
+  actor: TransferActor;
+  mode: "initial" | "retry";
+}) {
+  try {
+    return await claimPrismaAccountingTransferForSubmission(input);
+  } catch (error) {
+    return mapPrismaAccountingError(error);
+  }
+}
+
+export async function updateAccountingAcknowledgement(input: {
+  transferId: string;
+  acknowledgementStatus: AccountingAcknowledgementStatus;
+  provider: string;
+  externalAccountingReference?: string | null;
+  failureCode?: string | null;
+  failureSummary?: string | null;
+}) {
+  try {
+    return await updatePrismaAccountingAcknowledgement(input);
+  } catch (error) {
+    return mapPrismaAccountingError(error);
+  }
+}
+
 export async function writeAccountingTransferAuditEvent(input: {
   transfer: AccountingTransferRecord;
-  action: "Transfer Created" | "Submitted" | "Acknowledged" | "Rejected" | "Failed";
+  action: "Transfer Created" | "Submitted" | "Acknowledged" | "Rejected" | "Failed" | "Retry";
   occurredAt: string;
 }) {
   const prismaAutomatic = input.action === "Acknowledged" || input.action === "Rejected" || input.action === "Failed";

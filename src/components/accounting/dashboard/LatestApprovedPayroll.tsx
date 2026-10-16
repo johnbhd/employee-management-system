@@ -74,7 +74,7 @@ export function LatestApprovedPayroll({ payroll }: LatestApprovedPayrollProps) {
 export function getAccountingStatusTone(status: AccountingDashboardAccountingStatus) {
   if (status === "Transferred") return "success" as const;
   if (status === "Integration Issue" || status === "Blocked") return "danger" as const;
-  if (status === "Ready for Transfer") return "info" as const;
+  if (status === "Ready for Transfer" || status === "Prepared") return "info" as const;
   return "warning" as const;
 }
 

@@ -115,29 +115,12 @@ export function AccountingNavbar({ user, employee, onOpenSidebar }: AccountingNa
 
         <div className="accounting-navbar-actions">
           <span className="accounting-progress-badge">Accounting</span>
-          <button
-            type="button"
-            className="accounting-icon-button accounting-search-button"
-            onClick={() => notify("Use the filters in the current Accounting workspace.")}
-            aria-label="Search accounting workspace"
-          >
-            <Icon name="search" />
-          </button>
           {campusNow ? (
             <span className="accounting-date">
               <Icon name="calendar" />
               {formatCampusNavbarDate(campusNow)}
             </span>
           ) : null}
-          <button
-            type="button"
-            className="accounting-icon-button accounting-notification-button"
-            onClick={() => notify("No new accounting notifications.")}
-            aria-label="View accounting notifications"
-          >
-            <Icon name="bell" />
-            <span>3</span>
-          </button>
           <button
             type="button"
             className="accounting-icon-button accounting-help-button"

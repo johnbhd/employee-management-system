@@ -47,6 +47,10 @@ function getPayrollDetail(
     return "The Accounting transfer was acknowledged by the configured integration adapter.";
   }
 
+  if (accountingStatus === "Prepared") {
+    return "A local, read-only Accounting snapshot is prepared and ready for controlled simulated handoff.";
+  }
+
   if (accountingStatus === "Awaiting Acknowledgement") {
     return "The Accounting transfer was submitted and is awaiting acknowledgement.";
   }
@@ -106,6 +110,7 @@ function buildIntegrationFlow(
   if (!latest) return [];
 
   const hasTransfer = Boolean(latest.transferId);
+  const transferPrepared = latest.accountingStatus === "Prepared";
   const transferInProgress = latest.accountingStatus === "Transfer In Progress";
   const transferFailed = latest.accountingStatus === "Integration Issue";
   const transferSubmitted = latest.accountingStatus === "Transferred"
@@ -133,19 +138,21 @@ function buildIntegrationFlow(
     },
     {
       key: "submitted",
-      label: "Submitted to Accounting",
+      label: transferPrepared ? "Prepared for Accounting" : "Submitted to Accounting",
       detail: transferFailed
         ? "Transfer requires follow-up"
-        : transferInProgress
-          ? "Transfer in progress"
-          : hasTransfer
-            ? "Persisted Accounting transfer"
-            : "Waiting for transfer",
+        : transferPrepared
+          ? "Local snapshot prepared; ready for controlled handoff"
+          : transferInProgress
+            ? "Transfer in progress"
+            : hasTransfer
+              ? "Persisted Accounting transfer"
+              : "Waiting for transfer",
       state: transferFailed
         ? "failed"
         : transferInProgress
           ? "current"
-          : transferSubmitted
+          : transferPrepared || transferSubmitted
             ? "complete"
             : "pending",
       occurredAt: latest.submittedAt,
@@ -157,16 +164,20 @@ function buildIntegrationFlow(
         ? "Acknowledgement or transfer failed"
         : acknowledgementComplete
           ? "Accepted by Accounting adapter"
-          : latest.accountingStatus === "Awaiting Acknowledgement"
-            ? "Awaiting response"
-            : "No acknowledgement yet",
+          : transferPrepared
+            ? "Submit the prepared snapshot from the Accounting transfer workspace"
+            : latest.accountingStatus === "Awaiting Acknowledgement"
+              ? "Awaiting response"
+              : "No acknowledgement yet",
       state: acknowledgementFailed
         ? "failed"
         : acknowledgementComplete
           ? "complete"
-          : latest.accountingStatus === "Awaiting Acknowledgement"
-            ? "current"
-            : "pending",
+          : transferPrepared
+            ? "pending"
+            : latest.accountingStatus === "Awaiting Acknowledgement"
+              ? "current"
+              : "pending",
       occurredAt: acknowledgementComplete || acknowledgementFailed
         ? latest.lastUpdatedAt
         : null,
@@ -176,6 +187,15 @@ function buildIntegrationFlow(
 
 function getActivityPresentation(item: AccountingTransactionHistoryItem) {
   switch (item.lifecycleStatus) {
+    case "Prepared":
+      return {
+        type: "pending" as const,
+        title: "Accounting transfer prepared",
+        description: `${item.transferId} has a local read-only snapshot; external submission is not active.`,
+        tone: "info" as const,
+        icon: "info" as const,
+        occurredAt: item.preparedAt ?? item.submittedAt,
+      };
     case "Completed":
       return {
         type: "acknowledged" as const,
@@ -190,6 +210,15 @@ function getActivityPresentation(item: AccountingTransactionHistoryItem) {
         type: "pending" as const,
         title: "Accounting transfer submitted",
         description: `${item.transferId} is awaiting acknowledgement from the Accounting adapter.`,
+        tone: "warning" as const,
+        icon: "clock" as const,
+        occurredAt: item.submittedAt,
+      };
+    case "Not Received":
+      return {
+        type: "failed" as const,
+        title: "Accounting acknowledgement not received",
+        description: item.issueSummary ?? `${item.transferId} has not been acknowledged by the Accounting adapter.`,
         tone: "warning" as const,
         icon: "clock" as const,
         occurredAt: item.submittedAt,

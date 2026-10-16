@@ -14,6 +14,7 @@ import {
     getRepositoryPrisma,
     toDateKey,
     toIso,
+    toJson,
     toJsonObject,
 } from "@/server/repositories/prisma/prisma-repository-helpers";
 
@@ -287,6 +288,9 @@ export async function recordPrismaQrAttendance(input: {
     employeeId: string;
     attendanceDate: string;
     occurredAt: Date;
+    actualRecordedAt?: Date;
+    simulated?: boolean;
+    demoAttendanceTime?: string | null;
     scannerOperator: {
         uid: string;
         username: string;
@@ -295,6 +299,9 @@ export async function recordPrismaQrAttendance(input: {
     };
 }) {
     const prisma = getRepositoryPrisma();
+    const actualRecordedAt = input.actualRecordedAt ?? new Date();
+    const simulated = input.simulated ?? false;
+    const demoAttendanceTime = input.demoAttendanceTime ?? null;
     const result = await prisma.$transaction(async (transaction) => {
         const employee = await transaction.employee.findUnique({
             where: { employeeId: input.employeeId },
@@ -330,7 +337,18 @@ export async function recordPrismaQrAttendance(input: {
                     technicalState: "MISSING_OUT",
                     processedAt: new Date(),
                     timeInOperatorUserId: operatorUser?.id,
-                    sourceMetadata: { source: "QR" },
+                    sourceMetadata: toJson({
+                        source: "QR",
+                        simulated,
+                        demoAttendanceTime,
+                        actualRecordedAt: actualRecordedAt.toISOString(),
+                        qrEvidence: {
+                            timeIn: input.occurredAt.toISOString(),
+                            timeOut: null,
+                            timeInSourceReference: null,
+                            timeOutSourceReference: null,
+                        },
+                    }),
                 },
                 select: attendanceSelect,
             });
@@ -345,6 +363,7 @@ export async function recordPrismaQrAttendance(input: {
         }
 
         if (!existing.timeIn || !existing.timeInSource || existing.timeInActorSnapshot === null) {
+            const existingMetadata = toJsonObject(existing.sourceMetadata);
             const updated = await transaction.attendanceRecord.update({
                 where: { id: existing.id },
                 data: {
@@ -356,7 +375,23 @@ export async function recordPrismaQrAttendance(input: {
                     status: existing.timeOut ? "completed" : "present",
                     technicalState: existing.timeOut ? "COMPLETE" : "MISSING_OUT",
                     processedAt: new Date(),
-                    sourceMetadata: { source: "QR" },
+                    sourceMetadata: toJson({
+                        ...existingMetadata,
+                        source: "QR",
+                        simulated: Boolean(existingMetadata.simulated) || simulated,
+                        demoAttendanceTime: demoAttendanceTime ?? existingMetadata.demoAttendanceTime ?? null,
+                        actualRecordedAt: actualRecordedAt.toISOString(),
+                        qrEvidence: {
+                            timeIn: input.occurredAt.toISOString(),
+                            timeOut: typeof existingMetadata.qrEvidence === "object"
+                                && existingMetadata.qrEvidence !== null
+                                && !Array.isArray(existingMetadata.qrEvidence)
+                                ? (existingMetadata.qrEvidence as Record<string, unknown>).timeOut ?? null
+                                : null,
+                            timeInSourceReference: null,
+                            timeOutSourceReference: null,
+                        },
+                    }),
                 },
                 select: attendanceSelect,
             });
@@ -373,6 +408,12 @@ export async function recordPrismaQrAttendance(input: {
             return { action, record: mapAttendance(existing) };
         }
 
+        const existingMetadata = toJsonObject(existing.sourceMetadata);
+        const existingQrEvidence = typeof existingMetadata.qrEvidence === "object"
+            && existingMetadata.qrEvidence !== null
+            && !Array.isArray(existingMetadata.qrEvidence)
+            ? existingMetadata.qrEvidence as Record<string, unknown>
+            : {};
         const updated = await transaction.attendanceRecord.update({
             where: { id: existing.id },
             data: {
@@ -384,6 +425,20 @@ export async function recordPrismaQrAttendance(input: {
                 status: "completed",
                 technicalState: "COMPLETE",
                 processedAt: new Date(),
+                sourceMetadata: toJson({
+                    ...existingMetadata,
+                    source: "QR",
+                    simulated: Boolean(existingMetadata.simulated) || simulated,
+                    demoAttendanceTime: demoAttendanceTime ?? existingMetadata.demoAttendanceTime ?? null,
+                    actualRecordedAt: actualRecordedAt.toISOString(),
+                    qrEvidence: {
+                        ...existingQrEvidence,
+                        timeIn: existing.timeIn?.toISOString() ?? null,
+                        timeOut: input.occurredAt.toISOString(),
+                        timeInSourceReference: existing.timeInSourceReference,
+                        timeOutSourceReference: null,
+                    },
+                }),
             },
             select: attendanceSelect,
         });
